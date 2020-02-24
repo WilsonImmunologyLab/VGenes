@@ -1,0 +1,4 @@
+3 clonal pools containing 6 sequences were identified from 291 total sequences analyzed.
+The following 0 sequences could not be anaylzed for
+clonality because no CDR3s are indicated:
+Clonal analysis for Heavy

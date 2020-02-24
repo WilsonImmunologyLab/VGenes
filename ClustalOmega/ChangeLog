@@ -1,0 +1,48 @@
+2012-04-25 Release 1.1.0
+
+   DNA and RNA support now added. Sequence type can be specified manually
+   using --seqtype={Protein|DNA|RNA}
+
+2012-03-27 Release 1.0.4
+
+   zipped input now supported
+
+2011-09-07 Release 1.0.3 
+
+Bugs fixed:
+
+   input failed if first line in fasta file was empty
+
+   input failed if Clustal formatted file had trailing residue numbers
+
+   '*' character was causing problems, did not get filtered out by squid 
+
+   --outfmt=fasta was not recognized
+
+   '~' gap characters were not recognized in MSF format
+
+   amended README re sequence/profile alignment
+
+   disallowed empty sequences
+
+   doxygen documentation fixes and fix of API example
+
+2011-06-23 Release 1.0.2
+
+2011-06-17 Release 1.0.0 (DeshilHollesEamus)
+
+2010-06-17 Release 0.0.1 (Dubliniensis)
+		
+		First "release" as program has been able for a while to perform
+		all basic tasks without problems.
+
+		Non-standard features already built-in include:
+		HMM-iteration (using HMMER for building an HMM) and guide-tree
+		iteration. On top of that HMM input works fine and
+		background-frequencies are added to the HHalign process.
+		
+		Known issues: RNA/DNA alignment is considered buggy. Aligned
+		sequences have to be dealigned for HHalign to work properly.
+		
+		The HMMER version message can be ignored if no HMM-iteration
+		was used.
