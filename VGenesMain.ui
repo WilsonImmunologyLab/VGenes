@@ -104,7 +104,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -546,8 +546,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1078</width>
-             <height>827</height>
+             <width>1063</width>
+             <height>821</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_14">
@@ -4619,41 +4619,6 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="label_36">
-          <property name="text">
-           <string>Changes the unyieldy names provided by 10xGenomics Cell-Ranger consensus.fasta file</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
-         <widget class="QPushButton" name="btnRename10x_3">
-          <property name="text">
-           <string>Import Clusters</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QPushButton" name="btnRename10x">
-          <property name="text">
-           <string>Rename 10xGenomics Bar Codes</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="1">
-         <widget class="QLabel" name="label_48">
-          <property name="text">
-           <string>Imports cluster information from Cell reanger and Sueret analyses</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QLabel" name="label_37">
-          <property name="text">
-           <string>Temporary function to update names changed by VGenes removing the &quot;Cl&quot; that led to confusion</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="0" colspan="2">
          <widget class="QGroupBox" name="groupBox_8">
           <property name="title">
@@ -5775,6 +5740,41 @@ If the J-end is off the J gene end may need adjusted</string>
           </layout>
          </widget>
         </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_36">
+          <property name="text">
+           <string>Changes the unyieldy names provided by 10xGenomics Cell-Ranger consensus.fasta file</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="QPushButton" name="btnRename10x_3">
+          <property name="text">
+           <string>Import Clusters</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="btnRename10x">
+          <property name="text">
+           <string>Rename 10xGenomics Bar Codes</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="QLabel" name="label_48">
+          <property name="text">
+           <string>Imports cluster information from Cell reanger and Sueret analyses</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="label_37">
+          <property name="text">
+           <string>Temporary function to update names changed by VGenes removing the &quot;Cl&quot; that led to confusion</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
      </widget>
@@ -5926,7 +5926,7 @@ If the J-end is off the J gene end may need adjusted</string>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>81</height>
+        <height>120</height>
        </size>
       </property>
       <property name="frameShape">
@@ -5942,31 +5942,12 @@ If the J-end is off the J gene end may need adjusted</string>
        <property name="bottomMargin">
         <number>3</number>
        </property>
-       <item row="0" column="0">
-        <widget class="QPushButton" name="btnFieldSearch">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
+       <item row="0" column="2" rowspan="2">
+        <widget class="Line" name="line">
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Search</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4">
-        <widget class="Line" name="line_3">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>60</height>
+           <height>100</height>
           </size>
          </property>
          <property name="orientation">
@@ -5974,27 +5955,8 @@ If the J-end is off the J gene end may need adjusted</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="10">
-        <widget class="QLabel" name="label_4">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>10</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>of:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="11">
-        <widget class="QLCDNumber" name="lcdNumber_max">
+       <item row="0" column="9">
+        <widget class="QLCDNumber" name="lcdNumber_current">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -6018,16 +5980,69 @@ If the J-end is off the J gene end may need adjusted</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="Line" name="line">
+       <item row="0" column="12">
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="5" rowspan="3">
+        <widget class="QDial" name="dial">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>0</width>
-           <height>60</height>
+           <height>70</height>
           </size>
          </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
+         <property name="maximumSize">
+          <size>
+           <width>70</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Single click to focus and use arrow keys to increment</string>
+         </property>
+         <property name="invertedAppearance">
+          <bool>false</bool>
+         </property>
+         <property name="invertedControls">
+          <bool>false</bool>
+         </property>
+         <property name="notchesVisible">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QPushButton" name="btnFieldSearch">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Search</string>
          </property>
         </widget>
        </item>
@@ -6078,6 +6093,50 @@ If the J-end is off the J gene end may need adjusted</string>
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QPushButton" name="btnFieldBulk">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>30</height>
+          </size>
+         </property>
+         <property name="toolTip">
+          <string>Edit search field of all checked records to match edit/search box value</string>
+         </property>
+         <property name="text">
+          <string>Bulk Edit</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="10">
+        <widget class="QLabel" name="label_4">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>10</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>of:</string>
+         </property>
+        </widget>
+       </item>
        <item row="0" column="8">
         <widget class="QLabel" name="label_12">
          <property name="sizePolicy">
@@ -6097,138 +6156,12 @@ If the J-end is off the J gene end may need adjusted</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="9">
-        <spacer name="verticalSpacer_2">
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>40</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="0" column="9">
-        <widget class="QLCDNumber" name="lcdNumber_current">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>34</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="digitCount">
-          <number>8</number>
-         </property>
-         <property name="segmentStyle">
-          <enum>QLCDNumber::Flat</enum>
-         </property>
-         <property name="value" stdset="0">
-          <double>1.000000000000000</double>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="5" rowspan="3">
-        <widget class="QDial" name="dial">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>70</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>70</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Single click to focus and use arrow keys to increment</string>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>false</bool>
-         </property>
-         <property name="notchesVisible">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="12">
-        <spacer name="horizontalSpacer_6">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>20</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="2" column="6" rowspan="2" colspan="8">
-        <widget class="QScrollBar" name="horizontalScrollBar">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>300</width>
-           <height>15</height>
-          </size>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="0">
-        <widget class="QPushButton" name="btnFieldBulk">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>20</height>
-          </size>
-         </property>
-         <property name="toolTip">
-          <string>Edit search field of all checked records to match edit/search box value</string>
-         </property>
-         <property name="text">
-          <string>Bulk Edit</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="1">
         <widget class="QFrame" name="frame_3">
          <property name="minimumSize">
           <size>
            <width>300</width>
-           <height>85</height>
+           <height>95</height>
           </size>
          </property>
          <property name="frameShape">
@@ -6338,6 +6271,76 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
          </layout>
         </widget>
+       </item>
+       <item row="0" column="11">
+        <widget class="QLCDNumber" name="lcdNumber_max">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>34</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="digitCount">
+          <number>8</number>
+         </property>
+         <property name="segmentStyle">
+          <enum>QLCDNumber::Flat</enum>
+         </property>
+         <property name="value" stdset="0">
+          <double>1.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4" rowspan="2">
+        <widget class="Line" name="line_3">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="6" rowspan="2" colspan="8">
+        <widget class="QScrollBar" name="horizontalScrollBar">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>15</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="9">
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
