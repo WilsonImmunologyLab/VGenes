@@ -4,7 +4,7 @@ import os
 import sqlite3 as db
 import time
 
-from PyQt5.QtCore import pyqtSlot, QTimer, QDateTime, Qt, QSortFilterProxyModel, QModelIndex
+from PyQt5.QtCore import pyqtSlot, QTimer, QDateTime, Qt, QSortFilterProxyModel, QModelIndex, pyqtSignal, QUrl
 from PyQt5 import QtWidgets
 import VReports
 global OldName
@@ -34,7 +34,17 @@ from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QC
 from PyQt5.QtWidgets import QApplication, QTableView
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
+from PyQt5.QtWebEngine import *
+from PyQt5.QtWebEngineWidgets import *
+from pyecharts.charts import *
+from pyecharts import options as opts
+from pyecharts.globals import SymbolType
 import itertools
+
+from itertools import combinations
+from collections import Counter
+from subprocess import call, Popen, PIPE
+from platform import system
 
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
@@ -830,6 +840,25 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if filename != '':
 			self.TextEdit.loadFile(filename)
 
+class ResizeWidget(QWebEngineView):
+	resizeSignal = pyqtSignal(int,int)
+	def __init__(self,parent=None):
+		super(ResizeWidget,self).__init__()
+		self.id = 0
+		self.h = 0
+		self.w = 0
+
+	def resizeEvent(self, evt):
+		#w = evt.oldSize().width()
+		#h = evt.oldSize().height()
+		#print(f' size before :{w,h}')
+		w = evt.size().width()
+		h = evt.size().height()
+		self.h = h
+		self.w = w
+		print(f' size now :{w, h, self.id}')
+		self.resizeSignal.emit(w,h)
+
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
 		super(VGenesForm, self).__init__()  # parent)
@@ -849,6 +878,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.treeWidget.doubleClicked['QModelIndex'].connect(self.CheckMultiple)
 		self.ui.cboReportOptions.currentTextChanged.connect(self.ReportOptions)
 		self.ui.cboFindField.currentTextChanged.connect(self.on_cboFindField_currentTextChanged)
+		self.ui.tabWidget.currentChanged['int'].connect(self.InitialGraphic)
+		self.ui.toolButton.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -859,6 +891,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# self.VGProgress = VGenesProgressBar()
 		self.ImportOptions = ImportDialogue()
 
+		self.ui.HTMLview = ResizeWidget(self)
+		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
+		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+
 	# def ShowProgressBar(self):
 	#     self.VGProgress.handleButton()
 
@@ -866,6 +902,404 @@ class VGenesForm(QtWidgets.QMainWindow):
 	# @pyqtSlot()
 	# def on_radioButton_21_clicked(self):
 	# 	self.PopulateSpec()
+
+	def resizeHTML(self, w, h):
+		global DBFilename
+
+		h = h - 20
+		sender = self.sender()
+		a = sender.id
+		if sender.id == 1:
+			pass
+
+	def InitialGraphic(self):
+		global DBFilename
+		#Msg = str(self.ui.tabWidget.currentIndex())
+		#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		if self.ui.tabWidget.currentIndex() == 6:
+			fields_name = VGenesSQL.ColName(DBFilename)
+			fields_name = [""] + fields_name
+			self.ui.comboBoxPie.addItems(fields_name)
+			self.ui.comboBoxCol1.addItems(fields_name)
+			self.ui.comboBoxCol2.addItems(fields_name)
+			self.ui.comboBoxBoxData.addItems(fields_name)
+			self.ui.comboBoxBox1.addItems(fields_name)
+			self.ui.comboBoxBox2.addItems(fields_name)
+			self.ui.comboBoxRiver1.addItems(fields_name)
+			self.ui.comboBoxRiver2.addItems(fields_name)
+			self.ui.comboBoxWord.addItems(fields_name)
+
+	def GenerateFigure(self):
+		global DBFilename
+
+		if self.ui.tabWidgetFig.currentIndex() == 0:
+			# get data
+			field = self.ui.comboBoxPie.currentText()
+			if field == "":
+				return
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			data = []
+			for element in DataIn:
+				data.append(element[0])
+			result = Counter(data)
+			labels = result.keys()
+			values = result.values()
+
+			my_pyecharts = (
+				Pie(init_opts=opts.InitOpts(width="380px", height="380px"))
+				.add('', [list(z) for z in zip(labels, values)], radius=["40%", "75%"])
+				.set_global_opts(
+					title_opts=opts.TitleOpts(title=""),
+					legend_opts=opts.LegendOpts(
+						is_show = self.ui.checkBoxFigLegend.isChecked()
+					),
+				)
+				.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c} ({d}%)"))
+			)
+		elif self.ui.tabWidgetFig.currentIndex() == 1:
+			# get data
+			field1 = self.ui.comboBoxCol1.currentText()
+			field2 = self.ui.comboBoxCol2.currentText()
+			if field1 == "":
+				return
+
+			multi_factor = False
+			if field2 == "":
+				field = field1
+			else:
+				field = field1 + "," + field2
+				multi_factor = True
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if multi_factor == True:
+				if self.ui.checkBoxStack.isChecked():
+					stack = "stack1"
+				else:
+					stack = None
+
+				label_data = []
+				for element in DataIn:
+					label_data.append(element[0])
+
+				result = Counter(label_data)
+				labels = list(result.keys())
+				values = list(result.values())
+
+				data = {}
+				for element in DataIn:
+					if data.__contains__(element[1]):
+						data[element[1]] = data[element[1]] + [element[0]]
+					else:
+						data[element[1]] = [element[0]]
+
+				dic_keys = list(data.keys())
+
+				my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px"))\
+					.add_xaxis(labels)\
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(
+							is_show=self.ui.checkBoxFigLegend.isChecked()
+						),
+					)\
+					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c}"))
+
+				for group in dic_keys:
+					cur_data = data[group]
+					group_data = []
+					for ele in labels:
+						group_data.append(cur_data.count(ele))
+					my_bar.add_yaxis(group, group_data,stack=stack)
+
+				my_pyecharts = (
+					my_bar
+				)
+			else:
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+
+				result = Counter(data)
+				labels = list(result.keys())
+				values = list(result.values())
+
+				my_pyecharts = (
+					Bar(init_opts=opts.InitOpts(width="380px", height="380px"))
+						.add_xaxis(labels)
+						.add_yaxis(field1, values)
+						.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(
+							is_show=self.ui.checkBoxFigLegend.isChecked()
+						),
+					)
+					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c}"))
+				)
+		elif self.ui.tabWidgetFig.currentIndex() == 2:
+			# get data
+			data_field = self.ui.comboBoxBoxData.currentText()
+			field1 = self.ui.comboBoxBox1.currentText()
+			field2 = self.ui.comboBoxBox2.currentText()
+			if field1 == "":
+				return
+			multi_factor = False
+			if field2 == "":
+				field = data_field + "," + field1
+			else:
+				field = data_field + "," + field1 + "," + field2
+				multi_factor = True
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			box_data = [i[0] for i in DataIn]
+			box_data = list(map(float, box_data))
+
+			if min(box_data) >= 0:
+				null_data = [0,0,0,0,0]
+			else:
+				null_data = [min(box_data), min(box_data), min(box_data), min(box_data), min(box_data)]
+
+			if multi_factor == True:
+				label_data = []
+				g2_label = []
+				for element in DataIn:
+					label_data.append(element[1])
+					g2_label.append(element[2])
+
+				result = Counter(label_data)
+				labels = list(result.keys())
+
+				g2_dict = {}
+				i = 0
+				for ele in g2_label:
+					if g2_dict.__contains__(ele):
+						g2_dict[ele] = g2_dict[ele] + [i]
+					else:
+						g2_dict[ele] = [i]
+					i += 1
+				g2_dict_keys = list(g2_dict.keys())
+
+				my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px"))\
+					.add_xaxis(labels)\
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(
+							is_show=self.ui.checkBoxFigLegend.isChecked()
+						),
+						#toolbox_opts = opts.ToolboxOpts()
+					)
+
+				# for each group in field 2
+				for group in g2_dict_keys:
+					cur_box_data = []
+					cur_label_data = []
+					for i in g2_dict[group]:
+						cur_box_data.append(box_data[i])
+						cur_label_data.append(label_data[i])
+
+					sub_dict = {}
+					i = 0
+					for ele in cur_label_data:
+						if sub_dict.__contains__(ele):
+							sub_dict[ele] = sub_dict[ele] + [i]
+						else:
+							sub_dict[ele] = [i]
+						i += 1
+
+					data_v1 = []
+					for ele in labels:
+						if sub_dict.__contains__(ele):
+							cur_data = []
+							for i in sub_dict[ele]:
+								cur_data.append(cur_box_data[i])
+							data_v1.append(cur_data)
+						else:
+							data_v1.append(null_data)
+
+					my_bar.add_yaxis(group, Boxplot.prepare_data(data_v1))
+
+				my_pyecharts = (
+					my_bar
+				)
+			else:
+				data = []
+				for element in DataIn:
+					data.append(element[1])
+
+				result = Counter(data)
+				labels = list(result.keys())
+
+				my_dict = {}
+				i = 0
+				for ele in data:
+					if my_dict.__contains__(ele):
+						my_dict[ele] = my_dict[ele] + [i]
+					else:
+						my_dict[ele] = [i]
+					i += 1
+
+				data_v1 = []
+				for ele in labels:
+					if my_dict.__contains__(ele):
+						cur_data  = []
+						for i in my_dict[ele]:
+							cur_data.append(box_data[i])
+						data_v1.append(cur_data)
+					else:
+						data_v1.append(null_data)
+
+				my_pyecharts = (
+					Boxplot(init_opts=opts.InitOpts(width="380px", height="380px"))
+						.add_xaxis(labels)
+						.add_yaxis(field1, Boxplot.prepare_data(data_v1))
+						.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(
+							is_show=self.ui.checkBoxFigLegend.isChecked()
+						),
+					)
+				)
+		elif self.ui.tabWidgetFig.currentIndex() == 3:
+			# get data
+			field = self.ui.comboBoxWord.currentText()
+			if field == "":
+				return
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			data = []
+			for element in DataIn:
+				data.append(element[0])
+			result = Counter(data)
+			keys = list(result)
+			word_data = []
+			for ele in keys:
+				unit = (ele,result[ele])
+				word_data.append(unit)
+			my_pyecharts = (
+				WordCloud(init_opts=opts.InitOpts(width="380px", height="380px"))
+				.add("", word_data, word_size_range=[40, 200], shape=SymbolType.DIAMOND)
+				.set_global_opts(
+					title_opts=opts.TitleOpts(title=""),
+					legend_opts=opts.LegendOpts(
+						is_show=self.ui.checkBoxFigLegend.isChecked()
+					),
+				)
+			)
+
+			# load figure
+			html_path = '/Users/leil/Documents/Projects/VGenes/test.html'
+			my_pyecharts.render(path=html_path)
+			# adjust the window size seting
+			file_handle = open(html_path, 'r')
+			lines = file_handle.readlines()
+			file_handle.close()
+			# edit js line
+			js_line = '<script type="text/javascript" src="' + \
+			          os.path.join('echarts.min.js') + '"></script>\n' + \
+			          '<script type="text/javascript" src="echarts-wordcloud.min.js"></script>'
+			lines[5] = js_line
+			# edit style line
+			style_line = lines[10]
+			style_pos = style_line.find('style')
+			style_line = style_line[
+			             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
+				self.ui.HTMLview.h - 20) + 'px;"></div>'
+			lines[9] = style_line
+			content = '\n'.join(lines)
+			file_handle = open(html_path, 'w')
+			file_handle.write(content)
+			file_handle.close()
+			# show local HTML
+			self.ui.HTMLview.load(QUrl('file://' + html_path))
+			self.ui.HTMLview.show()
+			return
+		elif self.ui.tabWidgetFig.currentIndex() == 4:
+			# get data
+			field1 = self.ui.comboBoxRiver1.currentText()
+			field2 = self.ui.comboBoxRiver2.currentText()
+			if field1 == "" or field2 == "":
+				return
+
+			field = field1 + "," + field2
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			label_data = []
+			time_data = []
+			for element in DataIn:
+				label_data.append(element[1])
+				time_data.append(element[0])
+			time_data = list(map(float, time_data))
+			result = Counter(label_data)
+			labels = list(result.keys())
+
+			min_data = min(time_data)
+			max_data = max(time_data)
+			data_tick = 20
+			step = (max_data - min_data)/data_tick
+			
+			data_river = []
+			for i in range(0, 20):
+				cur_tick = min_data + step * i
+				cur_tick_end = min_data + step * (i + 1)
+				data_in_range = []
+				for element in DataIn:
+					cur_vbal = float(element[0])
+					if cur_vbal <= cur_tick_end and cur_vbal >= cur_tick:
+						data_in_range.append(element[1])
+				res = Counter(data_in_range)
+				for ele in labels:
+					if res.__contains__(ele):
+						unit = [int(cur_tick), res[ele], ele]
+					else:
+						unit = [int(cur_tick), 0, ele]
+					data_river.append(unit)
+
+			my_pyecharts = (
+				ThemeRiver()
+				.add(
+					labels,
+					data_river,
+					singleaxis_opts=opts.SingleAxisOpts(type_='value', min_='dataMin', max_='dataMax'),
+				)
+				.set_global_opts(
+					title_opts=opts.TitleOpts(title=""),
+					legend_opts=opts.LegendOpts(
+						is_show=self.ui.checkBoxFigLegend.isChecked()
+					),
+					#toolbox_opts=opts.ToolboxOpts()
+				)
+			)
+		elif self.ui.tabWidgetFig.currentIndex() == 5:
+			pass
+		elif self.ui.tabWidgetFig.currentIndex() == 6:
+			pass
+
+		# load figure
+		html_path = '/Users/leil/Documents/Projects/VGenes/test.html'
+		my_pyecharts.render(path=html_path)
+		# adjust the window size seting
+		file_handle = open(html_path, 'r')
+		lines = file_handle.readlines()
+		file_handle.close()
+		# edit js line
+		js_line = '            <script type="text/javascript" src="' + \
+		          os.path.join('echarts.min.js') + '"></script>'
+		lines[5] = js_line
+		# edit style line
+		style_line = lines[9]
+		style_pos = style_line.find('style')
+		style_line = style_line[
+		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
+			self.ui.HTMLview.h - 20) + 'px;"></div>'
+		lines[9] = style_line
+		content = '\n'.join(lines)
+		file_handle = open(html_path, 'w')
+		file_handle.write(content)
+		file_handle.close()
+		# show local HTML
+		self.ui.HTMLview.load(QUrl('file://' + html_path))
+		self.ui.HTMLview.show()
+
 
 	def PopulateSpec(self):
 		# if self.ui.radioButton_21.isChecked():
@@ -3438,7 +3872,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			DBFilename = ''
 			typeOpen = 'db'
 			DBFilename = openFile(self, typeOpen)
-			(dirname, filename) = os.path.split(DBFilename)
+			if DBFilename == None:
+				return
 
 		if DBFilename != None:
 			if os.path.isfile(DBFilename):
@@ -3447,15 +3882,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 				VGenesSQL.creatnewDB(DBFilename)
 
 			self.UpdateRecentList(DBFilename, True)
+			if GetName == True:
+				self.SaveBackup
 		else:
 			self.hide()
-			self.ApplicationStarted()
+			#self.ApplicationStarted()
 
-		if GetName == True:
-			self.SaveBackup
-
-			# self.LoadDB(DBFilename)
-			# self.EditableSqlModel.refresh()
 
 	@pyqtSlot()
 	def on_action_Import_triggered(self):
@@ -5180,7 +5612,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Backfilename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects',  'VGenes', 'BackUP.vdb')
 		global DBFilename
 
-		shutil.copy(DBFilename, Backfilename)
+		if DBFilename != None:
+			shutil.copy(DBFilename, Backfilename)
 
 	@pyqtSlot()
 	def on_actionRevert_to_previous_triggered(self):

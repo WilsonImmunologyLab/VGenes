@@ -49,9 +49,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
     import os
     # first get list of seqs and info as tuple from DB:
     if option == 'FASTA Nucleotide file':
-
         fields = ['SeqName', 'Sequence']
-
 
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -63,6 +61,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
 
         Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(FASTAFile)
@@ -70,9 +70,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowVGenesText(Pathname)
 
     elif option == 'FASTA Nucleotide Rename file':
-
-
-
         ProjDict = {}
         i = 1
         fields = ['Project']  # create name dictionary
@@ -111,6 +108,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 print(Seqname1 + ' had THE CLUSTAL OUTPUT IS NOT DONE')
 
         Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(FASTAFile)
@@ -132,6 +131,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
 
         Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(FASTAFile)
@@ -150,6 +151,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
 
         Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(FASTAFile)
@@ -170,6 +173,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
 
         Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(FASTAFile)
@@ -454,6 +459,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.ckReportText.isChecked():
             Pathname = saveFile(self, 'text')
+            if Pathname == None:
+                return
 
             with open(Pathname, 'w') as currentfile:
                 currentfile.write(CloningReport)
@@ -463,6 +470,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.ckReportCSV.isChecked():
             Pathname = saveFile(self, 'csv')
+            if Pathname == None:
+                return
 
             with open(Pathname, 'w') as currentfile:
                 currentfile.write(CloningReportCSV)
@@ -585,6 +594,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
 
         Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
@@ -681,6 +692,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                         CSVOut += SeqEntry
 
         Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
@@ -719,6 +732,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
 
         Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
@@ -812,6 +827,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             CSVOut += '\n'
 
         Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
@@ -841,6 +858,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             CSVOut += '\n'
 
         Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)

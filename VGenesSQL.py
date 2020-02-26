@@ -729,6 +729,21 @@ def enterData(self, DBpathname, IgBLASTAnalysis, answer3):
     # readData(DBpathname)
 
     return numberprocessed, answer3
+
+def ColName(DBpathname):
+    import os
+
+    (dirname, filename) = os.path.split(DBpathname)
+    os.chdir(dirname)
+    conn = db.connect(DBpathname)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT * FROM {}".format('vgenesDB'))
+    col_name_list = [tuple[0] for tuple in cursor.description]
+
+    return col_name_list
+
+
 def RunSQL(DBpathname, SQLStatement):
     # returns a dictionary with seqname as key and all other fileds  as a list as data
     # Note: always needs SeqName to be first field SQLed

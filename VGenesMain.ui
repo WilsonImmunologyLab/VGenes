@@ -945,13 +945,13 @@
                  </property>
                  <property name="maximumSize">
                   <size>
-                   <width>100</width>
+                   <width>166666</width>
                    <height>20</height>
                   </size>
                  </property>
                  <property name="font">
                   <font>
-                   <pointsize>8</pointsize>
+                   <pointsize>11</pointsize>
                   </font>
                  </property>
                 </widget>
@@ -5773,6 +5773,355 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="text">
            <string>Temporary function to update names changed by VGenes removing the &quot;Cl&quot; that led to confusion</string>
           </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tabFig">
+       <attribute name="title">
+        <string>GraphicalStat</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_28">
+        <item row="0" column="0">
+         <widget class="QTabWidget" name="tabWidgetFig">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>100</height>
+           </size>
+          </property>
+          <property name="currentIndex">
+           <number>4</number>
+          </property>
+          <widget class="QWidget" name="tabPie">
+           <attribute name="title">
+            <string>Pie Chart</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_29">
+            <item row="0" column="2">
+             <widget class="QComboBox" name="comboBoxPie">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_28">
+              <property name="text">
+               <string>Select Field:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <spacer name="horizontalSpacer_10">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabColumn">
+           <attribute name="title">
+            <string>Bar Chart</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_30">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>Select Field 1:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxCol1">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6">
+             <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_30">
+              <property name="text">
+               <string>Select Field 2 (optional):</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QComboBox" name="comboBoxCol2">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QCheckBox" name="checkBoxStack">
+              <property name="text">
+               <string>Stacked Bar</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabBox">
+           <attribute name="title">
+            <string>Box Chart</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_31">
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
+               <string>Select Group 2 (optional):</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="6">
+             <spacer name="horizontalSpacer_12">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_32">
+              <property name="text">
+               <string>Select Group 1:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QComboBox" name="comboBoxBox1">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QComboBox" name="comboBoxBox2">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_44">
+              <property name="text">
+               <string>Select data field:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxBoxData">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabWord">
+           <attribute name="title">
+            <string>Word Cloud</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_34">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_42">
+              <property name="text">
+               <string>Select Field:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxWord">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <spacer name="horizontalSpacer_15">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabRiver">
+           <attribute name="title">
+            <string>River Chart</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_33">
+            <item row="0" column="3">
+             <widget class="QComboBox" name="comboBoxRiver2">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_41">
+              <property name="text">
+               <string>Select pseudotime field:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxRiver1">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_40">
+              <property name="text">
+               <string>Select group field(e.g. cluster):</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <spacer name="horizontalSpacer_14">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tabHeat">
+           <attribute name="title">
+            <string>HeatMap</string>
+           </attribute>
+          </widget>
+          <widget class="QWidget" name="tabScatter">
+           <attribute name="title">
+            <string>Scatter Chart</string>
+           </attribute>
+          </widget>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <widget class="QToolButton" name="toolButton">
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>60</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>15</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Generate
+ Figure</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxFigLegend">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>FigLegend</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="1" column="0" colspan="2">
+         <widget class="QGroupBox" name="groupBox_12">
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+           </font>
+          </property>
+          <property name="title">
+           <string>GroupBox</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_36">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayoutStat"/>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>
