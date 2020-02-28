@@ -1371,7 +1371,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						name_location='center',
 						name_gap=30,
 					),
-					#toolbox_opts=opts.ToolboxOpts()
+					tooltip_opts=opts.TooltipOpts(trigger="axis", axis_pointer_type="line")
 				)
 			)
 		# Tree Map
@@ -1477,7 +1477,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			if self.ui.radioButtonTree.isChecked():
 				tree_data = [{"name":"MyData", "children":data}]
-				
 				my_pyecharts = (
 					Tree(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 						.add("MyData", tree_data)
@@ -1490,7 +1489,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				my_pyecharts = (
 					TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-					.add("MyData", data)
+					.add(
+						series_name="MyData",
+						data=data,
+						visual_min=300,
+						leaf_depth=1,
+						label_opts=opts.LabelOpts(position="inside"),
+					)
 					.set_global_opts(
 						title_opts=opts.TitleOpts(title="TreeMap"),
 						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
