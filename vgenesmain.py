@@ -958,6 +958,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# get data
 			field = self.ui.comboBoxPie.currentText()
 			if field == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -985,6 +987,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field1 = self.ui.comboBoxCol1.currentText()
 			field2 = self.ui.comboBoxCol2.currentText()
 			if field1 == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+			if field2 == field1:
+				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 
 			multi_factor = False
@@ -1033,8 +1041,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							name_location='center',
 							name_gap=30,
 						),
-					)\
-					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c}"))
+					)
 
 				for group in dic_keys:
 					cur_data = data[group]
@@ -1042,6 +1049,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					for ele in labels:
 						group_data.append(cur_data.count(ele))
 					my_bar.add_yaxis(group, group_data,stack=stack)
+				my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
 
 				my_pyecharts = (
 					my_bar
@@ -1065,7 +1073,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							is_show=self.ui.checkBoxFigLegend.isChecked()
 						),
 					)
-					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c}"))
+					.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
 				)
 		# Box plot
 		elif self.ui.tabWidgetFig.currentIndex() == 2:
@@ -1074,6 +1082,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field1 = self.ui.comboBoxBox1.currentText()
 			field2 = self.ui.comboBoxBox2.currentText()
 			if field1 == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+			if field2 == field1:
+				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 			multi_factor = False
 			if field2 == "":
@@ -1084,7 +1098,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			box_data = [i[0] for i in DataIn]
-			box_data = list(map(float, box_data))
+			try:
+				box_data = list(map(float, box_data))
+			except:
+				QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
 
 			if min(box_data) >= 0:
 				null_data = [0,0,0,0,0]
@@ -1212,6 +1231,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# get data
 			field = self.ui.comboBoxWord.currentText()
 			if field == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -1282,6 +1303,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field1 = self.ui.comboBoxRiver1.currentText()
 			field2 = self.ui.comboBoxRiver2.currentText()
 			if field1 == "" or field2 == "":
+				QMessageBox.warning(self, 'Warning', 'Your data field or group field is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 
 			field = field1 + "," + field2
@@ -1292,7 +1315,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for element in DataIn:
 				label_data.append(element[1])
 				time_data.append(element[0])
-			time_data = list(map(float, time_data))
+			try:
+				time_data = list(map(float, time_data))
+			except:
+				QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+
 			result = Counter(label_data)
 			labels = list(result.keys())
 
@@ -1342,6 +1371,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			group2 = self.ui.comboBoxTree2.currentText()
 			group3 = self.ui.comboBoxTree3.currentText()
 			if group1 == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 			if group2 == "":
 				data = []
@@ -1357,6 +1388,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 					data.append(unit)
 			else:
 				if group3 == "":
+					if group2 == group1:
+						QMessageBox.warning(self, 'Warning',
+						                    'Please select different group factors for field1 and field2!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
 					data = []
 
 					field = group1 + ',' + group2
@@ -1383,6 +1419,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 						data.append(unit)
 
 				else:
+					if group2 == group1 or group1 == group3 or group2 == group3:
+						QMessageBox.warning(self, 'Warning',
+						                    'Please select different group factors for field1, field2, and field3!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
 					data = []
 
 					field = group1 + ',' + group2 + ',' + group3
@@ -1442,6 +1483,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			dim2 = self.ui.comboBoxScatterY.currentText()
 			group = self.ui.comboBoxScatterGroup.currentText()
 			if dim1 == "" or dim2 == "":
+				QMessageBox.warning(self, 'Warning', 'Your dim1 or dim2 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 
 			# create figure
@@ -1464,6 +1507,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 						splitline_opts=opts.SplitLineOpts(is_show=False),
 					),
 					tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+					legend_opts=opts.LegendOpts(
+						is_show=self.ui.checkBoxFigLegend.isChecked()
+					),
 				)
 
 			# load data
@@ -1474,8 +1520,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				x_data = [d[0] for d in DataIn]
 				y_data = [d[1] for d in DataIn]
-				x_data = list(map(float,x_data))
-				y_data = list(map(float, y_data))
+				
+				try:
+					x_data = list(map(float,x_data))
+					y_data = list(map(float, y_data))
+				except:
+					QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
+					                    QMessageBox.Ok, QMessageBox.Ok)
+					return
 
 				# attach data
 				my_scatter.add_xaxis(xaxis_data=x_data)
@@ -1489,8 +1541,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				x_data = [d[0] for d in DataIn]
 				y_data = [d[1] for d in DataIn]
 				group_data = [d[2] for d in DataIn]
-				x_data = list(map(float, x_data))
-				y_data = list(map(float, y_data))
+				try:
+					x_data = list(map(float, x_data))
+					y_data = list(map(float, y_data))
+				except:
+					QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
+					                    QMessageBox.Ok, QMessageBox.Ok)
+					return
 
 				group_result = Counter(group_data)
 				groups = list(group_result.keys())

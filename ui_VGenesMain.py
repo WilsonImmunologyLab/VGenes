@@ -3325,7 +3325,7 @@ class Ui_MainWindow(object):
         self.tabWidgetFig.setTabText(self.tabWidgetFig.indexOf(self.tabBox), _translate("MainWindow", "Box Chart"))
         self.label_42.setText(_translate("MainWindow", "Select Field:"))
         self.tabWidgetFig.setTabText(self.tabWidgetFig.indexOf(self.tabWord), _translate("MainWindow", "Word Cloud"))
-        self.label_41.setText(_translate("MainWindow", "Select pseudotime field:"))
+        self.label_41.setText(_translate("MainWindow", "Select data field:"))
         self.label_40.setText(_translate("MainWindow", "Select group field(e.g. cluster):"))
         self.tabWidgetFig.setTabText(self.tabWidgetFig.indexOf(self.tabRiver), _translate("MainWindow", "River Chart"))
         self.label_33.setText(_translate("MainWindow", "Group factor1:"))
