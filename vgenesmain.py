@@ -55,6 +55,14 @@ from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 global LastPushed
 LastPushed = ''
 
+global working_prefix
+global temp_folder
+global js_folder
+
+working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
+temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
+js_folder = os.path.join(working_prefix, '..', 'Resources', 'JS')
+
 global data
 global LastSelected
 global DBFilename
@@ -151,7 +159,7 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 	def PopulateCombo(self):
 		# # todo need to make this filename fall in VGenes directory upon deployment
 		try:
-			filename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'RecentPaths.vtx')
+			filename = os.path.join(working_prefix, 'RecentPaths.vtx')
 
 			with open(filename, 'r') as currentfile:
 				self.cboRecent.clear()
@@ -369,10 +377,10 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		answer2 = ''
 
-		ErlogFile = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
+		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database',
 		                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 
-		ErlogFile2 = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
+		ErlogFile2 = os.path.join(working_prefix, 'IgBlast', 'database',
 		                          'ErLog2.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 		header = "Began input at " + time.strftime('%c')
 		with open(ErlogFile2, 'w') as currentFile:
@@ -663,7 +671,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		FirstOne = True
 		DataPass = []
 		ItemP = []
-		FileNamed = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
+		FileNamed = os.path.join(working_prefix, 'IgBlast', 'database',
 		                         'WorkingFile.nt')  # '/Applications/IgBlast/database/WorkingFile.nt'
 		ItemP.append(FileNamed)
 		DataPass.append(ItemP)
@@ -1257,7 +1265,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			)
 
 			# load figure
-			html_path = '/Users/leil/Documents/Projects/VGenes/test.html'
+			html_path = os.path.join(temp_folder,'figure.html')
 			my_pyecharts.render(path=html_path)
 			# adjust the window size seting
 			file_handle = open(html_path, 'r')
@@ -1265,8 +1273,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			file_handle.close()
 			# edit js line
 			js_line = '<script type="text/javascript" src="' + \
-			          os.path.join('echarts.min.js') + '"></script>' + \
-			          '<script src="jquery.js"></script>' + \
+			          os.path.join(js_folder,'echarts.min.js') + '"></script>' + \
+			          '<script src="' + os.path.join(js_folder,'jquery.js') + '"></script>' + \
 			          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
 			lines[5] = js_line
 			# edit style line
@@ -1572,7 +1580,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			pass
 
 		# load figure
-		html_path = '/Users/leil/Documents/Projects/VGenes/test.html'
+		html_path = os.path.join(temp_folder,'figure.html')
 		my_pyecharts.render(path=html_path)
 		# adjust the window size seting
 		file_handle = open(html_path, 'r')
@@ -1580,9 +1588,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		file_handle.close()
 		# edit js line
 		js_line = '<script type="text/javascript" src="' + \
-		          os.path.join('echarts.min.js') + '"></script>' + \
-				'<script src="jquery.js"></script>' + \
-		        '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
+		          os.path.join(js_folder, 'echarts.min.js') + '"></script>' + \
+		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
+		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
 		lines[5] = js_line
 		# edit style line
 		style_line = lines[9]
@@ -2712,7 +2720,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if len(ErLog2) > 0:
 			Erlog2 = ErLog2 + 'The following ' + str(
 				Errs) + ' sequences could not be anaylzed for\nclonality because no CDR3s are indicated:\n' + ErLog
-			ErlogFile = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
+			ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database',
 			                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 
 			with open(ErlogFile, 'w') as currentFile:
@@ -3121,7 +3129,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		DefaultText = data[75]  # data[77] + '-Expressed'
 		BaseName = setText(self, QueryIS, DefaultText)
 
-		filename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', '10x_barcodes.csv')
+		filename = os.path.join(working_prefix, '10x_barcodes.csv')
 		with open(filename, 'r') as currentfile:
 			# myCSVfile = csv.reader(currentfile)
 			myCSVfile  = []
@@ -3349,32 +3357,32 @@ class VGenesForm(QtWidgets.QMainWindow):
 		read_1 = filename[0]
 		read_2 = filename[1]
 
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11', 'reads_1.fq')
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'reads_1.fq')
 		shutil.copy(read_1, WorkDir)
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11', 'reads_2.fq')
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'reads_2.fq')
 		shutil.copy(read_2, WorkDir)
 
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11')
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11')
 		# (dirname, filename) = os.path.split(DBpathname)
 		os.chdir(WorkDir)
 
 		CommandLine = "./flash reads_1.fq reads_2.fq 2>&1 | tee flash.log"
 		Result = os.popen(CommandLine)
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11', 'out.extendedFrags.fastq')
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'out.extendedFrags.fastq')
 
 		filename = saveFile(self, 'fastq')
 		shutil.copy(WorkDir, filename)
 		filename2 = filename + 'Unmerged-1.fastq'
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11',
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
 		                       'out.notCombined_1.fastq')
 		shutil.copy(WorkDir, filename2)
 		filename2 = filename + 'Unmerged-2.fastq'
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11',
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
 		                       'out.notCombined_2.fastq')
 		shutil.copy(WorkDir, filename2)
 
 
-		WorkDir = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'FLASH-1.2.11', 'flash.log')
+		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'flash.log')
 		self.ShowVGenesText(WorkDir)
 
 
@@ -3906,7 +3914,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# todo may need to switch this to configparser which is python modle to save ini files
 		# todo change to app folder
 		try:
-			filename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'RecentPaths.vtx')
+			filename = os.path.join(working_prefix, 'RecentPaths.vtx')
 			with open(filename, 'r') as currentfile:
 				vv = currentfile
 
@@ -5945,7 +5953,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def SaveBackup(self):
 
 		import shutil
-		Backfilename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects',  'VGenes', 'BackUP.vdb')
+		Backfilename = os.path.join(working_prefix, 'BackUP.vdb')
 		global DBFilename
 
 		if DBFilename != None:
@@ -5961,7 +5969,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if answer == 'Cancel':
 			return
 
-		Backfilename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'BackUP.vdb')
+		Backfilename = os.path.join(working_prefix, 'BackUP.vdb')
 		global DBFilename
 
 		# DBFilename = filename
@@ -8254,14 +8262,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 		# todo change to app folder
-		ErlogFile = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
+		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database',
 		                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 		ErLog = 'VGenes input beginning at: ' + time.strftime('%c') + '\n'
 		with open(ErlogFile, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
 			currentFile.write(ErLog)
 
 		try:
-			DBpathname = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'VDJGenes.db')
+			DBpathname = os.path.join(working_prefix, 'VDJGenes.db')
 
 			(dirname, filename) = os.path.split(DBpathname)
 			os.chdir(dirname)
@@ -8819,7 +8827,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		currentRow = self.ui.tableView.currentIndex().row()
 		# todo change to app folder
 		try:
-			filename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'UpdateRecord.nt')
+			filename = os.path.join(working_prefix, 'UpdateRecord.nt')
 			# filename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'UpdateRecord.nt')
 			with open(filename, 'r') as currentfile:
 				vv = currentfile
@@ -8885,7 +8893,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		currentRow = self.ui.tableView.currentIndex().row()
 		# todo change to app folder
 		try:
-			filename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'UpdateRecord.nt')
+			filename = os.path.join(working_prefix, 'UpdateRecord.nt')
 			# filename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'UpdateRecord.nt')
 			with open(filename, 'r') as currentfile:
 				vv = currentfile
