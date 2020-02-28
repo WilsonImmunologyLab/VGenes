@@ -4,7 +4,7 @@ import sys
 import sqlite3 as db
 import time
 
-from PyQt5.QtCore import pyqtSlot, QTimer, QDateTime, Qt, QSortFilterProxyModel, QModelIndex, pyqtSignal, QUrl
+from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QEvent, QEventLoop
 from PyQt5 import QtWidgets
 import VReports
 global OldName
@@ -29,7 +29,6 @@ from ui_VGenesTextEdit import ui_TextEditor
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
-from PyQt5.QtCore import Qt, QObject, QEvent, QEventLoop
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor
 from PyQt5.QtWidgets import QApplication, QTableView
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
@@ -829,28 +828,35 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 class ResizeWidget(QWebEngineView):
 	resizeSignal = pyqtSignal(int, int)
-
 	def __init__(self, parent=None):
 		super(ResizeWidget, self).__init__()
 		self.id = 0
 		self.h = 0
 		self.w = 0
 		self.html = ''
+		self._resize_timer = None
 
-	def resizeEvent(self, evt):
-		#w = evt.oldSize().width()
-		#h = evt.oldSize().height()
-		#print(f' size before :{w,h}')
-		w = evt.size().width()
-		h = evt.size().height()
+	def updateResizeTimer(self, interval=None):
+		if self._resize_timer is not None:
+			self.killTimer(self._resize_timer)
+		if interval is not None:
+			self._resize_timer = self.startTimer(interval)
+		else:
+			self._resize_timer = None
+
+	def resizeEvent(self, event):
+		w = event.size().width()
+		h = event.size().height()
 		self.h = h
 		self.w = w
-		print(f' size now :{w, h, self.id}')
-		self.resizeSignal.emit(w,h)
+		self.updateResizeTimer(300)
 
-	def _callable(self, data):
-		self.html = data
-		print(data)
+	def timerEvent(self, event):
+		if event.timerId() == self._resize_timer:
+			self.updateResizeTimer()
+
+			print(f' size now :{self.w, self.h, self.id}')
+			self.resizeSignal.emit(self.w, self.h)
 
 class MyObjectCls(QObject):
 	updateSelectionSignal = pyqtSignal(str)
@@ -910,15 +916,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 	# @pyqtSlot()
 	# def on_radioButton_21_clicked(self):
 	# 	self.PopulateSpec()
-
-	def resizeHTML(self, w, h):
-		global DBFilename
-
-		h = h - 20
-		sender = self.sender()
-		a = sender.id
-		if sender.id == 1:
-			pass
 
 	def InitialGraphic(self):
 		global DBFilename
@@ -1297,6 +1294,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# show local HTML
 			self.ui.HTMLview.load(QUrl('file://' + html_path))
 			self.ui.HTMLview.show()
+			self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 			# build qweb channel
 			channel = QWebChannel(self.ui.HTMLview.page())
@@ -1612,6 +1610,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# show local HTML
 		self.ui.HTMLview.load(QUrl('file://' + html_path))
 		self.ui.HTMLview.show()
+		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 		# try to export figures
 		#make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
@@ -1624,6 +1623,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		channel.registerObject('connection', my_object)
 		self.ui.HTMLview.page().setWebChannel(channel)
 		my_object.updateSelectionSignal.connect(self.downloadSVG)
+
+	def resizeHTML(self):
+		self.GenerateFigure()
+		return
 
 	def downloadSVG(self, msg):
 		options = QtWidgets.QFileDialog.Options()
