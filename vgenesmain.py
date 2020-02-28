@@ -1,6 +1,6 @@
 __author__ = 'wilsonp'
 import os
-
+import sys
 import sqlite3 as db
 import time
 
@@ -29,7 +29,7 @@ from ui_VGenesTextEdit import ui_TextEditor
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
-from PyQt5.QtCore import Qt, QObject, QEvent
+from PyQt5.QtCore import Qt, QObject, QEvent, QEventLoop
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor
 from PyQt5.QtWidgets import QApplication, QTableView
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
@@ -43,6 +43,8 @@ import itertools
 
 from itertools import combinations
 from collections import Counter
+from pyecharts.render import make_snapshot
+from snapshot_selenium import snapshot
 from subprocess import call, Popen, PIPE
 from platform import system
 
@@ -353,9 +355,9 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		elif thetype == 'Sequence':
 			filenames = openFiles(self, 'seq')
 			pathname1 = self.ProcessSeqFiles(filenames)
-			pathname  = []
+			pathname = []
 			pathname.append(pathname1)
-			# filename = filenames[0]
+		# filename = filenames[0]
 
 		if self.rdoProductive.isChecked() == True:
 			GetProductive = True
@@ -369,16 +371,14 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		ErlogFile = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
 		                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 
-
 		ErlogFile2 = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'IgBlast', 'database',
-		                         'ErLog2.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+		                          'ErLog2.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 		header = "Began input at " + time.strftime('%c')
 		with open(ErlogFile2, 'w') as currentFile:
 			currentFile.write(header)
 		# firstOne = True
 
 		if self.checkBoxFileStruc.isChecked():
-
 
 			for item in pathname:
 
@@ -451,7 +451,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					preproject = os.path.splitext(filename)
 					project = preproject[0]
 
-
 				datalist.clear()
 				datalist.append(project)
 				datalist.append(grouping)
@@ -459,9 +458,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(species)
 				datalist.append(GetProductive)
 				datalist.append(MaxNum)
-
-
-
 
 				IgBLASTAnalysis = IgBLASTer.IgBLASTit(item, datalist)
 
@@ -474,14 +470,12 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				i = 0
 				newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + item + '\n'
 
-
 				with open(ErlogFile,
 				          'r') as currentFile:  # using with for this automatically closes the file even if you crash
 					for line in currentFile:
 						if i > 0:
 							newErLog += line
 						i += 1
-
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
@@ -496,7 +490,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			for item in pathname:
 				(dirname, filename) = os.path.split(item)
-
 
 				if Filenamed == 'none':
 					project = self.comboBoxProject.currentText()
@@ -525,7 +518,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					preproject = os.path.splitext(filename)
 					project = preproject[0]
 
-
 				datalist.clear()
 
 				datalist.append(project)
@@ -534,8 +526,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(species)
 				datalist.append(GetProductive)
 				datalist.append(MaxNum)
-
-
 
 				IgBLASTAnalysis = IgBLASTer.IgBLASTit(item, datalist)
 
@@ -548,14 +538,12 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				i = 0
 				newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + item + '\n'
 
-
 				with open(ErlogFile,
 				          'r') as currentFile:  # using with for this automatically closes the file even if you crash
 					for line in currentFile:
 						if i > 0:
 							newErLog += line
 						i += 1
-
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
@@ -588,10 +576,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				else:
 					multiProject = ''
 
-
 				datalist.clear()
-
-
 
 				datalist.append(project)
 				datalist.append(grouping)
@@ -627,16 +612,13 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
 
-
 		Vgenes.LoadDB(DBFilename)
 
 		self.ShowVGenesText(ErlogFile2)
 
-
-
 	@pyqtSlot()
 	def on_btnImportOldVGenes_clicked(self):
-		from operator import itemgetter   #		SeqList.sort(key=itemgetter(0, 1, 2, 3))
+		from operator import itemgetter  # SeqList.sort(key=itemgetter(0, 1, 2, 3))
 		msg = 'This function imports a comma separated values (CSV) file formatted as: Project, Group, Subgroup, Name, Sequence'
 		buttons = 'OKC'
 		global answer3
@@ -649,7 +631,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		# self.rdoChoose.setChecked(True)
 		# self.checkBoxFileStruc.setChecked(False)
 		self.rdoFunction.setChecked(False)
-
 
 		Pathname = openFile(self, 'CSV')
 		self.checkBoxFileStruc.setChecked(False)
@@ -713,7 +694,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			# else:
 			#     StartNewFASTA = False
 
-
 			if StartNewFASTA == True:  # then write it and clear it clear
 				StartNewFASTA = False
 				if FirstOne == False:  # firstone is empty
@@ -738,7 +718,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					self.comboBoxProject.setCurrentText(project)
 					self.comboBoxGroup.setCurrentText(group)
 					self.comboBoxSubgroup.setCurrentText(subgroup)
-
 
 				FirstOne = False
 				NewFile = ''
@@ -786,7 +765,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				# code to see if mostly a good sequence
 
-
 				elif len(readLine) < 30:
 					query = files + ' is a short sequence (<30 nucleotides), analyze anyways?'
 					answer = questionMessage(self, query, 'YN')
@@ -812,27 +790,27 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					readLine += '\n'
 					FASTAfile.append(readLine)
 
-					# print(FASTAfile)
+			# print(FASTAfile)
 			FinalFASTA = ''.join(FASTAfile)
 
 			now = 'FASTA from ' + time.strftime('%c') + '.nt'
 			FASTAFileName = os.path.join(dirname, now)
 			# need to test
 
-
 			with open(FASTAFileName,
 			          'w') as currentFile:  # using with for this automatically closes the file even if you crash
 				currentFile.write(FinalFASTA)
 
 			return FASTAFileName
-			# ErLog = IgBLASTer.ProcessFASTA(filename)
-			# if ErLog != '':
-			#     type = 'YN'
-			#     Query = "There were some bad sequences, would you like to see the Error log?"
-			#
-			#     reply = questionMessage(Query,type)
-			#     if reply == 'Yes':
-			#         self.ShowVGenesText(ErLog)
+
+	# ErLog = IgBLASTer.ProcessFASTA(filename)
+	# if ErLog != '':
+	#     type = 'YN'
+	#     Query = "There were some bad sequences, would you like to see the Error log?"
+	#
+	#     reply = questionMessage(Query,type)
+	#     if reply == 'Yes':
+	#         self.ShowVGenesText(ErLog)
 
 	def ShowVGenesText(self, filename):
 
@@ -841,12 +819,14 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.TextEdit.loadFile(filename)
 
 class ResizeWidget(QWebEngineView):
-	resizeSignal = pyqtSignal(int,int)
-	def __init__(self,parent=None):
-		super(ResizeWidget,self).__init__()
+	resizeSignal = pyqtSignal(int, int)
+
+	def __init__(self, parent=None):
+		super(ResizeWidget, self).__init__()
 		self.id = 0
 		self.h = 0
 		self.w = 0
+		self.html = ''
 
 	def resizeEvent(self, evt):
 		#w = evt.oldSize().width()
@@ -858,6 +838,36 @@ class ResizeWidget(QWebEngineView):
 		self.w = w
 		print(f' size now :{w, h, self.id}')
 		self.resizeSignal.emit(w,h)
+
+	def _callable(self, data):
+		self.html = data
+		print(data)
+
+def render(url):
+    """Fully render HTML, JavaScript and all."""
+    import sys
+    from PyQt5.QtCore import QEventLoop,QUrl
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtWebEngineWidgets import QWebEngineView
+
+    class Render(QWebEngineView):
+        def __init__(self, url):
+            self.html = None
+            self.app = QApplication(sys.argv)
+            QWebEngineView.__init__(self)
+            self.loadFinished.connect(self._loadFinished)
+            self.load(QUrl(url))
+            while self.html is None:
+                self.app.processEvents(QEventLoop.ExcludeUserInputEvents | QEventLoop.ExcludeSocketNotifiers | QEventLoop.WaitForMoreEvents)
+            self.app.quit()
+
+        def _callable(self, data):
+            self.html = data
+
+        def _loadFinished(self, result):
+            self.page().toHtml(self._callable)
+
+    return Render(url).html
 
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
@@ -881,6 +891,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.tabWidget.currentChanged['int'].connect(self.InitialGraphic)
 		self.ui.toolButton.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
+		self.ui.toolButton_2.clicked.connect(self.downloadFig)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -919,19 +930,41 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.tabWidget.currentIndex() == 6:
 			fields_name = VGenesSQL.ColName(DBFilename)
 			fields_name = [""] + fields_name
+			self.ui.comboBoxPie.clear()
 			self.ui.comboBoxPie.addItems(fields_name)
+			self.ui.comboBoxCol1.clear()
 			self.ui.comboBoxCol1.addItems(fields_name)
+			self.ui.comboBoxCol2.clear()
 			self.ui.comboBoxCol2.addItems(fields_name)
+			self.ui.comboBoxBoxData.clear()
 			self.ui.comboBoxBoxData.addItems(fields_name)
+			self.ui.comboBoxBox1.clear()
 			self.ui.comboBoxBox1.addItems(fields_name)
+			self.ui.comboBoxBox2.clear()
 			self.ui.comboBoxBox2.addItems(fields_name)
+			self.ui.comboBoxRiver1.clear()
 			self.ui.comboBoxRiver1.addItems(fields_name)
+			self.ui.comboBoxRiver2.clear()
 			self.ui.comboBoxRiver2.addItems(fields_name)
+			self.ui.comboBoxWord.clear()
 			self.ui.comboBoxWord.addItems(fields_name)
+			self.ui.comboBoxScatterX.clear()
+			self.ui.comboBoxScatterX.addItems(fields_name)
+			self.ui.comboBoxScatterY.clear()
+			self.ui.comboBoxScatterY.addItems(fields_name)
+			self.ui.comboBoxScatterGroup.clear()
+			self.ui.comboBoxScatterGroup.addItems(fields_name)
+			self.ui.comboBoxTree1.clear()
+			self.ui.comboBoxTree1.addItems(fields_name)
+			self.ui.comboBoxTree2.clear()
+			self.ui.comboBoxTree2.addItems(fields_name)
+			self.ui.comboBoxTree3.clear()
+			self.ui.comboBoxTree3.addItems(fields_name)
 
 	def GenerateFigure(self):
 		global DBFilename
 
+		# pie chart
 		if self.ui.tabWidgetFig.currentIndex() == 0:
 			# get data
 			field = self.ui.comboBoxPie.currentText()
@@ -947,7 +980,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			values = result.values()
 
 			my_pyecharts = (
-				Pie(init_opts=opts.InitOpts(width="380px", height="380px"))
+				Pie(init_opts=opts.InitOpts(width= str(self.ui.HTMLview.w) + "px", height= str(self.ui.HTMLview.h) + "px", renderer='svg'))
 				.add('', [list(z) for z in zip(labels, values)], radius=["40%", "75%"])
 				.set_global_opts(
 					title_opts=opts.TitleOpts(title=""),
@@ -956,7 +989,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					),
 				)
 				.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c} ({d}%)"))
-			)
+			)   #
+		# Bar chart
 		elif self.ui.tabWidgetFig.currentIndex() == 1:
 			# get data
 			field1 = self.ui.comboBoxCol1.currentText()
@@ -995,12 +1029,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				dic_keys = list(data.keys())
 
-				my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px"))\
+				my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
 					.add_xaxis(labels)\
 					.set_global_opts(
 						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(
-							is_show=self.ui.checkBoxFigLegend.isChecked()
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						xaxis_opts=opts.AxisOpts(
+							name=field1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							name='Count',
+							name_location='center',
+							name_gap=30,
 						),
 					)\
 					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c}"))
@@ -1025,7 +1067,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				values = list(result.values())
 
 				my_pyecharts = (
-					Bar(init_opts=opts.InitOpts(width="380px", height="380px"))
+					Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 						.add_xaxis(labels)
 						.add_yaxis(field1, values)
 						.set_global_opts(
@@ -1036,6 +1078,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					)
 					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c}"))
 				)
+		# Box plot
 		elif self.ui.tabWidgetFig.currentIndex() == 2:
 			# get data
 			data_field = self.ui.comboBoxBoxData.currentText()
@@ -1079,12 +1122,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 					i += 1
 				g2_dict_keys = list(g2_dict.keys())
 
-				my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px"))\
+				my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
 					.add_xaxis(labels)\
 					.set_global_opts(
 						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(
-							is_show=self.ui.checkBoxFigLegend.isChecked()
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						xaxis_opts=opts.AxisOpts(
+							name=field1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							name='Count',
+							name_location='center',
+							name_gap=30,
 						),
 						#toolbox_opts = opts.ToolboxOpts()
 					)
@@ -1149,16 +1200,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 						data_v1.append(null_data)
 
 				my_pyecharts = (
-					Boxplot(init_opts=opts.InitOpts(width="380px", height="380px"))
+					Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 						.add_xaxis(labels)
 						.add_yaxis(field1, Boxplot.prepare_data(data_v1))
 						.set_global_opts(
 						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(
-							is_show=self.ui.checkBoxFigLegend.isChecked()
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						xaxis_opts=opts.AxisOpts(
+							name=field1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							name='Count',
+							name_location='center',
+							name_gap=30,
 						),
 					)
 				)
+		# Word Cloud
 		elif self.ui.tabWidgetFig.currentIndex() == 3:
 			# get data
 			field = self.ui.comboBoxWord.currentText()
@@ -1176,7 +1236,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				unit = (ele,result[ele])
 				word_data.append(unit)
 			my_pyecharts = (
-				WordCloud(init_opts=opts.InitOpts(width="380px", height="380px"))
+				WordCloud(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 				.add("", word_data, word_size_range=[40, 200], shape=SymbolType.DIAMOND)
 				.set_global_opts(
 					title_opts=opts.TitleOpts(title=""),
@@ -1213,6 +1273,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.HTMLview.load(QUrl('file://' + html_path))
 			self.ui.HTMLview.show()
 			return
+		# River chart
 		elif self.ui.tabWidgetFig.currentIndex() == 4:
 			# get data
 			field1 = self.ui.comboBoxRiver1.currentText()
@@ -1255,7 +1316,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					data_river.append(unit)
 
 			my_pyecharts = (
-				ThemeRiver()
+				ThemeRiver(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 				.add(
 					labels,
 					data_river,
@@ -1263,15 +1324,191 @@ class VGenesForm(QtWidgets.QMainWindow):
 				)
 				.set_global_opts(
 					title_opts=opts.TitleOpts(title=""),
-					legend_opts=opts.LegendOpts(
-						is_show=self.ui.checkBoxFigLegend.isChecked()
+					legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+					xaxis_opts=opts.AxisOpts(
+						name=field1,
+						name_location='center',
+						name_gap=30,
 					),
 					#toolbox_opts=opts.ToolboxOpts()
 				)
 			)
+		# Tree Map
 		elif self.ui.tabWidgetFig.currentIndex() == 5:
-			pass
+			group1 = self.ui.comboBoxTree1.currentText()
+			group2 = self.ui.comboBoxTree2.currentText()
+			group3 = self.ui.comboBoxTree3.currentText()
+			if group1 == "":
+				return
+			if group2 == "":
+				data = []
+
+				field = group1
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				x_data = [d[0] for d in DataIn]
+
+				x_data_res = Counter(x_data)
+				for ele in x_data_res:
+					unit = {"value": x_data_res[ele], "name": ele}
+					data.append(unit)
+			else:
+				if group3 == "":
+					data = []
+
+					field = group1 + ',' + group2
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					x_data = [d[0] for d in DataIn]
+					y_data = [d[1] for d in DataIn]
+
+					x_data_res = Counter(x_data)
+					x_labels = x_data_res.keys()
+
+					for x_label in x_labels:
+						cur_x_label_data = []
+						for i in range(0, len(x_data)):
+							if x_data[i] == x_label:
+								cur_x_label_data.append(y_data[i])
+						cur_data = []
+						cur_x_data_res = Counter(cur_x_label_data)
+						for ele in cur_x_data_res:
+							sub_unit = {"value": cur_x_data_res[ele], "name": ele}
+							cur_data.append(sub_unit)
+
+						unit = {"value": x_data_res[x_label], "name": x_label, "children": cur_data}
+						data.append(unit)
+
+				else:
+					data = []
+
+					field = group1 + ',' + group2 + ',' + group3
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					x_data = [d[0] for d in DataIn]
+					y_data = [d[1] for d in DataIn]
+					z_data = [d[2] for d in DataIn]
+
+					x_data_res = Counter(x_data)
+					x_labels = x_data_res.keys()
+
+					# level 1
+					for x_label in x_labels:
+						cur_x_label_data = []
+						cur_z_data = []
+						for i in range(0, len(x_data)):
+							if x_data[i] == x_label:
+								cur_x_label_data.append(y_data[i])
+								cur_z_data.append(z_data[i])
+						cur_data = []
+						cur_x_data_res = Counter(cur_x_label_data)
+						y_labels = cur_x_data_res.keys()
+
+						# level 2
+						for y_label in y_labels:
+							cur_y_label_data = []
+							for i in range(0, len(cur_x_label_data)):
+								if cur_x_label_data[i] == y_label:
+									cur_y_label_data.append(cur_z_data[i])
+							cur_sub_data = []
+							cur_y_data_res = Counter(cur_y_label_data)
+							for ele in cur_y_data_res:
+								sub_sub_unit = {"value": cur_y_data_res[ele], "name": ele}
+								cur_sub_data.append(sub_sub_unit)
+
+							sub_unit = {"value": cur_y_data_res[y_label], "name": y_label, "children": cur_sub_data}
+							cur_data.append(sub_unit)
+
+						unit = {"value": x_data_res[x_label], "name": x_label, "children": cur_data}
+						data.append(unit)
+
+						a = 1
+						b = 2
+			my_pyecharts = (
+				TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+				.add("MyData", data)
+				.set_global_opts(
+					title_opts=opts.TitleOpts(title="TreeMap"),
+					legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+					toolbox_opts=opts.ToolboxOpts()
+				)
+			)
+		# Scatter Chart
 		elif self.ui.tabWidgetFig.currentIndex() == 6:
+			dim1 = self.ui.comboBoxScatterX.currentText()
+			dim2 = self.ui.comboBoxScatterY.currentText()
+			group = self.ui.comboBoxScatterGroup.currentText()
+			if dim1 == "" or dim2 == "":
+				return
+
+			# create figure
+			my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+				.set_series_opts(label_opts=opts.LabelOpts(is_show=False))\
+				.set_global_opts(
+					xaxis_opts=opts.AxisOpts(
+						type_="value",
+						splitline_opts=opts.SplitLineOpts(is_show=False),
+						name=dim1,
+						name_location='center',
+						name_gap=30,
+					),
+					yaxis_opts=opts.AxisOpts(
+						type_="value",
+						name=dim2,
+						name_location='center',
+						name_gap=30,
+						axistick_opts=opts.AxisTickOpts(is_show=True),
+						splitline_opts=opts.SplitLineOpts(is_show=False),
+					),
+					tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+				)
+
+			# load data
+			if group == "":
+				field = dim1 + "," + dim2
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				x_data = [d[0] for d in DataIn]
+				y_data = [d[1] for d in DataIn]
+				x_data = list(map(float,x_data))
+				y_data = list(map(float, y_data))
+
+				# attach data
+				my_scatter.add_xaxis(xaxis_data=x_data)
+				my_scatter.add_yaxis(series_name="Data", y_axis=y_data, label_opts=opts.LabelOpts(is_show=False))
+
+			else:
+				field = dim1 + "," + dim2 + "," + group
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				x_data = [d[0] for d in DataIn]
+				y_data = [d[1] for d in DataIn]
+				group_data = [d[2] for d in DataIn]
+				x_data = list(map(float, x_data))
+				y_data = list(map(float, y_data))
+
+				group_result = Counter(group_data)
+				groups = list(group_result.keys())
+
+				for group in groups:
+					sub_x_data = []
+					sub_y_data = []
+					for i in range(0, len(group_data)):
+						if group_data[i] == group:
+							sub_x_data.append(x_data[i])
+							sub_y_data.append(y_data[i])
+
+					# attach data
+					my_scatter.add_xaxis(xaxis_data=sub_x_data)
+					my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data,label_opts=opts.LabelOpts(is_show=False))
+
+			my_pyecharts = (
+				my_scatter
+			)
+		# Heatmap
+		elif self.ui.tabWidgetFig.currentIndex() == 7:
 			pass
 
 		# load figure
@@ -1299,7 +1536,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# show local HTML
 		self.ui.HTMLview.load(QUrl('file://' + html_path))
 		self.ui.HTMLview.show()
+		#make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
 
+		#self.ui.HTMLview.page().view().toPlainText(self.ui.HTMLview._callable)
+		#print(self.ui.HTMLview.html)
+		#print(render('/Users/leil/Documents/Projects/VGenes/111.html'))
+
+	def downloadFig(self):
+		#js_string = '''alert("hello,world！");'''
+		js_cmd= "var test=document.getElementsByTagName('svg')[0].parentNode.innerHTML;" \
+		        "alert(test)"
+		self.ui.HTMLview.page().runJavaScript(js_cmd)
+
+	def _callable(self, data):
+		self.html = data
 
 	def PopulateSpec(self):
 		# if self.ui.radioButton_21.isChecked():
