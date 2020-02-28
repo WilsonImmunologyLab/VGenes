@@ -909,6 +909,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
+
 	# def ShowProgressBar(self):
 	#     self.VGProgress.handleButton()
 
@@ -916,6 +917,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	# @pyqtSlot()
 	# def on_radioButton_21_clicked(self):
 	# 	self.PopulateSpec()
+
 
 	def InitialGraphic(self):
 		global DBFilename
@@ -1294,6 +1296,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# show local HTML
 			self.ui.HTMLview.load(QUrl('file://' + html_path))
 			self.ui.HTMLview.show()
+			self.ui.HTMLview.html = "loaded"
 			self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 			# build qweb channel
@@ -1466,23 +1469,34 @@ class VGenesForm(QtWidgets.QMainWindow):
 								sub_sub_unit = {"value": cur_y_data_res[ele], "name": ele}
 								cur_sub_data.append(sub_sub_unit)
 
-							sub_unit = {"value": cur_y_data_res[y_label], "name": y_label, "children": cur_sub_data}
+							sub_unit = {"value": cur_x_data_res[y_label], "name": y_label, "children": cur_sub_data}
 							cur_data.append(sub_unit)
 
 						unit = {"value": x_data_res[x_label], "name": x_label, "children": cur_data}
 						data.append(unit)
 
-						a = 1
-						b = 2
-			my_pyecharts = (
-				TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-				.add("MyData", data)
-				.set_global_opts(
-					title_opts=opts.TitleOpts(title="TreeMap"),
-					legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
-					toolbox_opts=opts.ToolboxOpts()
+			if self.ui.radioButtonTree.isChecked():
+				tree_data = [{"name":"MyData", "children":data}]
+				
+				my_pyecharts = (
+					Tree(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+						.add("MyData", tree_data)
+						.set_global_opts(
+						title_opts=opts.TitleOpts(title="Tree"),
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						#toolbox_opts=opts.ToolboxOpts()
+					)
 				)
-			)
+			else:
+				my_pyecharts = (
+					TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+					.add("MyData", data)
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title="TreeMap"),
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						#toolbox_opts=opts.ToolboxOpts()
+					)
+				)
 		# Scatter Chart
 		elif self.ui.tabWidgetFig.currentIndex() == 6:
 			dim1 = self.ui.comboBoxScatterX.currentText()
@@ -1610,6 +1624,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# show local HTML
 		self.ui.HTMLview.load(QUrl('file://' + html_path))
 		self.ui.HTMLview.show()
+		self.ui.HTMLview.html = "loaded"
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 		# try to export figures
@@ -1625,8 +1640,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		my_object.updateSelectionSignal.connect(self.downloadSVG)
 
 	def resizeHTML(self):
-		self.GenerateFigure()
-		return
+		if self.ui.HTMLview.html == '':
+			return
+		else:
+			self.GenerateFigure()
 
 	def downloadSVG(self, msg):
 		options = QtWidgets.QFileDialog.Options()
@@ -1636,7 +1653,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                                                      "Scalable Vector Graphics (*.svg);;All Files (*)",
 		                                                      options=options)
 
-		if save_file_name != 'none':
+		if save_file_name != None:
 			file_handle = open(save_file_name, 'w')
 			file_handle.write(msg)
 			file_handle.close()
