@@ -36,6 +36,7 @@ from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
 from PyQt5.QtWebEngineWidgets import *
+from PyQt5.QtWebChannel import *
 from pyecharts.charts import *
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType
@@ -843,31 +844,19 @@ class ResizeWidget(QWebEngineView):
 		self.html = data
 		print(data)
 
-def render(url):
-    """Fully render HTML, JavaScript and all."""
-    import sys
-    from PyQt5.QtCore import QEventLoop,QUrl
-    from PyQt5.QtWidgets import QApplication
-    from PyQt5.QtWebEngineWidgets import QWebEngineView
+class MyObjectCls(QObject):
+	updateSelectionSignal = pyqtSignal(str)
 
-    class Render(QWebEngineView):
-        def __init__(self, url):
-            self.html = None
-            self.app = QApplication(sys.argv)
-            QWebEngineView.__init__(self)
-            self.loadFinished.connect(self._loadFinished)
-            self.load(QUrl(url))
-            while self.html is None:
-                self.app.processEvents(QEventLoop.ExcludeUserInputEvents | QEventLoop.ExcludeSocketNotifiers | QEventLoop.WaitForMoreEvents)
-            self.app.quit()
+	def __init__(self, parent=None):
+		QObject.__init__(self, parent)
 
-        def _callable(self, data):
-            self.html = data
+	@pyqtSlot(str)
+	def consolePrint(self, msg):
+		print(msg)
 
-        def _loadFinished(self, result):
-            self.page().toHtml(self._callable)
-
-    return Render(url).html
+	@pyqtSlot(str)
+	def updateSelection(self, msg):
+		self.updateSelectionSignal.emit(msg)
 
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
@@ -1255,8 +1244,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			file_handle.close()
 			# edit js line
 			js_line = '<script type="text/javascript" src="' + \
-			          os.path.join('echarts.min.js') + '"></script>\n' + \
-			          '<script type="text/javascript" src="echarts-wordcloud.min.js"></script>'
+			          os.path.join('echarts.min.js') + '"></script>' + \
+			          '<script src="jquery.js"></script>' + \
+			          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
 			lines[5] = js_line
 			# edit style line
 			style_line = lines[10]
@@ -1264,7 +1254,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			style_line = style_line[
 			             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
 				self.ui.HTMLview.h - 20) + 'px;"></div>'
-			lines[9] = style_line
+			lines[10] = style_line
+			insert_js = '<script type="text/javascript">$(document).ready(function() {' \
+			            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
+			            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+			            'my_object.updateSelection(text);});});});</script>'
+			insert_btn = '<input id="download" type="button" value="" style="display:none;"/>'
+			lines = lines[:6] + [insert_js] + lines[6:10] + [insert_btn] + lines[10:]
 			content = '\n'.join(lines)
 			file_handle = open(html_path, 'w')
 			file_handle.write(content)
@@ -1272,6 +1268,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# show local HTML
 			self.ui.HTMLview.load(QUrl('file://' + html_path))
 			self.ui.HTMLview.show()
+
+			# build qweb channel
+			channel = QWebChannel(self.ui.HTMLview.page())
+			my_object = MyObjectCls(self.ui.HTMLview)
+			channel.registerObject('connection', my_object)
+			self.ui.HTMLview.page().setWebChannel(channel)
+			my_object.updateSelectionSignal.connect(self.downloadSVG)
 			return
 		# River chart
 		elif self.ui.tabWidgetFig.currentIndex() == 4:
@@ -1519,8 +1522,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		lines = file_handle.readlines()
 		file_handle.close()
 		# edit js line
-		js_line = '            <script type="text/javascript" src="' + \
-		          os.path.join('echarts.min.js') + '"></script>'
+		js_line = '<script type="text/javascript" src="' + \
+		          os.path.join('echarts.min.js') + '"></script>' + \
+				'<script src="jquery.js"></script>' + \
+		        '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
 		lines[5] = js_line
 		# edit style line
 		style_line = lines[9]
@@ -1529,6 +1534,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
 			self.ui.HTMLview.h - 20) + 'px;"></div>'
 		lines[9] = style_line
+		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
+		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
+		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+		            'my_object.updateSelection(text);});});});</script>'
+		insert_btn = '<input id="download" type="button" value="" style="display:none;"/>'
+		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
 		content = '\n'.join(lines)
 		file_handle = open(html_path, 'w')
 		file_handle.write(content)
@@ -1536,16 +1547,34 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# show local HTML
 		self.ui.HTMLview.load(QUrl('file://' + html_path))
 		self.ui.HTMLview.show()
-		#make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
 
+		# try to export figures
+		#make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
 		#self.ui.HTMLview.page().view().toPlainText(self.ui.HTMLview._callable)
 		#print(self.ui.HTMLview.html)
-		#print(render('/Users/leil/Documents/Projects/VGenes/111.html'))
+
+		# build qweb channel
+		channel = QWebChannel(self.ui.HTMLview.page())
+		my_object = MyObjectCls(self.ui.HTMLview)
+		channel.registerObject('connection', my_object)
+		self.ui.HTMLview.page().setWebChannel(channel)
+		my_object.updateSelectionSignal.connect(self.downloadSVG)
+
+	def downloadSVG(self, msg):
+		options = QtWidgets.QFileDialog.Options()
+		save_file_name, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+		                                                      "My_svg",
+		                                                      "My_svg",
+		                                                      "Scalable Vector Graphics (*.svg);;All Files (*)",
+		                                                      options=options)
+
+		if save_file_name != 'none':
+			file_handle = open(save_file_name, 'w')
+			file_handle.write(msg)
+			file_handle.close()
 
 	def downloadFig(self):
-		#js_string = '''alert("hello,world！");'''
-		js_cmd= "var test=document.getElementsByTagName('svg')[0].parentNode.innerHTML;" \
-		        "alert(test)"
+		js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
 		self.ui.HTMLview.page().runJavaScript(js_cmd)
 
 	def _callable(self, data):
