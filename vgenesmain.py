@@ -1658,10 +1658,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                                                      "Scalable Vector Graphics (*.svg);;All Files (*)",
 		                                                      options=options)
 
-		if save_file_name != None:
+		try:
 			file_handle = open(save_file_name, 'w')
 			file_handle.write(msg)
 			file_handle.close()
+		except:
+			return
 
 	def downloadFig(self):
 		js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
