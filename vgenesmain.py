@@ -3,6 +3,7 @@ import os
 import sys
 import sqlite3 as db
 import time
+import re
 
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QEvent, QEventLoop
 from PyQt5 import QtWidgets
@@ -859,6 +860,7 @@ class ResizeWidget(QWebEngineView):
 			self.resizeSignal.emit(self.w, self.h)
 
 class MyObjectCls(QObject):
+	downloadFigSignal = pyqtSignal(str)
 	updateSelectionSignal = pyqtSignal(str)
 
 	def __init__(self, parent=None):
@@ -871,6 +873,10 @@ class MyObjectCls(QObject):
 	@pyqtSlot(str)
 	def updateSelection(self, msg):
 		self.updateSelectionSignal.emit(msg)
+
+	@pyqtSlot(str)
+	def download(self, msg):
+		self.downloadFigSignal.emit(msg)
 
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
@@ -1286,7 +1292,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			insert_js = '<script type="text/javascript">$(document).ready(function() {' \
 			            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
 			            'var my_object = channel.objects.connection;$("#download").click(function(){' \
-			            'my_object.updateSelection(text);});});});</script>'
+			            'my_object.download(text);});});});</script>'
 			insert_btn = '<input id="download" type="button" value="" style="display:none;"/>'
 			lines = lines[:6] + [insert_js] + lines[6:10] + [insert_btn] + lines[10:]
 			content = '\n'.join(lines)
@@ -1304,7 +1310,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			my_object = MyObjectCls(self.ui.HTMLview)
 			channel.registerObject('connection', my_object)
 			self.ui.HTMLview.page().setWebChannel(channel)
-			my_object.updateSelectionSignal.connect(self.downloadSVG)
+			my_object.downloadFigSignal.connect(self.downloadSVG)
+			my_object.updateSelectionSignal.connect(self.updateSelection)
 			return
 		# River chart
 		elif self.ui.tabWidgetFig.currentIndex() == 4:
@@ -1619,9 +1626,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
 		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
 		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+		            'my_object.download(text);});$("#update").click(function(){' \
 		            'my_object.updateSelection(text);});});});</script>'
-		insert_btn = '<input id="download" type="button" value="" style="display:none;"/>'
+		insert_btn = '<input id="download" type="button" value="" style="display:none;"/>' \
+		             '<input id="update" type="button" value="" style="display:none;"/>'
 		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
+
+		# insert click response function
+		echart_init_line = lines[13]
+		matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
+		chart_id = matchObj.group(1)
+		js_cmd = chart_id + ".on('click', function (params) {" \
+		                    "if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}" \
+		                    "else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}" \
+		                    "$('#update').click();});"
+		lines = lines[:-3] + [js_cmd] + lines[-3:]
+
 		content = '\n'.join(lines)
 		file_handle = open(html_path, 'w')
 		file_handle.write(content)
@@ -1642,13 +1662,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 		my_object = MyObjectCls(self.ui.HTMLview)
 		channel.registerObject('connection', my_object)
 		self.ui.HTMLview.page().setWebChannel(channel)
-		my_object.updateSelectionSignal.connect(self.downloadSVG)
+		my_object.downloadFigSignal.connect(self.downloadSVG)
+		my_object.updateSelectionSignal.connect(self.updateSelection)
+
+		# this section will add information for latest figure. The information will be used to update element selections on the left
+		if self.ui.tabWidgetFig.currentIndex() == 0:
+			self.ui.HTMLview.info = ['Pie',self.ui.comboBoxPie.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 1:
+			self.ui.HTMLview.info = ['Bar', self.ui.comboBoxCol1.currentText() + ',' +
+			                         self.ui.comboBoxCol2.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 2:
+			self.ui.HTMLview.info = ['Bar', self.ui.comboBoxBoxData.currentText() + ',' +
+			                         self.ui.comboBoxBox1.currentText() + ',' + self.ui.comboBoxBox2.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 3:
+			self.ui.HTMLview.info = ['Word', self.ui.comboBoxWord.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 4:
+			self.ui.HTMLview.info = ['River', self.ui.comboBoxRiver1.currentText() + ',' +
+			                         self.ui.comboBoxRiver2.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 5:
+			self.ui.HTMLview.info = ['Tree', self.ui.comboBoxTree1.currentText() + ',' +
+			                         self.ui.comboBoxTree2.currentText() + ',' + self.ui.comboBoxTree3.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 6:
+			self.ui.HTMLview.info = ['Scatter', self.ui.comboBoxScatterX.currentText() + ',' +
+			                         self.ui.comboBoxScatterY.currentText() + ',' + self.ui.comboBoxScatterGroup.currentText()]
+		elif self.ui.tabWidgetFig.currentIndex() == 7:
+			pass
 
 	def resizeHTML(self):
 		if self.ui.HTMLview.html == '':
 			return
 		else:
 			self.GenerateFigure()
+
+	def updateSelection(self, msg):
+		msg += '\nThis information is from Python'
+		QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+		return
 
 	def downloadSVG(self, msg):
 		options = QtWidgets.QFileDialog.Options()
