@@ -368,11 +368,13 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 		file_handle = open(progressBarFile,'r')
 		progress = file_handle.readline()
-		progress = int(float(progress))
-		progress += 1
+		try:
+			progress = int(float(progress))
+		except:
+			progress = self.progressBar.value()
 		self.progressBar.setValue(progress)
 		self.labelpct.setText(str(progress) + '% records loaded')
-		if progress > 99:
+		if progress > 98:
 			self.labelpct.setText('Loading finished!')
 			return
 		t=thd.Timer(1, self.checkProgress)
@@ -524,6 +526,11 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.start()
 				workThread.trigger.connect(self.multi_callback)
 
+				import_file = os.path.join(temp_folder, "import_file_name.txt")
+				f = open(import_file, 'w')
+				f.write(item)
+				f.close()
+
 				self.disableWidgets()
 				self.checkProgress()
 				return
@@ -603,6 +610,11 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.start()
 				workThread.trigger.connect(self.multi_callback)
 
+				import_file = os.path.join(temp_folder, "import_file_name.txt")
+				f = open(import_file, 'w')
+				f.write(item)
+				f.close()
+
 				self.disableWidgets()
 				self.checkProgress()
 				return
@@ -674,6 +686,11 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.start()
 				workThread.trigger.connect(self.multi_callback)
 
+				import_file = os.path.join(temp_folder, "import_file_name.txt")
+				f = open(import_file, 'w')
+				f.write(item)
+				f.close()
+
 				self.disableWidgets()
 				self.checkProgress()
 				return
@@ -714,19 +731,24 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	@pyqtSlot()
 	def multi_callback(self):
-		#global timer
-		#timer.cancel()
+
 		Startprocessed = 0
 		try:
 			Startprocessed = len(IgBLASTAnalysis)
+			self.close()
 		except:
 			if Startprocessed == 0:
 				self.close()
 
 		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
 
+		import_file = os.path.join(temp_folder, "import_file_name.txt")
+		file_handle = open(import_file,'r')
+		file_name = file_handle.readline()
+		file_handle.close()
+
 		i = 0
-		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + '\n'
+		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + file_name + '\n'
 
 		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database','ErLog.txt')
 		ErlogFile2 = os.path.join(working_prefix, 'IgBlast', 'database','ErLog2.txt')
@@ -4408,6 +4430,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_action_Import_triggered(self):
+		self.ImportOptions = ImportDialogue()
 		self.ImportOptions.show()
 
 	@pyqtSlot()
