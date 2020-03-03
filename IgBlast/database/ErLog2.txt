@@ -1,4 +1,4 @@
-Began input at Tue Feb 11 09:22:31 2020
-560 sequences were input by IgBLAST for file: /Volumes/Promise Pegasus/Dropbox (Wilson Lab)/Universal vaccine/Probe experiment/HA-array-final/sample8-VDJ/outs/consensus.fasta
+Began input at Tue Mar  3 12:40:32 2020
+240 sequences were input by IgBLAST for file: 
 
-VGenes input ended at: Tue Feb 11 09:23:26 2020
+VGenes input ended at: Tue Mar  3 12:40:50 2020

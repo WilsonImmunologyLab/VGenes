@@ -5,7 +5,7 @@ import sqlite3 as db
 import time
 import re
 
-from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QEvent, QEventLoop
+from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
 from PyQt5 import QtWidgets
 import VReports
 global OldName
@@ -41,6 +41,7 @@ from pyecharts.charts import *
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType
 import itertools
+import threading as thd
 
 from itertools import combinations
 from collections import Counter
@@ -63,6 +64,10 @@ working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
 temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
 js_folder = os.path.join(working_prefix, '..', 'Resources', 'JS')
 
+global IgBLASTAnalysis
+IgBLASTAnalysis = []
+
+global timer
 global data
 global LastSelected
 global DBFilename
@@ -333,6 +338,18 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	# 	t = timeit.timeit('self.findTableViewRecord(self, FieldName)")', 'import IgBLASTer', number=10000)
 	# 	print(t)
 
+	def checkProgress(self):
+		global timer
+		progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+		file_handle = open(progressBarFile,'r')
+		progress = file_handle.readline()
+		progress = int(float(progress))
+		self.progressBar.setValue(progress)
+		if progress > 98:
+			return
+		t=thd.Timer(1, self.checkProgress)
+		t.start()
+
 	def InitiateImport(self, Filenamed, MaxNum):
 		# need to transfer species grouping to IgBlaster
 		answer = ''
@@ -488,12 +505,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
-
-
-
-
-
-
 		elif self.rdoChoose.isChecked():
 			# checklabel = {}
 
@@ -556,12 +567,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
-
-
-
-
 		elif self.rdoFunction.isChecked():
-
 			for item in pathname:
 				(dirname, filename) = os.path.split(item)
 
@@ -595,9 +601,25 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(MaxNum)
 				datalist.append(multiProject)
 
-				# if thetype == 'Sequence':
-				# 	item = pathname
+				# try multi-thread
+				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				file_handle = open(progressBarFile, 'w')
+				file_handle.write('0')
+				file_handle.close()
+				workThread = WorkThread(self)
+				workThread.item = item
+				workThread.datalist = datalist
+				workThread.start()
+				workThread.trigger.connect(self.multi_callback)
+
+				self.checkProgress()
+				return
+
+				'''				
+				start = time.time()
 				IgBLASTAnalysis = IgBLASTer.IgBLASTit(item, datalist)
+				end = time.time()
+				print('Run time for IgBlast: ' +str(end - start))
 				Startprocessed = 0
 				try:
 
@@ -606,7 +628,10 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					if Startprocessed == 0:
 						self.close()
 
+				start = time.time()
 				Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+				end = time.time()
+				print('Run time for Importing DB: ' + str(end - start))
 
 				i = 0
 				newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + item + '\n'
@@ -620,9 +645,38 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
+				'''
+		Vgenes.LoadDB(DBFilename)
+		self.ShowVGenesText(ErlogFile2)
+
+	@pyqtSlot()
+	def multi_callback(self):
+		#global timer
+		#timer.cancel()
+		Startprocessed = 0
+		try:
+			Startprocessed = len(IgBLASTAnalysis)
+		except:
+			if Startprocessed == 0:
+				self.close()
+
+		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+
+		i = 0
+		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + '\n'
+
+		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database','ErLog.txt')
+		ErlogFile2 = os.path.join(working_prefix, 'IgBlast', 'database','ErLog2.txt')
+		with open(ErlogFile,'r') as currentFile:  # using with for this automatically closes the file even if you crash
+			for line in currentFile:
+				if i > 0:
+					newErLog += line
+				i += 1
+
+		with open(ErlogFile2, 'a') as currentFile:
+			currentFile.write(newErLog)
 
 		Vgenes.LoadDB(DBFilename)
-
 		self.ShowVGenesText(ErlogFile2)
 
 	@pyqtSlot()
@@ -877,6 +931,20 @@ class MyObjectCls(QObject):
 	@pyqtSlot(str)
 	def download(self, msg):
 		self.downloadFigSignal.emit(msg)
+
+class WorkThread(QThread):
+	trigger = pyqtSignal(str)
+
+	def __int__(self):
+		super(WorkThread, self).__init__()
+		self.parent = parent
+		self.item = ''
+		self.datalist = ''
+
+	def run(self):
+		global IgBLASTAnalysis
+		IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
+		self.trigger.emit(self.item)
 
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
@@ -1756,11 +1824,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global UpdateSpecific
 		UpdateSpecific = False
 
-
-
-
-
-
 	def MakeSQLStatement(self, fields):
 		checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeChecked()
 
@@ -1882,7 +1945,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		return SQLStatement
 
-
 	def ShowVGenesTextEdit(self, textToShow, style):
 
 		if style == 'aligned':
@@ -1918,7 +1980,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.TextEdit.show()
 
 		self.TextEdit.textEdit.setText(textToShow)
-
 
 	def initializeTreeView(self, SQLFields):
 
@@ -2321,9 +2382,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		return
 
-
-
-
 	def getTreePathDown(self, item):
 		path = []
 		checkedkids = []
@@ -2409,8 +2467,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		return checkedProjects, checkedGroups, checkedSubGroups, checkedkids
 
-
-
 	@pyqtSlot()
 	def on_actionGL_triggered(self):
 		global GLMsg
@@ -2445,7 +2501,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	# Doc +=('Modules not imported:')
 	# Doc +=('\n'.join(finder.badmodules.keys()))
-
 
 	@pyqtSlot()
 	def on_actionPrint_triggered(self):
@@ -2535,7 +2590,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 				if os.path.isfile(DBFilename):
 					self.LoadDB(DBFilename)
 
-
 	def RemoveDuplicates(self, DataList):
 		from operator import itemgetter
 		import itertools
@@ -2599,12 +2653,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
 		print("Finished Shared analysis")
-
-	#SQLCommand = 'UPDATE vgenesDB SET ' + Field + ' = "' + Value + '" WHERE ID = ' + ID
-
-
-
-
 
 	@pyqtSlot()
 	def on_actionFind_Clonal_triggered(self):
@@ -2827,7 +2875,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.MakeAllVairants()
 		else:
 			VMapHotspots.MapHotspots(self, item, DBFilename, data[0])
-
 
 	def MakeAllVairants(self):
 		SeqName = data[0]
@@ -3414,13 +3461,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		answer = informationMessage(self, 'Close and restart database to see changes', 'OK')
 
-
-
-
-			# print(newName)
-
-
-
 	@pyqtSlot()
 	def on_actionMergeMySeq_triggered(self):
 		import shutil
@@ -3461,13 +3501,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'flash.log')
 		self.ShowVGenesText(WorkDir)
 
-
 	#actionAnalyze_Isotypes   actionImport10XInfo
 	@pyqtSlot()
 	def on_actionImport10XInfo_triggered(self):
 		print('10x code')
-
-
 
 	@pyqtSlot()
 	def on_actionAnalyze_Isotypes_triggered(self):
@@ -3842,9 +3879,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		print('done')
 
-	# do lengthy process
-
-
 	def getTreeSelected(self):
 		root = self.ui.treeWidget.invisibleRootItem()
 		ListSelected = []
@@ -3960,6 +3994,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                                                      "VGenes database Files (*.vdb);;All Files (*)",
 		                                                      options=options)
 
+		a = DBFilename
 		if DBFilename != None and DBFilename != '':
 			(dirname, filename) = os.path.split(DBFilename)
 			(shortname, extension) = os.path.splitext(filename)
@@ -4308,7 +4343,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.hide()
 			#self.ApplicationStarted()
 
-
 	@pyqtSlot()
 	def on_action_Import_triggered(self):
 		self.ImportOptions.show()
@@ -4505,11 +4539,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				FieldsChanged.clear
 
-
-
-
-
-
 	def MoveRecord(self, direction):
 
 		FieldCheck = self.FieldChangeCheck()
@@ -4552,9 +4581,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		except:
 			self.SeqButton('v')
 		JustMoved = False
-
-
-		# self.findTreeItem(data[0])
 
 	def createView(self, model):
 		# def createView(title, model):
@@ -4776,7 +4802,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
-
 
 	@pyqtSlot()
 	def on_txtProject_textChanged(self):

@@ -5,6 +5,12 @@ import sqlite3 as db
 import VGenesSQL
 from PyQt5.QtWidgets import QApplication
 
+global working_prefix
+global temp_folder
+
+working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
+temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
+
 def Translator(Sequence, frame):
 
         # Translate sequence into a list of codons
@@ -478,8 +484,8 @@ def ClustalO(SeqDict, wrapLength, ordered):
     # workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega', 'my-in-seqs.fa')
     # savefilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega', 'my-out-seqs.fa')
 
-    workingfilename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'ClustalOmega', MyInFiles)
-    savefilename = os.path.join(os.path.expanduser('~'), 'Documents', 'Projects', 'VGenes', 'ClustalOmega', MyOutFiles)
+    workingfilename = os.path.join(working_prefix, 'ClustalOmega', MyInFiles)
+    savefilename = os.path.join(working_prefix, 'ClustalOmega', MyOutFiles)
 
 
     workingdir, filename = os.path.split(workingfilename)
@@ -757,7 +763,7 @@ def RScaller(MutList, Vgene, species, DBpathname):
     from math import ceil
     GVseq = []
     try:
-        DBpathname = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'VDJGenes.db')
+        DBpathname = os.path.join(working_prefix, 'VDJGenes.db')
 
         (dirname, filename) = os.path.split(DBpathname)
         os.chdir(dirname)

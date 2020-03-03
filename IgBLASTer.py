@@ -6,7 +6,7 @@ __author__ = 'wilsonp'
 
 # must first switch to a directory containing both the database and the FASTA file
 # then use the subprocess command to run program and grab the output as a string
-import os, time
+import os, time, sys
 import sqlite3 as db
 from PyQt5 import QtWidgets
 from multiprocessing.dummy import Pool as ThreadPool
@@ -15,14 +15,17 @@ import VGenesSeq
 
 # IgBlastThreadTest = ''
 
+global working_prefix
+global temp_folder
+
+working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
+temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
+
 def ProcessFASTA(FASTAfile, MaxNum):
 	ErLog = ''
 	ErlogFile = ''
 
 	TotSeqs = 0
-
-
-
 
 	with open(FASTAfile, 'r') as currentFile:  #using with for this automatically closes the file even if you crash
 
@@ -78,10 +81,10 @@ def ProcessFASTA(FASTAfile, MaxNum):
 
 
 
-	WorkingDir  = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database')
+	WorkingDir  = os.path.join(working_prefix, 'IgBlast', 'database')
 	os.chdir(WorkingDir)
 
-	workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database', 'WorkingFile.nt')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'database', 'WorkingFile.nt')
 
 	if CleanSeq == '':
 		msg = 'There were no good variable gene seqeunces in this set'
@@ -99,6 +102,7 @@ def ProcessFASTA(FASTAfile, MaxNum):
 
 
 	return ErLog, TotSeqs
+
 def TimeCheck(listname):
 	countim = 0
 	listim = 0
@@ -114,28 +118,21 @@ def TimeCheck(listname):
 	return countim
 
 def IgBLASTit(FASTAFile, datalist):
-
-
-
 	import os
 	#todo change to app folder
-	ErlogFile = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 	ErLog  = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
 	with open(ErlogFile, 'w') as currentFile:  #using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
 
-
 	try:
-		DBpathname = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'VDJGenes.db')
-
-
-
+		DBpathname = os.path.join(working_prefix, 'VDJGenes.db')
 		(dirname, filename) = os.path.split(DBpathname)
 		os.chdir(dirname)
 
 		GetProductive = False
 		conn = db.connect(DBpathname)
-
 
 	except:
 		DBpathname = '/Volumes/Promise Pegasus/Dropbox/VGenes/VDJGenes.db'
@@ -145,11 +142,8 @@ def IgBLASTit(FASTAFile, datalist):
 		GetProductive = False
 		conn = db.connect(DBpathname)
 
-
 	#  then need to create a cursor that lets you traverse the database
 	cursor = conn.cursor()
-
-
 
 	IgBLASTAnalysis = []
 	IgBLASTset = []
@@ -171,9 +165,8 @@ def IgBLASTit(FASTAFile, datalist):
 	ErLog, TotSeqs = ProcessFASTA(FASTAFile, MaxNum)
 
 
-
-	workingdir = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database')
-	workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database', 'WorkingFile.nt')
+	workingdir = os.path.join(working_prefix, 'IgBlast', 'database')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'database', 'WorkingFile.nt')
 	# add code in ProcessFASTA to also return number of seqs then split into 10,000 seq
 	# sets to send through independently with different final names...might need split
 	# IgBlastit out from this code to get parallel. Actually, it's after IgBLASTn that
@@ -208,14 +201,17 @@ def IgBLASTit(FASTAFile, datalist):
 
 	# TODO on deployment need to ensure base user /Applications/IgBlast/database contains igblastn, and databases
 
-	if species == 'Human':
+	start = time.time()
 
+	if species == 'Human':
 		BLASTCommandLine = "./igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 		IgBlastOut = os.popen(BLASTCommandLine)
 	elif species == 'Mouse':
 		BLASTCommandLine = "./igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 		IgBlastOut = os.popen(BLASTCommandLine)
 
+	end = time.time()
+	print('Run time for IgBlast: ' + str(end - start))
 
 	# IgBlastOut += '\nBLASTend'
 	# igblastn -germline_db_V human_gl_V_IMGT -germline_db_J human_gl_J_IMGT -germline_db_D human_gl_D_IMGT -organism human -domain_system kabat -query SFV-005H.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3
@@ -318,12 +314,13 @@ def IgBLASTit(FASTAFile, datalist):
 	Jbeg = 0
 	Jend = 0
 
+	current_seq = 0
+	totel_seq = len(Sequences)
 	for IgLine in IgBlastOut:
 
 		# Alignment is actually last thing that comes up but have to code first to retain /n and /r just for the alignment field
 		if GrabAlignment == False:
 			IgLine = IgLine.replace('\n', '').replace('\r', '')
-
 
 		if IgLine[0:7] == 'Matrix:':
 		# Analysis is completed but last seq analysis needs saved as no new seqname to trigger
@@ -446,12 +443,8 @@ def IgBLASTit(FASTAFile, datalist):
 
 			return IgBLASTset
 
-
 		if IgLine[0:10] == 'Alignments':
 			GrabAlignment = True
-
-
-
 		elif GrabAlignment == True:
 			if NotValid == False:
 				if IgLine[0:6] != "Lambda":
@@ -990,10 +983,15 @@ def IgBLASTit(FASTAFile, datalist):
 							currentfile.write(ErLog)
 						BadSeqs += 1
 
-
-
-
 		if IgLine[0:7] == 'Query= ':
+			# write current progress to file
+			file_handle = open(progressBarFile,'w')
+			progress = str(int(current_seq*100/totel_seq))
+			file_handle.write(progress)
+			file_handle.close()
+			#print('Current Progress: ' + progress)
+			current_seq += 1
+
 
 			if SeqNumber >0:
 				if NotValid == False:
@@ -1020,9 +1018,9 @@ def IgBLASTit(FASTAFile, datalist):
 						IsoSeq = IsoSeq.strip('N')
 						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') +IsoSeq.count('C') +IsoSeq.count('T')
 						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-							print('Start ' + SeqName + ' counts at ' + time.strftime('%c'))
+							#print('Start ' + SeqName + ' counts at ' + time.strftime('%c'))
 							Isotype = VGenesSeq.CallIsotype(IsoSeq)
-							print('end ' + SeqName + ' counts at ' + time.strftime('%c'))
+							#print('end ' + SeqName + ' counts at ' + time.strftime('%c'))
 
 						else:
 							if len(IsoSeq) > 2:
@@ -1150,12 +1148,10 @@ def IgBLASTit(FASTAFile, datalist):
 
 
 			IgBLASTAnalysis.append(SeqName)
-
 		elif IgLine[0:7] == 'Length=':
 			LenSeq = int(IgLine[7:])
 
 			IgBLASTAnalysis.append(str(LenSeq))
-
 		elif IgLine[0:25] == '***** No hits found *****':
 			NotValid = True
 
@@ -1163,11 +1159,8 @@ def IgBLASTit(FASTAFile, datalist):
 			with open(ErlogFile, 'a') as currentfile:
 				currentfile.write(ErLog)
 			BadSeqs += 1
-
 		elif IgLine[0:21] == 'V-(D)-J rearrangement':  # trick to get next line based on line count
 			GrabRecomb = True  #  trick to get next line based on line count
-
-
 		elif GrabRecomb == True: #  spring this only if previous line was V-(D)-J...
 			# Should make this a different function to clean up
 			GrabRecomb = False
@@ -1298,12 +1291,9 @@ def IgBLASTit(FASTAFile, datalist):
 			IndexN += 1
 			Strand = RecombParts[IndexN]
 			IgBLASTAnalysis.append(Strand)
-
-
 		elif IgLine[0:16] == 'V-(D)-J junction':  # trick to get next line based on line count
 			GrabJunction = True  #  trick to get next line based on line count
 			GrabIt = LineCount
-
 		elif GrabJunction == True:
 			GrabJunction = False
 			Junction = IgLine
@@ -1340,11 +1330,6 @@ def IgBLASTit(FASTAFile, datalist):
 
 				IgBLASTAnalysis.append(begJ)
 				IgBLASTAnalysis.append(VJunction)
-
-
-		# Note that FR1, CDR1, FW2, CDR2, FW3 code below must stay in current order to catch
-		# bug where IgBLAST doesn't provide blanks if FW1 CDR1 etc. are missing from befginning of sequence
-
 		elif IgLine[0:3] == 'FR1':
 			Junction = IgLine
 			#print(Junction)
@@ -1373,11 +1358,6 @@ def IgBLASTit(FASTAFile, datalist):
 
 			TotMut += int(FR1mis)
 			TotMut += int(FR1gaps)
-
-
-			# for i in range(1,8):
-				#print(RecombParts[i])
-
 		elif IgLine[0:4] == 'CDR1':
 			if FR1hit == False:
 				IgBLASTAnalysis.append(0)
@@ -1421,11 +1401,6 @@ def IgBLASTit(FASTAFile, datalist):
 				TotMut += int(CDR1gaps)
 			except:
 				TotMut += 0
-
-
-
-
-
 		elif IgLine[0:3] == 'FR2':
 			if CDR1hit == False:
 				IgBLASTAnalysis.append(0) #FW1
@@ -1469,8 +1444,6 @@ def IgBLASTit(FASTAFile, datalist):
 
 			TotMut += int(FR2mis)
 			TotMut += int(FR2gaps)
-
-
 		elif IgLine[0:4] == 'CDR2':
 			if FW2hit == False:
 				IgBLASTAnalysis.append(0) #FW1
@@ -1526,9 +1499,6 @@ def IgBLASTit(FASTAFile, datalist):
 					TotMut += int(CDR2gaps)
 				except:
 					print('oops')
-
-
-
 		elif IgLine[0:3] == 'FR3':
 			if CDR2hit == False:
 				IgBLASTAnalysis.append(0) #FW1
