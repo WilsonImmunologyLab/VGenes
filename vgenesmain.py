@@ -145,13 +145,6 @@ class VGenesTextMain(QtWidgets.QMainWindow, ui_TextEditor):
 		# super(VGenesTextMain, self).__init__()
 		self.setupUi()
 
-
-# class VGenesProgressBar(QtWidgets.QMainWindow, ui_ProgressBar):
-#     def __init__(self, parent=None):
-#         QtWidgets.QMainWindow.__init__(self, parent)
-#
-#         self.setupUi()
-
 class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
@@ -1638,7 +1631,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.radioButtonTree.isChecked():
 				tree_data = [{"name":"MyData", "children":data}]
 				my_pyecharts = (
-					Tree(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+					Tree(init_opts=opts.InitOpts(width="380px", height="380px", renderer='canvas'))
 						.add("MyData", tree_data)
 						.set_global_opts(
 						title_opts=opts.TitleOpts(title="Tree"),
@@ -1648,7 +1641,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				)
 			else:
 				my_pyecharts = (
-					TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+					TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='canvas'))
 					.add(
 						series_name="MyData",
 						data=data,
@@ -1869,6 +1862,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def downloadFig(self):
 		js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
+
+		#js_cmd= 'svg=document.getElementsByTagName("svg")[0];var a = document.createElement("a");a.href = svg.src;' \
+		#        'a.download = "~/Downloads/test.svg";a.click();'
 		self.ui.HTMLview.page().runJavaScript(js_cmd)
 
 	def _callable(self, data):
