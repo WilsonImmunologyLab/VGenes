@@ -1424,7 +1424,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			file_handle.close()
 			# edit js line
 			js_line = '<script type="text/javascript" src="' + \
-			          os.path.join(js_folder,'echarts.min.js') + '"></script>' + \
+			          os.path.join(js_folder,'echarts.js') + '"></script>' + \
 			          '<script src="' + os.path.join(js_folder,'jquery.js') + '"></script>' + \
 			          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
 			lines[5] = js_line
@@ -1758,7 +1758,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		file_handle.close()
 		# edit js line
 		js_line = '<script type="text/javascript" src="' + \
-		          os.path.join(js_folder, 'echarts.min.js') + '"></script>' + \
+		          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
 		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
 		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
 		lines[5] = js_line
