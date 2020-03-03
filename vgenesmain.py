@@ -338,14 +338,42 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	# 	t = timeit.timeit('self.findTableViewRecord(self, FieldName)")', 'import IgBLASTer', number=10000)
 	# 	print(t)
 
+	def disableWidgets(self):
+		self.comboBoxGroup.setDisabled(True)
+		self.comboBoxProject.setDisabled(True)
+		self.comboBoxSubgroup.setDisabled(True)
+
+		self.radioButFASTA.setDisabled(True)
+		self.radioButHuman.setDisabled(True)
+		self.radioButIndSeq.setDisabled(True)
+		self.radioButMouse.setDisabled(True)
+
+		self.rdoAll.setDisabled(True)
+		self.rdoProductive.setDisabled(True)
+		self.rdoVandJ.setDisabled(True)
+
+		self.rdoChoose.setDisabled(True)
+		self.rdoFunction.setDisabled(True)
+		self.checkBoxFileStruc.setDisabled(True)
+
+		self.txtComment.setDisabled(True)
+		self.MaxImport.setDisabled(True)
+
+		self.btnImportOldVGenes.setDisabled(True)
+		self.buttonBox.setDisabled(True)
+
+
 	def checkProgress(self):
 		global timer
 		progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 		file_handle = open(progressBarFile,'r')
 		progress = file_handle.readline()
 		progress = int(float(progress))
+		progress += 1
 		self.progressBar.setValue(progress)
-		if progress > 98:
+		self.labelpct.setText(str(progress) + '% records loaded')
+		if progress > 99:
+			self.labelpct.setText('Loading finished!')
 			return
 		t=thd.Timer(1, self.checkProgress)
 		t.start()
@@ -485,6 +513,22 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(GetProductive)
 				datalist.append(MaxNum)
 
+				# try multi-thread
+				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				file_handle = open(progressBarFile, 'w')
+				file_handle.write('0')
+				file_handle.close()
+				workThread = WorkThread(self)
+				workThread.item = item
+				workThread.datalist = datalist
+				workThread.start()
+				workThread.trigger.connect(self.multi_callback)
+
+				self.disableWidgets()
+				self.checkProgress()
+				return
+
+				'''
 				IgBLASTAnalysis = IgBLASTer.IgBLASTit(item, datalist)
 
 				Startprocessed = len(IgBLASTAnalysis)
@@ -505,6 +549,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
+				'''
 		elif self.rdoChoose.isChecked():
 			# checklabel = {}
 
@@ -547,6 +592,22 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(GetProductive)
 				datalist.append(MaxNum)
 
+				# try multi-thread
+				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				file_handle = open(progressBarFile, 'w')
+				file_handle.write('0')
+				file_handle.close()
+				workThread = WorkThread(self)
+				workThread.item = item
+				workThread.datalist = datalist
+				workThread.start()
+				workThread.trigger.connect(self.multi_callback)
+
+				self.disableWidgets()
+				self.checkProgress()
+				return
+
+				'''
 				IgBLASTAnalysis = IgBLASTer.IgBLASTit(item, datalist)
 
 				Startprocessed = len(IgBLASTAnalysis)
@@ -567,6 +628,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				with open(ErlogFile2, 'a') as currentFile:
 					currentFile.write(newErLog)
+				'''
 		elif self.rdoFunction.isChecked():
 			for item in pathname:
 				(dirname, filename) = os.path.split(item)
@@ -612,6 +674,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.start()
 				workThread.trigger.connect(self.multi_callback)
 
+				self.disableWidgets()
 				self.checkProgress()
 				return
 
