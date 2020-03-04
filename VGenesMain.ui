@@ -5787,7 +5787,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>130</height>
+            <height>120</height>
            </size>
           </property>
           <property name="currentIndex">
@@ -5797,8 +5797,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <attribute name="title">
             <string>Pie Chart</string>
            </attribute>
-           <layout class="QGridLayout" name="gridLayout_29">
-            <item row="0" column="2">
+           <layout class="QGridLayout" name="gridLayout_37">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_28">
+              <property name="text">
+               <string>Select Field:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
              <widget class="QComboBox" name="comboBoxPie">
               <property name="minimumSize">
                <size>
@@ -5808,14 +5815,7 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_28">
-              <property name="text">
-               <string>Select Field:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
+            <item row="0" column="2">
              <spacer name="horizontalSpacer_10">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -6230,43 +6230,11 @@ If the J-end is off the J gene end may need adjusted</string>
          </widget>
         </item>
         <item row="0" column="1">
-         <layout class="QVBoxLayout" name="verticalLayout_2">
-          <item>
-           <widget class="QToolButton" name="toolButton">
-            <property name="minimumSize">
-             <size>
-              <width>90</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>15</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Generate
- Figure</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QCheckBox" name="checkBoxFigLegend">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>FigLegend</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item>
+         <layout class="QVBoxLayout" name="verticalLayout_2"/>
+        </item>
+        <item row="0" column="2">
+         <layout class="QGridLayout" name="gridLayout_29">
+          <item row="0" column="1">
            <widget class="QToolButton" name="toolButton_2">
             <property name="minimumSize">
              <size>
@@ -6279,14 +6247,83 @@ If the J-end is off the J gene end may need adjusted</string>
               <pointsize>15</pointsize>
              </font>
             </property>
+            <property name="toolTip">
+             <string>Download Figure</string>
+            </property>
             <property name="text">
-             <string>Download</string>
+             <string extracomment="Download Figure">Download</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1">
+           <widget class="QCheckBox" name="checkBoxFigLegend">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string extracomment="Display Figure legend">Display Figure legend</string>
+            </property>
+            <property name="text">
+             <string extracomment="Display Figure legend">Legend</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QCheckBox" name="checkBoxSelection">
+            <property name="toolTip">
+             <string extracomment="Generate figure only based on current selection">Generate figure only based on current selection</string>
+            </property>
+            <property name="statusTip">
+             <string extracomment="Generate figure only based on current selection"/>
+            </property>
+            <property name="whatsThis">
+             <string extracomment="Generate figure only based on current selection"/>
+            </property>
+            <property name="text">
+             <string extracomment="Generate figure only based on current selection">on CurSel</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QToolButton" name="toolButton">
+            <property name="minimumSize">
+             <size>
+              <width>90</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>15</pointsize>
+             </font>
+            </property>
+            <property name="toolTip">
+             <string>Generate Figure</string>
+            </property>
+            <property name="text">
+             <string extracomment="Generate Figure">Generate</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QCheckBox" name="checkBoxUpdateSelection">
+            <property name="toolTip">
+             <string>Enable click figure elements to update current selection</string>
+            </property>
+            <property name="text">
+             <string>Enable update Selection</string>
             </property>
            </widget>
           </item>
          </layout>
         </item>
-        <item row="1" column="0" colspan="2">
+        <item row="1" column="0" colspan="3">
          <widget class="QGroupBox" name="groupBox_12">
           <property name="font">
            <font>

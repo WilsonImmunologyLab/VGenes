@@ -1054,7 +1054,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.tabWidget.currentChanged['int'].connect(self.InitialGraphic)
 		self.ui.toolButton.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxStack.clicked.connect(self.GenerateFigure)
 		self.ui.toolButton_2.clicked.connect(self.downloadFig)
+		self.ui.radioButtonTreeMap.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonTree.clicked.connect(self.GenerateFigure)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1068,16 +1071,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
-
-
-	# def ShowProgressBar(self):
-	#     self.VGProgress.handleButton()
-
-
-	# @pyqtSlot()
-	# def on_radioButton_21_clicked(self):
-	# 	self.PopulateSpec()
-
 
 	def InitialGraphic(self):
 		global DBFilename
@@ -1119,6 +1112,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def GenerateFigure(self):
 		global DBFilename
+		global data
+
+		# select data or not
+		if self.ui.checkBoxSelection.isChecked():
+			where_statement = 'WHERE SeqName IN '
+			selected_list = self.getTreeCheckedChild()
+			selected_list = selected_list[3]
+			if len(selected_list) == 0:
+				Msg = 'No record has been selected! Will use the entire database!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				where_statement = 'WHERE 1'
+			else:
+				selected = "','".join(selected_list)
+				where_statement = where_statement + "('" + selected + "')"
+		else:
+			where_statement = 'WHERE 1'
 
 		# pie chart
 		if self.ui.tabWidgetFig.currentIndex() == 0:
@@ -1128,8 +1137,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if len(DataIn) == 0:
+				Msg = 'No records can be fetched!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
 			data = []
 			for element in DataIn:
 				data.append(element[0])
@@ -1168,7 +1182,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				field = field1 + "," + field2
 				multi_factor = True
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			if multi_factor == True:
 				if self.ui.checkBoxStack.isChecked():
@@ -1262,7 +1276,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				field = data_field + "," + field1 + "," + field2
 				multi_factor = True
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			box_data = [i[0] for i in DataIn]
 			try:
@@ -1401,7 +1415,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			data = []
 			for element in DataIn:
@@ -1478,7 +1492,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				return
 
 			field = field1 + "," + field2
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			label_data = []
 			time_data = []
@@ -1548,7 +1562,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				data = []
 
 				field = group1
-				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 				x_data = [d[0] for d in DataIn]
 
@@ -1566,7 +1580,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					data = []
 
 					field = group1 + ',' + group2
-					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 					x_data = [d[0] for d in DataIn]
 					y_data = [d[1] for d in DataIn]
@@ -1597,7 +1611,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					data = []
 
 					field = group1 + ',' + group2 + ',' + group3
-					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 					x_data = [d[0] for d in DataIn]
 					y_data = [d[1] for d in DataIn]
@@ -1701,7 +1715,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# load data
 			if group == "":
 				field = dim1 + "," + dim2
-				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 				x_data = [d[0] for d in DataIn]
@@ -1721,7 +1735,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			else:
 				field = dim1 + "," + dim2 + "," + group
-				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 				x_data = [d[0] for d in DataIn]
@@ -1786,15 +1800,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 		             '<input id="update" type="button" value="" style="display:none;"/>'
 		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
 
-		# insert click response function
-		echart_init_line = lines[13]
-		matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
-		chart_id = matchObj.group(1)
-		js_cmd = chart_id + ".on('click', function (params) {" \
-		                    "if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}" \
-		                    "else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}" \
-		                    "$('#update').click();});"
-		lines = lines[:-3] + [js_cmd] + lines[-3:]
+		if self.ui.tabWidgetFig.currentIndex() in [0,1,2,6]:
+			# insert click response function
+			echart_init_line = lines[13]
+			matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
+			chart_id = matchObj.group(1)
+			js_cmd = chart_id + ".on('click', function (params) {" \
+			                    "if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}" \
+			                    "else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}" \
+			                    "$('#update').click();});"
+			lines = lines[:-3] + [js_cmd] + lines[-3:]
 
 		content = '\n'.join(lines)
 		file_handle = open(html_path, 'w')
@@ -1823,22 +1838,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.tabWidgetFig.currentIndex() == 0:
 			self.ui.HTMLview.info = ['Pie',self.ui.comboBoxPie.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 1:
-			self.ui.HTMLview.info = ['Bar', self.ui.comboBoxCol1.currentText() + ',' +
-			                         self.ui.comboBoxCol2.currentText()]
+			self.ui.HTMLview.info = ['Bar', self.ui.comboBoxCol1.currentText(),self.ui.comboBoxCol2.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 2:
-			self.ui.HTMLview.info = ['Bar', self.ui.comboBoxBoxData.currentText() + ',' +
-			                         self.ui.comboBoxBox1.currentText() + ',' + self.ui.comboBoxBox2.currentText()]
+			self.ui.HTMLview.info = ['Box', self.ui.comboBoxBoxData.currentText(),self.ui.comboBoxBox1.currentText(),self.ui.comboBoxBox2.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 3:
 			self.ui.HTMLview.info = ['Word', self.ui.comboBoxWord.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 4:
-			self.ui.HTMLview.info = ['River', self.ui.comboBoxRiver1.currentText() + ',' +
-			                         self.ui.comboBoxRiver2.currentText()]
+			self.ui.HTMLview.info = ['River', self.ui.comboBoxRiver1.currentText(),self.ui.comboBoxRiver2.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 5:
-			self.ui.HTMLview.info = ['Tree', self.ui.comboBoxTree1.currentText() + ',' +
-			                         self.ui.comboBoxTree2.currentText() + ',' + self.ui.comboBoxTree3.currentText()]
+			self.ui.HTMLview.info = ['Tree', self.ui.comboBoxTree1.currentText(),self.ui.comboBoxTree2.currentText(),self.ui.comboBoxTree3.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 6:
-			self.ui.HTMLview.info = ['Scatter', self.ui.comboBoxScatterX.currentText() + ',' +
-			                         self.ui.comboBoxScatterY.currentText() + ',' + self.ui.comboBoxScatterGroup.currentText()]
+			self.ui.HTMLview.info = ['Scatter', self.ui.comboBoxScatterX.currentText(),self.ui.comboBoxScatterY.currentText(),self.ui.comboBoxScatterGroup.currentText()]
 		elif self.ui.tabWidgetFig.currentIndex() == 7:
 			pass
 
@@ -1849,9 +1859,62 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.GenerateFigure()
 
 	def updateSelection(self, msg):
-		msg += '\nThis information is from Python'
-		QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
-		return
+		if self.ui.checkBoxUpdateSelection.isChecked():
+			# split msg
+			messages = msg.split(',')
+			# fetch data record
+			info = self.ui.HTMLview.info
+			if info[0] == "Pie":
+				field = info[1]
+				where_statement = 'WHERE ' + field + " = '" + messages[0] + "'"
+				SQLStatement = 'SELECT SeqName FROM vgenesDB ' + where_statement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			elif info[0] == "Bar":
+				field1 = info[1]
+				field2 = info[2]
+				if field2 == "":
+					where_statement = 'WHERE ' + field1 + " = '" + messages[0] + "'"
+				else:
+					where_statement = 'WHERE ' + field1 + " = '" + messages[0] + "'" + ' AND ' + field2 + " = '" + messages[1] + "'"
+				SQLStatement = 'SELECT SeqName FROM vgenesDB ' + where_statement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			elif info[0] == "Box":
+				field1 = info[2]
+				field2 = info[3]
+				if field2 == "":
+					where_statement = 'WHERE ' + field1 + " = '" + messages[0] + "'"
+				else:
+					where_statement = 'WHERE ' + field1 + " = '" + messages[0] + "'" + ' AND ' + field2 + " = '" + messages[1] + "'"
+				SQLStatement = 'SELECT SeqName FROM vgenesDB ' + where_statement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			elif info[0] == "Scatter":
+				fieldx = info[1]
+				fieldy = info[2]
+				field = info[3]
+				if field == "":
+					where_statement = 'WHERE ' + fieldx + " = '" + messages[2] + "'" + \
+					                  ' AND ' + fieldy + " = '" + messages[3] + "'"
+				else:
+					where_statement = 'WHERE ' + fieldx + " = '" + messages[2] + "'" + \
+					                  ' AND ' + fieldy + " = '" + messages[3] + "'" + \
+					                  ' AND ' + field + " = '" + messages[1] + "'"
+				SQLStatement = 'SELECT SeqName FROM vgenesDB ' + where_statement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			else:
+				return
+
+			# update the selection
+			self.clearTreeChecks()
+			NumFound = len(DataIn)
+			i = 0
+			for item in DataIn:
+				Seqname = item[0]
+				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+				i += 1
+				for record in found:
+					if i == NumFound - 1:
+						wasClicked = True
+					record.setCheckState(0, Qt.Checked)
 
 	def downloadSVG(self, msg):
 		options = QtWidgets.QFileDialog.Options()
@@ -2300,7 +2363,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#     path.append(str(item.text(0)))
 
 	def CheckUp(self, item, ToCheck):  # checks all items below
-
 		root = self.ui.treeWidget.invisibleRootItem()
 		for index in range(root.childCount()):
 			fileIs = root.child(index)
@@ -2550,6 +2612,64 @@ class VGenesForm(QtWidgets.QMainWindow):
 							if Group.checkState(0) == Qt.Checked:
 								checkedkids.append(Group.text(0))
 
+			else:  # project is lowest (record) level
+				if project.checkState(0) == Qt.Checked:
+					checkedkids.append(project.text(0))
+
+		return checkedProjects, checkedGroups, checkedSubGroups, checkedkids
+
+	def getTreeCheckedChild(self):
+		root = self.ui.treeWidget.invisibleRootItem()
+		for index in range(root.childCount()):
+			fileIs = root.child(index)
+
+		checkedkids = []
+		checkedProjects = []
+		checkedGroups = []
+		checkedSubGroups = []
+
+		for index in range(fileIs.childCount()):
+			project = fileIs.child(index)  # project level
+			# while item is not None:  # iterate through project level items
+
+			if project.childCount() != 0:  # if project level exists
+				if project.checkState(0) == Qt.Checked:
+					checkedProjects.append(project.text(0))
+				for Pindex in range(project.childCount()):  # will iterate through group level
+					Group = project.child(Pindex)  # each group
+					checkName = Group.text(0)
+					# numkid =
+					if Group.childCount() != 0:  # if there is a subgroup level
+						if Group.checkState(0) == Qt.Checked:
+							ProjName = project.text(0)
+							GroupName = Group.text(0)
+							SetGroup = (ProjName, GroupName)
+							# checkedGroups.append(Group.text(0))
+							checkedGroups.append(SetGroup)
+						for Gindex in range(Group.childCount()):  # will iterate through subgroup level
+							SubGroup = Group.child(Gindex)  # each subgroup
+							checkName = SubGroup.text(0)
+							if SubGroup.childCount() != 0:  # if there is a record level
+								if SubGroup.checkState(0) == Qt.Checked:
+									ProjName = project.text(0)
+									GroupName = Group.text(0)
+									SubGroupName = SubGroup.text(0)
+									SetGroup = (ProjName, GroupName, SubGroupName)
+									# checkedSubGroups.append(SubGroup.text(0))
+									checkedSubGroups.append(SetGroup)
+								for SGindex in range(SubGroup.childCount()):
+									Record = SubGroup.child(SGindex)  # each subgroup
+									checkName = Record.text(0)
+									if Record.checkState(0) == Qt.Checked:
+										checkedkids.append(Record.text(0))
+							else:  # if group is lowest level
+								# for SGindex in range(SubGroup.childCount()):  # for each project if lowest level item
+								#      Ritem = SubGroup.child(SGindex)
+								if SubGroup.checkState(0) == Qt.Checked:
+									checkedkids.append(SubGroup.text(0))
+					else:  # if group is lowest level
+						if Group.checkState(0) == Qt.Checked:
+							checkedkids.append(Group.text(0))
 			else:  # project is lowest (record) level
 				if project.checkState(0) == Qt.Checked:
 					checkedkids.append(project.text(0))
@@ -3267,69 +3387,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# import csv
 		from operator import itemgetter
 		CFilename = ''
-		# typeOpen = 'csv'
-		# CFilename = openFile(self, typeOpen)
-
-		# QueryIS = 'Enter text to serve as the base name (i.e., subject number or name)'
-		# DefaultText = data[75]  # data[77] + '-Expressed'
-		# BaseName = setText(self, QueryIS, DefaultText)
-		#
-		# filename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', '10x_barcodes.csv')
-		# with open(filename, 'r') as currentfile:
-		# 	# myCSVfile = csv.reader(currentfile)
-		# 	myCSVfile  = []
-		# 	# myCSVfile = currentfile.split(',')
-		# 	for row in currentfile:
-		# 		entry = row.strip('\n')
-		# 		myCSVfile.append(entry)
-
-		# with open(CFilename, 'r') as currentfile:
-		#
-		# 	myClusterfile  = []
-		#
-		# 	for row in currentfile:
-		# 		entry = row.strip('\n').split(',')
-		# 		myClusterfile.append(entry)
-		#
-		# fields = ['SeqName', 'Id', 'Comments']
-		#
-		# # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-		# SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-		#
-		# DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
-		#
-		# # DataIn.sort(key=itemgetter(2, 0))
-		# Seurat = ''
-		# CellRanger = ''
-		# for item in DataIn:
-		# 	SkipUpdate = False
-		#
-		# 	SeqName = item[0]
-		# 	ID = item[1]
-		# 	Comments = item[2]
-		# 	barCode = Comments[:16]
-		#
-		#
-		# 	try:
-		# 		# BarCodeNum = myClusterfile.index(barCode)
-		# 		Clusters = [item for item in myClusterfile if item[0] == barCode]
-		#
-		#
-		# 		Seurat = Clusters[0][1]
-		# 		CellRanger = Clusters[0][2]
-		#
-		#
-		#
-		#
-		# 	except:
-		# 		SkipUpdate = True
-		#
-		# 	if SkipUpdate == False:
-		# 		FieldName = 'Specificity'
-		# 		VGenesSQL.UpdateField(ID, Seurat, FieldName, DBFilename)
-		# 		FieldName = 'Subspecificity'
-		# 		VGenesSQL.UpdateField(ID, CellRanger, FieldName, DBFilename)
-
 
 	@pyqtSlot()
 	def on_actionRename10x_triggered(self):
@@ -3963,9 +4020,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def TreeSelectChanged(self):
-
-
-
 		value = self.ui.treeWidget.selectedItems()
 
 		model = self.ui.tableView.model()
