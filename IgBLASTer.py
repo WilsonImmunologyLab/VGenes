@@ -988,6 +988,7 @@ def IgBLASTit(FASTAFile, datalist):
 			file_handle = open(progressBarFile,'w')
 			progress = str(int(current_seq*100/totel_seq))
 			file_handle.write(progress)
+			file_handle.write(',' + str(current_seq) + '/' + str(totel_seq))
 			file_handle.close()
 			#print('Current Progress: ' + progress)
 			current_seq += 1

@@ -360,15 +360,20 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		global timer
 		progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 		file_handle = open(progressBarFile,'r')
-		progress = file_handle.readline()
+		text = file_handle.readline()
+		text_list = text.split(',')
+
 		try:
+			progress = text_list[0]
+			progress_text = text_list[1]
 			progress = int(float(progress))
+			self.progressBar.setValue(progress)
+			self.labelpct.setText(progress_text + '(' + str(progress) + '%) records loaded')
 		except:
 			progress = self.progressBar.value()
-		self.progressBar.setValue(progress)
-		self.labelpct.setText(str(progress) + '% records loaded')
-		if progress > 98:
+		if progress > 99:
 			self.labelpct.setText('Loading finished!')
+			self.progressBar.setValue(100)
 			return
 		t=thd.Timer(1, self.checkProgress)
 		t.start()
@@ -779,100 +784,103 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.radioButFASTA.setChecked(True)
 		SeqList = []
 		fieldis = ''
-		with open(Pathname, 'r') as currentfile:
-			for line in currentfile:
-				fields = line.split(',')
-				if len(fields) == 5:
-					for i in range(0, 4):
-						fieldis = fields[i]
-						fieldis = fieldis.upper()
-						# if fieldis == '01B_STAN_17-006-1A03H_VH3':
-						#     print('stop')
-						fields[i] = fieldis.replace('"', '')
+		try:
+			with open(Pathname, 'r') as currentfile:
+				for line in currentfile:
+					fields = line.split(',')
+					if len(fields) == 5:
+						for i in range(0, 4):
+							fieldis = fields[i]
+							fieldis = fieldis.upper()
+							# if fieldis == '01B_STAN_17-006-1A03H_VH3':
+							#     print('stop')
+							fields[i] = fieldis.replace('"', '')
 
-						if fields[i] == '' and i < 3:
-							fields[i] = 'none'
-					SeqList.append(fields)
-		SeqList.sort(key=itemgetter(0, 1, 2, 3))
-		LastP = ''
-		LastG = ''
-		LastSG = ''
-		StartNewFASTA = True
-		FASTAFile = ''
-		NewFile = ''
-		FirstOne = True
-		DataPass = []
-		ItemP = []
-		FileNamed = os.path.join(working_prefix, 'IgBlast', 'database',
-		                         'WorkingFile.nt')  # '/Applications/IgBlast/database/WorkingFile.nt'
-		ItemP.append(FileNamed)
-		DataPass.append(ItemP)
-		DataPass.append('none')
-		DataPass.append('none')
-		DataPass.append('none')
-		for seq in SeqList:
-			project = seq[0]
-			group = seq[1]
-			subgroup = seq[2]
-			SeqName = '>' + seq[3] + '\n'
-			Sequence = seq[4] + '\n'
+							if fields[i] == '' and i < 3:
+								fields[i] = 'none'
+						SeqList.append(fields)
+			SeqList.sort(key=itemgetter(0, 1, 2, 3))
+			LastP = ''
+			LastG = ''
+			LastSG = ''
+			StartNewFASTA = True
+			FASTAFile = ''
+			NewFile = ''
+			FirstOne = True
+			DataPass = []
+			ItemP = []
+			FileNamed = os.path.join(working_prefix, 'IgBlast', 'database',
+			                         'WorkingFile.nt')  # '/Applications/IgBlast/database/WorkingFile.nt'
+			ItemP.append(FileNamed)
+			DataPass.append(ItemP)
+			DataPass.append('none')
+			DataPass.append('none')
+			DataPass.append('none')
+			for seq in SeqList:
+				project = seq[0]
+				group = seq[1]
+				subgroup = seq[2]
+				SeqName = '>' + seq[3] + '\n'
+				Sequence = seq[4] + '\n'
 
-			if project != LastP:
-				LastP = project
-				StartNewFASTA = True
-			# else:
-			#     StartNewFASTA = False
+				if project != LastP:
+					LastP = project
+					StartNewFASTA = True
+				# else:
+				#     StartNewFASTA = False
 
-			if group != LastG:
-				LastG = group
-				StartNewFASTA = True
-			# else:
-			#     StartNewFASTA = False
+				if group != LastG:
+					LastG = group
+					StartNewFASTA = True
+				# else:
+				#     StartNewFASTA = False
 
-			if subgroup != LastSG:
-				LastSG = subgroup
-				StartNewFASTA = True
-			# else:
-			#     StartNewFASTA = False
+				if subgroup != LastSG:
+					LastSG = subgroup
+					StartNewFASTA = True
+				# else:
+				#     StartNewFASTA = False
 
-			if StartNewFASTA == True:  # then write it and clear it clear
-				StartNewFASTA = False
-				if FirstOne == False:  # firstone is empty
-					with open(FileNamed, 'w') as currentFile:
-						currentFile.write(NewFile)
+				if StartNewFASTA == True:  # then write it and clear it clear
+					StartNewFASTA = False
+					if FirstOne == False:  # firstone is empty
+						with open(FileNamed, 'w') as currentFile:
+							currentFile.write(NewFile)
 
-					Alldone = self.InitiateImport(DataPass, 0)
-					DataPass[1] = project
-					# if project == 'STAN-004':
-					# 	print('stop')
-					DataPass[2] = group
-					DataPass[3] = subgroup
+						Alldone = self.InitiateImport(DataPass, 0)
+						DataPass[1] = project
+						# if project == 'STAN-004':
+						# 	print('stop')
+						DataPass[2] = group
+						DataPass[3] = subgroup
 
-					self.comboBoxProject.setCurrentText(project)
-					self.comboBoxGroup.setCurrentText(group)
-					self.comboBoxSubgroup.setCurrentText(subgroup)
+						self.comboBoxProject.setCurrentText(project)
+						self.comboBoxGroup.setCurrentText(group)
+						self.comboBoxSubgroup.setCurrentText(subgroup)
 
-				else:
-					DataPass[1] = project
-					DataPass[2] = group
-					DataPass[3] = subgroup
-					self.comboBoxProject.setCurrentText(project)
-					self.comboBoxGroup.setCurrentText(group)
-					self.comboBoxSubgroup.setCurrentText(subgroup)
+					else:
+						DataPass[1] = project
+						DataPass[2] = group
+						DataPass[3] = subgroup
+						self.comboBoxProject.setCurrentText(project)
+						self.comboBoxGroup.setCurrentText(group)
+						self.comboBoxSubgroup.setCurrentText(subgroup)
 
-				FirstOne = False
-				NewFile = ''
+					FirstOne = False
+					NewFile = ''
 
-			NewFile += SeqName
-			NewFile += Sequence
+				NewFile += SeqName
+				NewFile += Sequence
 
-		if NewFile != '':
-			with open(FileNamed, 'w') as currentFile:
-				currentFile.write(NewFile)
-			Alldone = self.InitiateImport(DataPass)
+			if NewFile != '':
+				with open(FileNamed, 'w') as currentFile:
+					currentFile.write(NewFile)
+				Alldone = self.InitiateImport(DataPass)
 
-		if Alldone == True:
-			self.close()
+			if Alldone == True:
+				self.close()
+		except:
+			return
 
 	def ProcessSeqFiles(self, fileNames):
 		if fileNames:
@@ -2611,22 +2619,24 @@ class VGenesForm(QtWidgets.QMainWindow):
 			Document += self.windowTitle()
 			font.setPointSize(10)
 			font.setFamily('Lucida Grande')
-
-
-		if self.ui.tabWidget.currentIndex() == 2:
+		elif self.ui.tabWidget.currentIndex() == 2:
 			Document = data[0] + '\n'
 			Document += ('DNA: ' + self.ui.txtDNASeq.toPlainText() + '\n')
 			Document += ('Protein: ' + self.ui.txtAASeq.toPlainText() + '\n')
 			Document += ('\n' + self.windowTitle())
 			font.setPointSize(10)
 			font.setFamily('Lucida Grande')
-
 		elif self.ui.tabWidget.currentIndex() == 3:
 			Document = data[0] + '\n'
 			Document += self.ui.txtSeqAlignment.toPlainText()
 			Document += ('\n' + self.windowTitle())
 			font.setPointSize(7)
 			font.setFamily('Courier New')
+		else:
+			Msg = 'Current page has nothing to print!\n ' \
+			      'Print functions ony available for Tablulated Data, Sequences and Alignment page!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
 
 		self.TextEdit.textEdit.setFont(font)
 
@@ -3176,6 +3186,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			typeOpen = 'csv'
 			filename = openFile(self, typeOpen)
 
+			if filename == None:
+				return
+
 			CSubjects = []
 			CClusters = []
 			CBarcodes = []
@@ -3209,48 +3222,43 @@ class VGenesForm(QtWidgets.QMainWindow):
 					SjBarCode = CSubjects[i] + '-' + CBarcodes[i]
 					myClustersdict[SjBarCode] = CClusters[i]
 
+			fields = ['SeqName', 'Id', 'GeneType', 'Blank10']
+
+			# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
+			SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
+			SaidItAlready = 'No'
+			DataIn.sort(key=itemgetter(2,0))
+			LastName = ''
+			DoubletsList = []
+			for item in DataIn:
+				# doublet = False
+				SkipUpdate = False
+				SeqName = item[0]
+				SeqNameShort = SeqName[:3]
+				ID = item[1]
+				genetypeis = item[2]
+				RealBarCode = item[3]
+				TestLen = len(RealBarCode)-2
+				TestChar = RealBarCode[TestLen]
+				if TestChar =='-':
+					RealBarCode = RealBarCode[:len(RealBarCode)-2]
+
+				if len(entryFields) == 3:
+					RealBarCode = SeqNameShort + '-' + RealBarCode
 
 
+				if answerC == 'Yes':
+					try:
+						RealCluster = myClustersdict[RealBarCode]
+					except:
+						RealCluster = 'unknown'
+				else:
+					RealCluster = ''
 
-		fields = ['SeqName', 'Id', 'GeneType', 'Blank10']
-
-		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-
-		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
-		SaidItAlready = 'No'
-		DataIn.sort(key=itemgetter(2,0))
-		LastName = ''
-		DoubletsList = []
-		for item in DataIn:
-			# doublet = False
-			SkipUpdate = False
-			SeqName = item[0]
-			SeqNameShort = SeqName[:3]
-			ID = item[1]
-			genetypeis = item[2]
-			RealBarCode = item[3]
-			TestLen = len(RealBarCode)-2
-			TestChar = RealBarCode[TestLen]
-			if TestChar =='-':
-				RealBarCode = RealBarCode[:len(RealBarCode)-2]
-
-			if len(entryFields) == 3:
-				RealBarCode = SeqNameShort + '-' + RealBarCode
-
-
-			if answerC == 'Yes':
-				try:
-					RealCluster = myClustersdict[RealBarCode]
-				except:
-					RealCluster = 'unknown'
-			else:
-				RealCluster = ''
-
-
-
-			FieldName = 'Blank9'
-			VGenesSQL.UpdateField(ID, RealCluster, FieldName, DBFilename)
+				FieldName = 'Blank9'
+				VGenesSQL.UpdateField(ID, RealCluster, FieldName, DBFilename)
 
 
 
@@ -3328,10 +3336,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		import csv
 		from operator import itemgetter  #from operator import itemgetter   #		SeqList.sort(key=itemgetter(0, 1, 2, 3))
 
-
 		QueryIS = 'Enter text to serve as the base name (i.e., subject number or name)'
 		DefaultText = data[75]  # data[77] + '-Expressed'
 		BaseName = setText(self, QueryIS, DefaultText)
+		if BaseName == "Cancelled Action":
+			return
 
 		filename = os.path.join(working_prefix, '10x_barcodes.csv')
 		with open(filename, 'r') as currentfile:
@@ -3350,6 +3359,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                            'OK')
 		typeOpen = 'csv'
 		filename =openFile(self, typeOpen)
+		if filename == None:
+			return
 		LastBar = ''
 		LastName = ''
 		with open(filename, 'r') as currentfile:
@@ -3397,33 +3408,33 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if answerC == 'Yes':
 			typeOpen = 'csv'
 			filename = openFile(self, typeOpen)
+			if filename != None:
+				CClusters = []
+				CBarcodes = []
 
-			CClusters = []
-			CBarcodes = []
+				# LastName = ''
+				with open(filename, 'r') as currentfile:
+					for row in currentfile:  # imports data from file
+						Rawentry = row.strip('\n')
 
-			# LastName = ''
-			with open(filename, 'r') as currentfile:
-				for row in currentfile:  # imports data from file
-					Rawentry = row.strip('\n')
-
-					entryFields = Rawentry.split(',')
-					if entryFields[0] != 'Barcode' and entryFields[1] != 'Cluster':
-						CBarcodes.append(entryFields[0])
-						CClusters.append(entryFields[1])
-
-
-			myClustersdict = {}
-
-			for i in range(len(CBarcodes)):
-				myClustersdict[CBarcodes[i]] = CClusters[i]
+						entryFields = Rawentry.split(',')
+						if entryFields[0] != 'Barcode' and entryFields[1] != 'Cluster':
+							CBarcodes.append(entryFields[0])
+							CClusters.append(entryFields[1])
 
 
+				myClustersdict = {}
 
+				for i in range(len(CBarcodes)):
+					myClustersdict[CBarcodes[i]] = CClusters[i]
+			else:
+				answerC == 'No'
 
 		fields = ['SeqName', 'Id', 'GeneType']
 
 		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
 		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
+		a = data
 
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
 		SaidItAlready = 'No'
@@ -3447,8 +3458,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 						                            'OK')
 						SaidItAlready = 'yes'
 					SkipUpdate = True
-
-
 			else:
 				RealBarCode = myAnnotationsCSVdict[SeqName]
 				RealBarCode = RealBarCode[:18]
@@ -3464,14 +3473,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				barCode = SeqNameParts[0]
 				barCode = str(barCode[9:])
 
-
-
-
 			Contig = SeqName[len(SeqName)-1:]
-
-
-
-
 
 			if SkipUpdate == False:
 				if SeqName[:9] != 'clonotype':
@@ -3488,7 +3490,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 					FieldName = 'SubGroup'
 					VGenesSQL.UpdateField(LastID, 'doublet', FieldName, DBFilename)
 
-
 				if genetypeis != 'Heavy':
 					try:
 						DoubleHCIndex = DoubletsList.index(barCode)
@@ -3502,12 +3503,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						FieldName = 'SubGroup'
 						VGenesSQL.UpdateField(ID, 'doublet HC', FieldName, DBFilename)
 
-
 				LastName = newName[:len(newName)-1]
-
-
-
-
 
 				FieldName = 'Comments'
 				VGenesSQL.UpdateField(ID, SeqName, FieldName, DBFilename)
@@ -3528,14 +3524,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					VGenesSQL.UpdateField(ID, 'doublet', FieldName, DBFilename)
 					FieldName = 'SubGroup'
 					VGenesSQL.UpdateField(ID, 'doublet', FieldName, DBFilename)
-
-
-
 				# LastName = newName
 				LastID = ID
-
-
-
 				model = self.ui.tableView.model()
 
 				model.refresh()
@@ -3548,39 +3538,41 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# WorkDir = '/Users/PCW-MacBookProRet/Applications/VGenes/FLASH-1.2.11/'
 
+		try:
+			filename = openfastq(self)
 
-		filename = openfastq(self)
+			read_1 = filename[0]
+			read_2 = filename[1]
 
-		read_1 = filename[0]
-		read_2 = filename[1]
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'reads_1.fq')
+			shutil.copy(read_1, WorkDir)
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'reads_2.fq')
+			shutil.copy(read_2, WorkDir)
 
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'reads_1.fq')
-		shutil.copy(read_1, WorkDir)
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'reads_2.fq')
-		shutil.copy(read_2, WorkDir)
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11')
+			# (dirname, filename) = os.path.split(DBpathname)
+			os.chdir(WorkDir)
 
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11')
-		# (dirname, filename) = os.path.split(DBpathname)
-		os.chdir(WorkDir)
+			CommandLine = "./flash reads_1.fq reads_2.fq 2>&1 | tee flash.log"
+			Result = os.popen(CommandLine)
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'out.extendedFrags.fastq')
 
-		CommandLine = "./flash reads_1.fq reads_2.fq 2>&1 | tee flash.log"
-		Result = os.popen(CommandLine)
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'out.extendedFrags.fastq')
-
-		filename = saveFile(self, 'fastq')
-		shutil.copy(WorkDir, filename)
-		filename2 = filename + 'Unmerged-1.fastq'
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
-		                       'out.notCombined_1.fastq')
-		shutil.copy(WorkDir, filename2)
-		filename2 = filename + 'Unmerged-2.fastq'
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
-		                       'out.notCombined_2.fastq')
-		shutil.copy(WorkDir, filename2)
+			filename = saveFile(self, 'fastq')
+			shutil.copy(WorkDir, filename)
+			filename2 = filename + 'Unmerged-1.fastq'
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
+			                       'out.notCombined_1.fastq')
+			shutil.copy(WorkDir, filename2)
+			filename2 = filename + 'Unmerged-2.fastq'
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
+			                       'out.notCombined_2.fastq')
+			shutil.copy(WorkDir, filename2)
 
 
-		WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'flash.log')
-		self.ShowVGenesText(WorkDir)
+			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'flash.log')
+			self.ShowVGenesText(WorkDir)
+		except:
+			return
 
 	#actionAnalyze_Isotypes   actionImport10XInfo
 	@pyqtSlot()
@@ -6139,8 +6131,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Backfilename = os.path.join(working_prefix, 'BackUP.vdb')
 		global DBFilename
 
-		if DBFilename != None:
-			shutil.copy(DBFilename, Backfilename)
+		try:
+			if DBFilename != None:
+				shutil.copy(DBFilename, Backfilename)
+		except:
+			return
 
 	@pyqtSlot()
 	def on_actionRevert_to_previous_triggered(self):
@@ -7699,6 +7694,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_actionCreateVDJdb_triggered(self):
 
 		Pathname = openFile(self, 'Nucleotide')
+		if Pathname == None:
+			return
 		VGenesSQL.CreateVDJDB(Pathname)
 
 	@pyqtSlot()

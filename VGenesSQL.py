@@ -453,7 +453,7 @@ def ProcessFASTA(FASTAfile):
     ErlogFile = ''
     import os
     # FASTAfile = os.path.join(os.path.expanduser('~'), 'Dropbox', 'VGenes', 'Database', 'ALLIMGT.nt')
-    if FASTAfile == '':
+    if FASTAfile == '' or FASTAfile == None:
         return
 
     with open(FASTAfile, 'r') as currentFile:  #using with for this automatically closes the file even if you crash
@@ -493,10 +493,6 @@ def ProcessFASTA(FASTAfile):
         else:
             if Newline != ' ' or  Newline != '':
                 ErLog += Titleline + '\n'
-
-
-
-
     return CleanSeq
 
 def OpenDB(DBFilename):
