@@ -1100,7 +1100,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					WhereState += ' OR '
 				i += 1
 
-			SQLStatement = 'SELECT SeqName, Sequence FROM vgenesDB WHERE ' + WhereState
+			field = self.ui.comboBoxFieldLogo.currentText()
+			SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
 			DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 			for item in DataIn:
@@ -1200,7 +1201,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					WhereState += ' OR '
 				i += 1
 
-			SQLStatement = 'SELECT SeqName, Sequence FROM vgenesDB WHERE ' + WhereState
+			field = self.ui.comboBoxFieldLogo.currentText()
+			SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
 			DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 			for item in DataIn:

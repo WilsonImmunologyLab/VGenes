@@ -6360,38 +6360,6 @@ If the J-end is off the J gene end may need adjusted</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QRadioButton" name="radioButtonPop">
-          <property name="text">
-           <string>RadioButton</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <spacer name="horizontalSpacer_17">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>549</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="0" colspan="4">
-         <widget class="QGroupBox" name="groupBoxLogo">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
-          </property>
-          <property name="title">
-           <string>Sequence Logo</string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QPushButton" name="pushButtonNT">
           <property name="minimumSize">
@@ -6403,6 +6371,63 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="text">
            <string>Nucleotide Logo</string>
           </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QRadioButton" name="radioButtonPop">
+          <property name="text">
+           <string>Open Alignment Logo on a pop-up page</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <spacer name="horizontalSpacer_17">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>225</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" colspan="5">
+         <widget class="QGroupBox" name="groupBoxLogo">
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+           </font>
+          </property>
+          <property name="title">
+           <string>Sequence Logo</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QComboBox" name="comboBoxFieldLogo">
+          <property name="minimumSize">
+           <size>
+            <width>150</width>
+            <height>0</height>
+           </size>
+          </property>
+          <item>
+           <property name="text">
+            <string>Sequence</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CDR3DNA</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>GermlineSequence</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
