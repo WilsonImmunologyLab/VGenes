@@ -1980,3 +1980,87 @@ def IDPlacer(TestSeq, GermSeq):
 
 
 
+def ClustalO_new(SeqDict, wrapLength, ordered, working_prefix, bin):
+    # input is a list of lists containing filename and sequence: ((fielname1, seq1),(fielname2, seq2))
+    # import time
+    # clustalo -i my-in-seqs.fa -o my-out-seqs.fa -v
+    # workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'ClustalOmega', 'my-in-seqs.fa')
+    # workingfilename = '/Applications/ClustalOmega/my-in-seqs.fa'
+    # workingdir, NameBase = os.path.split(DBname)
+    #
+    #
+    #
+    # NameBase = NameBase[:(len(NameBase) - 4)]
+
+    import uuid
+
+    NameBase  =str(uuid.uuid4())
+    # NameBase = NameBase[:12]
+    NameBase = NameBase.replace('-', '')
+
+    NameBase  = NameBase.replace(' ', '')
+
+
+    MyInFiles = NameBase + 'In.fa'
+    MyOutFiles = NameBase + 'Out.fa'
+
+    workingfilename = os.path.join(working_prefix, MyInFiles)
+    savefilename = os.path.join(working_prefix,  MyOutFiles)
+
+    workingdir, filename = os.path.split(workingfilename)
+
+    os.chdir(workingdir)
+    i = 1
+    FASTAfile = ''
+    for seq in SeqDict:
+        for item in seq:
+            if i % 2 != 0:
+                FASTAfile += '>' + item + '\n'
+                if i == 1:
+                    SeqName = FASTAfile
+            else:
+                if item == '':
+                    item = 'N'
+                if SeqName == "Germline":
+                    if len(item) < 50:
+                        return False
+
+                FASTAfile += item + '\n'
+            i += 1
+
+    with open(workingfilename, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
+        currentFile.write(FASTAfile)
+    # todo with the ./ in front of clustalO all I need is the 'stand alone MAC binary' from http://www.clustal.org/omega/ no other installation
+    # Mac users should rename the downloaded file to clustalo and
+    #  place in the location of their choice. This file may need to
+    # be made executable e.g.: chmod u+x clustalo
+    # ClustalOCommandLine = "clustalo -i my-in-seqs.fa -o my-out-seqs.fa -v --full --force"  # --full uses better alignment but slower
+    # with open('/Applications/ClustalOmega/my-out-seqs.fa', 'w') as currentFile:  #to set a test phrase so that it only progresses after clustal is doen
+    with open(savefilename, 'w') as currentFile:
+        currentFile.write('The clustal output is not done yet')
+
+    if ordered == True:
+        ClustalOCommandLine = bin + ' -i '+ MyInFiles + ' -o '+ MyOutFiles + ' -v --force --output-order=tree-order --outfmt=vie --resno --wrap=' \
+                              + str(wrapLength)  #
+    else:
+        ClustalOCommandLine = bin + ' -i '+ MyInFiles + ' -o '+ MyOutFiles + ' -v --force --output-order=tree-order --outfmt=vie --resno --wrap=1000'
+    ClustalOut = os.popen(ClustalOCommandLine)
+
+
+    ClustalOutLines = []
+    for line in ClustalOut:
+        ClustalOutLines.append(line)
+
+    send = False
+    while send == False:
+        # with open('/Applications/ClustalOmega/my-out-seqs.fa', 'r') as currentFile:  #using with for this automatically closes the file even if you crash
+        with open(savefilename, 'r') as currentFile:
+            testName = currentFile.readline()
+            if testName != 'The clustal output is not done yet': send = True
+            if send == False and len(ClustalOutLines) < 2:
+                return False
+                # print('first')
+
+    os.remove(workingfilename)
+
+    return savefilename
