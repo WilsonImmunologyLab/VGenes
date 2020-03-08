@@ -4,6 +4,7 @@ import sys
 import sqlite3 as db
 import time
 import re
+import shutil
 
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
 from PyQt5 import QtWidgets
@@ -18,7 +19,7 @@ from PyQt5.QtWebChannel import *
 from pyecharts.charts import *
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType
-from weblogo import *
+from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_formatter, svg_formatter
 import itertools
 import threading as thd
 
@@ -66,11 +67,15 @@ global working_prefix
 global temp_folder
 global js_folder
 global clustal_path
+global muscle_path
+global raxml_path
 
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
 temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
 js_folder = os.path.join(working_prefix, '..', 'Resources', 'JS')
 clustal_path = os.path.join(working_prefix, '..', 'Resources', 'Tools', 'clustalo')
+muscle_path = os.path.join(working_prefix, '..', 'Resources', 'Tools', 'muscle')
+raxml_path = os.path.join(working_prefix, '..', 'Resources', 'Tools', 'raxml')
 
 global IgBLASTAnalysis
 IgBLASTAnalysis = []
@@ -1068,6 +1073,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.radioButtonTree.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonNT.clicked.connect(self.makeNTLogo)
 		self.ui.pushButtonAA.clicked.connect(self.makeAALogo)
+		self.ui.toolButtonIgphyml.clicked.connect(self.loadIgphyml)
+		self.ui.toolButtonCloneRaxml.clicked.connect(self.buildCloneTree)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1082,6 +1089,155 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
+	def buildCloneTree(self):
+		clone_name = self.ui.comboBoxTree.currentText()
+		WHEREStatement = 'WHERE ClonalPool = "' + clone_name + '"'
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB ' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		if len(DataIn) < 3:
+			Msg = 'Too few sequences in this clone! At least three sequences required!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# write sequences into file
+		time_stamp = str(int(time.time() * 100))
+		this_folder = os.path.join(temp_folder, time_stamp)
+		cmd = 'mkdir ' + this_folder
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to make temp folder!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# alignment
+		aafilename = this_folder + "/input.fas"
+		outfilename = this_folder + "/alignment.fas"
+		treefilename = 'tree'
+		out_handle = open(aafilename, 'w')
+
+		out_handle.write('>Germline\n')
+		out_handle.write(DataIn[0][2] + '\n')
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1]
+
+			# parse seq name
+			SeqName = re.sub(r'[^\w\d\/\>]', '_', SeqName)
+			SeqName = re.sub(r'_+', '_', SeqName)
+			SeqName = SeqName.strip('_')
+
+			out_handle.write('>' + SeqName + '\n')
+			out_handle.write(Sequence + '\n')
+		out_handle.close()
+
+		# alignment
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# generate tree
+		cmd = 'cd ' + this_folder + ';'
+		cmd += raxml_path
+		cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+
+		os.system(cmd)
+		print("tree done!")
+
+		# generate html page
+		treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
+		f = open(treefile, 'r')
+		tree_str = f.readline()
+		f.close()
+		tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
+
+		out_html_file = os.path.join(this_folder, 'tree.html')
+		header_file = os.path.join(working_prefix, '..', 'Resources', 'Data', 'template_raxml_tree.html')
+		shutil.copyfile(header_file, out_html_file)
+
+		foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+		       '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+		       'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+		       '});\n</script>\n</body>\n</html>'
+		out_file_handle = open(out_html_file, 'a')
+		out_file_handle.write(tree_str)
+		out_file_handle.write(foot)
+		out_file_handle.close()
+
+		# display
+		view = QWebEngineView()
+		view.load(QUrl("file://" + out_html_file))
+		view.show()
+
+		layout = self.ui.groupBoxTree.layout()
+		if layout == None:
+			layout = QGridLayout(self.ui.groupBoxTree)
+		else:
+			for i in range(layout.count()):
+				layout.removeWidget(layout.itemAt(i).widget())
+		layout.addWidget(view)
+
+
+	def loadIgphyml(self):
+		ig_out, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select igphyml output", '~/',
+		                                         "igphyml output File (*.tab);;All Files (*)")
+		if ig_out == '' or ig_out == None:
+			return
+		trees = []
+		f = open(ig_out, 'r')
+		lines = f.readlines()
+		f.close()
+		if len(lines) < 3:
+			QMessageBox.warning(self, 'Warning', 'No trees detected!',QMessageBox.Ok,QMessageBox.Ok)
+			return
+		lines = lines[2:]
+		for line in lines:
+			tmp_list = line.split('\t')
+			this = ('Clone ' + tmp_list[0],tmp_list[14])
+			trees.append(this)
+
+		out_html_file = os.path.join(temp_folder, 'tree.html')
+		header_file = os.path.join(working_prefix, '..', 'Resources', 'Data', 'template_tree.html')
+		shutil.copyfile(header_file, out_html_file)
+
+		tree_str = 'var trees = new Array();\n'
+		i = 0
+		for tree in trees:
+			tree_str = tree_str + '$("#mySelect").append("<option value=' + "'" + str(i) + "'" + '>' + tree[0] + '</option>");\n'
+			tree_str = tree_str + 'trees[' + str(i) + ']="' + tree[1].strip('\n') + '";\n'
+			i += 1
+
+		tree_str = tree_str + 'var test_string = trees[0];\n'
+
+		foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+		       '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+		       'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+		       '});\n</script>\n</body>\n</html>'
+		out_file_handle = open(out_html_file, 'a')
+		out_file_handle.write(tree_str)
+		out_file_handle.write(foot)
+		out_file_handle.close()
+
+		print("html done!")
+
+		# display
+		view = QWebEngineView()
+		view.load(QUrl("file://" + out_html_file))
+		view.show()
+
+		layout = self.ui.groupBoxTree.layout()
+		if layout == None:
+			layout = QGridLayout(self.ui.groupBoxTree)
+		else:
+			for i in range(layout.count()):
+				layout.removeWidget(layout.itemAt(i).widget())
+		layout.addWidget(view)
 
 	def makeNTLogo(self):
 		listItems = self.getTreeCheckedChild()
@@ -1324,6 +1480,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.comboBoxTree2.addItems(fields_name)
 			self.ui.comboBoxTree3.clear()
 			self.ui.comboBoxTree3.addItems(fields_name)
+		elif self.ui.tabWidget.currentIndex() == 8:
+			SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			list1 = []
+			for ele in DataIn:
+				list1.append(ele[0])
+			list_unique = list(set(list1))
+			list_unique.remove('0')
+			list_unique.sort()
+			self.ui.comboBoxTree.addItems(list_unique)
 
 	def GenerateFigure(self):
 		global DBFilename

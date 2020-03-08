@@ -1,3 +1,4 @@
-VGenes input beginning at: Wed Mar  4 11:57:59 2020
-
-VGenes input ended at: Wed Mar  4 12:00:28 2020
+5 clonal pools containing 14 sequences were identified from 103 total sequences analyzed.
+The following 0 sequences could not be anaylzed for
+clonality because no CDR3s are indicated:
+Clonal analysis for Heavy

@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1450</width>
+    <width>1547</width>
     <height>1145</height>
    </rect>
   </property>
@@ -670,7 +670,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>8</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -1112,7 +1112,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1063</width>
+             <width>1160</width>
              <height>821</height>
             </rect>
            </property>
@@ -6709,7 +6709,7 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>58</width>
+                <width>41</width>
                 <height>20</height>
                </size>
               </property>
@@ -6953,7 +6953,7 @@ If the J-end is off the J gene end may need adjusted</string>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
-            <width>225</width>
+            <width>322</width>
             <height>20</height>
            </size>
           </property>
@@ -7012,7 +7012,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
@@ -7118,7 +7118,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1450</width>
+     <width>1547</width>
      <height>22</height>
     </rect>
    </property>
