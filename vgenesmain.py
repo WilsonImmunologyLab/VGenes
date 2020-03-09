@@ -1183,7 +1183,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 				layout.removeWidget(layout.itemAt(i).widget())
 		layout.addWidget(view)
 
-
 	def loadIgphyml(self):
 		ig_out, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select igphyml output", '~/',
 		                                         "igphyml output File (*.tab);;All Files (*)")
