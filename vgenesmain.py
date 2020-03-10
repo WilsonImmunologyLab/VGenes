@@ -71,11 +71,11 @@ global muscle_path
 global raxml_path
 
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
-temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
-js_folder = os.path.join(working_prefix, '..', 'Resources', 'JS')
-clustal_path = os.path.join(working_prefix, '..', 'Resources', 'Tools', 'clustalo')
-muscle_path = os.path.join(working_prefix, '..', 'Resources', 'Tools', 'muscle')
-raxml_path = os.path.join(working_prefix, '..', 'Resources', 'Tools', 'raxml')
+temp_folder = os.path.join(working_prefix, 'Temp')
+js_folder = os.path.join(working_prefix, 'JS')
+clustal_path = os.path.join(working_prefix, 'Tools', 'clustalo')
+muscle_path = os.path.join(working_prefix, 'Tools', 'muscle')
+raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
 
 global IgBLASTAnalysis
 IgBLASTAnalysis = []
@@ -1158,7 +1158,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
 
 		out_html_file = os.path.join(this_folder, 'tree.html')
-		header_file = os.path.join(working_prefix, '..', 'Resources', 'Data', 'template_raxml_tree.html')
+		header_file = os.path.join(working_prefix, 'Data', 'template_raxml_tree.html')
 		shutil.copyfile(header_file, out_html_file)
 
 		foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
@@ -1202,7 +1202,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			trees.append(this)
 
 		out_html_file = os.path.join(temp_folder, 'tree.html')
-		header_file = os.path.join(working_prefix, '..', 'Resources', 'Data', 'template_tree.html')
+		header_file = os.path.join(working_prefix, 'Data', 'template_tree.html')
 		shutil.copyfile(header_file, out_html_file)
 
 		tree_str = 'var trees = new Array();\n'
