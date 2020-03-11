@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>htmlDialog</class>
+ <widget class="QDialog" name="htmlDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1379</width>
+    <height>822</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Multiple Sequence Alignment Viewer</string>
+  </property>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

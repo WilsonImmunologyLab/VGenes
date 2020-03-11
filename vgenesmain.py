@@ -30,6 +30,7 @@ import IgBLASTer
 from VgenesTextEdit import VGenesTextMain
 import VGenesSQL
 import VGenesSeq
+from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
 import VGenesCloneCaller
@@ -47,8 +48,8 @@ from ui_VGenesTextEdit import ui_TextEditor
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
-
-
+global VGenesTextWindows
+VGenesTextWindows = {}
 
 from itertools import combinations
 from collections import Counter
@@ -151,6 +152,105 @@ FirstupdateF = True
 
 global GLMsg
 GLMsg = True
+
+class htmlDialog(QtWidgets.QDialog):
+	def __init__(self):
+		super(htmlDialog, self).__init__()
+		self.ui = Ui_htmlDialog()
+		self.ui.setupUi(self)
+
+class EditableSqlModel(QSqlQueryModel):
+	def flags(self, index):
+		flags = super(EditableSqlModel, self).flags(index)
+
+		if index.column() in (
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+		30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+		58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86,
+		87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+		112, 113, 114, 115, 116, 117, 118):
+			flags |= Qt.ItemIsEditable
+		# print(str(index.row()))
+		ID = Vgenes.ui.tableView.currentIndex().row()
+		NameIs = ''
+		if ID >= 0 and ID != PreVID:  # made this also not equal preVID before firing
+			NameIs = Vgenes.MatchingValue(ID)
+			Vgenes.findTreeItem(NameIs)
+			ReportName = Vgenes.ui.txtName.toPlainText()  # tabbed this and next 2 lines in
+			if ReportName != NameIs and ID >= 0:
+				Vgenes.updateF(ID)
+
+		return flags
+
+	def setData(self, index, value, role):
+		if index.column() not in (
+		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+		30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
+		58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86,
+		87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
+		112, 113, 114, 115, 116, 117, 118):
+			return False
+
+		recordIs = Vgenes.ui.treeWidget.selectedItems()
+		currentitemIs = ''
+
+		for item in recordIs:
+			currentitemIs = item.text(0)
+
+		primaryKeyIndex = self.index(index.row(), 119)
+		id = self.data(primaryKeyIndex)
+
+		self.clear()
+
+		i = 0
+		for item in FieldList:
+			if index.column() == i:
+				field = item
+				ok = self.setValue(id, value, field)
+				self.refresh()
+				if field == Vgenes.ui.cboTreeOp1.setCurrentText or field == Vgenes.ui.cboTreeOp2.setCurrentText or field == Vgenes.ui.cboTreeOp3.setCurrentText:
+					Vgenes.on_btnUpdateTree_clicked()
+
+				Vgenes.findTreeItem(currentitemIs)
+				Vgenes.ui.tableView.setCurrentIndex(index)
+				return
+			i += 1
+
+		self.refresh()
+
+		RowID = Vgenes.ui.tableView.currentIndex()
+		model = Vgenes.ui.tableView.model()
+		# for i in range(0, 83):
+		#     index = model.index(RowID, i)
+		#     data.append (str(model.data(index)))
+
+
+		return
+
+	def refresh(self):
+
+		self.setQuery(RefreshSQL)
+		i = 0
+		for item in FieldList:
+			self.setHeaderData(i, Qt.Horizontal, item)
+			i += 1
+
+	def setValue(self, Id, Newvalue, field):
+		query = QSqlQuery()
+		queryText = 'update vgenesdb set ' + field + ' = ? where ID = ?'
+		query.prepare(queryText)
+		query.addBindValue(Newvalue)
+		query.addBindValue(Id)
+		return query.exec_()
+
+		# @pyqtSlot("QModelIndex")
+		# def ItemClicked(self,index):
+		#     # QMessageBox.information(None,"Hello!","You Clicked: \n"+index.data().toString())
+		#     # print(index.data().toString())
+		#     ID = self.model.record(index).value('ID')
+		#     SeqName = self.model.record(index).value('SeqName')
+		#     print(ID)
+		#     print(SeqName)
 
 class VGenesTextMain(QtWidgets.QMainWindow, ui_TextEditor):
 	def __init__(self, parent=None):
@@ -1048,6 +1148,7 @@ class WorkThread(QThread):
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
 		super(VGenesForm, self).__init__()  # parent)
+		global VGenesTextWindows
 
 		self.ui = Ui_MainWindow()
 
@@ -1088,6 +1189,63 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+
+	@pyqtSlot()
+	def on_actionAlignmentHTML_triggered(self):
+		global VGenesTextWindows
+		# load data
+		AlignIn = []
+		listItems = self.getTreeCheckedChild()
+		listItems = listItems[3]
+
+		WhereState = ''
+		NumSeqs = len(listItems)
+		i = 1
+		if len(listItems) == 0:
+			QMessageBox.warning(self, 'Warning', 'Please select sequence from active sequence panel!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+		for item in listItems:
+			WhereState += 'SeqName = "' + item + '"'
+			if NumSeqs > i:
+				WhereState += ' OR '
+			i += 1
+
+		SQLStatement = 'SELECT SeqName, Sequence FROM vgenesDB WHERE ' + WhereState
+		DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1]
+			Sequence = Sequence.replace("-","")
+			Sequence = Sequence.upper()
+			EachIn = (SeqName, Sequence)
+			AlignIn.append(EachIn)
+		# make HTML
+		html_file = AlignSequencesHTML(AlignIn, '')
+		if html_file[0] == 'W':
+			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		# delete close window objects
+		del_list = []
+		for id, obj in VGenesTextWindows.items():
+			if obj.isVisible() == False:
+				del_list.append(id)
+		for id in del_list:
+			del_obj = VGenesTextWindows.pop(id)
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		view.load(QUrl("file://" + html_file))
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
 
 	def buildCloneTree(self):
 		clone_name = self.ui.comboBoxTree.currentText()
@@ -1188,6 +1346,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                                         "igphyml output File (*.tab);;All Files (*)")
 		if ig_out == '' or ig_out == None:
 			return
+		self.ui.igphyml_line.setText(ig_out)
+
 		trees = []
 		f = open(ig_out, 'r')
 		lines = f.readlines()
@@ -9602,99 +9762,574 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.updateF(data[119])
 
-class EditableSqlModel(QSqlQueryModel):
-	def flags(self, index):
-		flags = super(EditableSqlModel, self).flags(index)
+def AlignSequencesHTML(DataSet, template):
+	# import tempfile
+	import os
+	global GLMsg
+	global working_prefix
+	global clustal_path
+	global temp_folder
+	global VGenesTextWindows
+	global muscle_path
 
-		if index.column() in (
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-		30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
-		58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86,
-		87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-		112, 113, 114, 115, 116, 117, 118):
-			flags |= Qt.ItemIsEditable
-		# print(str(index.row()))
-		ID = Vgenes.ui.tableView.currentIndex().row()
-		NameIs = ''
-		if ID >= 0 and ID != PreVID:  # made this also not equal preVID before firing
-			NameIs = Vgenes.MatchingValue(ID)
-			Vgenes.findTreeItem(NameIs)
-			ReportName = Vgenes.ui.txtName.toPlainText()  # tabbed this and next 2 lines in
-			if ReportName != NameIs and ID >= 0:
-				Vgenes.updateF(ID)
+	# align selected sequences (AA) using muscle
+	all = dict()
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
+	aafilename = os.path.join(temp_folder, "in-" + time_stamp + ".fas")
+	if len(DataSet) == 1:
+		SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+		SeqName = SeqName.strip()
+		NTseq = DataSet[0][1]
+		AAseq, ErMessage = VGenesSeq.Translator(NTseq, 0)
+		all[SeqName] = [NTseq, AAseq]
 
-		return flags
+		out_handle = open(outfilename,'w')
+		out_handle.write('>' + SeqName + '\n')
+		out_handle.write(AAseq)
+		out_handle.close()
+	else:
+		aa_handle = open(aafilename,'w')
+		for record in DataSet:
+			SeqName = record[0].replace('\n', '').replace('\r', '')
+			SeqName = SeqName.strip()
+			NTseq = record[1]
+			# sequence check for NT seq
+			pattern = re.compile(r'[^ATCGUatcgu]')
+			cur_strange = pattern.findall(NTseq)
+			cur_strange = list(set(cur_strange))
+			if len(cur_strange) > 0:
+				ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
+				         '\nPlease remove those Unlawful nucleotide!'
+				return ErrMsg
 
-	def setData(self, index, value, role):
-		if index.column() not in (
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-		30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57,
-		58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 82, 83, 84, 85, 86,
-		87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111,
-		112, 113, 114, 115, 116, 117, 118):
-			return False
+			AAseq, ErMessage = VGenesSeq.Translator(NTseq, 0)
+			AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
+			all[SeqName] = [NTseq, AAseq]
+			aa_handle.write('>' + SeqName + '\n')
+			aa_handle.write(AAseq + '\n')
+		aa_handle.close()
 
-		recordIs = Vgenes.ui.treeWidget.selectedItems()
-		currentitemIs = ''
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
 
-		for item in recordIs:
-			currentitemIs = item.text(0)
-
-		primaryKeyIndex = self.index(index.row(), 119)
-		id = self.data(primaryKeyIndex)
-
-		self.clear()
-
-		i = 0
-		for item in FieldList:
-			if index.column() == i:
-				field = item
-				ok = self.setValue(id, value, field)
-				self.refresh()
-				if field == Vgenes.ui.cboTreeOp1.setCurrentText or field == Vgenes.ui.cboTreeOp2.setCurrentText or field == Vgenes.ui.cboTreeOp3.setCurrentText:
-					Vgenes.on_btnUpdateTree_clicked()
-
-				Vgenes.findTreeItem(currentitemIs)
-				Vgenes.ui.tableView.setCurrentIndex(index)
-				return
-			i += 1
-
-		self.refresh()
-
-		RowID = Vgenes.ui.tableView.currentIndex()
-		model = Vgenes.ui.tableView.model()
-		# for i in range(0, 83):
-		#     index = model.index(RowID, i)
-		#     data.append (str(model.data(index)))
-
-
+	# read alignment file, make alignment NT and AA sequences
+	SeqName = ''
+	AAseq = ''
+	if os.path.isfile(outfilename):
+		currentfile = open(outfilename, 'r')
+		lines = currentfile.readlines()
+		for line in lines:
+			Readline = line.replace('\n', '').replace('\r', '')
+			Readline = Readline.strip()
+			if Readline[0] == '>':
+				if SeqName != '':
+					AAseq, NTseq = BuildNTalignment(AAseq, all[SeqName][0])
+					all[SeqName] = [NTseq, AAseq]
+				SeqName = Readline[1:]
+				AAseq = ''
+			else:
+				AAseq += Readline
+		AAseq, NTseq = BuildNTalignment(AAseq, all[SeqName][0])
+		all[SeqName] = [NTseq, AAseq]
+	else:
 		return
 
-	def refresh(self):
+	#if os.path.exists(outfilename):
+	#	os.remove(outfilename)
+	#if os.path.exists(aafilename):
+	#	os.remove(aafilename)
 
-		self.setQuery(RefreshSQL)
-		i = 0
-		for item in FieldList:
-			self.setHeaderData(i, Qt.Horizontal, item)
+	# generate consnesus sequences (AA and NT)
+	if len(all) == 1:
+		for key in all:
+			consensusDNA = all[key][0]
+			consensusAA = all[key][1]
+	else:
+		firstOne = all[SeqName]
+		seqlen = len(firstOne[0])
+
+		consensusDNA = ''
+		tester = ''
+
+		for i in range(seqlen):
+			tester = ''
+			Cnuc = ''
+			for key in all:
+				try:
+					seq = all[key][0]
+					tester += seq[i]
+				except:
+					Msg = 'Find sequence error in ' + key + ', please check your sequence!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+
+			frequencies = [(c, tester.count(c)) for c in set(tester)]
+			Cnuc = max(frequencies, key=lambda x: x[1])[0]
+			consensusDNA += Cnuc
+
+
+		consensusAA = ''
+		firstOne = all[SeqName]
+		seqlen = len(firstOne[1])
+		for i in range(seqlen):
+			tester = ''
+			Caa = ''
+			for key in all:
+				seq = all[key][1]
+				tester += seq[i]
+
+			frequencies = [(c, tester.count(c)) for c in set(tester)]
+			Caa = max(frequencies, key=lambda x: x[1])[0]
+			consensusAA += Caa
+
+	# align consensus AA sequence with template to generate H1 and H3 numbering
+	compact_consensusAA = consensusAA.replace(' ', '')
+
+	# make header HTML
+	pos_aa_data = [list(range(1,len(compact_consensusAA)+1)),list(range(1,len(compact_consensusAA)+1))]
+	div_pos_aa = MakeDivPosAA('line line_pos_aa', 'Position AA:', 'Original AA position: ', pos_aa_data)
+	div_con_aa = MakeDivAA('line con_aa', 'Template AA:', compact_consensusAA)
+	pos_nt_data = [list(range(1, len(consensusDNA) + 1)), list(range(1, len(consensusDNA) + 1))]
+	div_pos_nt = MakeDivPosNT('line line_pos_nt', 'Position NT:', 'Original NT position: ', pos_nt_data)
+	div_con_nt = MakeDivNT('line con_nt', 'Template NT:', consensusDNA)
+
+	# initial and open HTML file
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	out_html_file = os.path.join(temp_folder, time_stamp + '.html')
+	if template == '':
+		header_file = os.path.join(working_prefix, 'Data', 'template.html')
+	else:
+		header_file = os.path.join(working_prefix, 'Data', template + '.html')
+	shutil.copyfile(header_file, out_html_file)
+	out_file_handle = open(out_html_file, 'a')
+
+	JSdata = '<script type="text/javascript">\n'
+	JSdata += 'var data = {\n'
+	JSarray = []
+	JStext = '"Seq0":["Consensus","' + compact_consensusAA + '","' + consensusDNA + '"]'
+	JSarray.append(JStext)
+
+	Optiondata = '<script type="text/javascript">\n'
+	Optiondata += '$("#option").append("<option value =\'Seq0\'>Consensus Sequence</option>");\n'
+
+	name_div = '<div class="name_div">\n'
+	seq_div = '<div class = "seq_div">\n'
+	# write header section
+	name_div += div_pos_aa[0] + '\n'
+	seq_div += div_pos_aa[1] + '\n'
+	name_div += div_con_aa[0] + '\n'
+	seq_div += div_con_aa[1] + '\n'
+	name_div += div_pos_nt[0] + '\n'
+	seq_div += div_pos_nt[1] + '\n'
+	name_div += div_con_nt[0] + '\n'
+	seq_div += div_con_nt[1] + '\n'
+	# make sequence section HTML
+	i = 1
+	for key in all:
+		seq_nick_name = 'Seq' + str(i)
+
+		seq_nt = all[key][0]
+		seq_aa = all[key][1]
+		con_nt = MakeConSeq(seq_nt, consensusDNA)
+		con_aa = MakeConSeq(seq_aa, compact_consensusAA)
+
+		div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
+		div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
+		div_nt = MakeDivNT('line line_nt ' + seq_nick_name, key, seq_nt)
+		div_nt_mut = MakeDivNT('line line_con_nt ' + seq_nick_name, key, con_nt)
+		# write sequence section
+		name_div += div_aa[0] + '\n'
+		seq_div += div_aa[1] + '\n'
+		name_div += div_aa_mut[0] + '\n'
+		seq_div += div_aa_mut[1] + '\n'
+		name_div += div_nt[0] + '\n'
+		seq_div += div_nt[1] + '\n'
+		name_div += div_nt_mut[0] + '\n'
+		seq_div += div_nt_mut[1] + '\n'
+
+		JStext = '"' + seq_nick_name + '":["' + key + '","' + seq_aa + '","' + seq_nt + '"]'
+		JSarray.append(JStext)
+		Optiondata += '$("#option").append("<option value =\'' + seq_nick_name + '\'>' + key + '</option>");\n'
+		i += 1
+
+	JSdata += ',\n'.join(JSarray)
+	JSdata += '\n}\n</script>\n'
+	Optiondata += '</script>\n'
+
+	name_div += '</div>\n'
+	seq_div += '</div>\n'
+
+	out_file_handle.write(JSdata)
+	out_file_handle.write(Optiondata)
+	out_file_handle.write('<div class="box">')
+	out_file_handle.write(name_div)
+	out_file_handle.write(seq_div)
+	out_file_handle.write('\n</div>\n</body>\n</html>')
+	out_file_handle.close()
+	return out_html_file
+
+def MakeConSeq(seq, con):
+	for i in range(len(con)):
+		if seq[i] == con[i]:
+			seq = seq[:i] + '.' + seq[i+1:]
+	return seq
+
+def SparseSeq(seq):
+	tmp = list(seq)
+	seq = ' ' + '  '.join(tmp) + ' '
+	return seq
+
+def BuildNTalignment(aa, nt):
+	pos = 0
+	new_nt = ''
+	for i in range(len(aa)):
+		cur_aa = aa[i]
+		if cur_aa == '-':
+			new_nt += '---'
+		elif cur_aa == 'X':
+			new_nt += nt[pos:pos + 3]
+			aa = aa[:i] + '*' + aa[i+1:]
+			pos = pos + 3
+		elif cur_aa == 'Z':
+			new_nt += nt[pos:] + '-'*(3 - len(nt[pos:]))
+			aa = aa[:i] + '~' + aa[i + 1:]
+			pos = pos + 3
+		elif cur_aa == 'J':
+			new_nt += nt[pos:pos + 3]
+			pos = pos + 3
+		else:
+			new_nt += nt[pos:pos + 3]
+			pos = pos + 3
+	a = 1
+	return aa, new_nt
+
+def SequenceCheck(sequence, type):
+	Msg = 'none'
+	if type == 'aa':
+		pattern = re.compile(r'[^ILVFMCAGPTSYWQNHEDKR]')
+	else:
+		pattern = re.compile(r'[^ATCUG]')
+
+	strange_residues = re.findall(pattern, sequence)
+
+	if len(strange_residues) > 0:
+		Msg = ','.join(strange_residues)
+
+	return Msg
+
+def Translator(Sequence, frame):
+        # Translate sequence into a list of codons
+    CodonList = [ ]
+    for x in range(frame, len(Sequence), 3):
+            CodonList.append(Sequence[x:x+3])
+    # For each codon, translate it into amino acid, and create a list
+    ProteinSeq = [ ]
+    for codon in CodonList:
+        if codon in CodonDict:
+            ProteinSeq.append(CodonDict[codon])
+        else:
+            ProteinSeq.append('~')
+
+    AASeq = ''.join(ProteinSeq)
+
+    # print("Translated in frame %d: %s (%.1f Da)" % ((frame+1), ''.join(ProteinSeq), sum(ProteinWeight)))
+    # Check position of stop codon, making sure it's at the end, and the only one
+    XCount = 0
+    UCount = 0
+    for acid in ProteinSeq:
+        if acid == "*":
+            XCount += 1
+    for acid in ProteinSeq:
+        if acid == "~":
+            UCount += 1
+    ErMessage = []
+    # ErMessage.append()
+    if XCount > 0:
+        if XCount == 1:
+            ErMes =  'WARNING: '+ str(XCount) + ' stop codon was found (marked as "*")!'
+        else:
+            ErMes =  'WARNING: '+ str(XCount) + ' stop codons found (marked as "*")!'
+        ErMessage.append(ErMes)
+    if UCount > 0:
+        # todo this doesn't label errors properly
+        AASeq2 = AASeq.replace ('.', '')
+        ErMes = 'Codon errors (marked as "~"): '
+        if len(Sequence) % 3 != 0 and UCount == 1:
+            ErMes += 'Incomplete codon at end.'
+            ErMessage.append(ErMes)
+            return AASeq, ErMessage
+
+        elif UCount == 1:
+
+            if AASeq2[0] == '~':
+                ErMes += 'The first codon is incomplete.'
+                ErMessage.append(ErMes)
+                return AASeq, ErMessage
+
+            else:
+                ErMes += '1 codon error internally.'
+                ErMessage.append(ErMes)
+                return AASeq, ErMessage
+
+        elif UCount > 1:
+
+
+            if AASeq2[0] == '~':
+                ErMes += 'The first codon is incomplete. '
+                ErMessage.append(ErMes)
+                UCount -= 1
+
+            if len(Sequence) % 3 != 0:
+                if UCount > 1:
+                    ErMes += '1 incomplete on end and '
+                    if UCount-1 > 1:
+                        ErMes += str(UCount-1) + ' others with errors internally.'
+                    elif UCount - 1 == 1:
+                        ErMes += '1 other with errors internally.'
+                else:
+                    ErMes += '1 incomplete on end.'
+
+            else:
+                ErMes += str(UCount) + ' errors within the sequence.'
+        ErMessage.append(ErMes)
+
+    return AASeq, ErMessage
+
+def AA2NT(sequence, dic):
+	nt_seq = ''
+	for i in range(len(sequence)):
+		nt_seq += dic[sequence[i]]
+
+	return nt_seq
+
+def checkOverlap(x1,y1,x2,y2):
+	a = range(x1,y1+1)
+	b = range(x2,y2+1)
+	inter = set(a).intersection(set(b))
+
+	if len(inter) > 0:
+		return True
+	else:
+		return False
+
+def MakeDivNT(class_name, line_name, data):
+	div_name = 	'<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	count = 0
+	for i in range(len(data)):
+		if count == 0:
+			div_seq += '<span class="unit_pack">'
+		elif count%3 == 0:
+			div_seq += '</span><span class="unit_pack">'
+		div_seq += '<span class="unit">' + data[i] + '</span>'
+		count += 1
+	div_seq += '</span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeDivNTDonor(class_name, line_name, data, ori_seq, donor_region):
+	div_name = 	'<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	cur_pos = 1
+	for i in range(len(data)):
+		if i == 0:
+			count = int(i/3)
+			if ori_seq[count] == "-":
+				div_seq += '<span class="unit_pack">'
+			else:
+				if cur_pos in donor_region:
+					div_seq += '<span class="unit_pack donor">'
+				else:
+					div_seq += '<span class="unit_pack">'
+				cur_pos += 1
+		elif i%3 == 0:
+			count = int(i / 3)
+			if ori_seq[count] == "-":
+				div_seq += '</span><span class="unit_pack">'
+			else:
+				if cur_pos in donor_region:
+					div_seq += '</span><span class="unit_pack donor">'
+				else:
+					div_seq += '</span><span class="unit_pack">'
+				cur_pos += 1
+
+		div_seq += '<span class="unit">' + data[i] + '</span>'
+	div_seq += '</span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeDivAA(class_name, line_name, data):
+	div_name = '<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	for i in range(len(data)):
+		div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + data[i] + '</span><span class="insert">&nbsp;</span></span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeDivAADonor(class_name, line_name, data, ori_seq, donor_region):
+	div_name = '<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	cur_pos = 1
+	for i in range(len(data)):
+		if ori_seq[i] == "-":
+			div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + \
+			           data[i] + '</span><span class="insert">&nbsp;</span></span>'
+		else:
+			if cur_pos in donor_region:
+				div_seq += '<span class="unit_pack donor"><span class="insert">&nbsp;</span><span class="unit">' + \
+			           data[i] + '</span><span class="insert">&nbsp;</span></span>'
+			else:
+				div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + \
+				           data[i] + '</span><span class="insert">&nbsp;</span></span>'
+			cur_pos += 1
+
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeDivPosAA(class_name, line_name, tip_text, data):
+	div_name = '<div class="' + class_name + '">'
+	div_name += '<span class="name">' + line_name + '</span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + '">'
+	for i in range(len(data[0])):
+		if data[0][i] != '-':
+			if int(data[0][i]) % 5 == 0:
+				div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + str(data[0][i]) + \
+				               '<span class ="unit_tip">' + tip_text + str(data[1][i]) + \
+				               '</span></span><span class="insert">&nbsp;</span></span>'
+			else:
+				div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + '.' + \
+				               '<span class ="unit_tip">' + tip_text + str(data[1][i]) + \
+				               '</span></span><span class="insert">&nbsp;</span></span>'
+		else:
+			div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + str(data[0][i]) + \
+			               '<span class ="unit_tip">' + tip_text + str(data[1][i]) + \
+			               '</span></span><span class="insert">&nbsp;</span></span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeDivH1N3(class_name, line_name, tip_text, data):
+	div_name = '<div class="' + class_name + '">'
+	div_name += '<span class="name">' + line_name + '</span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + '">'
+	for i in range(len(data)):
+		if data[i][2] == '':
+			if data[i][0] != '-':
+				if int(data[i][0]) % 5.0 == 0:
+					div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + str(data[i][0]) + \
+					               '<span class ="unit_tip">' + tip_text + str(data[i][1]) + \
+					               '</span></span><span class="insert">&nbsp;</span></span>'
+				else:
+					div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + '.' + \
+					               '<span class ="unit_tip">' + tip_text + str(data[i][1]) + \
+					               '</span></span><span class="insert">&nbsp;</span></span>'
+			else:
+				div_seq += '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + str(data[i][0]) + \
+				               '<span class ="unit_tip">' + tip_text + str(data[i][1]) + \
+				               '</span></span><span class="insert">&nbsp;</span></span>'
+		else:
+			if data[i][0] != '-':
+				if int(data[i][0]) % 5.0 == 0:
+					div_seq += '<span class="unit_pack"><span class="insert ' + data[i][2] + '">&nbsp;</span><span class="unit ' + \
+					               data[i][2] + '">' + str(data[i][0]) + \
+					               '<span class ="unit_tip">' + tip_text + str(data[i][1]) + \
+					               '</span></span><span class="insert ' + data[i][2] + '">&nbsp;</span></span>'
+				else:
+					div_seq += '<span class="unit_pack"><span class="insert ' + data[i][2] + '">&nbsp;</span><span class="unit ' + \
+					               data[i][2] + '">' + '.' + \
+					               '<span class ="unit_tip">' + tip_text + str(data[i][1]) + \
+					               '</span></span><span class="insert ' + data[i][2] + '">&nbsp;</span></span>'
+			else:
+				div_seq += '<span class="unit_pack"><span class="insert ' + data[i][2] + '">&nbsp;</span><span class="unit ' + \
+				               data[i][2] + '">' + str(data[i][0]) + \
+				               '<span class ="unit_tip">' + tip_text + str(data[i][1]) + \
+				               '</span></span><span class="insert ' + data[i][2] + '">&nbsp;</span></span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeDivPosNT(class_name, line_name, tip_text, data):
+	div_name = '<div class="' + class_name + '">'
+	div_name += '<span class="name">' + line_name + '</span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + '">'
+	count = 0
+	for i in range(len(data[0])):
+		if count == 0:
+			div_seq += '<span class="unit_pack">'
+			if data[0][i] % 5.0 == 0:
+				div_seq += '<span class="unit">' + str(data[0][i]) + '<span class ="unit_tip">' + tip_text + \
+				               str(data[1][i]) + ' - ' + str(int(data[1][i]) + 2) +  '</span></span>'
+			else:
+				div_seq += '<span class="unit">' + '.' + '<span class ="unit_tip">' + tip_text + str(data[1][i]) + \
+				           ' - ' + str(int(data[1][i]) + 2) +  '</span></span>'
+		elif count % 3 == 0:
+			div_seq += '</span><span class="unit_pack">'
+			if data[0][i] % 5.0 == 0:
+				div_seq += '<span class="unit">' + str(data[0][i]) + '<span class ="unit_tip">' + tip_text + \
+				               str(data[1][i])  + ' - ' + str(int(data[1][i]) + 2) +  '</span></span>'
+			else:
+				div_seq += '<span class="unit">' + '.' + '<span class ="unit_tip">' + tip_text + str(data[1][i]) + \
+				           ' - ' + str(int(data[1][i]) + 2) +  '</span></span>'
+		else:
+			if data[0][i] % 5.0 == 0:
+				div_seq += '<span class="unit">' + str(data[0][i]) + '</span>'
+			else:
+				div_seq += '<span class="unit">' + '.' + '</span>'
+		count += 1
+	div_seq += '</span>'
+	div_seq += '</div>'
+	return div_name, div_seq
+
+def MakeSeqWithInseetion(class_name,id,AAseq,info):
+	start_dict = {}
+	end_dict = {}
+	if len(info) > 0:
+		for ele in info:
+			start_dict[info[ele][0]] = ele
+			end_dict[info[ele][1]] = ele
+
+	div_seq = '<div class="' + class_name + '" id="' + id + '">'
+	i = 0
+	for aa in AAseq:
+		pos = i + 1
+		if end_dict.__contains__(pos):
+			div_seq += '<span class="unit">' + aa + '</span>'
+			div_seq += '<span class="insertion" style="margin-top: 10px;">' + info[end_dict[pos]][2] + '</span>'
+			div_seq += '</span>'
 			i += 1
+			continue
+		if start_dict.__contains__(pos):
+			div_seq += '<span class="replace" id="' + str(start_dict[pos]) + '" title="' + info[start_dict[pos]][4] + '">'
+			div_seq += '<span class="unit">' + aa + '</span>'
+			i += 1
+			continue
+		div_seq += '<span class="unit">' + aa + '</span>'
+		i += 1
+	div_seq += '</div>'
 
-	def setValue(self, Id, Newvalue, field):
-		query = QSqlQuery()
-		queryText = 'update vgenesdb set ' + field + ' = ? where ID = ?'
-		query.prepare(queryText)
-		query.addBindValue(Newvalue)
-		query.addBindValue(Id)
-		return query.exec_()
-
-		# @pyqtSlot("QModelIndex")
-		# def ItemClicked(self,index):
-		#     # QMessageBox.information(None,"Hello!","You Clicked: \n"+index.data().toString())
-		#     # print(index.data().toString())
-		#     ID = self.model.record(index).value('ID')
-		#     SeqName = self.model.record(index).value('SeqName')
-		#     print(ID)
-		#     print(SeqName)
-
+	return div_seq
 
 if __name__ == '__main__':
 	import sys

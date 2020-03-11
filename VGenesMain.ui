@@ -337,13 +337,13 @@
           <string/>
          </property>
          <property name="icon">
-          <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+          <iconset resource="Resources/VgenesResources.qrc">
            <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
          </property>
          <property name="iconSize">
           <size>
-           <width>24</width>
-           <height>24</height>
+           <width>40</width>
+           <height>40</height>
           </size>
          </property>
          <property name="autoDefault">
@@ -792,7 +792,7 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/delete.png</normaloff>:/PNG-Icons/delete.png</iconset>
            </property>
            <property name="iconSize">
@@ -836,7 +836,7 @@
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Copy checked records into another database&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="icon">
-            <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/Duplicate.png</normaloff>:/PNG-Icons/Duplicate.png</iconset>
            </property>
            <property name="iconSize">
@@ -880,7 +880,7 @@
             <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Make a new VGenes database file from checked records&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="icon">
-            <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/Insert.png</normaloff>:/PNG-Icons/Insert.png</iconset>
            </property>
            <property name="iconSize">
@@ -924,7 +924,7 @@
             <string>generate report or subset based on checked items</string>
            </property>
            <property name="icon">
-            <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/Query.png</normaloff>:/PNG-Icons/Query.png</iconset>
            </property>
            <property name="iconSize">
@@ -4640,7 +4640,7 @@
               <string/>
              </property>
              <property name="pixmap">
-              <pixmap resource="../../VGenes/Resources/VgenesResources.qrc">:/PNG-Icons/ScalePic.png</pixmap>
+              <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/ScalePic.png</pixmap>
              </property>
              <property name="scaledContents">
               <bool>true</bool>
@@ -7019,6 +7019,18 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>load Igphyml</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_39">
+            <item row="0" column="2">
+             <widget class="QToolButton" name="toolButtonIgphyml">
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Load igphyml results</string>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_18">
               <property name="orientation">
@@ -7033,14 +7045,24 @@ If the J-end is off the J gene end may need adjusted</string>
              </spacer>
             </item>
             <item row="0" column="1">
-             <widget class="QToolButton" name="toolButtonIgphyml">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
+             <widget class="QTextEdit" name="igphyml_line">
+              <property name="enabled">
+               <bool>true</bool>
               </property>
-              <property name="text">
-               <string>Load igphyml results</string>
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="readOnly">
+               <bool>true</bool>
               </property>
              </widget>
             </item>
@@ -7300,6 +7322,8 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionGL"/>
    <addaction name="actionIsotypes"/>
    <addaction name="separator"/>
+   <addaction name="actionAlignmentHTML"/>
+   <addaction name="separator"/>
    <addaction name="actionPreferences"/>
    <addaction name="action_Help"/>
    <addaction name="separator"/>
@@ -7310,7 +7334,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </widget>
   <action name="action_Open">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/folder.png</normaloff>:/PNG-Icons/folder.png</iconset>
    </property>
    <property name="text">
@@ -7322,7 +7346,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="action_New">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/page.png</normaloff>
      <normalon>../../../../../Applications/Python 3.4/PyQt-gpl-5.3.1/examples/mainwindows/mdi/images/new.png</normalon>:/PNG-Icons/page.png</iconset>
    </property>
@@ -7338,7 +7362,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="action_Import">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Import.png</normaloff>:/PNG-Icons/Import.png</iconset>
    </property>
    <property name="text">
@@ -7353,7 +7377,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionExport">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Export.png</normaloff>:/PNG-Icons/Export.png</iconset>
    </property>
    <property name="text">
@@ -7362,7 +7386,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionIMGT">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/IMGT.png</normaloff>:/PNG-Icons/IMGT.png</iconset>
    </property>
    <property name="text">
@@ -7371,7 +7395,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionIgBlast">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/NCBI.png</normaloff>:/PNG-Icons/NCBI.png</iconset>
    </property>
    <property name="text">
@@ -7380,7 +7404,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionAnalyze_Mutations">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SHM.png</normaloff>:/PNG-Icons/SHM.png</iconset>
    </property>
    <property name="text">
@@ -7389,7 +7413,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionMultiple_Alignement">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Muli.png</normaloff>:/PNG-Icons/Muli.png</iconset>
    </property>
    <property name="text">
@@ -7398,7 +7422,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionAlignment">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Align.png</normaloff>:/PNG-Icons/Align.png</iconset>
    </property>
    <property name="text">
@@ -7410,7 +7434,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/process.png</normaloff>:/PNG-Icons/process.png</iconset>
    </property>
    <property name="text">
@@ -7419,7 +7443,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/print.png</normaloff>:/PNG-Icons/print.png</iconset>
    </property>
    <property name="text">
@@ -7431,7 +7455,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionPaste_from_Clipboard">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Paste.png</normaloff>:/PNG-Icons/Paste.png</iconset>
    </property>
    <property name="text">
@@ -7440,7 +7464,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/pages.png</normaloff>:/PNG-Icons/pages.png</iconset>
    </property>
    <property name="text">
@@ -7452,7 +7476,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/scissor.png</normaloff>:/PNG-Icons/scissor.png</iconset>
    </property>
    <property name="text">
@@ -7464,7 +7488,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Paste.png</normaloff>:/PNG-Icons/Paste.png</iconset>
    </property>
    <property name="text">
@@ -7476,7 +7500,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="action_Save">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SaveIcon.png</normaloff>:/PNG-Icons/SaveIcon.png</iconset>
    </property>
    <property name="text">
@@ -7488,7 +7512,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionAbout_2">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/warning.png</normaloff>:/PNG-Icons/warning.png</iconset>
    </property>
    <property name="text">
@@ -7497,7 +7521,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="action_Help">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/help.png</normaloff>:/PNG-Icons/help.png</iconset>
    </property>
    <property name="text">
@@ -7506,7 +7530,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionTop">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/left_arrow.png</normaloff>:/PNG-Icons/left_arrow.png</iconset>
    </property>
    <property name="text">
@@ -7521,7 +7545,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionBottom">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/right_arrow.png</normaloff>:/PNG-Icons/right_arrow.png</iconset>
    </property>
    <property name="text">
@@ -7536,7 +7560,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionMove_Up">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/up_arrow.png</normaloff>:/PNG-Icons/up_arrow.png</iconset>
    </property>
    <property name="text">
@@ -7551,7 +7575,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionMove_Down">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/down_arrow.png</normaloff>:/PNG-Icons/down_arrow.png</iconset>
    </property>
    <property name="text">
@@ -7566,7 +7590,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionFind_Clonal">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Clonal.png</normaloff>:/PNG-Icons/Clonal.png</iconset>
    </property>
    <property name="text">
@@ -7575,7 +7599,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SaveAsIcon.png</normaloff>:/PNG-Icons/SaveAsIcon.png</iconset>
    </property>
    <property name="text">
@@ -7584,7 +7608,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionDelete_record">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/delete.png</normaloff>:/PNG-Icons/delete.png</iconset>
    </property>
    <property name="text">
@@ -7624,7 +7648,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionIncrease_font_size">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/plus.png</normaloff>:/PNG-Icons/plus.png</iconset>
    </property>
    <property name="text">
@@ -7636,7 +7660,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionDecrease_font_size">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/minus.png</normaloff>:/PNG-Icons/minus.png</iconset>
    </property>
    <property name="text">
@@ -7653,7 +7677,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionCreateVDJdb">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/address_book.png</normaloff>:/PNG-Icons/address_book.png</iconset>
    </property>
    <property name="text">
@@ -7733,7 +7757,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionSuggestCanonical">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/checkmark.png</normaloff>:/PNG-Icons/checkmark.png</iconset>
    </property>
    <property name="text">
@@ -7745,7 +7769,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionRevert_to_previous">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/rewind.png</normaloff>:/PNG-Icons/rewind.png</iconset>
    </property>
    <property name="text">
@@ -7757,7 +7781,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </action>
   <action name="actionAnalyze_Isotypes">
    <property name="icon">
-    <iconset resource="../../VGenes/Resources/VgenesResources.qrc">
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/yen_currency_sign.png</normaloff>:/PNG-Icons/yen_currency_sign.png</iconset>
    </property>
    <property name="text">
@@ -7795,9 +7819,22 @@ If the J-end is off the J gene end may need adjusted</string>
     <string>FixNames</string>
    </property>
   </action>
+  <action name="actionAlignmentHTML">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
+   </property>
+   <property name="text">
+    <string>Alignment</string>
+   </property>
+   <property name="toolTip">
+    <string>Alignment of selected sequences</string>
+   </property>
+  </action>
  </widget>
  <resources>
-  <include location="../../VGenes/Resources/VgenesResources.qrc"/>
+  <include location="Resources/VgenesResources.qrc"/>
+  <include location="Resources/VgenesResources.qrc"/>
   <include location="../../VGenes/Resources/VgenesResources.qrc"/>
  </resources>
  <connections>

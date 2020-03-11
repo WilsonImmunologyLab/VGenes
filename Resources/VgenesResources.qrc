@@ -1,5 +1,14 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>MSA.png</file>
+    <file>Seq.png</file>
+    <file>HA.png</file>
+    <file>NA.png</file>
+    <file>Mutation.png</file>
+    <file>EditSeq.png</file>
+    <file>Fusion.png</file>
+    <file>PyMOL.png</file>
+    <file>GibsonClone.png</file>
     <file>Export.png</file>
     <file>Import.png</file>
     <file>ScalePic.png</file>
@@ -130,5 +139,7 @@
     <file>yen_currency_sign.png</file>
     <file>zoom_in.png</file>
     <file>zoom_out.png</file>
+    <file>treeAA.png</file>
+    <file>treeNT.png</file>
   </qresource>
 </RCC>

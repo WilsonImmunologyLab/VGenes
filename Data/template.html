@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<head>
+<script src="../Js/jquery.js"></script>
+</head>
+<html>
+
+<style>
+.insert {
+  position: relative;
+  display: inline-block;
+  width: 13px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+  z-index: -1;
+}
+
+.unit {
+  position: relative;
+  display: inline-block;
+  width: 13px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.unit_long {
+  position: relative;
+  display: inline-block;
+  width: 80px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.unit .unit_tip {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 5px;
+  font-size: 16px;
+  margin-top: 20px;
+  margin-left: 20px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.unit_pack:hover .unit .unit_tip {
+  visibility: visible;
+}
+.unit_pack:hover .insert{
+  background-color: silver;
+}
+.unit_pack:hover .unit{
+  background-color: silver;
+}
+
+.unit:hover {
+  background-color: silver;
+}
+
+.unit:hover .unit_tip {
+  visibility: visible;
+}
+
+.line {
+	margin-top: 2px;
+	font-size: 0px;
+	height: 20px;
+	margin-left: 12px;
+}
+
+.name {
+	width: 200px;
+	height: 18px;
+	display: inline-block;
+	font-size: 16px;
+	overflow: hidden;
+}
+
+.name .name_tip {
+  visibility: hidden;
+  width: 400px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 5px;
+  font-size: 16px;
+  margin-top: 20px;
+  margin-left: 50px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.name:hover .name_tip{
+	visibility: visible;
+}
+
+.name:hover {
+	background-color: silver;
+}
+
+.header_div {
+	padding:5px;
+	border:1px solid #96c2f1;
+	background:#eff7ff; 
+	width:96%;
+	height: 90px;
+	border-radius: 5px;
+	position: fixed;
+	left:0; top:0; right:0; bottom: 0; margin: auto; 
+}
+
+.box {
+	float: left;
+}
+
+.name_div {
+	padding:15px;
+	padding-left: 0px;
+	border-right: 8px solid #9bdf70;
+	border-top: 1px solid #9bdf70;
+	border-bottom:  1px solid #9bdf70;
+	background: #f0fbeb; 
+	margin-top:170px;
+	z-index: -1;
+	position: fixed;
+	width: 200px;
+}
+
+.seq_div {
+	padding:15px;
+	border-left: 8px solid #9bdf70;
+	border-top: 1px solid #9bdf70;
+	border-bottom:  1px solid #9bdf70;
+	background:#f0fbeb; 
+	margin-top:170px;
+	margin-left: 200px;
+	z-index: -2;
+	position: absolute;
+	width: 10000px;
+	display: block;
+	float: left;
+}
+
+.Ca1 {
+	color: white;
+	background-color: fuchsia
+}
+.Ca2 {
+	background-color: yellow
+}
+.Cb {
+	background-color: silver
+}
+.Sa {
+	color: white;
+	background-color: maroon
+}
+.Sb {
+	color: white;
+	background-color: green
+}
+.A {
+	color: white;
+	background-color: green
+}
+.B {
+	color: white;
+	background-color: fuchsia
+}
+.C {
+	background-color: silver
+}
+.D {
+	color: white;
+	background-color: maroon
+}
+.E {
+	color: white;
+	background-color: blue
+}
+
+.Stalk-MN {
+	color: white;
+	background-color: navy
+}
+
+.line_con_aa {
+	display: none;
+}
+
+.line_con_nt {
+	display: none;
+}
+
+.con_nt {
+	display: none;
+}
+
+.con_aa {
+	display: none;
+}
+
+.A.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        green 0, green 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        green 40%, green 65%, #f0fbeb 65%, #f0fbeb 80%, green 80%, green
+      );
+}
+
+.B.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        fuchsia 0, fuchsia 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        fuchsia 40%, fuchsia 65%, #f0fbeb 65%, #f0fbeb 80%, fuchsia 80%, fuchsia
+      );
+}
+
+.C.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        silver 0, silver 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        silver 40%, silver 65%, #f0fbeb 65%, #f0fbeb 80%, silver 80%, silver
+      );
+}
+
+.D.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        maroon 0, maroon 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        maroon 40%, maroon 65%, #f0fbeb 65%, #f0fbeb 80%, maroon 80%, maroon
+      );
+}
+
+.E.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        blue 0, blue 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        blue 40%, blue 65%, #f0fbeb 65%, #f0fbeb 80%, blue 80%, blue
+      );
+}
+
+.Ca1.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        fuchsia 0, fuchsia 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        fuchsia 40%, fuchsia 65%, #f0fbeb 65%, #f0fbeb 80%, fuchsia 80%, fuchsia
+      );
+}
+
+.Ca2.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        yellow 0, yellow 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        yellow 40%, yellow 65%, #f0fbeb 65%, #f0fbeb 80%, yellow 80%, yellow
+      );
+}
+
+.Cb.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        silver 0, silver 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        silver 40%, silver 65%, #f0fbeb 65%, #f0fbeb 80%, silver 80%, silver
+      );
+}
+
+
+.Sa.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        maroon 0, maroon 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        maroon 40%, maroon 65%, #f0fbeb 65%, #f0fbeb 80%, maroon 80%, maroon
+      );
+}
+
+.Sb.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+       	green 0, green 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        green 40%, green 65%, #f0fbeb 65%, #f0fbeb 80%, green 80%, green
+      );
+}
+
+.LateralPatch{
+	background: linear-gradient(
+		135deg,
+       	gray 0, gray 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        gray 40%, gray 65%, #f0fbeb 65%, #f0fbeb 80%, gray 80%, gray
+      );
+}
+
+.unit_long.LateralPatch{
+	background: linear-gradient(
+		135deg,
+       	gray 0, gray 25%, #eff7ff 25%, #eff7ff 40%, 
+        gray 40%, gray 65%, #eff7ff 65%, #eff7ff 80%, gray 80%, gray
+      );
+}
+</style>
+
+<style>
+/* The container */
+.container {
+  display: inline-block;
+  position: relative;
+  padding-left: 35px;
+  margin-left: 12px;
+  margin-right: 35px;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 16px;
+  width: 16px;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+</style>
+
+<style type="text/css">
+    .help-tip {
+        cursor:pointer;
+        text-align: left;
+        font-size: 14px;
+        padding-top: 5px;
+        padding-left: 10px;
+        border: 2px solid red;
+    }
+</style>
+<script>
+    window.onscroll = function () {
+        var st = -Math.max(document.body.scrollTop, document.documentElement.scrollTop) + 170;
+        $(".name_div").css('margin-top',st + 'px');
+    }
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#aa").click(function(){
+		selectionChange()
+	});
+	$("#nt").click(function(){
+		selectionChange()
+	});
+	$("#h1").click(function(){
+		selectionChange()
+	});
+	$("#h3").click(function(){
+		selectionChange()
+	});
+	$("#consensus").click(function(){
+		if($("#consensus").is(':checked')){
+			$("#option").css('display','inline-block')
+			$("#original").prop("checked",false)
+		} else {
+			$("#option").css('display','none')
+			$("#original").prop("checked",true)
+		}
+		selectionChange()
+	});
+	$("#original").click(function(){
+		if($("#original").is(':checked')){
+			$("#option").css('display','none')
+			$("#consensus").prop("checked",false)
+		} else {
+			$("#option").css('display','inline-block')
+			$("#consensus").prop("checked",true)
+		}
+		selectionChange()
+	});
+	$('#option').change(function(){
+		var select_val = $("#option").val();
+		var con_aa = data[select_val][1];
+		var con_nt = data[select_val][2];
+
+		var class_name_aa = ".line.con_aa.2";
+		var class_name_nt = ".line.con_nt.2";
+		$(class_name_aa).html(MakeDivAA(con_aa));
+		$(class_name_nt).html(MakeDivNT(con_nt));
+
+		for(var seq in data) {
+			if(seq != 'Seq0'){
+				var class_name_aa = ".line.line_con_aa." + seq + ".2";
+				var class_name_nt = ".line.line_con_nt." + seq + ".2";
+				var cur_con_aa = MakeConSeq(data[seq][1],con_aa);
+				var cur_con_nt = MakeConSeq(data[seq][2],con_nt);
+				$(class_name_aa).html(MakeDivAA(cur_con_aa));
+				$(class_name_nt).html(MakeDivNT(cur_con_nt));
+			}
+		}
+		selectionChange()
+	});
+	$('.unit_pack')
+	.mouseover(function(){
+		onmouseover_help(this,event)
+	})
+	.mouseout(function(){
+    	onmouseout_help(this)
+  	});
+	$(".line_nt.1").find(".name").hide()
+});
+
+function onmouseover_help(ele,event){
+    var left = ele.offsetLeft + ele.offsetParent.offsetLeft + 4
+    var width = ele.offsetWidth - 8
+    var height = ele.offsetParent.clientHeight
+    var top = ele.offsetParent.clientTop + ele.offsetParent.offsetTop
+
+    $("#indicator").css({"display":"block","left":(left+'px'), "top":(top+'px'),"height":(height+'px'),"width":(width+'px')});
+}
+function onmouseout_help(){
+	$("#indicator").css({"display":"none"});
+}
+
+function selectionChange() {
+	if($("#nt").is(':checked')){
+		$(".insert").show()
+		$(".line_pos_nt").show()
+		if($("#consensus").is(':checked')){
+			$(".con_nt").show()
+			$(".line_con_nt").show()
+			$(".line_nt").hide()
+		} else {
+			$(".line_nt").show()
+			$(".con_nt").hide()
+			$(".line_con_nt").hide()
+		}
+	} else {
+		$(".line_nt").hide()
+		$(".con_nt").hide()
+		$(".insert").hide()
+		$(".line_pos_nt").hide()
+		$(".line_con_nt").hide()
+	}
+
+	if($("#aa").is(':checked')){
+		$(".line_pos_aa").show()
+		if($("#consensus").is(':checked')){
+			$(".con_aa").show()
+			$(".line_con_aa").show()
+			$(".line_aa").hide()
+		} else {
+			$(".line_aa").show()
+			$(".con_aa").hide()
+			$(".line_con_aa").hide()
+		}
+	} else {
+		$(".line_aa").hide()
+		$(".con_aa").hide()
+		$(".line_pos_aa").hide()
+		$(".line_con_aa").hide()
+	}
+
+	if($("#h1").is(':checked')){
+		$(".line_h1").show()
+	} else {
+		$(".line_h1").hide()
+	}
+
+	if($("#h3").is(':checked')){
+		$(".line_h3").show()
+	} else {
+		$(".line_h3").hide()
+	}
+
+	if($("#aa").is(':checked') && $("#nt").is(':checked')){
+		$(".line_nt.1").find(".name").hide()
+		$(".line_con_nt.1").find(".name").hide()
+	}
+	else if($("#nt").is(':checked')){
+		$(".line_nt.1").find(".name").show()
+		$(".line_con_nt.1").find(".name").show()
+	}
+}
+
+</script>
+
+<script type="text/javascript">
+function MakeConSeq(seq, con){
+	var seq_len = seq.length;
+	for (var i = 0; i < seq_len; i++) {
+		if(seq[i] == con[i]){
+			seq = seq.substr(0,i) + '.' + seq.substr(i+1,seq_len-i);
+		}
+	}
+	return seq;
+}
+
+function MakeDivAA(data){
+	var div_seq = '';
+	for (var i = 0; i < data.length; i++) {
+		div_seq = div_seq + '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + data[i] + '</span><span class="insert">&nbsp;</span></span>';
+	}
+	return div_seq;
+}
+
+function MakeDivNT(data){
+	var div_seq = '';
+	for (var i = 0; i < data.length; i++) {
+		if(i == 0){
+			div_seq = div_seq + '<span class="unit_pack">';
+		} else if(i%3 == 0) {
+			div_seq = div_seq + '</span><span class="unit_pack">';
+		}
+		div_seq = div_seq + '<span class="unit">' + data[i] + '</span>';
+	}
+	div_seq = div_seq + '</span>';
+
+	return div_seq;
+}
+</script>
+
+<body style="margin-left: 0px;">
+
+<div id="indicator" style="display:none;position:absolute;z-index:1;pointer-events: none" class = "help-tip"></div>
+
+<div class = 'header_div' style="margin-top: 10px; height: 65px;">
+	<h3 style="margin-left:12px;margin-top:5px;margin-bottom:5px;">Options:</h3>
+	<label class="container">AA
+	  <input id = 'aa' type="checkbox" checked="checked">
+	  <span class="checkmark"></span>
+	</label>
+	<label class="container">NT
+	  <input id = 'nt' type="checkbox" checked="checked">
+	  <span class="checkmark"></span>
+	</label>
+</div>
+
+<div class = 'header_div' style="margin-top: 95px; height: 65px;">
+	<h3 style="margin-left:12px;margin-top:5px;margin-bottom:5px;">Display Mode:</h3>
+	<label class="container">Original:
+	  <input id = 'original' type="checkbox"  checked="checked">
+	  <span class="checkmark"></span>
+	</label>
+	<label class="container">Template:
+	  <input id = 'consensus' type="checkbox">
+	  <span class="checkmark"></span>
+	</label>
+	<select id = 'option' style="display: none;">
+	</select>
+</div>
+
