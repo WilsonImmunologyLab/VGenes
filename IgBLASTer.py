@@ -19,7 +19,7 @@ global working_prefix
 global temp_folder
 
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
-temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
+temp_folder = os.path.join(working_prefix, 'Temp')
 
 def ProcessFASTA(FASTAfile, MaxNum):
 	ErLog = ''

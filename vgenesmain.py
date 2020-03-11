@@ -411,8 +411,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.comboBoxGroup.setEditable(True)
 			self.comboBoxSubgroup.setEditable(True)
 
-	# Need code for function to populate identical to these on main form
-
 	@pyqtSlot()
 	def on_buttonBox_accepted(self):
 		# Alldone = False
@@ -426,23 +424,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	def on_buttonBox_rejected(self):
 
 		self.close()
-
-	# def timingcheck(self):
-	# 	# TODO can delete this if gets work
-	#
-	# 	# import IgBLASTer
-	#
-	# 	# stmtS = "/Users/PCW-MacBookProRet/Dropbox/VGenes/Database/SFV-005H.nt"
-	# 	DirTo = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes')
-	# 	import timeit, os
-	# 	# todo change to app folder
-	# 	try:
-	# 		os.chdir(DirTo)
-	# 	except:
-	# 		os.chdir('/Volumes/Promise Pegasus/Dropbox/VGenes/VGenes')
-	#
-	# 	t = timeit.timeit('self.findTableViewRecord(self, FieldName)")', 'import IgBLASTer', number=10000)
-	# 	print(t)
 
 	def disableWidgets(self):
 		self.comboBoxGroup.setDisabled(True)
@@ -465,9 +446,8 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.txtComment.setDisabled(True)
 		self.MaxImport.setDisabled(True)
 
-		self.btnImportOldVGenes.setDisabled(True)
+		#self.btnImportOldVGenes.setDisabled(True)
 		self.buttonBox.setDisabled(True)
-
 
 	def checkProgress(self):
 		global timer
@@ -517,10 +497,10 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				pathname = Filenamed[0]
 			if pathname == None:
 				return False
-
-
 		elif thetype == 'Sequence':
 			filenames = openFiles(self, 'seq')
+			if filenames == None:
+				return False
 			pathname1 = self.ProcessSeqFiles(filenames)
 			pathname = []
 			pathname.append(pathname1)
@@ -754,6 +734,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				'''
 		elif self.rdoFunction.isChecked():
 			for item in pathname:
+				self.lineEdit.setText(item)
 				(dirname, filename) = os.path.split(item)
 
 				project = 'ByFunction'

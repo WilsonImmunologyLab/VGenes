@@ -112,6 +112,55 @@
      </widget>
     </widget>
    </item>
+   <item row="9" column="1" colspan="2">
+    <widget class="QProgressBar" name="progressBar">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>20</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>50</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="sizeIncrement">
+      <size>
+       <width>0</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="baseSize">
+      <size>
+       <width>0</width>
+       <height>20</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string/>
+     </property>
+     <property name="autoFillBackground">
+      <bool>true</bool>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>true</bool>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="invertedAppearance">
+      <bool>false</bool>
+     </property>
+     <property name="textDirection">
+      <enum>QProgressBar::BottomToTop</enum>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="0">
     <widget class="QLabel" name="label">
      <property name="minimumSize">
@@ -159,6 +208,13 @@
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="11" column="0" colspan="2">
+    <widget class="QLineEdit" name="lineEdit">
+     <property name="readOnly">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
@@ -343,23 +399,6 @@
      </property>
     </widget>
    </item>
-   <item row="11" column="0">
-    <widget class="QPushButton" name="btnImportOldVGenes">
-     <property name="toolTip">
-      <string>This function imports a comma separated values (CSV) file formatted as Project, Group, Subgroup, Name, Sequence</string>
-     </property>
-     <property name="text">
-      <string>Import CSV</string>
-     </property>
-    </widget>
-   </item>
-   <item row="11" column="2">
-    <widget class="QDialogButtonBox" name="buttonBox">
-     <property name="standardButtons">
-      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="1" colspan="2">
     <widget class="QComboBox" name="comboBoxProject">
      <property name="minimumSize">
@@ -451,52 +490,16 @@
      </property>
     </widget>
    </item>
-   <item row="9" column="1" colspan="2">
-    <widget class="QProgressBar" name="progressBar">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>20</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
+   <item row="11" column="2">
+    <widget class="QDialogButtonBox" name="buttonBox">
+     <property name="maximumSize">
       <size>
-       <width>50</width>
-       <height>20</height>
+       <width>180</width>
+       <height>16777215</height>
       </size>
      </property>
-     <property name="sizeIncrement">
-      <size>
-       <width>0</width>
-       <height>0</height>
-      </size>
-     </property>
-     <property name="baseSize">
-      <size>
-       <width>0</width>
-       <height>20</height>
-      </size>
-     </property>
-     <property name="toolTip">
-      <string/>
-     </property>
-     <property name="autoFillBackground">
-      <bool>true</bool>
-     </property>
-     <property name="value">
-      <number>0</number>
-     </property>
-     <property name="textVisible">
-      <bool>true</bool>
-     </property>
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="invertedAppearance">
-      <bool>false</bool>
-     </property>
-     <property name="textDirection">
-      <enum>QProgressBar::BottomToTop</enum>
+     <property name="standardButtons">
+      <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
      </property>
     </widget>
    </item>
