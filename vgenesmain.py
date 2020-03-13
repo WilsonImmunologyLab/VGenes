@@ -9,7 +9,7 @@ import shutil
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor
+from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
 from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
@@ -1170,6 +1170,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+
+		self.enableEdit = False
 
 	@pyqtSlot()
 	def on_actionAlignmentHTML_triggered(self):
@@ -6599,7 +6601,136 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.findTreeItem(currentitemIs)
 
+	@pyqtSlot()
+	def on_btnEditLock_clicked(self):
+		if self.enableEdit == True:
+			lock_icon = QIcon()
+			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
+			self.ui.btnEditLock.setIcon(lock_icon)
 
+			self.ui.btnSaveChange.setEnabled(False)
+
+			self.ui.txtDateTime.setReadOnly(True)
+			self.ui.txtGroup.setReadOnly(True)
+			self.ui.txtLabel.setReadOnly(True)
+			self.ui.txtName.setReadOnly(True)
+			self.ui.txtProject.setReadOnly(True)
+			self.ui.txtQuality.setReadOnly(True)
+			self.ui.txtStatus.setReadOnly(True)
+			self.ui.txtSubGroup.setReadOnly(True)
+			self.ui.comboBoxSpecies.setEnabled(False)
+			
+			self.ui.txtDLocus.setReadOnly(True)
+			self.ui.txtDgene.setReadOnly(True)
+			self.ui.txtVLocus.setReadOnly(True)
+			self.ui.txtVgene.setReadOnly(True)
+			self.ui.txtJLocus.setReadOnly(True)
+			self.ui.txtJgene.setReadOnly(True)
+			self.ui.txtIsotype.setReadOnly(True)
+			self.ui.txtID.setReadOnly(True)
+			self.ui.txtStop.setReadOnly(True)
+
+			self.ui.textBarcode.setReadOnly(True)
+			self.ui.textCluster.setReadOnly(True)
+			self.ui.textMutations.setReadOnly(True)
+			self.ui.textEdit.setReadOnly(True)
+			self.ui.txtPopulation.setReadOnly(True)
+
+			self.ui.txtD.setReadOnly(True)
+			self.ui.txtDJ.setReadOnly(True)
+			self.ui.txtJend.setReadOnly(True)
+			self.ui.txtVD.setReadOnly(True)
+			self.ui.txtVend.setReadOnly(True)
+			self.ui.txtClonalPool.setReadOnly(True)
+			self.ui.txtClonalRank.setReadOnly(True)
+			self.ui.txtProductive.setReadOnly(True)
+			self.ui.txtReadingFrame.setReadOnly(True)
+			self.ui.txtCDR3AA.setReadOnly(True)
+			self.ui.txtCDR3DNA.setReadOnly(True)
+			self.ui.txtCDR3Length.setReadOnly(True)
+			self.ui.txtCDR3MW.setReadOnly(True)
+			self.ui.txtCDR3pI.setReadOnly(True)
+
+			self.ui.radioButton_21.setEnabled(False)
+			self.ui.radioButton_22.setEnabled(False)
+			self.ui.radioButton_23.setEnabled(False)
+			self.ui.Autoreactivity.setEnabled(False)
+			self.ui.listViewSpecificity.setEnabled(False)
+			self.ui.listViewSpecificity_2.setEnabled(False)
+
+			self.ui.txtComments.setReadOnly(True)
+
+			self.enableEdit = False
+
+		else:
+			unlock_icon = QIcon()
+			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
+			self.ui.btnEditLock.setIcon(unlock_icon)
+
+			self.ui.btnSaveChange.setEnabled(True)
+
+			self.ui.txtDateTime.setReadOnly(False)
+			self.ui.txtGroup.setReadOnly(False)
+			self.ui.txtLabel.setReadOnly(False)
+			self.ui.txtName.setReadOnly(False)
+			self.ui.txtProject.setReadOnly(False)
+			self.ui.txtQuality.setReadOnly(False)
+			self.ui.txtStatus.setReadOnly(False)
+			self.ui.txtSubGroup.setReadOnly(False)
+			self.ui.comboBoxSpecies.setEnabled(True)
+
+			self.ui.txtDLocus.setReadOnly(False)
+			self.ui.txtDgene.setReadOnly(False)
+			self.ui.txtVLocus.setReadOnly(False)
+			self.ui.txtVgene.setReadOnly(False)
+			self.ui.txtJLocus.setReadOnly(False)
+			self.ui.txtJgene.setReadOnly(False)
+			self.ui.txtIsotype.setReadOnly(False)
+			self.ui.txtID.setReadOnly(False)
+			self.ui.txtStop.setReadOnly(False)
+
+			self.ui.textBarcode.setReadOnly(False)
+			self.ui.textCluster.setReadOnly(False)
+			self.ui.textMutations.setReadOnly(False)
+			self.ui.textEdit.setReadOnly(False)
+			self.ui.txtPopulation.setReadOnly(False)
+
+			self.ui.txtD.setReadOnly(False)
+			self.ui.txtDJ.setReadOnly(False)
+			self.ui.txtJend.setReadOnly(False)
+			self.ui.txtVD.setReadOnly(False)
+			self.ui.txtVend.setReadOnly(False)
+			self.ui.txtClonalPool.setReadOnly(False)
+			self.ui.txtClonalRank.setReadOnly(False)
+			self.ui.txtProductive.setReadOnly(False)
+			self.ui.txtReadingFrame.setReadOnly(False)
+			self.ui.txtCDR3AA.setReadOnly(False)
+			self.ui.txtCDR3DNA.setReadOnly(False)
+			self.ui.txtCDR3Length.setReadOnly(False)
+			self.ui.txtCDR3MW.setReadOnly(False)
+			self.ui.txtCDR3pI.setReadOnly(False)
+
+			self.ui.radioButton_21.setEnabled(True)
+			self.ui.radioButton_22.setEnabled(True)
+			self.ui.radioButton_23.setEnabled(True)
+			self.ui.Autoreactivity.setEnabled(True)
+			self.ui.listViewSpecificity.setEnabled(True)
+			self.ui.listViewSpecificity_2.setEnabled(True)
+
+			self.ui.txtComments.setReadOnly(False)
+
+			self.enableEdit = True
+
+	@pyqtSlot()
+	def on_btnSaveChange_clicked(self):
+		if self.enableEdit == True:
+			Msg = 'Yes!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		else:
+			Msg = 'Please switch to edit mode first!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
 
 	@pyqtSlot()
 	def ReportOptions(self):
