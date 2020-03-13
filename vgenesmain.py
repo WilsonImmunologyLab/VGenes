@@ -6366,8 +6366,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		New = False
 		self.MoveRecords(New)
 
-
-
 	@pyqtSlot()
 	def on_pushButtonSimilar_clicked(self):
 		# print('searched')
@@ -6724,9 +6722,60 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_btnSaveChange_clicked(self):
 		if self.enableEdit == True:
-			Msg = 'Yes!'
-			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-			return
+			SETStatement = 'SET '
+			SETStatement += 'Project = "' + self.ui.txtProject.toPlainText() + '",'
+			SETStatement += 'Grouping = "' + self.ui.txtGroup.toPlainText() + '",'
+			SETStatement += 'SubGroup = "' + self.ui.txtSubGroup.toPlainText() + '",'
+			SETStatement += 'SeqName = "' + self.ui.txtName.toPlainText() + '",'
+			SETStatement += 'Species = "' + self.ui.comboBoxSpecies.currentText() + '",'
+			SETStatement += 'DateEntered = "' + self.ui.txtDateTime.toPlainText() + '",'
+			SETStatement += 'Quality = "' + self.ui.txtQuality.toPlainText() + '",'
+			SETStatement += 'Blank12 = "' + self.ui.txtLabel.toPlainText() + '",'
+			SETStatement += 'Blank12 = "' + self.ui.txtLabel.toPlainText() + '",'
+			SETStatement += 'Blank13 = "' + self.ui.txtStatus.toPlainText() + '",'
+			SETStatement += 'V1 = "' + self.ui.txtVgene.toPlainText() + '",'
+			SETStatement += 'VLocus = "' + self.ui.txtVLocus.toPlainText() + '",'
+			SETStatement += 'D1 = "' + self.ui.txtDgene.toPlainText() + '",'
+			SETStatement += 'DLocus = "' + self.ui.txtDLocus.toPlainText() + '",'
+			SETStatement += 'J1 = "' + self.ui.txtJgene.toPlainText() + '",'
+			SETStatement += 'JLocus = "' + self.ui.txtJLocus.toPlainText() + '",'
+			SETStatement += 'Isotype = "' + self.ui.txtIsotype.toPlainText() + '",'
+			SETStatement += 'IDEvent = "' + self.ui.txtID.toPlainText() + '",'
+			SETStatement += 'StopCodon = "' + self.ui.txtStop.toPlainText() + '",'
+			SETStatement += 'Blank8 = "' + self.ui.textCluster.toPlainText() + '",'
+			SETStatement += 'Blank9 = "' + self.ui.textEdit.toPlainText() + '",'
+			SETStatement += 'TotMut = "' + self.ui.textMutations.toPlainText() + '",'
+			SETStatement += 'Blank10 = "' + self.ui.textBarcode.toPlainText() + '",'
+			SETStatement += 'Blank11 = "' + self.ui.txtPopulation.toPlainText() + '",'
+			SETStatement += 'VSeqend = "' + self.ui.txtVend.toPlainText() + '",'
+			SETStatement += 'VDJunction = "' + self.ui.txtVD.toPlainText() + '",'
+			SETStatement += 'Dregion = "' + self.ui.txtD.toPlainText() + '",'
+			SETStatement += 'DJJunction = "' + self.ui.txtDJ.toPlainText() + '",'
+			SETStatement += 'begJ = "' + self.ui.txtJend.toPlainText() + '",'
+			SETStatement += 'CDR3DNA = "' + self.ui.txtCDR3DNA.toPlainText() + '",'
+			SETStatement += 'CDR3AA = "' + self.ui.txtCDR3AA.toPlainText() + '",'
+			SETStatement += 'CDR3Length = "' + self.ui.txtCDR3Length.toPlainText() + '",'
+			SETStatement += 'CDR3pI = "' + self.ui.txtCDR3pI.toPlainText() + '",'
+			SETStatement += 'CDR3MW = "' + self.ui.txtCDR3MW.toPlainText() + '",'
+			SETStatement += 'productive = "' + self.ui.txtProductive.toPlainText() + '",'
+			SETStatement += 'ReadingFrame = "' + self.ui.txtReadingFrame.toPlainText() + '",'
+			SETStatement += 'ClonalPool = "' + self.ui.txtClonalPool.toPlainText() + '",'
+			SETStatement += 'ClonalRank = "' + self.ui.txtClonalRank.toPlainText() + '",'
+			SETStatement += 'Specificity = "' + self.ui.listViewSpecificity.currentText() + '",'
+			SETStatement += 'Subspecificity = "' + self.ui.listViewSpecificity_2.currentText() + '",'
+			SETStatement += 'Blank6 = "' + self.ui.Autoreactivity.currentText() + '",'
+			SETStatement += 'Comments = "' + self.ui.txtComments.toPlainText() + '" '
+
+			value = self.ui.treeWidget.selectedItems()
+			name = value[-1].text(0)
+			WHEREStatement = 'WHERE SeqName = "' + name + '"'
+
+			SQLStatement = 'UPDATE vgenesDB ' + SETStatement + WHEREStatement
+			foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+
+			# update tree
+			SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+			self.initializeTreeView(SQLFields)
 		else:
 			Msg = 'Please switch to edit mode first!'
 			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -6827,8 +6876,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		option = self.ui.cboReportOptions.currentText()
 
 		VReports.StandardReports(self, option, data[0], DBFilename)
-
-
 
 	@pyqtSlot()
 	def SaveBackup(self):
@@ -7991,21 +8038,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.DecorateText(FinalMap, Scale, CurPos, cursor)
 
-
-
-		# SeqArray has: SeqName, CDR1beg, CDR1end, CDR2beg, CDR2end, CDR3beg, CDR3end,
-		# AAseq, Hydrophobicity, Hyrdorphilicity, flexibility, surface, pI, Instability,
-
-	# now for decorated seqs build document in VGenetext editor (no wrap)
-	# for fun add scale line made of spaces that are colormapped, can even give numbers instead spaces
-	# and numerical color maps using VGenesSeq.OtherParam and then
-	# color using VGenes text edit cursor and    self.DecorateText(ColorMap, Scale, CurPos, cursor)
-	# where CurPos will allow iteration through seq with different map conditions
-
-
-
-
-
 	@pyqtSlot()
 	def on_btnUpdateTree_clicked(self):
 		fields = self.ui.cboTreeOp1.currentText()
@@ -8377,24 +8409,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#  76 Grouping, 77 SubGroup, 78 Species, 79 Sequence, 80 GermlineSequence, 81 CDR3DNA, 82 CDR3AA,
 			#  83 CDR3Length, 84 CDR3beg, 85 CDRend, 86 Specificity, 87 Subspecificity, 88 ClonalPool, 89 ClonalRank,
 			#  90 VLocus, 91 JLocus, 92 DLocus, 93 DateEntered, 94 Comments, 95 Quality, 96 TotalMuts, 97 Mutations, 98 IDEvent, CDR3MW, CDR3pI, Isotype, Blank4, Blank5, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, 99 ID
-
-	# @pyqtSlot()
-	# def IncrementDials(self):
-	#
-	#     if DontFindTwice == False:
-	#         self.findTreeItem(data[0])
-	#     currentRecord = self.ui.tableView.currentIndex().row()
-	#     maxRecords = self.ui.tableView.model().rowCount()
-	#     self.ui.horizontalScrollBar.setMaximum(maxRecords)
-	#     self.ui.dial.setMaximum(maxRecords)
-	#
-	#     self.ui.lcdNumber_max.display(maxRecords)
-	#     self.ui.horizontalScrollBar.setValue(currentRecord)
-	#     self.ui.dial.setValue(currentRecord)
-	#     currentRecord += 1
-	#     self.ui.lcdNumber_current.display(currentRecord)
-
-
 
 	@pyqtSlot()
 	def on_actionCreateVDJdb_triggered(self):
