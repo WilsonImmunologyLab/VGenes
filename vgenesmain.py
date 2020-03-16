@@ -10,7 +10,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
@@ -92,6 +92,8 @@ global DontFindTwice
 DontFindTwice = False
 wasClicked = False
 data = []
+global MoveNotChange
+MoveNotChange = False
 global PreviewHTExp
 PreviewHTExp = []
 global PreviewHTcurrent
@@ -1157,6 +1159,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonAA.clicked.connect(self.makeAALogo)
 		self.ui.toolButtonIgphyml.clicked.connect(self.loadIgphyml)
 		self.ui.toolButtonCloneRaxml.clicked.connect(self.buildCloneTree)
+		self.ui.EditLock.clicked.connect(self.ChangeEditMode)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1631,7 +1634,99 @@ class VGenesForm(QtWidgets.QMainWindow):
 			list_unique = list(set(list1))
 			list_unique.remove('0')
 			list_unique.sort()
+			self.ui.comboBoxTree.clear()
 			self.ui.comboBoxTree.addItems(list_unique)
+		elif self.ui.tabWidget.currentIndex() == 9:
+			# if old table exists, clear table
+			if self.ui.SeqTable.columnCount() > 0:
+				self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
+			self.ui.SeqTable.setColumnCount(0)
+			self.ui.SeqTable.setRowCount(0)
+			# load data for new table
+			if DBFilename != '' and DBFilename != 'none':
+				SQLStatement = 'SELECT * FROM vgenesdb ORDER BY SeqName DESC'
+				HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+
+				num_row = len(DataIn)
+				num_col = len(HeaderIn)
+				self.ui.SeqTable.setRowCount(num_row)
+				self.ui.SeqTable.setColumnCount(num_col)
+
+				horizontalHeader = [i[1] for i in HeaderIn]
+				self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
+				self.ui.SeqTable.fields = horizontalHeader
+
+				for row_index in range(num_row):
+					for col_index in range(num_col):
+						unit = QTableWidgetItem(DataIn[row_index][col_index])
+						unit.last_name = DataIn[row_index][col_index]
+						self.ui.SeqTable.setItem(row_index, col_index, unit)
+				# disable edit
+				self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+				# show sort indicator
+				self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
+				# connect sort indicator to slot function
+				self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
+				self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
+
+
+	def EditTableItem(self, item):
+
+		global MoveNotChange
+		if MoveNotChange:
+			return
+
+		row = item.row()
+		col = item.column()
+		CurVal = item.text()
+
+		horizontalHeader = self.ui.SeqTable.fields
+		col_name = horizontalHeader[col]
+
+		if col == 0:  # update sequence name
+			SeqName = item.last_name
+		else:
+			SeqName = self.ui.SeqTable.item(row, 0).text()
+
+		try:
+			self.UpdateSeq(SeqName, CurVal, col_name)
+			item.last_name = CurVal
+		except:
+			MoveNotChange = True
+			col = item.column()
+			self.ui.SeqTable.item(row, col).setText(SeqName)
+			MoveNotChange = False
+			QMessageBox.warning(self, 'Warning',
+								'The name:\n' + CurVal + '\nhas been taken! Please choose another name!',
+								QMessageBox.Ok, QMessageBox.Ok)
+
+	@pyqtSlot()
+	def UpdateSeq(self, ID, ItemValue, FieldName):
+		global DBFilename
+		# ID = item[0]
+		VGenesSQL.UpdateField(ID, ItemValue, FieldName, DBFilename)
+
+	def sortTable(self, index):
+		if self.ui.tabWidget.currentIndex() == 9:
+			self.ui.SeqTable.sortByColumn(index, self.ui.SeqTable.horizontalHeader().sortIndicatorOrder())
+		else:
+			self.ui.tableWidget.sortByColumn(index, self.ui.tableWidget.horizontalHeader().sortIndicatorOrder())
+
+	def ChangeEditMode(self):
+		if self.ui.SeqTable.editTriggers() == QtWidgets.QAbstractItemView.NoEditTriggers:
+			unlock_icon = QIcon()
+			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
+			self.ui.EditLock.setIcon(unlock_icon)
+			self.ui.EditLock.setText('Edit Lock: Unlock (Double fields click to edit)')
+			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
+		else:
+			lock_icon = QIcon()
+			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
+			self.ui.EditLock.setIcon(lock_icon)
+			self.ui.EditLock.setText('Edit Lock: Locked')
+			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 	def GenerateFigure(self):
 		global DBFilename
