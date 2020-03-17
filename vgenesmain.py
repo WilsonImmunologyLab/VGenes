@@ -1161,6 +1161,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.toolButtonCloneRaxml.clicked.connect(self.buildCloneTree)
 		self.ui.EditLock.clicked.connect(self.ChangeEditMode)
 		self.ui.checkBoxAll.stateChanged.connect(self.checkAll)
+		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1176,6 +1177,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 		self.enableEdit = False
+
+	def selectionMode(self):
+		if self.ui.checkBoxRowSelection.isChecked():
+			self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+		else:
+			self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
 
 	@pyqtSlot()
 	def on_actionAlignmentHTML_triggered(self):
@@ -1232,7 +1239,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		view.show()
 		layout.addWidget(view)
 		VGenesTextWindows[window_id].show()
-
 
 	def buildCloneTree(self):
 		clone_name = self.ui.comboBoxTree.currentText()
@@ -1662,7 +1668,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# re-size column size
 				self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
 				self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-				self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+				if self.ui.checkBoxRowSelection.isChecked():
+					self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+				else:
+					self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
 
 				for row_index in range(num_row):
 					cell_checkBox = QCheckBox()

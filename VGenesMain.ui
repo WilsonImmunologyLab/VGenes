@@ -5386,7 +5386,7 @@
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text';&quot;&gt;Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &amp;quot;-2&amp;quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &amp;quot;-2&amp;quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -7324,17 +7324,7 @@ If the J-end is off the J gene end may need adjusted</string>
         <string>Database</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_42">
-        <item row="0" column="1">
-         <widget class="QCheckBox" name="checkBoxAll">
-          <property name="text">
-           <string>Check all</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="4">
-         <widget class="QTableWidget" name="SeqTable"/>
-        </item>
-        <item row="0" column="3">
+        <item row="0" column="4">
          <spacer name="horizontalSpacer_21">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -7346,6 +7336,16 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
          </spacer>
+        </item>
+        <item row="1" column="0" colspan="5">
+         <widget class="QTableWidget" name="SeqTable"/>
+        </item>
+        <item row="0" column="1">
+         <widget class="QCheckBox" name="checkBoxAll">
+          <property name="text">
+           <string>Check all</string>
+          </property>
+         </widget>
         </item>
         <item row="0" column="2">
          <widget class="QPushButton" name="EditLock">
@@ -7370,6 +7370,13 @@ If the J-end is off the J gene end may need adjusted</string>
           </property>
           <property name="flat">
            <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="QCheckBox" name="checkBoxRowSelection">
+          <property name="text">
+           <string>Select entire row</string>
           </property>
          </widget>
         </item>
@@ -8088,7 +8095,7 @@ If the J-end is off the J gene end may need adjusted</string>
  <resources>
   <include location="Resources/VgenesResources.qrc"/>
   <include location="Resources/VgenesResources.qrc"/>
-  <include location="Resources/VgenesResources.qrc"/>
+  <include location="../../VGenes/Resources/VgenesResources.qrc"/>
  </resources>
  <connections>
   <connection>

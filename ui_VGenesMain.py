@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'VGenesMain.ui'
 #
-# Created by: PyQt5 UI code generator 5.13.2
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -2952,16 +2952,16 @@ class Ui_MainWindow(object):
         self.tab_7.setObjectName("tab_7")
         self.gridLayout_42 = QtWidgets.QGridLayout(self.tab_7)
         self.gridLayout_42.setObjectName("gridLayout_42")
-        self.checkBoxAll = QtWidgets.QCheckBox(self.tab_7)
-        self.checkBoxAll.setObjectName("checkBoxAll")
-        self.gridLayout_42.addWidget(self.checkBoxAll, 0, 1, 1, 1)
+        spacerItem21 = QtWidgets.QSpacerItem(865, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
+        self.gridLayout_42.addItem(spacerItem21, 0, 4, 1, 1)
         self.SeqTable = QtWidgets.QTableWidget(self.tab_7)
         self.SeqTable.setObjectName("SeqTable")
         self.SeqTable.setColumnCount(0)
         self.SeqTable.setRowCount(0)
-        self.gridLayout_42.addWidget(self.SeqTable, 1, 0, 1, 4)
-        spacerItem21 = QtWidgets.QSpacerItem(865, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.gridLayout_42.addItem(spacerItem21, 0, 3, 1, 1)
+        self.gridLayout_42.addWidget(self.SeqTable, 1, 0, 1, 5)
+        self.checkBoxAll = QtWidgets.QCheckBox(self.tab_7)
+        self.checkBoxAll.setObjectName("checkBoxAll")
+        self.gridLayout_42.addWidget(self.checkBoxAll, 0, 1, 1, 1)
         self.EditLock = QtWidgets.QPushButton(self.tab_7)
         self.EditLock.setMaximumSize(QtCore.QSize(16777215, 30))
         self.EditLock.setIcon(icon2)
@@ -2969,6 +2969,9 @@ class Ui_MainWindow(object):
         self.EditLock.setFlat(True)
         self.EditLock.setObjectName("EditLock")
         self.gridLayout_42.addWidget(self.EditLock, 0, 2, 1, 1)
+        self.checkBoxRowSelection = QtWidgets.QCheckBox(self.tab_7)
+        self.checkBoxRowSelection.setObjectName("checkBoxRowSelection")
+        self.gridLayout_42.addWidget(self.checkBoxRowSelection, 0, 3, 1, 1)
         self.tabWidget.addTab(self.tab_7, "")
         self.gridLayout_8.addWidget(self.tabWidget, 0, 1, 3, 1)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -3498,7 +3501,7 @@ class Ui_MainWindow(object):
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'.SF NS Text\'; font-size:13pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-family:\'.SF NS Text\';\">Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &quot;-2&quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.</span></p></body></html>"))
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &quot;-2&quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.</p></body></html>"))
         self.groupBox_9.setTitle(_translate("MainWindow", "               Leader:                             V-Begin:                                J-end:                                              C-Begin:  "))
         self.btn10xEditForward.setText(_translate("MainWindow", "Forward ->"))
         self.label_35.setText(_translate("MainWindow", "Sequence Name:"))
@@ -3592,6 +3595,7 @@ class Ui_MainWindow(object):
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_4), _translate("MainWindow", "Ig phylogeny"))
         self.checkBoxAll.setText(_translate("MainWindow", "Check all"))
         self.EditLock.setText(_translate("MainWindow", "Edit Lock: Locked"))
+        self.checkBoxRowSelection.setText(_translate("MainWindow", "Select entire row"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_7), _translate("MainWindow", "Database"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuSequences.setTitle(_translate("MainWindow", "Sequences"))
