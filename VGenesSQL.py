@@ -97,6 +97,32 @@ def UpdateField(ID, Value, Field, DBpathname):
 
     conn.commit()
     conn.close
+
+def UpdateFieldbySeqName(ID, Value, Field, DBpathname):
+    (dirname, filename) = os.path.split(DBpathname)
+
+    os.chdir(dirname)
+    # print(dirname)
+
+
+    conn = db.connect(DBpathname)
+    cursor = conn.cursor()
+    # cursor.execute('drop table if exists vgenesdb')
+    nID = str(ID)
+    SQLCommand = 'UPDATE vgenesDB SET ' + Field + ' = "' + Value + '" WHERE SeqName = ' + '"' + nID + '"'
+    # if Field == 'SeqAlignment':
+    #     SQLCommand = 'UPDATE vgenesdb SET Isotype = "' + Value + '" WHERE ID = ' + ID
+    try:
+        cursor.execute(SQLCommand)
+    except:
+        print(SQLCommand)
+    # SQLCommand = 'UPDATE vgenesdb SET SeqName = "DeletionSeq2", V1 = "333" WHERE ID = 7'
+
+    # ID PRIMARY KEY,
+
+    conn.commit()
+    conn.close
+
 def CreateAnalysisDB(FileName, DBpathname):
     # DBpathname = FileName   #os.path.join(os.path.expanduser('~'), 'Dropbox', 'VGenes', 'VDJGenes.db')
     currentFile = ProcessFASTA(FileName)

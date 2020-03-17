@@ -10,7 +10,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
@@ -1160,6 +1160,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.toolButtonIgphyml.clicked.connect(self.loadIgphyml)
 		self.ui.toolButtonCloneRaxml.clicked.connect(self.buildCloneTree)
 		self.ui.EditLock.clicked.connect(self.ChangeEditMode)
+		self.ui.checkBoxAll.stateChanged.connect(self.checkAll)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1655,14 +1656,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.SeqTable.setColumnCount(num_col)
 
 				horizontalHeader = [i[1] for i in HeaderIn]
+				horizontalHeader = [''] + horizontalHeader
 				self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
 				self.ui.SeqTable.fields = horizontalHeader
+				# re-size column size
+				self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
+				self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
+				self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
 
 				for row_index in range(num_row):
+					cell_checkBox = QCheckBox()
+					#cell_checkBox.setText(DataIn[row_index][0])
+					cell_checkBox.setChecked(False)
+					cell_checkBox.stateChanged.connect(self.multipleSelection)
+					self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
+
 					for col_index in range(num_col):
 						unit = QTableWidgetItem(DataIn[row_index][col_index])
 						unit.last_name = DataIn[row_index][col_index]
-						self.ui.SeqTable.setItem(row_index, col_index, unit)
+						self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
+
 				# disable edit
 				self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 				# show sort indicator
@@ -1671,6 +1684,36 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
 				self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
 
+	def checkAll(self):
+		rows = self.ui.SeqTable.rowCount()
+		if self.ui.checkBoxAll.isChecked():
+			for row in range(rows):
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+		else:
+			for row in range(rows):
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+
+	def multipleSelection(self, int_signal):
+		buttonClicked = self.sender()
+		postitionOfWidget = buttonClicked.pos()
+		index = self.ui.SeqTable.indexAt(postitionOfWidget)
+		row = index.row()
+
+		# get all selected rows
+		rows = []
+		item = self.ui.SeqTable.selectedItems()
+		for i in item:
+			if self.ui.SeqTable.indexFromItem(i).row() not in rows:
+				rows.append(self.ui.SeqTable.indexFromItem(i).row())
+
+		# if current row in selected rows, check all rows
+		if row in rows:
+			for cur_row in rows:
+				if cur_row != row:
+					if int_signal == 2:		# signal = 2 means check event
+						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(True)
+					else:
+						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(False)
 
 	def EditTableItem(self, item):
 
@@ -1688,7 +1731,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if col == 0:  # update sequence name
 			SeqName = item.last_name
 		else:
-			SeqName = self.ui.SeqTable.item(row, 0).text()
+			SeqName = self.ui.SeqTable.item(row, 1).text()
 
 		try:
 			self.UpdateSeq(SeqName, CurVal, col_name)
@@ -1706,13 +1749,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def UpdateSeq(self, ID, ItemValue, FieldName):
 		global DBFilename
 		# ID = item[0]
-		VGenesSQL.UpdateField(ID, ItemValue, FieldName, DBFilename)
+		VGenesSQL.UpdateFieldbySeqName(ID, ItemValue, FieldName, DBFilename)
 
 	def sortTable(self, index):
 		if self.ui.tabWidget.currentIndex() == 9:
 			self.ui.SeqTable.sortByColumn(index, self.ui.SeqTable.horizontalHeader().sortIndicatorOrder())
 		else:
-			self.ui.tableWidget.sortByColumn(index, self.ui.tableWidget.horizontalHeader().sortIndicatorOrder())
+			self.ui.SeqTable.sortByColumn(index, self.ui.SeqTable.horizontalHeader().sortIndicatorOrder())
 
 	def ChangeEditMode(self):
 		if self.ui.SeqTable.editTriggers() == QtWidgets.QAbstractItemView.NoEditTriggers:
@@ -9094,8 +9137,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.ui.lblDNASeq.setText(lblText)
 
-	# @pyqtSlot()
-	# def on_btnEditSeq_clicked(self):
 	@pyqtSlot()
 	def on_sbPairLeft_valueChanged(self):
 
@@ -9106,7 +9147,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		BarCode = BarCode[:len(BarCode)- valueToR]
 		self.ui.txtPairNames.setText(BarCode)
 
-
 	# @pyqtSlot()
 	def on_sbPairRight_valueChanged(self):
 
@@ -9116,7 +9156,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		BarCode = BarCode[:len(BarCode)- valueToR]
 		BarCode = BarCode[valueToL:]
 		self.ui.txtPairNames.setText(BarCode)
-
 
 	@pyqtSlot()
 	def on_btnPairRename_clicked(self):
@@ -9183,12 +9222,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 					model = self.ui.tableView.model()
 
 					model.refresh()
-
-
-
-
-
-	# self.ui.txtPairNames.setText(data[0])
 
 	@pyqtSlot()
 	def on_btn10xEditPreview_clicked(self):
