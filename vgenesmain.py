@@ -1715,6 +1715,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.SeqTable.indexFromItem(i).row() not in rows:
 				rows.append(self.ui.SeqTable.indexFromItem(i).row())
 
+		DataIn = []
 		# if current row in selected rows, check all rows
 		if row in rows:
 			for cur_row in rows:
@@ -1723,6 +1724,31 @@ class VGenesForm(QtWidgets.QMainWindow):
 						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(True)
 					else:
 						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(False)
+
+		self.match_table_to_tree()
+
+	def match_tree_to_table(self):
+		pass
+	def match_table_to_tree(self):
+		DataIn = []
+		# get all checked table rows
+		total_rows = self.ui.SeqTable.rowCount()
+		for row in range(total_rows):
+			if self.ui.SeqTable.cellWidget(row, 0).isChecked():
+				DataIn.append(self.ui.SeqTable.item(row, 1).text())
+
+		# update the selection
+		self.clearTreeChecks()
+		NumFound = len(DataIn)
+		i = 0
+		for Seqname in DataIn:
+			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+			i += 1
+			for record in found:
+				if i == NumFound - 1:
+					wasClicked = True
+				record.setCheckState(0, Qt.Checked)
+
 
 	def EditTableItem(self, item):
 
@@ -1771,7 +1797,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			unlock_icon = QIcon()
 			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.EditLock.setIcon(unlock_icon)
-			self.ui.EditLock.setText('Edit Lock: Unlock (Double fields click to edit)')
+			self.ui.EditLock.setText('Edit Lock: Unlock (Double click to edit)')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
 		else:
 			lock_icon = QIcon()
@@ -3733,9 +3759,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			self.ShowVGenesText(ErlogFile)
 
-			# VGenesSQL.UpdateField(DataRow,ItemValue,FieldName,DBFilename)
-			# model.refresh()
-
 	@pyqtSlot()
 	def on_actionAnalyze_Mutations_triggered(self):
 		import VMapHotspots
@@ -4727,7 +4750,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return 'None'
 
 	def TreeviewOptions(self):
-
 		Option1 = self.ui.cboTreeOp1.currentText()
 		self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
 		if Option1 == 'None':
@@ -4771,13 +4793,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.UpdateRecentList(DBFilename, True)
 
 		self.SaveBackup()
-		# self.EditableSqlModel.refresh()
-
-	# @pyqtSlot(int)
-	# def on_spinBox_valueChanged(self, value): #how to handle spin box signals
-	#     val = value # could also refer directly to control instead of value: self.ui.spinBox.value()
-	#
-	#     print("Changed to " + str(val))
 
 	@pyqtSlot()
 	def on_action_New_triggered(self):  # how to activate menu and toolbar actions!!!
