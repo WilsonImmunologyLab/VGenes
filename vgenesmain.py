@@ -4167,7 +4167,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_actionRename10x_triggered(self):
-		import csv
+		global NameIndex
 		from operator import itemgetter  #from operator import itemgetter   #		SeqList.sort(key=itemgetter(0, 1, 2, 3))
 
 		QueryIS = 'Enter text to serve as the base name (i.e., subject number or name)'
@@ -4361,10 +4361,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# LastName = newName
 				LastID = ID
 				model = self.ui.tableView.model()
-
 				model.refresh()
 
-		answer = informationMessage(self, 'Close and restart database to see changes', 'OK')
+		# update tree
+		SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(),self.ui.cboTreeOp3.currentText())
+		self.initializeTreeView(SQLFields)
+		self.ui.treeWidget.expandAll()
+		# rebuild ID
+		self.GenerateNameIndex()
+		# update table
+		self.load_table()
+		#answer = informationMessage(self, 'Close and restart database to see changes', 'OK')
 
 	@pyqtSlot()
 	def on_actionMergeMySeq_triggered(self):
@@ -6273,13 +6280,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.cboFindField.currentText() == 'Autoreactivity':
 			self.AutoRXSet()
 
-
-
-
-
 	def SpecSet(self):
 		global LastSelected
-
 
 		# if JustMoved == False:
 		valueis = self.ui.listViewSpecificity.currentText()
