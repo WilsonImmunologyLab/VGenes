@@ -81,6 +81,9 @@ raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
 global IgBLASTAnalysis
 IgBLASTAnalysis = []
 
+global TreeSelected
+TreeSelected = []
+
 global timer
 global data
 global LastSelected
@@ -1162,6 +1165,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.EditLock.clicked.connect(self.ChangeEditMode)
 		self.ui.checkBoxAll.stateChanged.connect(self.checkAll)
 		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
+		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1646,54 +1650,63 @@ class VGenesForm(QtWidgets.QMainWindow):
 		elif self.ui.tabWidget.currentIndex() == 9:
 			# if old table exists, clear table
 			if self.ui.SeqTable.columnCount() > 0:
-				self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
-			self.ui.SeqTable.setColumnCount(0)
-			self.ui.SeqTable.setRowCount(0)
-			# load data for new table
-			if DBFilename != '' and DBFilename != 'none':
-				SQLStatement = 'SELECT * FROM vgenesdb ORDER BY SeqName DESC'
-				HEADERStatement = 'PRAGMA table_info(vgenesDB);'
-				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-				HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+				return
+			else:
+				self.load_table()
 
-				num_row = len(DataIn)
-				num_col = len(HeaderIn)
-				self.ui.SeqTable.setRowCount(num_row)
-				self.ui.SeqTable.setColumnCount(num_col)
+	def load_table(self):
+		if self.ui.SeqTable.columnCount() > 0:
+			self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
+		self.ui.SeqTable.setColumnCount(0)
+		self.ui.SeqTable.setRowCount(0)
+		# load data for new table
+		if DBFilename != '' and DBFilename != 'none':
+			SQLStatement = 'SELECT * FROM vgenesdb ORDER BY SeqName DESC'
+			HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
 
-				horizontalHeader = [i[1] for i in HeaderIn]
-				horizontalHeader = [''] + horizontalHeader
-				self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
-				self.ui.SeqTable.fields = horizontalHeader
-				# re-size column size
-				self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
-				self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-				if self.ui.checkBoxRowSelection.isChecked():
-					self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-				else:
-					self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
+			num_row = len(DataIn)
+			num_col = len(HeaderIn)
+			self.ui.SeqTable.setRowCount(num_row)
+			self.ui.SeqTable.setColumnCount(num_col)
 
-				for row_index in range(num_row):
-					cell_checkBox = QCheckBox()
-					#cell_checkBox.setText(DataIn[row_index][0])
-					cell_checkBox.setChecked(False)
-					cell_checkBox.stateChanged.connect(self.multipleSelection)
-					self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
+			horizontalHeader = [i[1] for i in HeaderIn]
+			horizontalHeader = [''] + horizontalHeader
+			self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
+			self.ui.SeqTable.fields = horizontalHeader
+			# re-size column size
+			self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
+			self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
+			if self.ui.checkBoxRowSelection.isChecked():
+				self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+			else:
+				self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
 
-					for col_index in range(num_col):
-						unit = QTableWidgetItem(DataIn[row_index][col_index])
-						unit.last_name = DataIn[row_index][col_index]
-						self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
+			for row_index in range(num_row):
+				cell_checkBox = QCheckBox()
+				# cell_checkBox.setText(DataIn[row_index][0])
+				cell_checkBox.setChecked(False)
+				cell_checkBox.stateChanged.connect(self.multipleSelection)
+				self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
 
-				# disable edit
-				self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-				# show sort indicator
-				self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
-				# connect sort indicator to slot function
-				self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
-				self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
+				for col_index in range(num_col):
+					unit = QTableWidgetItem(DataIn[row_index][col_index])
+					unit.last_name = DataIn[row_index][col_index]
+					self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
+
+			# disable edit
+			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+			# show sort indicator
+			self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
+			# connect sort indicator to slot function
+			self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
+			self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
 
 	def checkAll(self):
+		global MoveNotChange
+
+		MoveNotChange = True
 		rows = self.ui.SeqTable.rowCount()
 		if self.ui.checkBoxAll.isChecked():
 			for row in range(rows):
@@ -1701,8 +1714,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+		MoveNotChange = False
+		self.match_table_to_tree()
 
 	def multipleSelection(self, int_signal):
+		global MoveNotChange
+		if MoveNotChange:
+			return
+
+		MoveNotChange = True
 		buttonClicked = self.sender()
 		postitionOfWidget = buttonClicked.pos()
 		index = self.ui.SeqTable.indexAt(postitionOfWidget)
@@ -1724,11 +1744,33 @@ class VGenesForm(QtWidgets.QMainWindow):
 						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(True)
 					else:
 						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(False)
+		MoveNotChange = False
 
 		self.match_table_to_tree()
 
+	# this function could be optimized later
 	def match_tree_to_table(self):
-		pass
+		global TreeSelected
+		global MoveNotChange
+		# check if checked item changed
+		selected_list = self.getTreeCheckedChild()
+		selected_list = selected_list[3]
+
+		# if TreeSelected.sort() == selected_list.sort():
+		#	print(",".join(selected_list))
+		#	print(",".join(TreeSelected))
+		#	return
+		# else:
+		MoveNotChange = True
+		rows = self.ui.SeqTable.rowCount()
+		for row in range(rows):
+			cur_name = self.ui.SeqTable.item(row, 1).text()
+			if cur_name in selected_list:
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+			else:
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+		MoveNotChange = False
+
 	def match_table_to_tree(self):
 		DataIn = []
 		# get all checked table rows
@@ -1748,7 +1790,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 				if i == NumFound - 1:
 					wasClicked = True
 				record.setCheckState(0, Qt.Checked)
-
 
 	def EditTableItem(self, item):
 
@@ -2975,8 +3016,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		wasClicked = True
 
 	def handleChanged(self, item, column):
-
 		global wasClicked
+
 		if wasClicked == False:
 			return
 
@@ -2990,6 +3031,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				item.setCheckState(0, Qt.Unchecked)
 			elif item.checkState(column) == Qt.Unchecked:
 				item.setCheckState(0, Qt.Checked)
+			self.match_tree_to_table()
 			return
 
 		if item.checkState(column) == Qt.Checked:
@@ -3000,7 +3042,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if item.checkState(column) == Qt.Unchecked:
 			self.CheckBelow(item, False)
 			self.CheckUp(item, False)
-			print("unchecked"), item, item.text(column)
+			print("unchecked")
+
+		self.match_tree_to_table()
 
 	def getTreePathUp(self, item):
 		path = []
@@ -3403,9 +3447,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			Doc += '\n'
 			# Doc
 		Doc += ('-' * 50)
-
-	# Doc +=('Modules not imported:')
-	# Doc +=('\n'.join(finder.badmodules.keys()))
 
 	@pyqtSlot()
 	def on_actionPrint_triggered(self):
