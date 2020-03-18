@@ -1166,6 +1166,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxAll.stateChanged.connect(self.checkAll)
 		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
 		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
+		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -3031,20 +3032,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 				item.setCheckState(0, Qt.Unchecked)
 			elif item.checkState(column) == Qt.Unchecked:
 				item.setCheckState(0, Qt.Checked)
-			self.match_tree_to_table()
-			return
-
-		if item.checkState(column) == Qt.Checked:
-			self.CheckBelow(item, True)
-			self.CheckUp(item, True)
-			# childs = item.childCount()
-
-		if item.checkState(column) == Qt.Unchecked:
-			self.CheckBelow(item, False)
-			self.CheckUp(item, False)
-			print("unchecked")
+		else:
+			if item.checkState(column) == Qt.Checked:
+				self.CheckBelow(item, True)
+				self.CheckUp(item, True)
+				# childs = item.childCount()
+			if item.checkState(column) == Qt.Unchecked:
+				self.CheckBelow(item, False)
+				self.CheckUp(item, False)
+				print("unchecked")
 
 		self.match_tree_to_table()
+
+	def tree_to_table_selection(self):
+		Selected = self.ui.treeWidget.selectedItems()
+		Selected = Selected[-1]
+		name = Selected.text(0)
+
+		print(name)
+
+		rows = self.ui.SeqTable.rowCount()
+		for row in range(rows):
+			cur_name = self.ui.SeqTable.item(row, 1).text()
+			if cur_name == name:
+				self.ui.SeqTable.setCurrentCell(row,1)
+				return
+
+	def table_to_tree_selection(self):
+		items = self.ui.SeqTable.selectedItems()
+		item = items[-1]
+		name = self.ui.SeqTable.item(self.ui.SeqTable.indexFromItem(item).row(), 1).text()
+
+		print(name)
+
+		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+		found = found[0]
+		self.ui.treeWidget.setCurrentItem(found)
 
 	def getTreePathUp(self, item):
 		path = []
@@ -4783,6 +4806,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if NumSelected > 1:
 			NewHead  = str(NumSelected) + ' items selected'
 			self.ui.label_Name.setText(NewHead)
+
+		self.tree_to_table_selection()
 
 	def MatchingValue(self, IndexIs):
 		try:
