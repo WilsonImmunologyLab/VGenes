@@ -3222,6 +3222,11 @@ class Ui_MainWindow(object):
         self.actionEditLock = QtWidgets.QAction(MainWindow)
         self.actionEditLock.setIcon(icon2)
         self.actionEditLock.setObjectName("actionEditLock")
+        self.actionclearTrash = QtWidgets.QAction(MainWindow)
+        icon38 = QtGui.QIcon()
+        icon38.addPixmap(QtGui.QPixmap(":/PNG-Icons/bin.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        self.actionclearTrash.setIcon(icon38)
+        self.actionclearTrash.setObjectName("actionclearTrash")
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.action_Open)
         self.menuFile.addAction(self.action_Save)
@@ -3320,6 +3325,8 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionDecrease_font_size)
         self.toolBar.addSeparator()
         self.toolBar.addAction(self.actionDelete_record)
+        self.toolBar.addSeparator()
+        self.toolBar.addAction(self.actionclearTrash)
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(1)
@@ -3701,4 +3708,5 @@ class Ui_MainWindow(object):
         self.actionAlignmentHTML.setText(_translate("MainWindow", "Alignment"))
         self.actionAlignmentHTML.setToolTip(_translate("MainWindow", "Alignment of selected sequences"))
         self.actionEditLock.setText(_translate("MainWindow", "EditLock"))
+        self.actionclearTrash.setText(_translate("MainWindow", "clearTrash"))
 import VgenesResources_rc

@@ -7610,6 +7610,8 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionDecrease_font_size"/>
    <addaction name="separator"/>
    <addaction name="actionDelete_record"/>
+   <addaction name="separator"/>
+   <addaction name="actionclearTrash"/>
   </widget>
   <action name="action_Open">
    <property name="icon">
@@ -8117,6 +8119,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>EditLock</string>
+   </property>
+  </action>
+  <action name="actionclearTrash">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/bin.png</normaloff>:/PNG-Icons/bin.png</iconset>
+   </property>
+   <property name="text">
+    <string>clearTrash</string>
    </property>
   </action>
  </widget>

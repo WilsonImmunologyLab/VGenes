@@ -4168,6 +4168,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_actionRename10x_triggered(self):
 		global NameIndex
+
 		from operator import itemgetter  #from operator import itemgetter   #		SeqList.sort(key=itemgetter(0, 1, 2, 3))
 
 		QueryIS = 'Enter text to serve as the base name (i.e., subject number or name)'
@@ -4185,7 +4186,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				entry = row.strip('\n')
 				myCSVfile.append(entry)
 
-		#Now import annotations to get barcodes:
+		# if not check any sequence, will import for all
+		checked_list = self.getTreeCheckedChild()
+		checked_list = checked_list[3]
+
+		if len(checked_list) == 0:
+			root = self.ui.treeWidget.invisibleRootItem()
+			self.CheckBelow(root, True)
 
 		#filtered_contig_annotations.csv
 		answer = informationMessage(self,
@@ -4198,41 +4205,29 @@ class VGenesForm(QtWidgets.QMainWindow):
 		LastBar = ''
 		LastName = ''
 		with open(filename, 'r') as currentfile:
-
 			barcodeis = []
 			NameIs = []
 			AllRows = []
 
 			for row in currentfile:  #imports data from file
 				Rawentry = row.strip('\n')
-
 				entryFields = Rawentry.split(',')
 				if entryFields[0] != 'barcode' and entryFields[17] != 'None':
 					AllRows.append(entryFields)
-
 			AllRows.sort(key=itemgetter(17))	#sorts by name so that seques with 2 barcodes can be identified
 
-
-
 			for row in AllRows:
-
 				if row[17] == LastName:
 					multiBar = LastBar + ',' + row[0]
 					LastBar = multiBar
 					barcodeis.append(multiBar)
-
 				else:
 					barcodeis.append(row[0])
 					LastBar = row[0]
 
 				NameIs.append(row[17])
-
-
 				LastName  = row[17]
-
-
 			myAnnotationsCSVdict = {}
-
 			for i in range(len(barcodeis)):
 				myAnnotationsCSVdict[NameIs[i]] = barcodeis[i]
 		# answerC = 'No'
@@ -4367,11 +4362,38 @@ class VGenesForm(QtWidgets.QMainWindow):
 		SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(),self.ui.cboTreeOp3.currentText())
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
+
 		# rebuild ID
-		self.GenerateNameIndex()
+		NameIndex.clear()
+		model = self.ui.tableView.model()
+		index = model.index(0, 0)
+		self.ui.tableView.setCurrentIndex(index)
+		Maxi = model.rowCount()
+
+		for i in range(0, Maxi):
+			index = model.index(i, 0)
+			NameIs = str(model.data(index))
+			NameIndex[NameIs] = i
+
 		# update table
 		self.load_table()
 		#answer = informationMessage(self, 'Close and restart database to see changes', 'OK')
+
+	@pyqtSlot()
+	def on_actionclearTrash_triggered(self):
+		question = 'Clean all TEMP files?'
+		buttons = 'YN'
+		answer = questionMessage(self, question, buttons)
+		if answer == 'No':
+			return
+		else:
+			cmd = 'cd ' + temp_folder + '; rm -rf ' + temp_folder + '/*'
+			try:
+				os.system(cmd)
+			except:
+				QMessageBox.warning(self, 'Warning', 'Fail to clear TEMP folder!', QMessageBox.Ok,
+				                    QMessageBox.Ok)
+				return
 
 	@pyqtSlot()
 	def on_actionMergeMySeq_triggered(self):
@@ -5511,6 +5533,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.setWindowTitle(titletext)
 
 	def GenerateNameIndex(self):
+		global NameIndex
 		model = self.ui.tableView.model()
 		index = model.index(0, 0)
 		self.ui.tableView.setCurrentIndex(index)
