@@ -684,7 +684,7 @@
       <property name="movable">
        <bool>true</bool>
       </property>
-      <widget class="QWidget" name="tab_7">
+      <widget class="QWidget" name="tabDB">
        <attribute name="title">
         <string>Database</string>
        </attribute>
