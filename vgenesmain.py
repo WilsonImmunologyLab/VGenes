@@ -91,6 +91,8 @@ global DBFilename
 global wasClicked
 global LineLen
 LastSelected = ()
+global updateMarker
+updateMarker = False
 global DontFindTwice
 DontFindTwice = False
 wasClicked = False
@@ -1603,6 +1605,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def InitialGraphic(self):
 		global DBFilename
+		global updateMarker
 		#Msg = str(self.ui.tabWidget.currentIndex())
 		#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 		if self.ui.tabWidget.currentIndex() == 6:
@@ -1654,9 +1657,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		elif self.ui.tabWidget.currentIndex() == 0:
 			# if old table exists, clear table
 			if self.ui.SeqTable.columnCount() > 0:
-				return
+				if updateMarker == True:
+					self.load_table()
+					self.match_tree_to_table()
+					self.tree_to_table_selection()
+					updateMarker = False
 			else:
 				self.load_table()
+				self.match_tree_to_table()
+				self.tree_to_table_selection()
 
 	def load_table(self):
 		if self.ui.SeqTable.columnCount() > 0:
@@ -1823,8 +1832,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				NameIndex[CurVal] = NameIndex[SeqName]
 				del NameIndex[SeqName]
 				#refresh model
-				model = self.ui.tableView.model()
-				model.refresh()
+				#model = self.ui.tableView.model()
+				#model.refresh()
 				# update tree
 				SQLFields = (
 				self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
@@ -3647,6 +3656,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_actionFind_Clonal_triggered(self):
+		global updateMarker
 		# self.ShowProgressBar()
 		from operator import itemgetter
 		import itertools
@@ -3808,8 +3818,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					VGenesSQL.UpdateField(FirstOne, depth, 'Quality', DBFilename)
 				i += 1
 
-		model = self.ui.tableView.model()
-		model.refresh()
+		#model = self.ui.tableView.model()
+		#model.refresh()
 
 		if answer == 'Yes':
 			if DBFilename != None:
@@ -3842,6 +3852,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				currentFile.write(Erlog2)
 
 			self.ShowVGenesText(ErlogFile)
+
+		if self.ui.tabWidget.currentIndex() == 0:
+			self.load_table()
+			self.match_tree_to_table()
+			self.tree_to_table_selection()
+		else:
+			updateMarker == True
 
 	@pyqtSlot()
 	def on_actionAnalyze_Mutations_triggered(self):
@@ -4355,24 +4372,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 					VGenesSQL.UpdateField(ID, 'doublet', FieldName, DBFilename)
 				# LastName = newName
 				LastID = ID
-				model = self.ui.tableView.model()
-				model.refresh()
+				#model = self.ui.tableView.model()
+				#model.refresh()
 
 		# update tree
 		SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(),self.ui.cboTreeOp3.currentText())
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
 
-		# rebuild ID
-		NameIndex.clear()
-		model = self.ui.tableView.model()
-		index = model.index(0, 0)
-		self.ui.tableView.setCurrentIndex(index)
-		Maxi = model.rowCount()
+		# rebuild ID dict
+		field1 = self.ui.cboTreeOp1.currentText()
+		field2 = self.ui.cboTreeOp2.currentText()
+		field3 = self.ui.cboTreeOp3.currentText()
 
+		NameIndex.clear()
+		SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		Maxi = len(DataIs)
 		for i in range(0, Maxi):
-			index = model.index(i, 0)
-			NameIs = str(model.data(index))
+			NameIs = DataIs[i][0]
 			NameIndex[NameIs] = i
 
 		# update table
@@ -4828,9 +4846,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def TreeSelectChanged(self):
 		value = self.ui.treeWidget.selectedItems()
 
-		model = self.ui.tableView.model()
-		while model.canFetchMore():
-			model.fetchMore()
+		#model = self.ui.tableView.model()
+		#while model.canFetchMore():
+		#	model.fetchMore()
 
 		name = ''
 		# name2 = ''
@@ -5311,18 +5329,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot(int)
 	def DialScroll(self, value):
-		currentRow = self.ui.tableView.currentIndex().row()
+		currentRow = self.ui.SeqTable.currentIndex().row()
 
 		if currentRow != value:
-			currentColumn = self.ui.tableView.currentIndex().column()
+			currentColumn = self.ui.SeqTable.currentIndex().column()
 			if currentColumn == -1: currentColumn = 0
 			model = self.ui.tableView.model()
-			records = model.rowCount()
+			records = self.ui.SeqTable.rowCount()
 			if value < records and value > -1:
 				index = model.index(value, currentColumn)
 				self.ui.tableView.setCurrentIndex(index)
-
 				self.updateF(value)
+
+
+
 
 	def findTableViewRecord(self, FieldName):
 
@@ -5531,6 +5551,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.OnOpen()
 		titletext = 'VGenes - ' + DBFilename
 		self.setWindowTitle(titletext)
+
+		self.load_table()
 
 	def GenerateNameIndex(self):
 		global NameIndex
@@ -6994,6 +7016,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnSaveChange_clicked(self):
+		global updateMarker
 		if self.enableEdit == True:
 			SETStatement = 'SET '
 			SETStatement += 'Project = "' + self.ui.txtProject.toPlainText() + '",'
@@ -7053,8 +7076,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 				NameIndex[self.ui.txtName.toPlainText()] = NameIndex[name]
 				del NameIndex[name]
 				# refresh model
-				model = self.ui.tableView.model()
-				model.refresh()
+				#model = self.ui.tableView.model()
+				#model.refresh()
+				# update database marker
+				updateMarker = True
 				# update tree
 				SQLFields = (
 					self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
@@ -8359,7 +8384,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for item in value:
 			currentitemIs = item.text(0)
 
-		model = self.ui.tableView.model()
+		#model = self.ui.tableView.model()
 
 		# global RefreshSQL
 		if field1 == 'None' or field1 is None:
@@ -8371,12 +8396,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 
-		model.refresh()
+		#model.refresh()
 
-		self.ui.tableView.sortByColumn(field1Index, Qt.AscendingOrder)
-		self.ui.tableView.sortByColumn(0, Qt.AscendingOrder)
-		self.ui.tableView.sortByColumn(field3Index, Qt.AscendingOrder)
-		self.ui.tableView.sortByColumn(field2Index, Qt.AscendingOrder)
+		#self.ui.tableView.sortByColumn(field1Index, Qt.AscendingOrder)
+		#self.ui.tableView.sortByColumn(0, Qt.AscendingOrder)
+		#self.ui.tableView.sortByColumn(field3Index, Qt.AscendingOrder)
+		#self.ui.tableView.sortByColumn(field2Index, Qt.AscendingOrder)
 
 		self.initializeTreeView(SQLFields)
 		global DontFindTwice
@@ -8425,23 +8450,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 				data.clear()
 
 				if FirstupdateF == False and ID > -1:
-					# MatchingIndex = NameIndex[name]
+				# MatchingIndex = NameIndex[name]
 					newID = list(NameIndex.keys())[list(NameIndex.values()).index(ID)]
 					SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + str(newID) + '"'
 					DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 					for record in DataIs:
 						for item in record:
 							data.append(str(item))
-
 				else:
 					model = self.ui.tableView.model()
 					if ID == -2: ID = 0
-
 					for i in range(0, 120):
 						index = model.index(ID, i)
 						data.append(str(model.data(index)))
 
-					# global FirstupdateF
 					FirstupdateF = False
 
 				PreVID = ID
@@ -9152,16 +9174,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			if self.ui.radioButtonGermView.isChecked():
 				self.on_radioButtonGermView_clicked()
-
-
-
-
 			# self.ui.lblSeq2.setText(msg)
 			frame = 0
 			ErMes = 'Amino acid sequence: \n\n'
-
-
-
 			AASeq, ErMessage = VGenesSeq.Translator(DNAseq, frame)
 			if len(ErMessage) > 0:
 				for mess in ErMessage:
@@ -9344,9 +9359,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					# ' WHERE SeqName = "A116_1B04H-2" OR SeqName = "A116_1B04H-3"'
 					foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
 
-					model = self.ui.tableView.model()
-
-					model.refresh()
+					#model = self.ui.tableView.model()
+					#model.refresh()
 
 	@pyqtSlot()
 	def on_btn10xEditPreview_clicked(self):
@@ -9977,7 +9991,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def UpdateSeqAnalysis(self):
 		datalist = []
-		currentRow = self.ui.tableView.currentIndex().row()
+		#currentRow = self.ui.tableView.currentIndex().row()
 		# todo change to app folder
 		try:
 			filename = os.path.join(working_prefix, 'UpdateRecord.nt')
@@ -10019,7 +10033,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#     NotDone  = False
 		# todo need to put any other preserved data into IgBLASTAnalysis
 		i = 0
-		model = self.ui.tableView.model()
+		#model = self.ui.tableView.model()
 		DataRow = int(data[119])
 
 		for record in IgBLASTAnalysis:
@@ -10028,12 +10042,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 				ItemValue = str(item) #+ ' '
 				if i != 119:
 					VGenesSQL.UpdateField(DataRow, ItemValue, FieldName, DBFilename)
-
-
 				i += 1
 
 
-		model.refresh()
+		#model.refresh()
 
 		global PreVID
 		# NewID = int(data[119])+1
@@ -10043,7 +10055,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def UpdateMutationAnalysis(self):
 		datalist = []
-		currentRow = self.ui.tableView.currentIndex().row()
+		#currentRow = self.ui.tableView.currentIndex().row()
 		# todo change to app folder
 		try:
 			filename = os.path.join(working_prefix, 'UpdateRecord.nt')
@@ -10121,7 +10133,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 			i = 0
-			model = self.ui.tableView.model()
+			#model = self.ui.tableView.model()
 			# DataRow = int(data[119])
 
 			for record in IgBLASTAnalysis:
@@ -10133,11 +10145,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					i += 1
 
-			model.refresh()
-
-		# global PreVID
-		# NewID = int(data[119])+1
-		# PreVID = NewID
+			#model.refresh()
 
 		self.updateF(data[119])
 
