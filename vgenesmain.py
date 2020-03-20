@@ -348,6 +348,8 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.setupUi(self)
 		self.TextEdit = VGenesTextMain()
 
+		self.toolButton.clicked.connect()
+
 		global answer3
 		answer3 = 'No'
 
@@ -418,6 +420,8 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.comboBoxGroup.setEditable(True)
 			self.comboBoxSubgroup.setEditable(True)
 
+
+
 	@pyqtSlot()
 	def on_buttonBox_accepted(self):
 		# Alldone = False
@@ -429,7 +433,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	@pyqtSlot()
 	def on_buttonBox_rejected(self):
-
 		self.close()
 
 	def disableWidgets(self):
