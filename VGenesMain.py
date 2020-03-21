@@ -543,7 +543,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		if self.checkBoxFileStruc.isChecked():
 			for item in pathname:
-
 				(dirname, filename) = os.path.split(item)
 				dirparts = dirname.split('/')
 				NumParts = len(dirparts)
@@ -1048,12 +1047,11 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			# print(FASTAfile)
 			FinalFASTA = ''.join(FASTAfile)
 
-			now = 'FASTA from ' + time.strftime('%c') + '.nt'
-			FASTAFileName = os.path.join(dirname, now)
+			now = 'FASTA' + time.strftime('%c') + '.nt'
+			FASTAFileName = os.path.join(temp_folder, now)
 			# need to test
 
-			with open(FASTAFileName,
-			          'w') as currentFile:  # using with for this automatically closes the file even if you crash
+			with open(FASTAFileName, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
 				currentFile.write(FinalFASTA)
 
 			return FASTAFileName
@@ -1679,7 +1677,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.setRowCount(0)
 		# load data for new table
 		if DBFilename != '' and DBFilename != 'none':
-			SQLStatement = 'SELECT * FROM vgenesdb ORDER BY SeqName DESC'
+			field1 = self.ui.cboTreeOp1.currentText()
+			field2 = self.ui.cboTreeOp2.currentText()
+			field3 = self.ui.cboTreeOp3.currentText()
+			SQLStatement = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 			HEADERStatement = 'PRAGMA table_info(vgenesDB);'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
@@ -1834,8 +1835,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				item.last_name = CurVal
 
 				# update name index
-				NameIndex[CurVal] = NameIndex[SeqName]
-				del NameIndex[SeqName]
+				#NameIndex[CurVal] = NameIndex[SeqName]
+				#del NameIndex[SeqName]
 				#refresh model
 				#model = self.ui.tableView.model()
 				#model.refresh()
@@ -2905,12 +2906,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.TextEdit.textEdit.setText(textToShow)
 
 	def initializeTreeView(self, SQLFields):
-
+		# clear tree
 		self.ui.treeWidget.clear()
-
+		# add all children
 		self.TreeAddItems(self.ui.treeWidget.invisibleRootItem(), SQLFields)
+		# rebuild name index
+		self.buildNameidnex(SQLFields)
+
 		global wasClicked
 		wasClicked = True
+
+	def buildNameidnex(self,SQLFields):
+		global NameIndex
+
+		field1, field2, field3 = SQLFields
+		NameIndex.clear()
+		SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		Maxi = len(DataIs)
+		for i in range(0, Maxi):
+			NameIs = DataIs[i][0]
+			NameIndex[NameIs] = i
 
 	def TreeAddItems(self, parent, SQLFields):
 		dirnamed, filenamed = os.path.split(DBFilename)
@@ -4385,22 +4401,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
 
-		# rebuild ID dict
-		field1 = self.ui.cboTreeOp1.currentText()
-		field2 = self.ui.cboTreeOp2.currentText()
-		field3 = self.ui.cboTreeOp3.currentText()
-
-		NameIndex.clear()
-		SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
-		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-		Maxi = len(DataIs)
-		for i in range(0, Maxi):
-			NameIs = DataIs[i][0]
-			NameIndex[NameIs] = i
-
 		# update table
 		self.load_table()
 		#answer = informationMessage(self, 'Close and restart database to see changes', 'OK')
+
+	
 
 	@pyqtSlot()
 	def on_actionclearTrash_triggered(self):
@@ -4851,25 +4856,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def TreeSelectChanged(self):
 		value = self.ui.treeWidget.selectedItems()
 
-		#model = self.ui.tableView.model()
-		#while model.canFetchMore():
-		#	model.fetchMore()
-
 		name = ''
 		# name2 = ''
 		for item in value:
 			name = item.text(0)
-			# name2 = item.text(1)
-
-		FieldCheck = self.FieldChangeCheck()
-		# if FieldCheck == 'exit':
-		#     return
-
+		#FieldCheck = self.FieldChangeCheck()
 		try:
 			MatchingIndex = NameIndex[name]
-
 			self.DialScroll(MatchingIndex)
 		except:
+			print('wrong')
 			return
 			# self.findTableViewRecord(name)
 			# print(role)
@@ -4880,6 +4876,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.label_Name.setText(NewHead)
 
 		self.tree_to_table_selection()
+		self.match_tree_to_table()
 
 	def MatchingValue(self, IndexIs):
 		try:
@@ -5334,20 +5331,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot(int)
 	def DialScroll(self, value):
-		currentRow = self.ui.SeqTable.currentIndex().row()
-
-		if currentRow != value:
-			currentColumn = self.ui.SeqTable.currentIndex().column()
-			if currentColumn == -1: currentColumn = 0
-			model = self.ui.tableView.model()
-			records = self.ui.SeqTable.rowCount()
-			if value < records and value > -1:
-				index = model.index(value, currentColumn)
-				self.ui.tableView.setCurrentIndex(index)
-				self.updateF(value)
-
-
-
+		records = len(NameIndex)
+		if value < records and value > -1:
+			self.updateF(value)
 
 	def findTableViewRecord(self, FieldName):
 
@@ -5398,16 +5384,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtAASeq.setFont(font)
 
 		elif self.ui.tabWidget.currentIndex() == 1:
-			FontIs = self.ui.tableView.font()
-			font = QFont(FontIs)
+			pass
+			#FontIs = self.ui.tableView.font()
+			#font = QFont(FontIs)
 
-			FontSize = int(font.pointSize())
-			if FontSize > 7:
-				FontSize += 1
-			font.setPointSize(FontSize)
-			font.setFamily('Lucida Grande')
+			#FontSize = int(font.pointSize())
+			#if FontSize > 7:
+			#	FontSize += 1
+			#font.setPointSize(FontSize)
+			#font.setFamily('Lucida Grande')
 
-			self.ui.tableView.setFont(font)
+			#self.ui.tableView.setFont(font)
 			# self.ui.tableView.resizeColumnsToContents()
 
 	@pyqtSlot()
@@ -5430,16 +5417,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtDNASeq.setFont(font)
 			self.ui.txtAASeq.setFont(font)
 		elif self.ui.tabWidget.currentIndex() == 1:
-			FontIs = self.ui.tableView.font()
-			font = QFont(FontIs)
+			pass
+			#FontIs = self.ui.tableView.font()
+			#font = QFont(FontIs)
 
-			FontSize = int(font.pointSize())
-			if FontSize > 7:
-				FontSize -= 1
-			font.setPointSize(FontSize)
-			font.setFamily('Lucida Grande')
+			#FontSize = int(font.pointSize())
+			#if FontSize > 7:
+			#	FontSize -= 1
+			#font.setPointSize(FontSize)
+			#font.setFamily('Lucida Grande')
 
-			self.ui.tableView.setFont(font)
+			#self.ui.tableView.setFont(font)
 
 			# self.ui.tableView.resizeColumnsToContents()
 
@@ -5498,15 +5486,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if FieldCheck == 'exit':
 			return
 
-		currentRow = self.ui.tableView.currentIndex().row()
-		currentColumn = self.ui.tableView.currentIndex().column()
+		Selected = self.ui.treeWidget.selectedItems()
+		Selected = Selected[-1]
+		name = Selected.text(0)
+		currentRow = NameIndex[name]
 
-		if currentRow == -1:
-			currentRow = 0
-		if currentColumn == -1:
-			currentColumn = 0
-		model = self.ui.tableView.model()
-		records = model.rowCount()
+		records = len(NameIndex)
 
 		if direction == 'up':
 			if currentRow > 0:
@@ -5525,8 +5510,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 			currentRow = records - 1
 		global JustMoved
 		JustMoved = True
-		index = model.index(currentRow, currentColumn)
-		self.ui.tableView.setCurrentIndex(index)
+
+		if currentRow == -1:
+			currentRow = 0
+
+		name = list(NameIndex.keys())[list(NameIndex.values()).index(int(currentRow))]
+		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+		if len(found) > 0:
+			found = found[0]
+			self.ui.treeWidget.setCurrentItem(found)
+		self.tree_to_table_selection()
 		self.ui.radioButtonSeqView.setChecked(True)
 
 		try:
@@ -5549,9 +5542,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if not self.createConnection(DBFilename):
 			sys.exit(1)
 
-		editableModel = EditableSqlModel()
-		self.initializeModel(editableModel)
-		self.createView(editableModel)
+		#editableModel = EditableSqlModel()
+		#self.initializeModel(editableModel)
+		#self.createView(editableModel)
 
 		self.OnOpen()
 		titletext = 'VGenes - ' + DBFilename
@@ -5574,16 +5567,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def OnOpen(self):
 
 		# self.ui.tableView.ColumnsToContents()
-		self.ui.tableView.resizeColumnsToContents()
+		#self.ui.tableView.resizeColumnsToContents()
 
-		self.updateF(-2)
 		self.ui.lcdNumber_current.display(1)
 		# self.ui.txtGotoRecord.setPlainText('1')
-		model = self.ui.tableView.model()
+		#model = self.ui.tableView.model()
 
-		index = model.index(0, 0)
-		self.ui.tableView.setCurrentIndex(index)
-		self.GenerateNameIndex()
+		#index = model.index(0, 0)
+		#self.ui.tableView.setCurrentIndex(index)
+		#self.GenerateNameIndex()
 
 		self.ui.cboFindField.clear()
 		self.ui.cboTreeOp1.clear()
@@ -5608,6 +5600,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		SQLFields = ('Project', 'Grouping', 'SubGroup')
 		self.initializeTreeView(SQLFields)
+
+		self.updateF(-2)
 
 		self.findTreeItem(data[0])
 
@@ -6051,42 +6045,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			FieldsChanged.append(ListItem)
 
 	def on_action_Save_triggered(self):
-
-		global FieldChanged
-		F1 = self.ui.cboTreeOp1.currentText()
-		FR1 = self.TransLateFieldtoReal(F1, True)
-		F2 = self.ui.cboTreeOp2.currentText()
-		FR2 = self.TransLateFieldtoReal(F2, True)
-		F3 = self.ui.cboTreeOp3.currentText()
-		FR3 = self.TransLateFieldtoReal(F3, True)
-		NeedTree = False
-		NeedOpen = False
-		if len(FieldsChanged) > 0:
-			model = self.ui.tableView.model()
-			for item in FieldsChanged:
-				ID = item[0]
-				ItemValue = item[1]
-				FieldName = item[2]
-				if FieldName == FR1 or FieldName == FR2 or FieldName == FR3:
-					NeedTree = True
-				if FieldName == 'SeqName':
-					NeedTree = False
-
-
-
-					# NeedOpen = True
-				VGenesSQL.UpdateField(ID, ItemValue, FieldName, DBFilename)
-				model.refresh()
-
-			FieldsChanged.clear()
-
-			FieldChanged = False
-		# self.GOOpen(False)
-		if NeedTree == True:
-			self.on_btnUpdateTree_clicked()
-			# if NeedOpen == True:
-			#     self.GOOpen(False)
-
+		self.on_btnSaveChange_clicked()
 
 	@pyqtSlot()
 	def on_actionFixNames_triggered(self):
@@ -6641,9 +6600,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
 
-			model = self.ui.tableView.model()
-
-			model.refresh()
+			#model = self.ui.tableView.model()
+			#model.refresh()
 
 			self.on_btnUpdateTree_clicked()
 			# self.ui.txtFieldSearch.setPlainText(EditSubgroup)
@@ -6882,20 +6840,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# ' WHERE SeqName = "A116_1B04H-2" OR SeqName = "A116_1B04H-3"'
 		foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
 
-		model = self.ui.tableView.model()
-
-		model.refresh()
-
+		#model = self.ui.tableView.model()
+		#model.refresh()
 		# self.GOOpen(False)
-
-
 
 		if fieldsearch == field1 or fieldsearch == field2 or fieldsearch == field3:
 			self.on_btnUpdateTree_clicked()
-
-		# self.LoadDB(DBFilename)
-
-
 
 		self.findTreeItem(currentitemIs)
 
@@ -8454,22 +8404,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if ID != -1:
 				data.clear()
 
-				if FirstupdateF == False and ID > -1:
+				#if FirstupdateF == False and ID > -1:
 				# MatchingIndex = NameIndex[name]
-					newID = list(NameIndex.keys())[list(NameIndex.values()).index(ID)]
-					SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + str(newID) + '"'
-					DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-					for record in DataIs:
-						for item in record:
-							data.append(str(item))
-				else:
-					model = self.ui.tableView.model()
-					if ID == -2: ID = 0
-					for i in range(0, 120):
-						index = model.index(ID, i)
-						data.append(str(model.data(index)))
+				if ID == -2: ID = 0
+				newID = list(NameIndex.keys())[list(NameIndex.values()).index(ID)]
+				SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + str(newID) + '"'
+				DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				for record in DataIs:
+					for item in record:
+						data.append(str(item))
+				#else:
+				#	model = self.ui.tableView.model()
+				#	if ID == -2: ID = 0
+				#	for i in range(0, 120):
+				#		index = model.index(ID, i)
+				#		data.append(str(model.data(index)))
 
-					FirstupdateF = False
+				#	FirstupdateF = False
 
 				PreVID = ID
 
@@ -8666,8 +8617,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				# if DontFindTwice == False:
 				#     self.findTreeItem(data[0])
-				currentRecord = self.ui.tableView.currentIndex().row()
-				maxRecords = self.ui.tableView.model().rowCount()
+				#currentRecord = self.ui.tableView.currentIndex().row()
+				#maxRecords = self.ui.tableView.model().rowCount()
+				#self.ui.horizontalScrollBar.setMaximum(maxRecords)
+				#self.ui.dial.setMaximum(maxRecords)
+
+				currentRecord = ID
+				maxRecords = len(NameIndex)
 				self.ui.horizontalScrollBar.setMaximum(maxRecords)
 				self.ui.dial.setMaximum(maxRecords)
 

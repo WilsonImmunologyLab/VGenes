@@ -4988,26 +4988,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <spacer name="horizontalSpacer_5">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>532</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_8">
-          <property name="text">
-           <string>Font Size (Ctrl+, Ctrl-): </string>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="3">
          <widget class="QSpinBox" name="spnAlignFont">
           <property name="cursor">
@@ -5021,6 +5001,13 @@
           </property>
           <property name="value">
            <number>10</number>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>Font Size (Ctrl+, Ctrl-): </string>
           </property>
          </widget>
         </item>
@@ -5043,50 +5030,18 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="4">
-         <widget class="QTableView" name="tableView">
-          <property name="enabled">
-           <bool>true</bool>
+        <item row="0" column="1">
+         <spacer name="horizontalSpacer_5">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
           </property>
-          <property name="maximumSize">
+          <property name="sizeHint" stdset="0">
            <size>
-            <width>0</width>
-            <height>0</height>
+            <width>532</width>
+            <height>20</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <pointsize>13</pointsize>
-           </font>
-          </property>
-          <property name="toolTip">
-           <string>Database table</string>
-          </property>
-          <property name="layoutDirection">
-           <enum>Qt::LeftToRight</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Sunken</enum>
-          </property>
-          <property name="autoScroll">
-           <bool>true</bool>
-          </property>
-          <property name="editTriggers">
-           <set>QAbstractItemView::AnyKeyPressed|QAbstractItemView::DoubleClicked|QAbstractItemView::EditKeyPressed|QAbstractItemView::SelectedClicked</set>
-          </property>
-          <property name="alternatingRowColors">
-           <bool>true</bool>
-          </property>
-          <property name="textElideMode">
-           <enum>Qt::ElideLeft</enum>
-          </property>
-          <property name="verticalScrollMode">
-           <enum>QAbstractItemView::ScrollPerItem</enum>
-          </property>
-          <property name="sortingEnabled">
-           <bool>true</bool>
-          </property>
-         </widget>
+         </spacer>
         </item>
        </layout>
       </widget>
@@ -7812,7 +7767,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionTop">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/left_arrow.png</normaloff>:/PNG-Icons/left_arrow.png</iconset>
+     <normaloff>:/PNG-Icons/top.png</normaloff>:/PNG-Icons/top.png</iconset>
    </property>
    <property name="text">
     <string>Move &amp;Up</string>
@@ -7827,7 +7782,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionBottom">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/right_arrow.png</normaloff>:/PNG-Icons/right_arrow.png</iconset>
+     <normaloff>:/PNG-Icons/buttom.png</normaloff>:/PNG-Icons/buttom.png</iconset>
    </property>
    <property name="text">
     <string>Move &amp;Down</string>
@@ -7842,7 +7797,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionMove_Up">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/up_arrow.png</normaloff>:/PNG-Icons/up_arrow.png</iconset>
+     <normaloff>:/PNG-Icons/up.png</normaloff>:/PNG-Icons/up.png</iconset>
    </property>
    <property name="text">
     <string>Top</string>
@@ -7857,7 +7812,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionMove_Down">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/down_arrow.png</normaloff>:/PNG-Icons/down_arrow.png</iconset>
+     <normaloff>:/PNG-Icons/down.png</normaloff>:/PNG-Icons/down.png</iconset>
    </property>
    <property name="text">
     <string>Bottom</string>

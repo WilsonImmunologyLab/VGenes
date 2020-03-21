@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>up.png</file>
+    <file>down.png</file>
+    <file>top.png</file>
+    <file>buttom.png</file>
     <file>MSA.png</file>
     <file>Seq.png</file>
     <file>HA.png</file>
