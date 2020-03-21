@@ -3857,7 +3857,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if remove == True:
 
 			self.LoadDB(DBFilename)
-			self.ui.txtFieldSearch.setPlainText('Duplicate')
+			self.ui.txtFieldSearch.setText('Duplicate')
 			self.ui.cboFindField.setCurrentText('Quality')
 			done = self.on_btnFieldSearch_clicked()
 			done = self.on_actionDelete_record_triggered()
@@ -4960,11 +4960,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			if os.path.isfile(DBFilename):
 				self.LoadDB(DBFilename)
-
 		else:
-			self.hide()
-			self.ApplicationStarted()
-
+			pass
+			#self.hide()
+			#self.ApplicationStarted()
 			# self.EditableSqlModel.refresh()
 
 	def UpdateRecentList(self, DBFilename, AddOne):
@@ -5649,6 +5648,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('V gene 1')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtDgene_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtDgene.toPlainText()
@@ -5657,6 +5659,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('D gene 1')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtJgene_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtJgene.toPlainText()
@@ -5664,6 +5669,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('J gene 1')
+		self.ui.valueLine.setText(valueis)
 
 	# todo need to put LastSelected for rest of fields
 
@@ -5675,6 +5683,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('VLocus')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtDLocus_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtDLocus.toPlainText()
@@ -5682,6 +5693,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('DLocus')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtJLocus_selectionChanged(self):
 		global LastSelected
@@ -5691,6 +5705,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('JLocus')
+		self.ui.valueLine.setText(valueis)
+
 	def on_textBarcode_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.textBarcode.toPlainText()
@@ -5698,6 +5715,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('Barcode')
+		self.ui.valueLine.setText(valueis)
 
 
 	# if data[106] != 'Blank8':
@@ -5713,21 +5733,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
-	def on_txtLabel_selectionChanged(self):
-		global LastSelected
-		valueis = self.ui.textEdit.toPlainText()
-		LastSelected = ('Blank12', valueis)
-		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
-		self.ui.cboFindField.setCurrentText(Fiedlvalue)
-
-	def on_txtStatus_selectionChanged(self):
-		global LastSelected
-		valueis = self.ui.textEdit.toPlainText()
-		LastSelected = ('Blank13', valueis)
-		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
-		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+		self.ui.fieldLine.setText('10X cluster')
+		self.ui.valueLine.setText(valueis)
 
 	def on_textEdit_selectionChanged(self):
 		global LastSelected
@@ -5737,6 +5744,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('Seurat cluster')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtPopulation_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtPopulation.toPlainText()
@@ -5745,6 +5755,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('Population')
+		self.ui.valueLine.setText(valueis)
+
 	def on_textMutations_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.textMutations.toPlainText()
@@ -5752,6 +5765,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('TotMut')
+		self.ui.valueLine.setText(valueis)
 
 	@pyqtSlot()
 	def on_txtProject_textChanged(self):
@@ -6083,6 +6099,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('Project')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtGroup_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtGroup.toPlainText()
@@ -6090,6 +6109,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('Grouping')
+		self.ui.valueLine.setText(valueis)
+
+	def on_txtGeneType_selectionChanged(self):
+		global LastSelected
+		valueis = self.ui.txtGeneType.toPlainText()
+		LastSelected = ('GeneType', valueis)
+		field = LastSelected[0]
+		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('GeneType')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtSubGroup_selectionChanged(self):
 		global LastSelected
@@ -6099,6 +6132,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('SubGroup')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtVend_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtVend.toPlainText()
@@ -6106,6 +6142,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('VSeqend')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtD_selectionChanged(self):
 		global LastSelected
@@ -6115,6 +6154,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('Dregion')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtVD_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtVD.toPlainText()
@@ -6122,6 +6164,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('VDJunction')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtDJ_selectionChanged(self):
 		global LastSelected
@@ -6131,6 +6176,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('DJJunction')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtJend_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtJend.toPlainText()
@@ -6138,6 +6186,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('begJ')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtCDR3DNA_selectionChanged(self):
 		global LastSelected
@@ -6147,6 +6198,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('CDR3DNA')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtIsotype_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtIsotype.toPlainText()
@@ -6154,6 +6208,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('Isotype')
+		self.ui.valueLine.setText(valueis)
 
 
 	def on_txtCDR3AA_selectionChanged(self):
@@ -6164,6 +6221,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('CDR3AA')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtCDR3Length_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtCDR3Length.toPlainText()
@@ -6171,6 +6231,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('CDR3Length')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtCDR3pI_selectionChanged(self):
 		global LastSelected
@@ -6180,6 +6243,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('CDR3pI')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtCDR3MW_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtCDR3MW.toPlainText()
@@ -6187,6 +6253,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('CDR3MW')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtProductive_selectionChanged(self):
 		global LastSelected
@@ -6196,6 +6265,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('productive')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtReadingFrame_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtReadingFrame.toPlainText()
@@ -6203,6 +6275,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('ReadingFrame')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtStop_selectionChanged(self):
 		global LastSelected
@@ -6212,6 +6287,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('StopCodon')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtQuality_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtQuality.toPlainText()
@@ -6219,6 +6297,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('Quality')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtQuality_2_selectionChanged(self):
 		global LastSelected
@@ -6228,6 +6309,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('Quality')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtStatus_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtStatus.toPlainText()
@@ -6235,6 +6319,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('Status')
+		self.ui.valueLine.setText(valueis)
 
 	def on_txtLabel_selectionChanged(self):
 		global LastSelected
@@ -6244,6 +6331,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('Label')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtID_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtID.toPlainText()
@@ -6252,6 +6342,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
+		self.ui.fieldLine.setText('IDEvent')
+		self.ui.valueLine.setText(valueis)
+
 	def on_txtClonalPool_selectionChanged(self):
 		global LastSelected
 		valueis = self.ui.txtClonalPool.toPlainText()
@@ -6259,6 +6352,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('ClonalPool')
+		self.ui.valueLine.setText(valueis)
 
 	@pyqtSlot()
 	def on_txtClonalPool_textChanged(self):
@@ -6349,11 +6445,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_actionSuggestCanonical_triggered(self):
-
-
-
-
-
 		self.ui.treeWidget.expandAll()
 
 		fields = self.ui.cboTreeOp1.currentText()
@@ -6709,7 +6800,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_btnFieldSearch_clicked(self):
 		global wasClicked
-		search = self.ui.txtFieldSearch.toPlainText()
+		search = self.ui.txtFieldSearch.text()
 		field = self.ui.cboFindField.currentText()
 		fieldsearch = self.TransLateFieldtoReal(field, True)
 
@@ -6794,7 +6885,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnFieldBulk_clicked(self):
-		search = self.ui.txtFieldSearch.toPlainText()
+		search = self.ui.txtFieldSearch.text()
 		if search == '':
 			answer = informationMessage(self, 'Enter a value to the edit/search field', 'OK')
 			return
@@ -6968,6 +7059,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtComments.setReadOnly(False)
 
 			self.enableEdit = True
+
+	@pyqtSlot()
+	def on_pushButtonLock_clicked(self):
+		if self.ui.btnFieldBulk.isEnabled() == True:
+			lock_icon = QIcon()
+			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
+			self.ui.pushButtonLock.setIcon(lock_icon)
+			self.ui.btnFieldBulk.setEnabled(False)
+		else:
+			unlock_icon = QIcon()
+			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
+			self.ui.pushButtonLock.setIcon(unlock_icon)
+			self.ui.btnFieldBulk.setEnabled(True)
 
 	@pyqtSlot()
 	def on_btnSaveChange_clicked(self):
@@ -8428,6 +8532,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.txtName_2.setText(data[0])
 				self.ui.label_Name.setText(data[0])
 
+				self.ui.txtGeneType.setText(data[2])
 				self.ui.txtVgene.setText(data[3])
 				self.ui.txtDgene.setText(data[6])
 				self.ui.txtJgene.setText(data[9])
@@ -9795,7 +9900,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		if PreviewCurrentType == 'H':
 
-			self.ui.txtFieldSearch.setPlainText(HSeqName)
+			self.ui.txtFieldSearch.setText(HSeqName)
 			self.ui.cboFindField.setCurrentText('Name')
 			done = self.on_btnFieldSearch_clicked()
 
@@ -9819,7 +9924,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		elif PreviewCurrentType == 'L':
 
-			self.ui.txtFieldSearch.setPlainText(LSeqName)
+			self.ui.txtFieldSearch.setText(LSeqName)
 			self.ui.cboFindField.setCurrentText('Name')
 			done = self.on_btnFieldSearch_clicked()
 
