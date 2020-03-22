@@ -43,7 +43,7 @@ import csv
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
 	setText, openfastq
 from ui_VGenesStartUpDialogue import Ui_VGenesStartUpDialog
-
+from ui_import_data_dialog import Ui_ImportDataDialog
 from ui_VGenesTextEdit import ui_TextEditor
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
@@ -342,6 +342,112 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 			self.close()
 			Vgenes.ApplicationStarted()
 
+class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
+	def __init__(self):
+		super(ImportDataDialogue, self).__init__()
+		self.ui = Ui_ImportDataDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButtonOK.clicked.connect(self.accept)
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+		self.ui.tab.currentChanged['int'].connect(self.switchTab)
+		self.ui.browse10x.clicked.connect(self.browse10x)
+		self.ui.browseCSV.clicked.connect(self.browseCSV)
+		self.ui.browseFasta.clicked.connect(self.browseFasta)
+		#self.ui.comboBoxTemplate.currentTextChanged.connect(self.makeHTML)
+		#self.ui.comboBoxTarget.currentTextChanged.connect(self.makeHTML)
+
+	def browse10x(self):
+		directory = QtWidgets.QFileDialog.getExistingDirectory(self, "getExistingDirectory", "～/Documents")
+		if directory == None or directory == '':
+			return
+		else:
+			seq_file = os.path.join(directory,'consensus.fasta')
+			anno_file = os.path.join(directory,'filtered_contig_annotations.csv')
+			if os.path.exists(seq_file):
+				if os.path.exists(anno_file):
+					self.ui.Seqpath.setText(seq_file)
+					self.ui.Annopath.setText(anno_file)
+				else:
+					self.ui.Seqpath.setText(seq_file)
+			else:
+				seq_file = os.path.join(directory, 'outs', 'consensus.fasta')
+				anno_file = os.path.join(directory, 'outs', 'filtered_contig_annotations.csv')
+				if os.path.exists(seq_file):
+					if os.path.exists(anno_file):
+						self.ui.Seqpath.setText(seq_file)
+						self.ui.Annopath.setText(anno_file)
+					else:
+						self.ui.Seqpath.setText(seq_file)
+				else:
+					Msg = 'Can not find consensus.fasta under your folder! Please check your input!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+
+	def browseFasta(self):
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
+		                                                   "getOpenFileNames", "~/Documents",
+		                                                   "Fasta Files (*.fasta, *.fas, *.fa);;All Files (*)")
+		if len(files) == 0:
+			return
+		else:
+			self.ui.listWidgetFasta.addItems(files)
+
+	def browseCSV(self):
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
+		                                                   "getOpenFileNames", "~/Documents",
+		                                                   "Fasta Files (*.fasta, *.fas, *.fa);;All Files (*)")
+		if len(files) == 0:
+			return
+		else:
+			self.ui.listWidgetCSV.addItems(files)
+
+	def switchTab(self, num):
+		if num == 0:
+			self.ui.radioButtonHuman.setEnabled(True)
+			self.ui.radioButtonMouse.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.rdoVandJ.setEnabled(True)
+			self.ui.rdoFunction.setEnabled(True)
+			self.ui.rdoAll.setEnabled(True)
+			self.ui.rdoChoose.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.checkBoxFileStruc.setEnabled(True)
+			self.ui.lineEditProject.setEnabled(True)
+			self.ui.lineEditGroup.setEnabled(True)
+			self.ui.lineEditSubGroup.setEnabled(True)
+			self.ui.txtComment.setEnabled(True)
+		elif num == 1:
+			self.ui.radioButtonHuman.setEnabled(True)
+			self.ui.radioButtonMouse.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.rdoVandJ.setEnabled(True)
+			self.ui.rdoFunction.setEnabled(True)
+			self.ui.rdoAll.setEnabled(True)
+			self.ui.rdoChoose.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.checkBoxFileStruc.setEnabled(True)
+			self.ui.lineEditProject.setEnabled(True)
+			self.ui.lineEditGroup.setEnabled(True)
+			self.ui.lineEditSubGroup.setEnabled(True)
+			self.ui.txtComment.setEnabled(True)
+		elif num == 2:
+			self.ui.radioButtonHuman.setEnabled(False)
+			self.ui.radioButtonMouse.setEnabled(False)
+			self.ui.rdoProductive.setEnabled(False)
+			self.ui.rdoVandJ.setEnabled(False)
+			self.ui.rdoFunction.setEnabled(False)
+			self.ui.rdoAll.setEnabled(False)
+			self.ui.rdoChoose.setEnabled(False)
+			self.ui.rdoProductive.setEnabled(False)
+			self.ui.checkBoxFileStruc.setEnabled(False)
+			self.ui.lineEditProject.setEnabled(False)
+			self.ui.lineEditGroup.setEnabled(False)
+			self.ui.lineEditSubGroup.setEnabled(False)
+			self.ui.txtComment.setEnabled(False)
+		else:
+			pass
+
 class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
@@ -425,8 +531,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.comboBoxProject.setEditable(True)
 			self.comboBoxGroup.setEditable(True)
 			self.comboBoxSubgroup.setEditable(True)
-
-
 
 	@pyqtSlot()
 	def on_buttonBox_accepted(self):
@@ -5597,12 +5701,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboTreeOp2.setCurrentText('Grouping')
 		self.ui.cboTreeOp3.setCurrentText('Subgroup')
 
-		SQLFields = ('Project', 'Grouping', 'SubGroup')
-		self.initializeTreeView(SQLFields)
 
-		self.updateF(-2)
-
-		self.findTreeItem(data[0])
+		try:
+			SQLFields = ('Project', 'Grouping', 'SubGroup')
+			self.initializeTreeView(SQLFields)
+			self.updateF(-2)
+			self.findTreeItem(data[0])
+		except:
+			return
 
 	def createConnection(self, DBFilename):
 
@@ -8511,7 +8617,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 				#if FirstupdateF == False and ID > -1:
 				# MatchingIndex = NameIndex[name]
 				if ID == -2: ID = 0
-				newID = list(NameIndex.keys())[list(NameIndex.values()).index(ID)]
+				try:
+					newID = list(NameIndex.keys())[list(NameIndex.values()).index(ID)]
+				except:
+					return
 				SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + str(newID) + '"'
 				DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 				for record in DataIs:
