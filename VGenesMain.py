@@ -78,6 +78,15 @@ clustal_path = os.path.join(working_prefix, 'Tools', 'clustalo')
 muscle_path = os.path.join(working_prefix, 'Tools', 'muscle')
 raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
 
+ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+r = open(ErlogFile,'w')
+r.write('')
+r.close()
+r = open(ErlogFile2, 'w')
+r.write('')
+r.close()
+
 global IgBLASTAnalysis
 IgBLASTAnalysis = []
 
@@ -343,19 +352,35 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 			Vgenes.ApplicationStarted()
 
 class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
-	def __init__(self):
-		super(ImportDataDialogue, self).__init__()
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		#super(ImportDataDialogue, self).__init__()
 		self.ui = Ui_ImportDataDialog()
 		self.ui.setupUi(self)
 
+		self.TextEdit = VGenesTextMain()
+
 		self.ui.pushButtonOK.clicked.connect(self.accept)
 		self.ui.pushButtonCancel.clicked.connect(self.reject)
-		self.ui.tab.currentChanged['int'].connect(self.switchTab)
+		self.ui.tabWidget.currentChanged['int'].connect(self.switchTab)
 		self.ui.browse10x.clicked.connect(self.browse10x)
 		self.ui.browseCSV.clicked.connect(self.browseCSV)
 		self.ui.browseFasta.clicked.connect(self.browseFasta)
+		self.ui.browseVDB.clicked.connect(self.browseVDB)
 		#self.ui.comboBoxTemplate.currentTextChanged.connect(self.makeHTML)
 		#self.ui.comboBoxTarget.currentTextChanged.connect(self.makeHTML)
+
+		global answer3
+		answer3 = 'No'
+
+	def browseVDB(self):
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
+		                                                         "getOpenFileNames", "~/Documents",
+		                                                         "VGene DB Files (*.vdb);;All Files (*)")
+		if len(files) == 0:
+			return
+		else:
+			self.ui.listWidgetVDB.addItems(files)
 
 	def browse10x(self):
 		directory = QtWidgets.QFileDialog.getExistingDirectory(self, "getExistingDirectory", "～/Documents")
@@ -396,7 +421,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	def browseCSV(self):
 		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
 		                                                   "getOpenFileNames", "~/Documents",
-		                                                   "Fasta Files (*.fasta, *.fas, *.fa);;All Files (*)")
+		                                                   "VGene exported CSV Files (*.csv);;All Files (*)")
 		if len(files) == 0:
 			return
 		else:
@@ -445,8 +470,497 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.lineEditGroup.setEnabled(False)
 			self.ui.lineEditSubGroup.setEnabled(False)
 			self.ui.txtComment.setEnabled(False)
+		elif num == 3:
+			self.ui.radioButtonHuman.setEnabled(False)
+			self.ui.radioButtonMouse.setEnabled(False)
+			self.ui.rdoProductive.setEnabled(False)
+			self.ui.rdoVandJ.setEnabled(False)
+			self.ui.rdoFunction.setEnabled(False)
+			self.ui.rdoAll.setEnabled(False)
+			self.ui.rdoChoose.setEnabled(False)
+			self.ui.rdoProductive.setEnabled(False)
+			self.ui.checkBoxFileStruc.setEnabled(False)
+			self.ui.lineEditProject.setEnabled(False)
+			self.ui.lineEditGroup.setEnabled(False)
+			self.ui.lineEditSubGroup.setEnabled(False)
+			self.ui.txtComment.setEnabled(False)
 		else:
 			pass
+
+	def accept(self):
+		num =  self.ui.tabWidget.currentIndex()
+		if num == 0:
+			#MaxNum = self.MaxImport.value()
+			MaxNum = 0
+			Alldone = self.InitiateImportFrom10X('none', MaxNum)
+			if Alldone == True:
+				self.close()
+		elif num == 1:
+			pass
+		elif num == 2:
+			pass
+		elif num == 3:
+			pass
+		else:
+			pass
+
+	def reject(self):
+		print('close')
+		self.hide()
+
+	@pyqtSlot()
+	def on_rdoChoose_clicked(self):
+
+		if self.rdoChoose.isChecked():
+			self.comboBoxProject.setEditable(True)
+			self.comboBoxGroup.setEditable(True)
+			self.comboBoxSubgroup.setEditable(True)
+			self.comboBoxProject.setCurrentText('')
+			self.comboBoxGroup.setCurrentText('')
+			self.comboBoxSubgroup.setCurrentText('')
+
+			fields = ['Project']  # , 'Grouping', 'SubGroup'
+			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
+
+			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			if len(DataIn) > 0:
+				for item in DataIn:
+					self.comboBoxProject.addItem(item[0])
+			DataIn.clear()
+
+			fields = ['Grouping']  # , 'Grouping', 'SubGroup'
+			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
+
+			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if len(DataIn) > 0:
+				for item in DataIn:
+					self.comboBoxGroup.addItem(item[0])
+			DataIn.clear()
+
+			fields = ['SubGroup']  # , 'Grouping', 'SubGroup'
+			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
+
+			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			if len(DataIn) > 0:
+				for item in DataIn:
+					self.comboBoxSubgroup.addItem(item[0])
+
+
+		else:
+			self.comboBoxProject.setEditable(False)
+			self.comboBoxGroup.setEditable(False)
+			self.comboBoxSubgroup.setEditable(False)
+
+	@pyqtSlot()
+	def on_checkBoxFileStruc_clicked(self):
+
+		if self.checkBoxFileStruc.isChecked():
+			self.comboBoxProject.setEditable(False)
+			self.comboBoxGroup.setEditable(False)
+			self.comboBoxSubgroup.setEditable(False)
+			self.comboBoxProject.setCurrentText('')
+			self.comboBoxGroup.setCurrentText('')
+			self.comboBoxSubgroup.setCurrentText('')
+
+		else:
+			self.comboBoxProject.setEditable(True)
+			self.comboBoxGroup.setEditable(True)
+			self.comboBoxSubgroup.setEditable(True)
+
+	def disableWidgets(self):
+		self.ui.tabWidget.setEnabled(False)
+
+		self.comboBoxGroup.setDisabled(True)
+		self.comboBoxProject.setDisabled(True)
+		self.comboBoxSubgroup.setDisabled(True)
+
+		self.radioButFASTA.setDisabled(True)
+		self.radioButHuman.setDisabled(True)
+		self.radioButIndSeq.setDisabled(True)
+		self.radioButMouse.setDisabled(True)
+
+		self.rdoAll.setDisabled(True)
+		self.rdoProductive.setDisabled(True)
+		self.rdoVandJ.setDisabled(True)
+
+		self.rdoChoose.setDisabled(True)
+		self.rdoFunction.setDisabled(True)
+		self.checkBoxFileStruc.setDisabled(True)
+
+		self.txtComment.setDisabled(True)
+		self.MaxImport.setDisabled(True)
+
+		# self.btnImportOldVGenes.setDisabled(True)
+		self.buttonBox.setDisabled(True)
+
+	def checkProgress(self):
+		global timer
+		progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+		file_handle = open(progressBarFile, 'r')
+		text = file_handle.readline()
+		text_list = text.split(',')
+
+		try:
+			progress = text_list[0]
+			progress_text = text_list[1]
+			progress = int(float(progress))
+			self.ui.progressBar.setValue(progress)
+			self.ui.labelpct.setText(progress_text + '(' + str(progress) + '%) records loaded')
+		except:
+			progress = self.ui.progressBar.value()
+		if progress > 99:
+			self.ui.labelpct.setText('Loading finished!')
+			self.ui.progressBar.setValue(100)
+			return
+		t = thd.Timer(1, self.checkProgress)
+		t.start()
+
+	def InitiateImportFrom10X(self, Filenamed, MaxNum):
+		# need to transfer species grouping to IgBlaster
+		answer = ''
+		thetype = 'FASTA'
+		species = ''
+		datalist = []
+		global answer3
+		# answerTo = answer3
+
+		if self.ui.radioButtonHuman.isChecked():
+			species = 'Human'
+		elif self.ui.radioButtonMouse.isChecked():
+			species = 'Mouse'
+
+		seq_pathname = self.ui.Seqpath.text()
+		anno_path_name = self.ui.Annopath.text()
+
+		if self.ui.rdoProductive.isChecked() == True:
+			GetProductive = True
+		else:
+			GetProductive = False
+
+		if seq_pathname == None:
+			return
+		answer2 = ''
+
+		ErlogFile = os.path.join(temp_folder,'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		header = "Began input at " + time.strftime('%c')
+		with open(ErlogFile2, 'w') as currentFile:
+			currentFile.write(header)
+		# firstOne = True
+
+		if self.ui.checkBoxFileStruc.isChecked():
+			for item in seq_pathname:
+				(dirname, filename) = os.path.split(item)
+				dirparts = dirname.split('/')
+				NumParts = len(dirparts)
+
+				subgroup = dirparts[NumParts - 1]
+
+				for i in range((self.ui.comboBoxSubgroup.count()) - 1):
+					if self.ui.comboBoxSubgroup.itemText(i) == subgroup:
+						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+				if self.ui.comboBoxSubgroup.currentText() != subgroup:
+					self.ui.comboBoxSubgroup.addItem(subgroup)
+					self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+				# need to check this code and add to other combos
+
+				if NumParts > 2:
+					grouping = dirparts[NumParts - 2]
+					for i in range((self.ui.comboBoxGroup.count()) - 1):
+						if self.ui.comboBoxGroup.itemText(i) == grouping:
+							self.ui.comboBoxGroup.setCurrentText(grouping)
+					if self.ui.comboBoxGroup.currentText() != grouping:
+						self.ui.comboBoxGroup.addItem(grouping)
+						self.ui.comboBoxGroup.setCurrentText(grouping)
+				# need to check this code and add to other combos
+
+				else:
+					grouping = dirparts[NumParts - 1]
+					for i in range((self.ui.comboBoxGroup.count()) - 1):
+						if self.ui.comboBoxGroup.itemText(i) == grouping:
+							self.ui.comboBoxGroup.setCurrentText(grouping)
+					if self.ui.comboBoxGroup.currentText() != grouping:
+						self.ui.comboBoxGroup.addItem(grouping)
+						self.ui.comboBoxGroup.setCurrentText(grouping)
+
+				if NumParts > 3:
+					project = dirparts[NumParts - 3]
+					for i in range((self.comboBoxProject.count()) - 1):
+						if self.ui.comboBoxProject.itemText(i) == project:
+							self.ui.comboBoxProject.setCurrentText(project)
+					if self.ui.comboBoxProject.currentText() != project:
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+
+				elif NumParts > 2:
+					project = dirparts[NumParts - 1]
+					for i in range((self.ui.comboBoxProject.count()) - 1):
+						if self.ui.comboBoxProject.itemText(i) == project:
+							self.ui.comboBoxProject.setCurrentText(project)
+					if self.ui.comboBoxProject.currentText() != project:
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+
+				else:
+					project = dirparts[NumParts - 1]
+					self.ui.comboBoxProject.setCurrentText(project)
+
+					# if thetype != 'Sequence':
+					if answer2 == '':
+						if len(pathname) > 1:
+							msg = 'More then 1 FASTA file was selected. Make each a seperate project based on the filenames?'
+							buttons = 'YN'
+							answer2 = informationMessage(self, msg, buttons)
+
+							firstOne = False
+
+				if answer2 == 'Yes':
+					preproject = os.path.splitext(filename)
+					project = preproject[0]
+
+				datalist.clear()
+				datalist.append(project)
+				datalist.append(grouping)
+				datalist.append(subgroup)
+				datalist.append(species)
+				datalist.append(GetProductive)
+				datalist.append(MaxNum)
+
+				# try multi-thread
+				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				file_handle = open(progressBarFile, 'w')
+				file_handle.write('0')
+				file_handle.close()
+				workThread = WorkThread(self)
+				workThread.item = item
+				workThread.datalist = datalist
+				workThread.start()
+				workThread.trigger.connect(self.multi_callback)
+
+				import_file = os.path.join(temp_folder, "import_file_name.txt")
+				f = open(import_file, 'w')
+				f.write(item)
+				f.close()
+
+				self.disableWidgets()
+				self.checkProgress()
+				return
+		elif self.ui.rdoChoose.isChecked():
+			# checklabel = {}
+
+			for item in seq_pathname:
+				(dirname, filename) = os.path.split(item)
+
+				if Filenamed == 'none':
+					project = self.ui.comboBoxProject.currentText()
+					grouping = self.ui.comboBoxGroup.currentText()
+					subgroup = self.ui.comboBoxSubgroup.currentText()
+				else:
+					project = Filenamed[1]
+					grouping = Filenamed[2]
+					subgroup = Filenamed[3]
+
+				if project == '': project = 'none'
+				if grouping == '': grouping = 'none'
+				if subgroup == '': subgroup = 'none'
+
+				# if thetype != 'Sequence':
+				if answer2 == '':
+					if len(pathname) > 1:
+						msg = 'More then 1 FASTA file was selected. Make each a seperate project based on the filenames?'
+						buttons = 'YN'
+
+						answer2 = informationMessage(self, msg, buttons)
+
+						firstOne = False
+
+				if answer2 == 'Yes':
+					preproject = os.path.splitext(filename)
+					project = preproject[0]
+
+				datalist.clear()
+
+				datalist.append(project)
+				datalist.append(grouping)
+				datalist.append(subgroup)
+				datalist.append(species)
+				datalist.append(GetProductive)
+				datalist.append(MaxNum)
+
+				# try multi-thread
+				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				file_handle = open(progressBarFile, 'w')
+				file_handle.write('0')
+				file_handle.close()
+				workThread = WorkThread(self)
+				workThread.item = item
+				workThread.datalist = datalist
+				workThread.start()
+				workThread.trigger.connect(self.multi_callback)
+
+				import_file = os.path.join(temp_folder, "import_file_name.txt")
+				f = open(import_file, 'w')
+				f.write(item)
+				f.close()
+
+				self.disableWidgets()
+				self.checkProgress()
+				return
+		elif self.ui.rdoFunction.isChecked():
+			project = 'ByFunction'
+			grouping = ''
+			subgroup = ''
+
+			multiProject = ''
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+			datalist.append(multiProject)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			f.write(seq_pathname)
+			f.close()
+
+			#self.disableWidgets()
+			self.checkProgress()
+			return
+
+	@pyqtSlot()
+	def multi_callback(self):
+		Startprocessed = 0
+		try:
+			Startprocessed = len(IgBLASTAnalysis)
+			self.close()
+		except:
+			if Startprocessed == 0:
+				self.close()
+
+		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+
+		import_file = os.path.join(temp_folder, "import_file_name.txt")
+		file_handle = open(import_file, 'r')
+		file_name = file_handle.readline()
+		file_handle.close()
+
+		i = 0
+		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + file_name + '\n'
+
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		with open(ErlogFile, 'r') as currentFile:  # using with for this automatically closes the file even if you crash
+			for line in currentFile:
+				if i > 0:
+					newErLog += line
+				i += 1
+
+		with open(ErlogFile2, 'a') as currentFile:
+			currentFile.write(newErLog)
+
+		Vgenes.LoadDB(DBFilename)
+		self.ShowVGenesText(ErlogFile2)
+		self.hide()
+
+	def ProcessSeqFiles(self, fileNames):
+		if fileNames:
+			FASTAfile = []
+			FASTAparts = []
+			for files in fileNames:
+				WriteFASTA = True
+				(dirname, filename) = os.path.split(files)  # parses filename from path
+				(shortname, extension) = os.path.splitext(filename)  # parses filename into name and extension
+				NameLine = '>' + shortname + '\n'
+
+				# print(FASTAfile)
+				os.chdir(dirname)
+
+				with open(files,
+				          'r') as currentFile:  # using with for this automatically closes the file even if you crash
+					readLine = str(currentFile.read())
+
+				CountNucs = readLine.count('a') + readLine.count('A') + readLine.count('g') + readLine.count(
+					'G') + readLine.count('c') + readLine.count('C') + readLine.count('t') + readLine.count('T')
+				PercentNuc = CountNucs / len(readLine)
+
+				if readLine[0] == '>':
+					query = files + ' appears to ba a FASTA file, process as such?'
+					answer = questionMessage(self, query, 'YN')
+					if answer == 'Yes':
+						FASTAparts.append(readLine)
+						WriteFASTA = False
+					else:
+						WriteFASTA = False
+
+				# code to see if mostly a good sequence
+
+				elif len(readLine) < 30:
+					query = files + ' is a short sequence (<30 nucleotides), analyze anyways?'
+					answer = questionMessage(self, query, 'YN')
+					if answer == 'Yes':
+						WriteFASTA = True
+					else:
+						WriteFASTA = False
+
+
+				elif PercentNuc < 0.8:
+					query = files + ' has over 20% of characters that are not nucleotides (A, G, C, or T), analyze anyways?'
+					answer = questionMessage(self, query, 'YN')
+					if answer == 'Yes':
+						WriteFASTA = True
+					else:
+						WriteFASTA = False
+
+				# print(readLine)
+				if WriteFASTA == True:
+					FASTAfile.append(NameLine)
+
+					readLine = readLine.replace('\n', '').replace('\r', '')
+					readLine += '\n'
+					FASTAfile.append(readLine)
+
+			# print(FASTAfile)
+			FinalFASTA = ''.join(FASTAfile)
+
+			now = 'FASTA' + time.strftime('%c') + '.nt'
+			FASTAFileName = os.path.join(temp_folder, now)
+			# need to test
+
+			with open(FASTAFileName,
+			          'w') as currentFile:  # using with for this automatically closes the file even if you crash
+				currentFile.write(FinalFASTA)
+
+			return FASTAFileName
+
+	def ShowVGenesText(self, filename):
+
+		self.TextEdit.show()
+		if filename != '':
+			self.TextEdit.loadFile(filename)
 
 class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	def __init__(self, parent=None):
@@ -635,11 +1149,9 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		answer2 = ''
 
-		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database',
-		                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 
-		ErlogFile2 = os.path.join(working_prefix, 'IgBlast', 'database',
-		                          'ErLog2.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 		header = "Began input at " + time.strftime('%c')
 		with open(ErlogFile2, 'w') as currentFile:
 			currentFile.write(header)
@@ -957,8 +1469,8 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		i = 0
 		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + file_name + '\n'
 
-		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database','ErLog.txt')
-		ErlogFile2 = os.path.join(working_prefix, 'IgBlast', 'database','ErLog2.txt')
+		ErlogFile = os.path.join(temp_folder,'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder,'ErLog2.txt')
 		with open(ErlogFile,'r') as currentFile:  # using with for this automatically closes the file even if you crash
 			for line in currentFile:
 				if i > 0:
@@ -1285,7 +1797,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.TextEdit = VGenesTextMain()
 		# self.VGProgress = VGenesProgressBar()
-		self.ImportOptions = ImportDialogue()
+		# self.ImportOptions =ImportDialogue()
+		self.ImportOptions = ImportDataDialogue()
 
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
@@ -3970,8 +4483,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if len(ErLog2) > 0:
 			Erlog2 = ErLog2 + 'The following ' + str(
 				Errs) + ' sequences could not be anaylzed for\nclonality because no CDR3s are indicated:\n' + ErLog
-			ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database',
-			                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+			ErlogFile = os.path.join(temp_folder, 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 
 			with open(ErlogFile, 'w') as currentFile:
 				currentFile.write(Erlog2)
@@ -4526,6 +5038,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', 'Fail to clear TEMP folder!', QMessageBox.Ok,
 				                    QMessageBox.Ok)
 				return
+
+			ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+			ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+			r = open(ErlogFile,'w')
+			r.write('')
+			r.close()
+			r = open(ErlogFile2, 'w')
+			r.write('')
+			r.close()
+
+
 
 	@pyqtSlot()
 	def on_actionMergeMySeq_triggered(self):
@@ -5395,7 +5918,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_action_Import_triggered(self):
-		self.ImportOptions = ImportDialogue()
+		#self.ImportOptions = ImportDialogue()
+		self.ImportOptions = ImportDataDialogue()
 		self.ImportOptions.show()
 
 	@pyqtSlot()
@@ -9604,8 +10128,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 		# todo change to app folder
-		ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database',
-		                         'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+		ErlogFile = os.path.join(temp_folder,'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 		ErLog = 'VGenes input beginning at: ' + time.strftime('%c') + '\n'
 		with open(ErlogFile, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
 			currentFile.write(ErLog)
