@@ -438,9 +438,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.rdoChoose.setEnabled(True)
 			self.ui.rdoProductive.setEnabled(True)
 			self.ui.checkBoxFileStruc.setEnabled(True)
-			self.ui.lineEditProject.setEnabled(True)
-			self.ui.lineEditGroup.setEnabled(True)
-			self.ui.lineEditSubGroup.setEnabled(True)
+			self.ui.comboBoxProject.setEnabled(True)
+			self.ui.comboBoxGroup.setEnabled(True)
+			self.ui.comboBoxSubgroup.setEnabled(True)
 			self.ui.txtComment.setEnabled(True)
 		elif num == 1:
 			self.ui.radioButtonHuman.setEnabled(True)
@@ -452,9 +452,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.rdoChoose.setEnabled(True)
 			self.ui.rdoProductive.setEnabled(True)
 			self.ui.checkBoxFileStruc.setEnabled(True)
-			self.ui.lineEditProject.setEnabled(True)
-			self.ui.lineEditGroup.setEnabled(True)
-			self.ui.lineEditSubGroup.setEnabled(True)
+			self.ui.comboBoxProject.setEnabled(True)
+			self.ui.comboBoxGroup.setEnabled(True)
+			self.ui.comboBoxSubgroup.setEnabled(True)
 			self.ui.txtComment.setEnabled(True)
 		elif num == 2:
 			self.ui.radioButtonHuman.setEnabled(False)
@@ -466,9 +466,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.rdoChoose.setEnabled(False)
 			self.ui.rdoProductive.setEnabled(False)
 			self.ui.checkBoxFileStruc.setEnabled(False)
-			self.ui.lineEditProject.setEnabled(False)
-			self.ui.lineEditGroup.setEnabled(False)
-			self.ui.lineEditSubGroup.setEnabled(False)
+			self.ui.comboBoxProject.setEnabled(False)
+			self.ui.comboBoxGroup.setEnabled(False)
+			self.ui.comboBoxSubgroup.setEnabled(False)
 			self.ui.txtComment.setEnabled(False)
 		elif num == 3:
 			self.ui.radioButtonHuman.setEnabled(False)
@@ -480,9 +480,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.rdoChoose.setEnabled(False)
 			self.ui.rdoProductive.setEnabled(False)
 			self.ui.checkBoxFileStruc.setEnabled(False)
-			self.ui.lineEditProject.setEnabled(False)
-			self.ui.lineEditGroup.setEnabled(False)
-			self.ui.lineEditSubGroup.setEnabled(False)
+			self.ui.comboBoxProject.setEnabled(False)
+			self.ui.comboBoxGroup.setEnabled(False)
+			self.ui.comboBoxSubgroup.setEnabled(False)
 			self.ui.txtComment.setEnabled(False)
 		else:
 			pass
@@ -510,14 +510,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	@pyqtSlot()
 	def on_rdoChoose_clicked(self):
-
-		if self.rdoChoose.isChecked():
-			self.comboBoxProject.setEditable(True)
-			self.comboBoxGroup.setEditable(True)
-			self.comboBoxSubgroup.setEditable(True)
-			self.comboBoxProject.setCurrentText('')
-			self.comboBoxGroup.setCurrentText('')
-			self.comboBoxSubgroup.setCurrentText('')
+		if self.ui.rdoChoose.isChecked():
+			self.ui.comboBoxProject.setEditable(True)
+			self.ui.comboBoxGroup.setEditable(True)
+			self.ui.comboBoxSubgroup.setEditable(True)
+			self.ui.comboBoxProject.setCurrentText('')
+			self.ui.comboBoxGroup.setCurrentText('')
+			self.ui.comboBoxSubgroup.setCurrentText('')
 
 			fields = ['Project']  # , 'Grouping', 'SubGroup'
 			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
@@ -528,7 +527,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			if len(DataIn) > 0:
 				for item in DataIn:
-					self.comboBoxProject.addItem(item[0])
+					self.ui.comboBoxProject.addItem(item[0])
 			DataIn.clear()
 
 			fields = ['Grouping']  # , 'Grouping', 'SubGroup'
@@ -539,7 +538,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			if len(DataIn) > 0:
 				for item in DataIn:
-					self.comboBoxGroup.addItem(item[0])
+					self.ui.comboBoxGroup.addItem(item[0])
 			DataIn.clear()
 
 			fields = ['SubGroup']  # , 'Grouping', 'SubGroup'
@@ -551,7 +550,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			if len(DataIn) > 0:
 				for item in DataIn:
-					self.comboBoxSubgroup.addItem(item[0])
+					self.ui.comboBoxSubgroup.addItem(item[0])
 
 
 		else:
@@ -562,44 +561,40 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	@pyqtSlot()
 	def on_checkBoxFileStruc_clicked(self):
 
-		if self.checkBoxFileStruc.isChecked():
-			self.comboBoxProject.setEditable(False)
-			self.comboBoxGroup.setEditable(False)
-			self.comboBoxSubgroup.setEditable(False)
-			self.comboBoxProject.setCurrentText('')
-			self.comboBoxGroup.setCurrentText('')
-			self.comboBoxSubgroup.setCurrentText('')
+		if self.ui.checkBoxFileStruc.isChecked():
+			self.ui.comboBoxProject.setEditable(False)
+			self.ui.comboBoxGroup.setEditable(False)
+			self.ui.comboBoxSubgroup.setEditable(False)
+			self.ui.comboBoxProject.setCurrentText('')
+			self.ui.comboBoxGroup.setCurrentText('')
+			self.ui.comboBoxSubgroup.setCurrentText('')
 
 		else:
-			self.comboBoxProject.setEditable(True)
-			self.comboBoxGroup.setEditable(True)
-			self.comboBoxSubgroup.setEditable(True)
+			self.ui.comboBoxProject.setEditable(True)
+			self.ui.comboBoxGroup.setEditable(True)
+			self.ui.comboBoxSubgroup.setEditable(True)
 
 	def disableWidgets(self):
 		self.ui.tabWidget.setEnabled(False)
 
-		self.comboBoxGroup.setDisabled(True)
-		self.comboBoxProject.setDisabled(True)
-		self.comboBoxSubgroup.setDisabled(True)
+		self.ui.comboBoxGroup.setDisabled(True)
+		self.ui.comboBoxProject.setDisabled(True)
+		self.ui.comboBoxSubgroup.setDisabled(True)
 
-		self.radioButFASTA.setDisabled(True)
-		self.radioButHuman.setDisabled(True)
-		self.radioButIndSeq.setDisabled(True)
-		self.radioButMouse.setDisabled(True)
+		self.ui.radioButtonHuman.setDisabled(True)
+		self.ui.radioButtonMouse.setDisabled(True)
 
-		self.rdoAll.setDisabled(True)
-		self.rdoProductive.setDisabled(True)
-		self.rdoVandJ.setDisabled(True)
+		self.ui.rdoAll.setDisabled(True)
+		self.ui.rdoProductive.setDisabled(True)
+		self.ui.rdoVandJ.setDisabled(True)
 
-		self.rdoChoose.setDisabled(True)
-		self.rdoFunction.setDisabled(True)
-		self.checkBoxFileStruc.setDisabled(True)
+		self.ui.rdoChoose.setDisabled(True)
+		self.ui.rdoFunction.setDisabled(True)
+		self.ui.checkBoxFileStruc.setDisabled(True)
 
-		self.txtComment.setDisabled(True)
-		self.MaxImport.setDisabled(True)
-
-		# self.btnImportOldVGenes.setDisabled(True)
-		self.buttonBox.setDisabled(True)
+		self.ui.txtComment.setDisabled(True)
+		self.ui.pushButtonCancel.setEnabled(False)
+		self.ui.pushButtonOK.setEnabled(False)
 
 	def checkProgress(self):
 		global timer
@@ -693,7 +688,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 				if NumParts > 3:
 					project = dirparts[NumParts - 3]
-					for i in range((self.comboBoxProject.count()) - 1):
+					for i in range((self.ui.comboBoxProject.count()) - 1):
 						if self.ui.comboBoxProject.itemText(i) == project:
 							self.ui.comboBoxProject.setCurrentText(project)
 					if self.ui.comboBoxProject.currentText() != project:
@@ -754,66 +749,49 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				self.checkProgress()
 				return
 		elif self.ui.rdoChoose.isChecked():
-			# checklabel = {}
+			(dirname, filename) = os.path.split(seq_pathname)
 
-			for item in seq_pathname:
-				(dirname, filename) = os.path.split(item)
+			if Filenamed == 'none':
+				project = self.ui.comboBoxProject.currentText()
+				grouping = self.ui.comboBoxGroup.currentText()
+				subgroup = self.ui.comboBoxSubgroup.currentText()
+			else:
+				project = Filenamed[1]
+				grouping = Filenamed[2]
+				subgroup = Filenamed[3]
 
-				if Filenamed == 'none':
-					project = self.ui.comboBoxProject.currentText()
-					grouping = self.ui.comboBoxGroup.currentText()
-					subgroup = self.ui.comboBoxSubgroup.currentText()
-				else:
-					project = Filenamed[1]
-					grouping = Filenamed[2]
-					subgroup = Filenamed[3]
+			if project == '': project = 'none'
+			if grouping == '': grouping = 'none'
+			if subgroup == '': subgroup = 'none'
 
-				if project == '': project = 'none'
-				if grouping == '': grouping = 'none'
-				if subgroup == '': subgroup = 'none'
+			datalist.clear()
 
-				# if thetype != 'Sequence':
-				if answer2 == '':
-					if len(pathname) > 1:
-						msg = 'More then 1 FASTA file was selected. Make each a seperate project based on the filenames?'
-						buttons = 'YN'
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
 
-						answer2 = informationMessage(self, msg, buttons)
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
 
-						firstOne = False
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			f.write(seq_pathname)
+			f.close()
 
-				if answer2 == 'Yes':
-					preproject = os.path.splitext(filename)
-					project = preproject[0]
-
-				datalist.clear()
-
-				datalist.append(project)
-				datalist.append(grouping)
-				datalist.append(subgroup)
-				datalist.append(species)
-				datalist.append(GetProductive)
-				datalist.append(MaxNum)
-
-				# try multi-thread
-				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-				file_handle = open(progressBarFile, 'w')
-				file_handle.write('0')
-				file_handle.close()
-				workThread = WorkThread(self)
-				workThread.item = item
-				workThread.datalist = datalist
-				workThread.start()
-				workThread.trigger.connect(self.multi_callback)
-
-				import_file = os.path.join(temp_folder, "import_file_name.txt")
-				f = open(import_file, 'w')
-				f.write(item)
-				f.close()
-
-				self.disableWidgets()
-				self.checkProgress()
-				return
+			self.disableWidgets()
+			self.checkProgress()
+			return
 		elif self.ui.rdoFunction.isChecked():
 			project = 'ByFunction'
 			grouping = ''

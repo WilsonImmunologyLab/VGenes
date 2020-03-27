@@ -594,13 +594,13 @@
     </widget>
    </item>
    <item row="7" column="1" colspan="3">
-    <widget class="QLineEdit" name="lineEditSubGroup"/>
+    <widget class="QComboBox" name="comboBoxSubgroup"/>
    </item>
    <item row="6" column="1" colspan="3">
-    <widget class="QLineEdit" name="lineEditGroup"/>
+    <widget class="QComboBox" name="comboBoxGroup"/>
    </item>
    <item row="5" column="1" colspan="3">
-    <widget class="QLineEdit" name="lineEditProject"/>
+    <widget class="QComboBox" name="comboBoxProject"/>
    </item>
   </layout>
  </widget>
