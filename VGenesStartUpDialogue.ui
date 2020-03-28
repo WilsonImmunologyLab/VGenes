@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>606</width>
+    <width>605</width>
     <height>619</height>
    </rect>
   </property>
@@ -40,13 +40,13 @@
        <widget class="QPushButton" name="btnNew">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>260</width>
           <height>45</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>180</width>
+          <width>260</width>
           <height>16777215</height>
          </size>
         </property>
@@ -62,7 +62,7 @@
          <enum>Qt::LeftToRight</enum>
         </property>
         <property name="text">
-         <string>New</string>
+         <string>New VGene DB</string>
         </property>
         <property name="icon">
          <iconset resource="Resources/VgenesResources.qrc">
@@ -73,6 +73,12 @@
           <width>30</width>
           <height>30</height>
          </size>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -93,13 +99,13 @@
        <widget class="QPushButton" name="cboOpen">
         <property name="minimumSize">
          <size>
-          <width>180</width>
+          <width>260</width>
           <height>45</height>
          </size>
         </property>
         <property name="maximumSize">
          <size>
-          <width>180</width>
+          <width>260</width>
           <height>16777215</height>
          </size>
         </property>
@@ -112,7 +118,7 @@
          <string>Find a VGenes database to open</string>
         </property>
         <property name="text">
-         <string>Open other</string>
+         <string>Open VGene DB</string>
         </property>
         <property name="icon">
          <iconset resource="Resources/VgenesResources.qrc">
@@ -123,6 +129,12 @@
           <width>30</width>
           <height>30</height>
          </size>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
         </property>
        </widget>
       </item>
@@ -182,31 +194,6 @@
      </property>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QFrame" name="frame_2">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label_3">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="pixmap">
-         <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/Flu.png</pixmap>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QFrame" name="frame_3">
      <property name="frameShape">
@@ -263,6 +250,19 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item row="0" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/mAB.png</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
     </widget>
    </item>
   </layout>
