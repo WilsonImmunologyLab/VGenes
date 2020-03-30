@@ -169,6 +169,13 @@ FirstupdateF = True
 global GLMsg
 GLMsg = True
 
+def reName(ori_name, rep1, rep2, prefix):
+	my_name = re.sub('clonotype',rep1, ori_name)
+	my_name = re.sub('consensus_', rep2, my_name)
+	if prefix != '':
+		my_name = prefix + '_' + my_name
+	return my_name
+
 class htmlDialog(QtWidgets.QDialog):
 	def __init__(self):
 		super(htmlDialog, self).__init__()
@@ -367,11 +374,36 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.browseCSV.clicked.connect(self.browseCSV)
 		self.ui.browseFasta.clicked.connect(self.browseFasta)
 		self.ui.browseVDB.clicked.connect(self.browseVDB)
+		self.ui.radioButtonChain.clicked.connect(self.ChainClicked)
+		self.ui.lineEditRep1.textChanged.connect(self.updateName)
+		self.ui.lineEditRep2.textChanged.connect(self.updateName)
+		self.ui.lineEditRep3.textChanged.connect(self.updateName)
 		#self.ui.comboBoxTemplate.currentTextChanged.connect(self.makeHTML)
 		#self.ui.comboBoxTarget.currentTextChanged.connect(self.makeHTML)
 
 		global answer3
 		answer3 = 'No'
+
+
+
+	def updateName(self):
+		ori_name = 'clonotype2_consensus_1'
+		rep1 = self.ui.lineEditRep1.text()
+		if self.ui.radioButtonChain.isChecked():
+			rep2 = 'H'
+		else:
+			rep2 = self.ui.lineEditRep2.text()
+		prefix = self.ui.lineEditRep3.text()
+
+		new_name = reName(ori_name, rep1, rep2, prefix)
+		self.ui.labelName.setText(new_name)
+
+	def ChainClicked(self):
+		if self.ui.radioButtonChain.isChecked():
+			self.ui.lineEditRep2.setEnabled(False)
+		else:
+			self.ui.lineEditRep2.setEnabled(True)
+		self.updateName()
 
 	def browseVDB(self):
 		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
@@ -618,6 +650,20 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		t = thd.Timer(1, self.checkProgress)
 		t.start()
 
+	def readBarcode(self, anno_path_name):
+		# read annotation content
+		barcode_dict = {}
+		if anno_path_name != "":
+			csvFile = open(anno_path_name, "r")
+			reader = csv.reader(csvFile)
+			for item in reader:
+				# ignore header line
+				if reader.line_num == 1:
+					continue
+				barcode_dict[item[17]] = item[0]
+			csvFile.close()
+		return barcode_dict
+
 	def InitiateImportFrom10X(self, Filenamed, MaxNum):
 		# need to transfer species grouping to IgBlaster
 		answer = ''
@@ -634,6 +680,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		seq_pathname = self.ui.Seqpath.text()
 		anno_path_name = self.ui.Annopath.text()
+		self.anno_path_name = anno_path_name
+
+		self.rep1 = self.ui.lineEditRep1.text()
+		if self.ui.radioButtonChain.isChecked():
+			self.rep2 = 'byChain'
+		else:
+			self.rep2 = self.ui.lineEditRep2.text()
+		self.prefix = self.ui.lineEditRep3.text()
 
 		if self.ui.rdoProductive.isChecked() == True:
 			GetProductive = True
@@ -831,6 +885,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	@pyqtSlot()
 	def multi_callback(self):
+		global IgBLASTAnalysis
+
 		Startprocessed = 0
 		try:
 			Startprocessed = len(IgBLASTAnalysis)
@@ -838,6 +894,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		except:
 			if Startprocessed == 0:
 				self.close()
+
+		# match barcode
+		barcodeDict = self.readBarcode(self.anno_path_name)
+
+		for record in IgBLASTAnalysis:
+			if record[0] in barcodeDict.keys():
+				record[108] = barcodeDict[record[0]]
+
+			if self.rep2 == "byChain":
+				rep2 = record[2][0]
+			else:
+				rep2 = self.rep2
+			record[0] = reName(record[0], self.rep1, rep2, self.prefix)
+
+		#a = IgBLASTAnalysis
 
 		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
 
@@ -2286,7 +2357,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.SeqTable.setColumnCount(num_col)
 
 			horizontalHeader = [i[1] for i in HeaderIn]
-			horizontalHeader = [''] + horizontalHeader
+			#horizontalHeader = [''] + horizontalHeader
+			horizontalHeader = [''] + RealNameList
 			self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
 			self.ui.SeqTable.fields = horizontalHeader
 			# re-size column size
