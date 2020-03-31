@@ -2443,7 +2443,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.SeqTable.setRowCount(num_row)
 			self.ui.SeqTable.setColumnCount(num_col)
 
-			horizontalHeader = [i[1] for i in HeaderIn]
+			#horizontalHeader = [i[1] for i in HeaderIn]
 			#horizontalHeader = [''] + horizontalHeader
 			horizontalHeader = [''] + RealNameList
 			self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
@@ -6302,13 +6302,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 		view.setModel(model)
 
 	def LoadDB(self, DBFilename):
+		global FieldList
+		global FieldCommentList
+		global FieldTypeList
+		global RealNameList
 
 		if not self.createConnection(DBFilename):
 			sys.exit(1)
 
-		#editableModel = EditableSqlModel()
-		#self.initializeModel(editableModel)
-		#self.createView(editableModel)
+		VGenesSQL.checkFieldTable(DBFilename)
+		SQLSATEMENT = 'SELECT * FROM fieldsname ORDER BY ID'
+		Records = VGenesSQL.RunSQL(DBFilename, SQLSATEMENT)
+
+		FieldList = [i[1] for i in Records]
+		RealNameList = [i[2] for i in Records]
+		FieldTypeList = [i[3] for i in Records]
+		FieldCommentList = [i[4] for i in Records]
 
 		self.OnOpen()
 		titletext = 'VGenes - ' + DBFilename

@@ -11,17 +11,216 @@ def creatnewDB(DBpathname):
     os.chdir(dirname)
     # print(dirname)
 
-
     conn = db.connect(DBpathname)
     cursor = conn.cursor()
     cursor.execute('drop table if exists vgenesdb')
-
     cursor.execute("create table vgenesDB(SeqName text, SeqLen, GeneType text, V1 text, V2 text, V3 text, D1 text, D2 text, D3 text, J1 text, J2 text, J3 text, StopCodon text, ReadingFrame text, productive text, Strand text, VSeqend text, VDJunction text, Dregion text, DJJunction text, begJ text, VJunction text, FR1From text, FR1To text, FR1length text, FR1matches text, FR1mis text, FR1gaps text, FR1PercentIdentity text, CDR1From text, CDR1to text, CDR1length text, CDR1matches text, CDR1mis text, CDR1gaps text, CDR1PercentIdentity text, FR2From text, FR2To text, FR2length text, FR2matches text, FR2mis text, FR2gaps text, FR2PercentIdentity text, CDR2From text, CDR2to text, CDR2length text, CDR2matches text, CDR2mis text, CDR2gaps text, CDR2PercentIdentity text, FR3From text, FR3To text, FR3length text, FR3matches text, FR3mis text, FR3gaps text, FR3PercentIdentity text, TotMut text, SeqAlignment text, GVbeg text, GVend text, GD1beg text, GD1end text, GD2beg text, GD2end text, GJbeg text, GJend text, Vbeg text, Vend text, D1beg text, D1end text, D2beg text, D2end text, Jbeg text, Jend text, Project text, Grouping text, SubGroup text, Species text, Sequence text, GermlineSequence text, CDR3DNA text, CDR3AA text, CDR3Length text, CDR3beg text, CDR3end text, Specificity text, Subspecificity text, ClonalPool text, ClonalRank text, VLocus text, JLocus text, DLocus text, DateEntered text, Comments text, Quality text, TotalMuts text, Mutations text, IDEvent text, CDR3MW, CDR3pI, Isotype, GCDR3beg, GCDR3end, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, ID PRIMARY KEY NOT NULL)")
     # ID PRIMARY KEY,
+    cursor.execute('drop table if exists fieldsname')
+    cursor.execute("create table fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text)")
+
+    FieldList = [
+        [1, "SeqName", "Name", "Fixed", ""],
+        [2, "SeqLen", "Length", "Fixed", ""],
+        [3, "GeneType", "Type", "Fixed", ""],
+        [4, "V1", "Vgene", "Fixed", ""],
+        [5, "V2", "Vgene2ndchoice", "Fixed", ""],
+        [6, "V3", "Vgene3rdchoice", "Fixed", ""],
+        [7, "D1", "Dgene", "Fixed", ""],
+        [8, "D2", "Dgene2ndchoice", "Fixed", ""],
+        [9, "D3", "Dgene3rdchoice", "Fixed", ""],
+        [10, "J1", "Jgene", "Fixed", ""],
+        [11, "J2", "Jgene2ndchoice", "Fixed", ""],
+        [12, "J3", "Jgene3rdchoice", "Fixed", ""],
+        [13, "StopCodon", "Stopcodons?", "Fixed", ""],
+        [14, "ReadingFrame", "Readingframe", "Fixed", ""],
+        [15, "productive", "Productive?", "Fixed", ""],
+        [16, "Strand", "Strand", "Fixed", ""],
+        [17, "VSeqend", "EndofVgene", "Fixed", ""],
+        [18, "VDJunction", "VtoDJunction", "Fixed", ""],
+        [19, "Dregion", "Dregion", "Fixed", ""],
+        [20, "DJJunction", "DtoJjunction", "Fixed", ""],
+        [21, "begJ", "BeginningofJ", "Fixed", ""],
+        [22, "VJunction", "VtoJjunction", "Fixed", ""],
+        [23, "FR1From", "FWR1firstbase", "Fixed", ""],
+        [24, "FR1To", "FWR1lastbase", "Fixed", ""],
+        [25, "FR1length", "FWR1length", "Fixed", ""],
+        [26, "FR1matches", "FWR1matches", "Fixed", ""],
+        [27, "FR1mis", "FWR1mismatches", "Fixed", ""],
+        [28, "FR1gaps", "FWR1gaps", "Fixed", ""],
+        [29, "FR1PercentIdentity", "FWR1percentidentity", "Fixed", ""],
+        [30, "CDR1From", "CDR1firstbase", "Fixed", ""],
+        [31, "CDR1to", "CDR1lastbase", "Fixed", ""],
+        [32, "CDR1length", "CDR1length", "Fixed", ""],
+        [33, "CDR1matches", "CDR1matches", "Fixed", ""],
+        [34, "CDR1mis", "CDR1mismatches", "Fixed", ""],
+        [35, "CDR1gaps", "CDR1gaps", "Fixed", ""],
+        [36, "CDR1PercentIdentity", "CDR1percentidentity", "Fixed", ""],
+        [37, "FR2From", "FWR2firstbase", "Fixed", ""],
+        [38, "FR2To", "FWR2lastbase", "Fixed", ""],
+        [39, "FR2length", "FWR2length", "Fixed", ""],
+        [40, "FR2matches", "FWR2matches", "Fixed", ""],
+        [41, "FR2mis", "FWR2mismatches", "Fixed", ""],
+        [42, "FR2gaps", "FWR2gaps", "Fixed", ""],
+        [43, "FR2PercentIdentity", "FWR2percentidentity", "Fixed", ""],
+        [44, "CDR2From", "CDR2firstbase", "Fixed", ""],
+        [45, "CDR2to", "CDR2lastbase", "Fixed", ""],
+        [46, "CDR2length", "CDR2length", "Fixed", ""],
+        [47, "CDR2matches", "CDR2matches", "Fixed", ""],
+        [48, "CDR2mis", "CDR2mismatches", "Fixed", ""],
+        [49, "CDR2gaps", "CDR2gaps", "Fixed", ""],
+        [50, "CDR2PercentIdentity", "CDR2percentidentity", "Fixed", ""],
+        [51, "FR3From", "FWR3firstbase", "Fixed", ""],
+        [52, "FR3To", "FWR3lastbase", "Fixed", ""],
+        [53, "FR3length", "FWR3length", "Fixed", ""],
+        [54, "FR3matches", "FWR3matches", "Fixed", ""],
+        [55, "FR3mis", "FWR3mismatches", "Fixed", ""],
+        [56, "FR3gaps", "FWR3gaps", "Fixed", ""],
+        [57, "FR3PercentIdentity", "FWR3percentidentity", "Fixed", ""],
+        [58, "TotMut", "IgBLASTmutationcount", "Fixed", ""],
+        [59, "SeqAlignment", "IgBLASTSequenceAlignment", "Fixed", ""],
+        [60, "GVbeg", "GermlineVbegin", "Fixed", ""],
+        [61, "GVend", "GermlineVend", "Fixed", ""],
+        [62, "GD1beg", "GermlineD1begin", "Fixed", ""],
+        [63, "GD1end", "GermlineD1end", "Fixed", ""],
+        [64, "GD2beg", "GermlineD2begin", "Fixed", ""],
+        [65, "GD2end", "GermlineD2end", "Fixed", ""],
+        [66, "GJbeg", "GermlineJbegin", "Fixed", ""],
+        [67, "GJend", "GermlineJend", "Fixed", ""],
+        [68, "Vbeg", "Vbegin", "Fixed", ""],
+        [69, "Vend", "Vend", "Fixed", ""],
+        [70, "D1beg", "D1begin", "Fixed", ""],
+        [71, "D1end", "D1end", "Fixed", ""],
+        [72, "D2beg", "D2begin", "Fixed", ""],
+        [73, "D2end", "D2end", "Fixed", ""],
+        [74, "Jbeg", "Jbegin", "Fixed", ""],
+        [75, "Jend", "Jend", "Fixed", ""],
+        [76, "Project", "Project", "Fixed", ""],
+        [77, "Grouping", "Grouping", "Fixed", ""],
+        [78, "SubGroup", "Subgroup", "Fixed", ""],
+        [79, "Species", "Species", "Fixed", ""],
+        [80, "Sequence", "Sequence", "Fixed", ""],
+        [81, "GermlineSequence", "Germlinesequence", "Fixed", ""],
+        [82, "CDR3DNA", "CDR3DNA", "Fixed", ""],
+        [83, "CDR3AA", "CDR3peptide", "Fixed", ""],
+        [84, "CDR3Length", "CDR3length", "Fixed", ""],
+        [85, "CDR3beg", "CDR3firstbase", "Fixed", ""],
+        [86, "CDR3end", "CDR3lastbase", "Fixed", ""],
+        [87, "Specificity", "Specificity", "Fixed", ""],
+        [88, "Subspecificity", "Subspecificity", "Fixed", ""],
+        [89, "ClonalPool", "ClonalPool", "Fixed", ""],
+        [90, "ClonalRank", "ClonalRank", "Fixed", ""],
+        [91, "VLocus", "Vlocus", "Fixed", ""],
+        [92, "JLocus", "Jlocus", "Fixed", ""],
+        [93, "DLocus", "Dlocus", "Fixed", ""],
+        [94, "DateEntered", "Dateandtimeentered", "Fixed", ""],
+        [95, "Comments", "Comments", "Fixed", ""],
+        [96, "Quality", "Quality", "Fixed", ""],
+        [97, "TotalMuts", "TotalMutations", "Fixed", ""],
+        [98, "Mutations", "Mutationlist", "Fixed", ""],
+        [99, "IDEvent", "Insertions&deletions", "Fixed", ""],
+        [100, "CDR3MW", "CDR3molecularweight", "Fixed", ""],
+        [101, "CDR3pI", "CDR3isoelectricpoint", "Fixed", ""],
+        [102, "Isotype", "Isotype", "Fixed", ""],
+        [103, "GCDR3beg", "GermlneCDR3begin", "Fixed", ""],
+        [104, "GCDR3end", "GermlineCDR3end", "Fixed", ""],
+        [105, "Blank6", "Autoreactivity", "Fixed", ""],
+        [106, "Blank7", "Blank7", "Customized", ""],
+        [107, "Blank8", "10xCluster", "Customized", ""],
+        [108, "Blank9", "Seuret_Cluster", "Customized", ""],
+        [109, "Blank10", "10xBarCode", "Customized", ""],
+        [110, "Blank11", "Population", "Customized", ""],
+        [111, "Blank12", "Label", "Customized", ""],
+        [112, "Blank13", "Status", "Customized", ""],
+        [113, "Blank14", "Blank14", "Customized", ""],
+        [114, "Blank15", "Blank15", "Customized", ""],
+        [115, "Blank16", "Blank16", "Customized", ""],
+        [116, "Blank17", "Blank17", "Customized", ""],
+        [117, "Blank18", "Blank18", "Customized", ""],
+        [118, "Blank19", "Blank19", "Customized", ""],
+        [119, "Blank20", "Blank20", "Customized", ""],
+        [120, "ID", "ID", "Customized", ""]
+    ]
+
+    cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) VALUES(?,?,?,?,?)''',FieldList)
 
     conn.commit()
     conn.close()
 
+def checkFieldTable(DBpathname):
+    (dirname, filename) = os.path.split(DBpathname)
+
+    os.chdir(dirname)
+
+    conn = db.connect(DBpathname)
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("SELECT * FROM fieldsname WHERE ID = 1")
+    except:
+        cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text)")
+
+        HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+        HeaderIn = RunSQL(DBpathname, HEADERStatement)
+        Fields = [i[1] for i in HeaderIn]
+
+        keys = ['SeqName', 'SeqLen', 'GeneType', 'V1', 'V2', 'V3', 'D1', 'D2', 'D3', 'J1', 'J2', 'J3', 'StopCodon',
+            'ReadingFrame', 'productive', 'Strand', 'VSeqend', 'VDJunction', 'Dregion', 'DJJunction', 'begJ',
+            'VJunction', 'FR1From', 'FR1To', 'FR1length', 'FR1matches', 'FR1mis', 'FR1gaps', 'FR1PercentIdentity',
+            'CDR1From', 'CDR1to', 'CDR1length', 'CDR1matches', 'CDR1mis', 'CDR1gaps', 'CDR1PercentIdentity', 'FR2From',
+            'FR2To', 'FR2length', 'FR2matches', 'FR2mis', 'FR2gaps', 'FR2PercentIdentity', 'CDR2From', 'CDR2to',
+            'CDR2length', 'CDR2matches', 'CDR2mis', 'CDR2gaps', 'CDR2PercentIdentity', 'FR3From', 'FR3To', 'FR3length',
+            'FR3matches', 'FR3mis', 'FR3gaps', 'FR3PercentIdentity', 'TotMut', 'SeqAlignment', 'GVbeg', 'GVend',
+            'GD1beg', 'GD1end', 'GD2beg', 'GD2end', 'GJbeg', 'GJend', 'Vbeg', 'Vend', 'D1beg', 'D1end', 'D2beg',
+            'D2end', 'Jbeg', 'Jend', 'Project', 'Grouping', 'SubGroup', 'Species', 'Sequence', 'GermlineSequence',
+            'CDR3DNA', 'CDR3AA', 'CDR3Length', 'CDR3beg', 'CDR3end', 'Specificity', 'Subspecificity', 'ClonalPool',
+            'ClonalRank', 'VLocus', 'JLocus', 'DLocus', 'DateEntered', 'Comments', 'Quality', 'TotalMuts', 'Mutations',
+            'IDEvent', 'CDR3MW', 'CDR3pI', 'Isotype', 'GCDR3beg', 'GCDR3end', 'Blank6', 'Blank7', 'Blank8', 'Blank9',
+            'Blank10', 'Blank11', 'Blank12', 'Blank13', 'Blank14', 'Blank15', 'Blank16', 'Blank17', 'Blank18',
+            'Blank19', 'Blank20', 'ID']
+        values = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene 3rd choice", "D gene",
+             " D gene 2nd choice", "D gene 3rd choice", "J gene", " J gene 2nd choice", "J gene 3rd choice",
+             "Stop codons?", "Reading frame", "Productive?", "Strand", "End of V gene", "V to D Junction",
+             "D region", "D to J junction", "Beginning of J", "V to J junction", "FWR1 first base", "FWR1 last base",
+             "FWR1 length", "FWR1 matches", "FWR1 mismatches", "FWR1 gaps", "FWR1 percent identity",
+             "CDR1 first base", "CDR1 last base", "CDR1 length", "CDR1 matches", "CDR1 mismatches", "CDR1 gaps",
+             "CDR1 percent identity", "FWR2 first base", "FWR2 last base", "FWR2 length", "FWR2 matches",
+             "FWR2 mismatches", "FWR2 gaps", "FWR2 percent identity", "CDR2 first base", "CDR2 last base",
+             "CDR2 length", "CDR2 matches", "CDR2 mismatches", "CDR2 gaps", "CDR2 percent identity",
+             "FWR3 first base", "FWR3 last base", "FWR3 length", "FWR3 matches", "FWR3 mismatches", "FWR3 gaps",
+             "FWR3 percent identity", "IgBLAST mutation count", "IgBLAST Sequence Alignment", "Germline V begin",
+             "Germline V end", "Germline D1 begin", "Germline D1 end", "Germline D2 begin", "Germline D2 end",
+             "Germline J begin", "Germline J end", " V begin", " V end", " D1 begin", " D1 end", " D2 begin",
+             " D2 end", " J begin", " J end", "Project", "Grouping", "Subgroup", "Species", "Sequence",
+             " Germline sequence", "CDR3 DNA", "CDR3 peptide", "CDR3 length", "CDR3 first base", "CDR3 last base",
+             "Specificity", "Subspecificity", "Clonal Pool", "Clonal Rank", "V locus", "J locus", "D locus",
+             "Date and time entered", "Comments", "Quality", "Total Mutations", "Mutation list",
+             "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
+             "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster",
+             "10xBarCode", "Population",
+             "Label", "Status", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
+        Dict = dict(zip(keys, values))
+
+        i = 1
+        FieldList = []
+        for field in Fields:
+            if i < 106:
+                if field in keys:
+                    ele = [i, field, Dict[field], "Fixed", ""]
+                else:
+                    ele = [i, field, field, "Fixed", ""]
+            else:
+                if field in keys:
+                    ele = [i, field, Dict[field], "Customized", ""]
+                else:
+                    ele = [i, field, field, "Customized", ""]
+            FieldList.append(ele)
+            i += 1
+
+        cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) VALUES(?,?,?,?,?)''',FieldList)
+
+    conn.commit()
+    conn.close()
 
 
 def CopyDatatoDB2(SQLSELECT, DBpathname, DB2path):
