@@ -297,6 +297,26 @@ def UpdateField(ID, Value, Field, DBpathname):
     conn.commit()
     conn.close
 
+def UpdateFieldTable(ID, Value, Field, DBpathname):
+    (dirname, filename) = os.path.split(DBpathname)
+
+    os.chdir(dirname)
+    # print(dirname)
+
+    conn = db.connect(DBpathname)
+    cursor = conn.cursor()
+    # cursor.execute('drop table if exists vgenesdb')
+    nID = str(ID)
+    SQLCommand = 'UPDATE fieldsname SET ' + Field + ' = "' + Value + '" WHERE Field = "' + nID + '"'
+
+    try:
+        cursor.execute(SQLCommand)
+    except:
+        print(SQLCommand)
+
+    conn.commit()
+    conn.close
+
 def UpdateFieldbySeqName(ID, Value, Field, DBpathname):
     (dirname, filename) = os.path.split(DBpathname)
 

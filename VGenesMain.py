@@ -396,6 +396,8 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 	def saveRecord(self):
 		global RealNameList
 		global FieldCommentList
+		global FieldTypeList
+		global FieldList
 
 		items = self.ui.listWidget.selectedItems()
 		for item in items:
@@ -409,7 +411,11 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			FieldCommentList[index] = self.ui.textEditNote.toPlainText()
 
 		# save to DB
-		pass
+		if FieldTypeList[index] == "Fixed":
+			VGenesSQL.UpdateFieldTable(name, self.ui.textEditNote.toPlainText(), 'FieldComment', DBFilename)
+		else:
+			VGenesSQL.UpdateFieldTable(name, self.ui.textEditNote.toPlainText(), 'FieldComment', DBFilename)
+			VGenesSQL.UpdateFieldTable(name, self.ui.lineEditNickName.text(), 'FieldNickName', DBFilename)
 
 		self.ui.pushButtonSave.setEnabled(False)
 
@@ -422,6 +428,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			name = item.text()
 
 		index = FieldList.index(name)
+		self.ui.lineEditName.setText(FieldList[index])
 		self.ui.lineEditNickName.setText(RealNameList[index])
 		self.ui.lineEditType.setText(FieldTypeList[index])
 		self.ui.textEditNote.setText(FieldCommentList[index])
@@ -1926,11 +1933,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# self.ImportOptions =ImportDialogue()
 		self.ImportOptions = ImportDataDialogue()
 		self.AlterWindow = AlterDielog()
-		self.AlterWindow.ui.listWidget.addItems(FieldList)
-		#self.AlterWindow.ui.listWidget.setCurrentIndex(0)
-		self.AlterWindow.ui.lineEditNickName.setText(RealNameList[0])
-		self.AlterWindow.ui.lineEditType.setText(FieldTypeList[0])
-		self.AlterWindow.ui.textEditNote.setText(FieldCommentList[0])
+		self.AlterWindow.intial = True
 
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
@@ -1940,6 +1943,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def openAlter(self):
 		self.AlterWindow.ui.pushButtonSave.setEnabled(False)
+		if self.AlterWindow.intial:
+			if DBFilename != "":
+				self.AlterWindow.ui.listWidget.addItems(FieldList)
+				# self.AlterWindow.ui.listWidget.setCurrentIndex(0)
+				self.AlterWindow.ui.lineEditName.setText(FieldList[0])
+				self.AlterWindow.ui.lineEditNickName.setText(RealNameList[0])
+				self.AlterWindow.ui.lineEditType.setText(FieldTypeList[0])
+				self.AlterWindow.ui.textEditNote.setText(FieldCommentList[0])
+				self.AlterWindow.intial = False
 		self.AlterWindow.show()
 
 	def selectionMode(self):
@@ -2156,6 +2168,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		layout.addWidget(view)
 
 	def makeNTLogo(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
 		listItems = self.getTreeCheckedChild()
 		listItems = listItems[3]
 		WhereState = ''
@@ -2257,6 +2272,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
 
 	def makeAALogo(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
 		listItems = self.getTreeCheckedChild()
 		listItems = listItems[3]
 		WhereState = ''
@@ -2362,74 +2380,77 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def InitialGraphic(self):
 		global DBFilename
 		global updateMarker
-		#Msg = str(self.ui.tabWidget.currentIndex())
-		#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-		if self.ui.tabWidget.currentIndex() == 6:
-			if self.ui.comboBoxPie.count() == 0:
-				# setup options for graph table
-				fields_name = VGenesSQL.ColName(DBFilename)
-				fields_name = [""] + fields_name
-				self.ui.comboBoxPie.clear()
-				self.ui.comboBoxPie.addItems(fields_name)
-				self.ui.comboBoxCol1.clear()
-				self.ui.comboBoxCol1.addItems(fields_name)
-				self.ui.comboBoxCol2.clear()
-				self.ui.comboBoxCol2.addItems(fields_name)
-				self.ui.comboBoxBoxData.clear()
-				self.ui.comboBoxBoxData.addItems(fields_name)
-				self.ui.comboBoxBox1.clear()
-				self.ui.comboBoxBox1.addItems(fields_name)
-				self.ui.comboBoxBox2.clear()
-				self.ui.comboBoxBox2.addItems(fields_name)
-				self.ui.comboBoxRiver1.clear()
-				self.ui.comboBoxRiver1.addItems(fields_name)
-				self.ui.comboBoxRiver2.clear()
-				self.ui.comboBoxRiver2.addItems(fields_name)
-				self.ui.comboBoxWord.clear()
-				self.ui.comboBoxWord.addItems(fields_name)
-				self.ui.comboBoxScatterX.clear()
-				self.ui.comboBoxScatterX.addItems(fields_name)
-				self.ui.comboBoxScatterY.clear()
-				self.ui.comboBoxScatterY.addItems(fields_name)
-				self.ui.comboBoxScatterGroup.clear()
-				self.ui.comboBoxScatterGroup.addItems(fields_name)
-				self.ui.comboBoxTree1.clear()
-				self.ui.comboBoxTree1.addItems(fields_name)
-				self.ui.comboBoxTree2.clear()
-				self.ui.comboBoxTree2.addItems(fields_name)
-				self.ui.comboBoxTree3.clear()
-				self.ui.comboBoxTree3.addItems(fields_name)
-		elif self.ui.tabWidget.currentIndex() == 8:
-			SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			list1 = []
-			for ele in DataIn:
-				list1.append(ele[0])
-			list_unique = list(set(list1))
-			list_unique.remove('0')
-			list_unique.sort()
-			self.ui.comboBoxTree.clear()
-			self.ui.comboBoxTree.addItems(list_unique)
-		elif self.ui.tabWidget.currentIndex() == 0:
-			# if old table exists, clear table
-			if self.ui.SeqTable.columnCount() > 0:
-				if updateMarker == True:
+		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
+			#Msg = str(self.ui.tabWidget.currentIndex())
+			#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			if self.ui.tabWidget.currentIndex() == 6:
+				if self.ui.comboBoxPie.count() == 0:
+					# setup options for graph table
+					fields_name = VGenesSQL.ColName(DBFilename)
+					fields_name = [""] + fields_name
+					self.ui.comboBoxPie.clear()
+					self.ui.comboBoxPie.addItems(fields_name)
+					self.ui.comboBoxCol1.clear()
+					self.ui.comboBoxCol1.addItems(fields_name)
+					self.ui.comboBoxCol2.clear()
+					self.ui.comboBoxCol2.addItems(fields_name)
+					self.ui.comboBoxBoxData.clear()
+					self.ui.comboBoxBoxData.addItems(fields_name)
+					self.ui.comboBoxBox1.clear()
+					self.ui.comboBoxBox1.addItems(fields_name)
+					self.ui.comboBoxBox2.clear()
+					self.ui.comboBoxBox2.addItems(fields_name)
+					self.ui.comboBoxRiver1.clear()
+					self.ui.comboBoxRiver1.addItems(fields_name)
+					self.ui.comboBoxRiver2.clear()
+					self.ui.comboBoxRiver2.addItems(fields_name)
+					self.ui.comboBoxWord.clear()
+					self.ui.comboBoxWord.addItems(fields_name)
+					self.ui.comboBoxScatterX.clear()
+					self.ui.comboBoxScatterX.addItems(fields_name)
+					self.ui.comboBoxScatterY.clear()
+					self.ui.comboBoxScatterY.addItems(fields_name)
+					self.ui.comboBoxScatterGroup.clear()
+					self.ui.comboBoxScatterGroup.addItems(fields_name)
+					self.ui.comboBoxTree1.clear()
+					self.ui.comboBoxTree1.addItems(fields_name)
+					self.ui.comboBoxTree2.clear()
+					self.ui.comboBoxTree2.addItems(fields_name)
+					self.ui.comboBoxTree3.clear()
+					self.ui.comboBoxTree3.addItems(fields_name)
+			elif self.ui.tabWidget.currentIndex() == 8:
+				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				list1 = []
+				for ele in DataIn:
+					list1.append(ele[0])
+				list_unique = list(set(list1))
+				list_unique.remove('0')
+				list_unique.sort()
+				self.ui.comboBoxTree.clear()
+				self.ui.comboBoxTree.addItems(list_unique)
+			elif self.ui.tabWidget.currentIndex() == 0:
+				# if old table exists, clear table
+				if self.ui.SeqTable.columnCount() > 0:
+					if updateMarker == True:
+						self.load_table()
+						self.match_tree_to_table()
+						self.tree_to_table_selection()
+						updateMarker = False
+				else:
 					self.load_table()
 					self.match_tree_to_table()
 					self.tree_to_table_selection()
-					updateMarker = False
-			else:
-				self.load_table()
-				self.match_tree_to_table()
-				self.tree_to_table_selection()
 
 	def load_table(self):
 		if self.ui.SeqTable.columnCount() > 0:
 			self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
 		self.ui.SeqTable.setColumnCount(0)
 		self.ui.SeqTable.setRowCount(0)
+
+		a = DBFilename
 		# load data for new table
-		if DBFilename != '' and DBFilename != 'none':
+		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
 			field1 = self.ui.cboTreeOp1.currentText()
 			field2 = self.ui.cboTreeOp2.currentText()
 			field3 = self.ui.cboTreeOp3.currentText()
@@ -2478,6 +2499,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def checkAll(self):
 		global MoveNotChange
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
 
 		MoveNotChange = True
 		rows = self.ui.SeqTable.rowCount()
@@ -6113,10 +6136,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# todo old code to update fields after tree clicked using Name Index now
 
-
-
-
-
 		try:
 			self.SeqButton(LastPushed)
 		except:
@@ -7217,6 +7236,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnClearTreeChecks_clicked(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
 		self.clearTreeChecks()
 
 	@pyqtSlot()
@@ -7575,6 +7597,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnFieldSearch_clicked(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
 		global wasClicked
 		search = self.ui.txtFieldSearch.text()
 		field = self.ui.cboFindField.currentText()
@@ -7851,6 +7876,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnSaveChange_clicked(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
 		global updateMarker
 		if self.enableEdit == True:
 			SETStatement = 'SET '
@@ -9184,6 +9212,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnUpdateTree_clicked(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
 		fields = self.ui.cboTreeOp1.currentText()
 		field1Index = self.ui.cboTreeOp1.currentIndex()
 

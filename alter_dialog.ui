@@ -102,7 +102,7 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
-      <item row="4" column="0">
+      <item row="8" column="0">
        <widget class="QLabel" name="label_5">
         <property name="font">
          <font>
@@ -111,6 +111,25 @@
         </property>
         <property name="text">
          <string>Note:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="9" column="0" colspan="2">
+       <widget class="QTextEdit" name="textEditNote">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QLineEdit" name="lineEditName">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>25</height>
+         </size>
         </property>
        </widget>
       </item>
@@ -126,7 +145,7 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
+      <item row="4" column="0">
        <widget class="QLabel" name="label_4">
         <property name="font">
          <font>
@@ -138,7 +157,38 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Field Name:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QCommandLinkButton" name="pushButtonSave">
+        <property name="maximumSize">
+         <size>
+          <width>60</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Save</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
        <widget class="QLineEdit" name="lineEditNickName">
         <property name="minimumSize">
          <size>
@@ -168,34 +218,6 @@
         </property>
         <property name="readOnly">
          <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0" colspan="2">
-       <widget class="QTextEdit" name="textEditNote">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1">
-       <widget class="QCommandLinkButton" name="pushButtonSave">
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
         </property>
        </widget>
       </item>
