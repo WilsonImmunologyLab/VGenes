@@ -45,6 +45,7 @@ from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMess
 from ui_VGenesStartUpDialogue import Ui_VGenesStartUpDialog
 from ui_import_data_dialog import Ui_ImportDataDialog
 from ui_VGenesTextEdit import ui_TextEditor
+from ui_alter_dialog import Ui_AlterDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -155,6 +156,27 @@ RealNameList = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene
                 "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
                 "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster", "10xBarCode", "Population",
                 "Label", "Status", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
+
+global FieldTypeList
+FieldTypeList = ["Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Customized", "Customized", "Customized",
+                 "Customized", "Customized", "Customized", "Customized", "Customized", "Customized", "Customized",
+                 "Customized", "Customized", "Customized", "Customized", "Customized"]
+global FieldCommentList
+FieldCommentList = ["", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "","", "", "",
+                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "",
+                    "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "",
+                    "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "",
+                    "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", ""]
+
 global NameIndex
 NameIndex = {}
 global FieldsChanged
@@ -357,6 +379,60 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 			Vgenes.UpdateRecentList(StartUpAnswer, False)
 			self.close()
 			Vgenes.ApplicationStarted()
+
+class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		#super(ImportDataDialogue, self).__init__()
+		self.ui = Ui_AlterDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButton.clicked.connect(self.reject)
+		self.ui.pushButtonSave.clicked.connect(self.saveRecord)
+		self.ui.lineEditNickName.textChanged.connect(self.valueChange)
+		self.ui.textEditNote.textChanged.connect(self.valueChange)
+		self.ui.listWidget.itemSelectionChanged.connect(self.ListItemChanged)
+
+	def saveRecord(self):
+		global RealNameList
+		global FieldCommentList
+
+		items = self.ui.listWidget.selectedItems()
+		for item in items:
+			name = item.text()
+
+		index = FieldList.index(name)
+		if FieldTypeList[index] == "Fixed":
+			FieldCommentList[index] = self.ui.textEditNote.toPlainText()
+		else:
+			RealNameList[index] = self.ui.lineEditNickName.text()
+			FieldCommentList[index] = self.ui.textEditNote.toPlainText()
+
+		# save to DB
+		pass
+
+		self.ui.pushButtonSave.setEnabled(False)
+
+	def valueChange(self):
+		self.ui.pushButtonSave.setEnabled(True)
+
+	def ListItemChanged(self):
+		items = self.ui.listWidget.selectedItems()
+		for item in items:
+			name = item.text()
+
+		index = FieldList.index(name)
+		self.ui.lineEditNickName.setText(RealNameList[index])
+		self.ui.lineEditType.setText(FieldTypeList[index])
+		self.ui.textEditNote.setText(FieldCommentList[index])
+		self.ui.pushButtonSave.setEnabled(False)
+		if self.ui.lineEditType.text() == "Fixed":
+			self.ui.lineEditNickName.setReadOnly(True)
+		else:
+			self.ui.lineEditNickName.setReadOnly(False)
+
+	def reject(self):
+		self.hide()
 
 class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	def __init__(self, parent=None):
@@ -1838,6 +1914,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
 		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
 		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
+		self.ui.pushButtonAlter.clicked.connect(self.openAlter)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -1848,12 +1925,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# self.VGProgress = VGenesProgressBar()
 		# self.ImportOptions =ImportDialogue()
 		self.ImportOptions = ImportDataDialogue()
+		self.AlterWindow = AlterDielog()
+		self.AlterWindow.ui.listWidget.addItems(FieldList)
+		#self.AlterWindow.ui.listWidget.setCurrentIndex(0)
+		self.AlterWindow.ui.lineEditNickName.setText(RealNameList[0])
+		self.AlterWindow.ui.lineEditType.setText(FieldTypeList[0])
+		self.AlterWindow.ui.textEditNote.setText(FieldCommentList[0])
 
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 		self.enableEdit = False
+
+	def openAlter(self):
+		self.AlterWindow.ui.pushButtonSave.setEnabled(False)
+		self.AlterWindow.show()
 
 	def selectionMode(self):
 		if self.ui.checkBoxRowSelection.isChecked():
