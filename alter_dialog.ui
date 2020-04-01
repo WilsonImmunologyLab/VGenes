@@ -56,7 +56,20 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
+      <item row="2" column="0">
+       <widget class="QListWidget" name="listWidget">
+        <property name="maximumSize">
+         <size>
+          <width>500</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="editTriggers">
+         <set>QAbstractItemView::NoEditTriggers</set>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
        <widget class="QLabel" name="label_2">
         <property name="maximumSize">
          <size>
@@ -77,16 +90,40 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QListWidget" name="listWidget">
-        <property name="maximumSize">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushButtonNew">
+        <property name="minimumSize">
          <size>
-          <width>500</width>
-          <height>16777215</height>
+          <width>0</width>
+          <height>40</height>
          </size>
         </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>10000</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Add a new field</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>Resources/plus.png</normaloff>Resources/plus.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

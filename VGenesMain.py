@@ -529,6 +529,53 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.lineEditNickName.textChanged.connect(self.valueChange)
 		self.ui.textEditNote.textChanged.connect(self.valueChange)
 		self.ui.listWidget.itemSelectionChanged.connect(self.ListItemChanged)
+		self.ui.pushButtonNew.clicked.connect(self.addField)
+
+	def addField(self):
+		global RealNameList
+		global FieldCommentList
+		global FieldTypeList
+		global FieldList
+
+		items = []
+		for index in range(self.ui.listWidget.count()):
+			items.append(self.ui.listWidget.item(index))
+		cur_fields = [i.text() for i in items]
+
+		i = len(cur_fields)
+		tmp_field_name = "Column" + str(i)
+		while tmp_field_name in cur_fields:
+			i = i + 1
+			tmp_field_name = "Column" + str(i)
+
+		# update table
+		SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + tmp_field_name + " text"
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+		                'VALUES(' + str(self.ui.listWidget.count() + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "")'
+		try:
+			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+		except:
+			msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		try:
+			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+		except:
+			msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		RealNameList.append(tmp_field_name)
+		FieldCommentList.append('')
+		FieldTypeList.append('Customized')
+		FieldList.append(tmp_field_name)
+
+		self.ui.listWidget.addItem(tmp_field_name)
+		self.ui.listWidget.setCurrentItem(self.ui.listWidget.item(self.ui.listWidget.count()-1))
+		self.ui.listWidget.scrollToBottom()
 
 	def saveRecord(self):
 		global RealNameList
@@ -2649,6 +2696,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.setRowCount(0)
 
 		a = DBFilename
+
+		a = FieldList
+		b = RealNameList
+		c = FieldTypeList
+		d = FieldCommentList
+
+
+
 		# load data for new table
 		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
 			field1 = self.ui.cboTreeOp1.currentText()
@@ -2662,7 +2717,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			num_row = len(DataIn)
 			num_col = len(HeaderIn)
 			self.ui.SeqTable.setRowCount(num_row)
-			self.ui.SeqTable.setColumnCount(num_col)
+			self.ui.SeqTable.setColumnCount(num_col + 1)
 
 			#horizontalHeader = [i[1] for i in HeaderIn]
 			#horizontalHeader = [''] + horizontalHeader
@@ -6537,6 +6592,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		RealNameList = [i[2] for i in Records]
 		FieldTypeList = [i[3] for i in Records]
 		FieldCommentList = [i[4] for i in Records]
+
+		a = FieldList
+		b = RealNameList
+		c = FieldTypeList
+		d = FieldCommentList
 
 		self.OnOpen()
 		titletext = 'VGenes - ' + DBFilename
