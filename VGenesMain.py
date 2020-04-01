@@ -40,6 +40,7 @@ global OldName
 global UpdateSpecific
 UpdateSpecific = True
 import csv
+import copy
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
 	setText, openfastq
 from ui_VGenesStartUpDialogue import Ui_VGenesStartUpDialog
@@ -382,19 +383,141 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 			Vgenes.ApplicationStarted()
 
 class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
+	refreshDBSignal = pyqtSignal()
+
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
 		#super(ImportDataDialogue, self).__init__()
 		self.ui = Ui_AnnoDialog()
 		self.ui.setupUi(self)
 
-	def reject(self):
-		self.close()
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+		self.ui.radioButton.clicked.connect(self.switchHeader)
+		self.ui.pushButtonOK.clicked.connect(self.accept)
 
 	def accept(self):
-		pass
+		col_index = []
+		col_fields = []
+
+		header = self.header
+		anchor_field = self.ui.comboBox.currentText()
+		target_field = self.ui.comboBox2.currentText()
+		target_field = re.sub(r'\s.+','',target_field)
+		anchor_col_index = header.index(anchor_field)
+
+		num_col = self.ui.tableWidget.columnCount()
+		num_row = self.ui.tableWidget.rowCount()
+		for col in range(num_col):
+			if col == anchor_col_index:
+				continue
+			my_widget = self.ui.tableWidget.cellWidget(0, col)
+			if my_widget.currentText() != "":
+				col_index.append(col)
+				col_fields.append(my_widget.currentText())
+
+		for row in range(num_row):
+			if row == 0:
+				continue
+			else:
+				SQLSTATEMENT = "UPDATE vgenesdb SET "
+				for i in range(len(col_index)):
+					col = col_index[i]
+					field = col_fields[i]
+					field = re.sub(r'\s.+','',field)
+					value = self.ui.tableWidget.item(row, col).text()
+					SQLSTATEMENT = SQLSTATEMENT + field + ' = "' + value + '",'
+				current_anchor = self.ui.tableWidget.item(row, anchor_col_index).text()
+				SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
+				SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
+				try:
+					VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
+					print(SQLSTATEMENT)
+				except:
+					Msg = 'SQL error! Current SQL statement is:\n' + SQLSTATEMENT
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+					                        QMessageBox.Ok)
+					return
+				#print(SQLSTATEMENT)
+
+		Msg = "Update successfully!"
+		QMessageBox.information(self, 'information', Msg, QMessageBox.Ok,
+		                        QMessageBox.Ok)
+
+		self.refreshDBSignal.emit()
+		self.hide()
+
+
+	def reject(self):
+		self.hide()
+
+	def switchHeader(self):
+		if self.ui.radioButton.isChecked():
+			Content = list(self.Content)
+			horizontalHeader = Content.pop(0)
+			self.ui.comboBox.clear()
+			self.ui.comboBox.addItems(horizontalHeader)
+
+			HEADERStatement = 'SELECT Field, FieldNickName FROM fieldsname'
+			HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+			Fields = [i[0] + '  (' + i[1] + ')' for i in HeaderIn]
+			self.ui.comboBox2.addItems(Fields)
+
+			num_col = len(horizontalHeader)
+			num_row = len(Content)
+
+			self.ui.tableWidget.setRowCount(num_row)
+			self.ui.tableWidget.setColumnCount(num_col)
+			self.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+			self.header = horizontalHeader
+
+			for col_index in range(num_col):
+				cell_comBox = QtWidgets.QComboBox()
+				cell_comBox.addItems([''] + Fields)
+				cell_comBox.setMaximumSize(10086, 40)
+				cell_comBox.setMinimumSize(50, 20)
+				self.ui.tableWidget.setCellWidget(0, col_index, cell_comBox)
+
+			for row_index in range(num_row):
+				for col_index in range(num_col):
+					self.ui.tableWidget.setItem(row_index + 1, col_index,
+					                                       QTableWidgetItem(Content[row_index][col_index]))
+		else:
+			Content = list(self.Content)
+			horizontalHeader = list(Content[0])
+			for i in range(len(horizontalHeader)):
+				horizontalHeader[i] = 'Column' + str(i+1)
+
+			self.ui.comboBox.clear()
+			self.ui.comboBox.addItems(horizontalHeader)
+
+			HEADERStatement = 'SELECT Field, FieldNickName FROM fieldsname'
+			HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+			Fields = [i[0] + '  (' + i[1] + ')' for i in HeaderIn]
+			self.ui.comboBox2.addItems(Fields)
+
+			num_col = len(horizontalHeader)
+			num_row = len(Content)
+
+			self.ui.tableWidget.setRowCount(num_row)
+			self.ui.tableWidget.setColumnCount(num_col)
+			self.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+			self.header = horizontalHeader
+
+			for col_index in range(num_col):
+				cell_comBox = QtWidgets.QComboBox()
+				cell_comBox.addItems([''] + Fields)
+				cell_comBox.setMaximumSize(10086, 40)
+				cell_comBox.setMinimumSize(50, 20)
+				self.ui.tableWidget.setCellWidget(0, col_index, cell_comBox)
+
+			for row_index in range(num_row):
+				for col_index in range(num_col):
+					self.ui.tableWidget.setItem(row_index + 1, col_index,
+					                                       QTableWidgetItem(Content[row_index][col_index]))
 
 class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
+	refreshDBSignal = pyqtSignal()
+
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
 		#super(ImportDataDialogue, self).__init__()
@@ -432,6 +555,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			VGenesSQL.UpdateFieldTable(name, self.ui.lineEditNickName.text(), 'FieldNickName', DBFilename)
 
 		self.ui.pushButtonSave.setEnabled(False)
+		self.refreshDBSignal.emit()
 
 	def valueChange(self):
 		self.ui.pushButtonSave.setEnabled(True)
@@ -1947,6 +2071,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# self.ImportOptions =ImportDialogue()
 		self.ImportOptions = ImportDataDialogue()
 		self.AlterWindow = AlterDielog()
+		self.AlterWindow.refreshDBSignal.connect(self.refreshDB)
 		self.AlterWindow.intial = True
 
 		self.ui.HTMLview = ResizeWidget(self)
@@ -1956,6 +2081,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 
 	@pyqtSlot()
+	def refreshDB(self):
+		self.load_table()
+
+	@pyqtSlot()
 	def on_actionImport_Annotate_triggered(self):
 		anno_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select annotation file", '~/',
 		                                                  "Comma Separated Values (*.csv);;All Files (*)")
@@ -1963,6 +2092,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		self.annoDialog = AnnoDielog()
+		self.annoDialog.refreshDBSignal.connect(self.refreshDB)
 		Content = []
 
 		try:
@@ -1976,21 +2106,39 @@ class VGenesForm(QtWidgets.QMainWindow):
 			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
+		self.annoDialog.Content = copy.deepcopy(Content)
+
 		horizontalHeader = Content.pop(0)
 		self.annoDialog.ui.comboBox.addItems(horizontalHeader)
+
+		HEADERStatement = 'SELECT Field, FieldNickName FROM fieldsname'
+		HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+		Fields = [i[0] + '  (' + i[1] + ')' for i in HeaderIn]
+		self.annoDialog.ui.comboBox2.addItems(Fields)
+
 		num_col = len(horizontalHeader)
 		num_row = len(Content)
 
 		self.annoDialog.ui.tableWidget.setRowCount(num_row)
 		self.annoDialog.ui.tableWidget.setColumnCount(num_col)
 		self.annoDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+		self.annoDialog.header = horizontalHeader
+
+		for col_index in range(num_col):
+			cell_comBox = QtWidgets.QComboBox()
+			cell_comBox.addItems([''] + Fields)
+			cell_comBox.setMaximumSize(10086,40)
+			cell_comBox.setMinimumSize(50,20)
+			self.annoDialog.ui.tableWidget.setCellWidget(0, col_index, cell_comBox)
 
 		for row_index in range(num_row):
 			for col_index in range(num_col):
-				self.annoDialog.ui.tableWidget.setItem(row_index, col_index,
+				self.annoDialog.ui.tableWidget.setItem(row_index + 1, col_index,
 				                                       QTableWidgetItem(Content[row_index][col_index]))
 
 		self.annoDialog.show()
+
+
 
 
 	def openAlter(self):

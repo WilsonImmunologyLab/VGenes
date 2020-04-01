@@ -53,23 +53,23 @@ class Ui_AnnoDialog(object):
         self.pushButtonCancel.setMaximumSize(QtCore.QSize(80, 16777215))
         self.pushButtonCancel.setObjectName("pushButtonCancel")
         self.gridLayout_2.addWidget(self.pushButtonCancel, 4, 2, 1, 1)
-        self.label_2 = QtWidgets.QLabel(AnnoDialog)
-        self.label_2.setObjectName("label_2")
-        self.gridLayout_2.addWidget(self.label_2, 1, 0, 1, 1)
         self.radioButton = QtWidgets.QRadioButton(AnnoDialog)
         self.radioButton.setChecked(True)
         self.radioButton.setObjectName("radioButton")
         self.gridLayout_2.addWidget(self.radioButton, 2, 0, 1, 1)
+        self.label_2 = QtWidgets.QLabel(AnnoDialog)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout_2.addWidget(self.label_2, 1, 0, 1, 4)
 
         self.retranslateUi(AnnoDialog)
         QtCore.QMetaObject.connectSlotsByName(AnnoDialog)
 
     def retranslateUi(self, AnnoDialog):
         _translate = QtCore.QCoreApplication.translate
-        AnnoDialog.setWindowTitle(_translate("AnnoDialog", "Dialog"))
+        AnnoDialog.setWindowTitle(_translate("AnnoDialog", "Import Annotation from CSV"))
         self.label.setText(_translate("AnnoDialog", "Anchor column:"))
         self.label_3.setText(_translate("AnnoDialog", "link to:"))
         self.pushButtonOK.setText(_translate("AnnoDialog", "OK"))
         self.pushButtonCancel.setText(_translate("AnnoDialog", "Cancel"))
-        self.label_2.setText(_translate("AnnoDialog", "Determine field name for each column:"))
         self.radioButton.setText(_translate("AnnoDialog", "First row is Column name"))
+        self.label_2.setText(_translate("AnnoDialog", "Determine field name for each column (leave blank for columns you don\'t want):"))

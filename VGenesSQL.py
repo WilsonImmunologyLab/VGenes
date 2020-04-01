@@ -984,6 +984,16 @@ def ColName(DBpathname):
 
     return col_name_list
 
+def RunUpdateSQL(DBpathname, SQLStatement):
+    import os
+
+    (dirname, filename) = os.path.split(DBpathname)
+    os.chdir(dirname)
+    conn = db.connect(DBpathname)
+    cursor = conn.cursor()
+    cursor.execute(SQLStatement)
+    conn.commit()
+    conn.close()
 
 def RunSQL(DBpathname, SQLStatement):
     # returns a dictionary with seqname as key and all other fileds  as a list as data

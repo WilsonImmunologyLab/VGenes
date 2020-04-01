@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Import Annotation from CSV</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
    <item row="3" column="0" colspan="4">
@@ -103,13 +103,6 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>Determine field name for each column:</string>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <widget class="QRadioButton" name="radioButton">
      <property name="text">
@@ -117,6 +110,13 @@
      </property>
      <property name="checked">
       <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>Determine field name for each column (leave blank for columns you don't want):</string>
      </property>
     </widget>
    </item>
