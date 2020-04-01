@@ -46,6 +46,7 @@ from ui_VGenesStartUpDialogue import Ui_VGenesStartUpDialog
 from ui_import_data_dialog import Ui_ImportDataDialog
 from ui_VGenesTextEdit import ui_TextEditor
 from ui_alter_dialog import Ui_AlterDialog
+from ui_annotatedialog import Ui_AnnoDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -379,6 +380,19 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 			Vgenes.UpdateRecentList(StartUpAnswer, False)
 			self.close()
 			Vgenes.ApplicationStarted()
+
+class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		#super(ImportDataDialogue, self).__init__()
+		self.ui = Ui_AnnoDialog()
+		self.ui.setupUi(self)
+
+	def reject(self):
+		self.close()
+
+	def accept(self):
+		pass
 
 class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 	def __init__(self, parent=None):
@@ -1940,6 +1954,44 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 		self.enableEdit = False
+
+	@pyqtSlot()
+	def on_actionImport_Annotate_triggered(self):
+		anno_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select annotation file", '~/',
+		                                                  "Comma Separated Values (*.csv);;All Files (*)")
+		if anno_file == '' or anno_file == None:
+			return
+
+		self.annoDialog = AnnoDielog()
+		Content = []
+
+		try:
+			csvFile = open(anno_file, "r")
+			reader = csv.reader(csvFile)
+			for item in reader:
+				Content.append(item)
+			csvFile.close()
+		except:
+			Msg = 'Can not process your file as CSV! Please check your input!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		horizontalHeader = Content.pop(0)
+		self.annoDialog.ui.comboBox.addItems(horizontalHeader)
+		num_col = len(horizontalHeader)
+		num_row = len(Content)
+
+		self.annoDialog.ui.tableWidget.setRowCount(num_row)
+		self.annoDialog.ui.tableWidget.setColumnCount(num_col)
+		self.annoDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+
+		for row_index in range(num_row):
+			for col_index in range(num_col):
+				self.annoDialog.ui.tableWidget.setItem(row_index, col_index,
+				                                       QTableWidgetItem(Content[row_index][col_index]))
+
+		self.annoDialog.show()
+
 
 	def openAlter(self):
 		self.AlterWindow.ui.pushButtonSave.setEnabled(False)

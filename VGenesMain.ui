@@ -7676,6 +7676,12 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionRename10x"/>
     <addaction name="actionFixNames"/>
    </widget>
+   <widget class="QMenu" name="menuAnnotate">
+    <property name="title">
+     <string>Annotate</string>
+    </property>
+    <addaction name="actionImport_Annotate"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuSequences"/>
@@ -7684,6 +7690,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
    <addaction name="menuHighThroughput"/>
+   <addaction name="menuAnnotate"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -7727,6 +7734,8 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="separator"/>
    <addaction name="action_Import"/>
    <addaction name="actionExport"/>
+   <addaction name="separator"/>
+   <addaction name="actionImport_Annotate"/>
    <addaction name="separator"/>
    <addaction name="actionCopy"/>
    <addaction name="actionCut"/>
@@ -8272,6 +8281,18 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>clearTrash</string>
+   </property>
+  </action>
+  <action name="actionImport_Annotate">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
+   </property>
+   <property name="text">
+    <string>Import Annotate</string>
+   </property>
+   <property name="toolTip">
+    <string>Import Annotation from CSV</string>
    </property>
   </action>
  </widget>
