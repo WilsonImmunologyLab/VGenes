@@ -64,7 +64,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -6570,27 +6570,6 @@ If the J-end is off the J gene end may need adjusted</string>
         </item>
         <item row="0" column="2">
          <layout class="QGridLayout" name="gridLayout_29">
-          <item row="0" column="1">
-           <widget class="QToolButton" name="toolButton_2">
-            <property name="minimumSize">
-             <size>
-              <width>90</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <pointsize>15</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Download Figure</string>
-            </property>
-            <property name="text">
-             <string extracomment="Download Figure">Download</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="1">
            <widget class="QCheckBox" name="checkBoxFigLegend">
             <property name="maximumSize">
@@ -6610,6 +6589,16 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
            </widget>
           </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QCheckBox" name="checkBoxUpdateSelection">
+            <property name="toolTip">
+             <string>Enable click figure elements to update current selection</string>
+            </property>
+            <property name="text">
+             <string>Enable update Selection</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
            <widget class="QCheckBox" name="checkBoxSelection">
             <property name="toolTip">
@@ -6626,34 +6615,61 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QToolButton" name="toolButton">
+          <item row="0" column="1">
+           <widget class="QPushButton" name="pushButtonDownload">
             <property name="minimumSize">
              <size>
-              <width>90</width>
+              <width>130</width>
               <height>0</height>
              </size>
             </property>
-            <property name="font">
-             <font>
-              <pointsize>15</pointsize>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string>Generate Figure</string>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
             </property>
             <property name="text">
-             <string extracomment="Generate Figure">Generate</string>
+             <string>Download</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/cloud_download.png</normaloff>:/PNG-Icons/cloud_download.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
             </property>
            </widget>
           </item>
-          <item row="2" column="0" colspan="2">
-           <widget class="QCheckBox" name="checkBoxUpdateSelection">
-            <property name="toolTip">
-             <string>Enable click figure elements to update current selection</string>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pushButtonDraw">
+            <property name="minimumSize">
+             <size>
+              <width>130</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>130</width>
+              <height>16777215</height>
+             </size>
             </property>
             <property name="text">
-             <string>Enable update Selection</string>
+             <string>Draw</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
             </property>
            </widget>
           </item>

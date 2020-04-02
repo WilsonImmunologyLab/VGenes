@@ -61,7 +61,7 @@ from snapshot_selenium import snapshot
 from subprocess import call, Popen, PIPE
 from platform import system
 
-from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import QMessageBox, QInputDialog
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 
 global LastPushed
@@ -530,6 +530,59 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.textEditNote.textChanged.connect(self.valueChange)
 		self.ui.listWidget.itemSelectionChanged.connect(self.ListItemChanged)
 		self.ui.pushButtonNew.clicked.connect(self.addField)
+		self.ui.pushButtonDelete.clicked.connect(self.deleteField)
+
+	def deleteField(self):
+		global FieldList
+		global RealNameList
+		global FieldCommentList
+		global FieldTypeList
+
+		target_field = self.ui.listWidget.currentItem().text()
+		if self.ui.lineEditType == "Fixed":
+			Msg = 'You can not delete Fixed filed!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		Msg = "Are you sure to delete field: " + target_field + " ?"
+		reply = QMessageBox.question(self, 'Information', Msg, QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+		if reply == QMessageBox.No:
+			return
+
+		# update table
+		#SQLSTATEMENT1 = "ALTER TABLE vgenesDB DROP COLUMN " + target_field
+		#try:
+		#	VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+		#except:
+		#	msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+		#	QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+		#	                    QMessageBox.Ok)
+		#	return
+
+		SQLSTATEMENT2 = 'DELETE FROM fieldsname WHERE Field = "' + target_field + '"'
+		try:
+			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+		except:
+			msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+
+
+		index = FieldList.index(target_field)
+		RealNameList = RealNameList[0:index] + RealNameList[index + 1:]
+		FieldCommentList = FieldCommentList[0:index] + FieldCommentList[index + 1:]
+		FieldTypeList = FieldTypeList[0:index] + FieldTypeList[index + 1:]
+		FieldList = FieldList[0:index] + FieldList[index + 1:]
+
+		# update widget
+		self.ui.listWidget.clear()
+		self.ui.listWidget.addItems(FieldList)
+		self.ui.listWidget.setCurrentItem(self.ui.listWidget.item(0))
+		self.ui.listWidget.scrollToTop()
+
+		self.refreshDBSignal.emit()
 
 	def addField(self):
 		global RealNameList
@@ -542,11 +595,15 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			items.append(self.ui.listWidget.item(index))
 		cur_fields = [i.text() for i in items]
 
-		i = len(cur_fields)
-		tmp_field_name = "Column" + str(i)
-		while tmp_field_name in cur_fields:
-			i = i + 1
-			tmp_field_name = "Column" + str(i)
+		tmp_field_name, ok = QInputDialog.getText(self, 'Input Dialog','Enter name of your new field:')
+		while tmp_field_name in cur_fields and ok:
+			tmp_field_name, ok = QInputDialog.getText(self, 'Input Dialog','This field name has been taken! '
+			                                                               'Enter another name of your new field:')
+
+		if ok:
+			pass
+		else:
+			return
 
 		# update table
 		SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + tmp_field_name + " text"
@@ -576,6 +633,8 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.listWidget.addItem(tmp_field_name)
 		self.ui.listWidget.setCurrentItem(self.ui.listWidget.item(self.ui.listWidget.count()-1))
 		self.ui.listWidget.scrollToBottom()
+
+		self.refreshDBSignal.emit()
 
 	def saveRecord(self):
 		global RealNameList
@@ -609,6 +668,8 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 
 	def ListItemChanged(self):
 		items = self.ui.listWidget.selectedItems()
+		if len(items) == 0:
+			return
 		for item in items:
 			name = item.text()
 
@@ -2091,10 +2152,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboReportOptions.currentTextChanged.connect(self.ReportOptions)
 		self.ui.cboFindField.currentTextChanged.connect(self.on_cboFindField_currentTextChanged)
 		self.ui.tabWidget.currentChanged['int'].connect(self.InitialGraphic)
-		self.ui.toolButton.clicked.connect(self.GenerateFigure)
+		self.ui.pushButtonDraw.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxStack.clicked.connect(self.GenerateFigure)
-		self.ui.toolButton_2.clicked.connect(self.downloadFig)
+		self.ui.pushButtonDownload.clicked.connect(self.downloadFig)
 		self.ui.radioButtonTreeMap.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonTree.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonNT.clicked.connect(self.makeNTLogo)
@@ -2709,18 +2770,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field1 = self.ui.cboTreeOp1.currentText()
 			field2 = self.ui.cboTreeOp2.currentText()
 			field3 = self.ui.cboTreeOp3.currentText()
-			SQLStatement = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
-			HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+
+			fields = ','.join(FieldList)
+			SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+
 
 			num_row = len(DataIn)
-			num_col = len(HeaderIn)
+			num_col = len(RealNameList)
 			self.ui.SeqTable.setRowCount(num_row)
 			self.ui.SeqTable.setColumnCount(num_col + 1)
 
-			#horizontalHeader = [i[1] for i in HeaderIn]
-			#horizontalHeader = [''] + horizontalHeader
 			horizontalHeader = [''] + RealNameList
 			self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
 			self.ui.SeqTable.fields = horizontalHeader

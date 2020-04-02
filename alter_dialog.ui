@@ -64,6 +64,11 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
         <property name="editTriggers">
          <set>QAbstractItemView::NoEditTriggers</set>
         </property>
@@ -127,6 +132,37 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="pushButtonDelete">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Delete field</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>Resources/minus.png</normaloff>Resources/minus.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -165,8 +201,13 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>25</height>
+          <height>30</height>
          </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
         </property>
        </widget>
       </item>
@@ -206,36 +247,17 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="1">
-       <widget class="QCommandLinkButton" name="pushButtonSave">
-        <property name="maximumSize">
-         <size>
-          <width>60</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>Save</string>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>30</width>
-          <height>30</height>
-         </size>
-        </property>
-       </widget>
-      </item>
       <item row="5" column="0">
        <widget class="QLineEdit" name="lineEditNickName">
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>25</height>
+          <height>30</height>
          </size>
         </property>
         <property name="font">
          <font>
-          <pointsize>14</pointsize>
+          <pointsize>15</pointsize>
          </font>
         </property>
        </widget>
@@ -245,15 +267,41 @@
         <property name="minimumSize">
          <size>
           <width>0</width>
-          <height>25</height>
+          <height>30</height>
          </size>
         </property>
         <property name="font">
          <font>
-          <pointsize>14</pointsize>
+          <pointsize>15</pointsize>
          </font>
         </property>
         <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="QPushButton" name="pushButtonSave">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>40</height>
+         </size>
+        </property>
+        <property name="text">
+         <string>Save</string>
+        </property>
+        <property name="icon">
+         <iconset>
+          <normaloff>Resources/save.png</normaloff>Resources/save.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>30</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="flat">
          <bool>true</bool>
         </property>
        </widget>
