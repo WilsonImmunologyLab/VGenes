@@ -698,13 +698,140 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.lineEditRep1.textChanged.connect(self.updateName)
 		self.ui.lineEditRep2.textChanged.connect(self.updateName)
 		self.ui.lineEditRep3.textChanged.connect(self.updateName)
-		#self.ui.comboBoxTemplate.currentTextChanged.connect(self.makeHTML)
-		#self.ui.comboBoxTarget.currentTextChanged.connect(self.makeHTML)
+		self.ui.rdoChoose.clicked.connect(self.updateGroupSetting)
+		self.ui.rdoFunction.clicked.connect(self.updateGroupSetting)
+		self.ui.checkBoxFileStruc.clicked.connect(self.updateGroupSetting)
+
+		self.path10x = ''
+		self.pathFasta = ''
 
 		global answer3
 		answer3 = 'No'
 
+	def updateGroupSetting(self):
+		if self.ui.rdoChoose.isChecked():
+			fields = ['Project']  # , 'Grouping', 'SubGroup'
+			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
 
+			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			if len(DataIn) > 0:
+				for item in DataIn:
+					self.ui.comboBoxProject.addItem(item[0])
+			DataIn.clear()
+
+			fields = ['Grouping']  # , 'Grouping', 'SubGroup'
+			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
+
+			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if len(DataIn) > 0:
+				for item in DataIn:
+					self.ui.comboBoxGroup.addItem(item[0])
+			DataIn.clear()
+
+			fields = ['SubGroup']  # , 'Grouping', 'SubGroup'
+			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
+
+			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			if len(DataIn) > 0:
+				for item in DataIn:
+					self.ui.comboBoxSubgroup.addItem(item[0])
+
+			self.ui.comboBoxProject.addItem('')
+			self.ui.comboBoxGroup.addItem('')
+			self.ui.comboBoxSubgroup.addItem('')
+
+			self.ui.comboBoxProject.setCurrentText('')
+			self.ui.comboBoxGroup.setCurrentText('')
+			self.ui.comboBoxSubgroup.setCurrentText('')
+
+			self.ui.comboBoxProject.setEditable(True)
+			self.ui.comboBoxGroup.setEditable(True)
+			self.ui.comboBoxSubgroup.setEditable(True)
+
+			self.ui.comboBoxProject.setEnabled(True)
+			self.ui.comboBoxGroup.setEnabled(True)
+			self.ui.comboBoxSubgroup.setEnabled(True)
+
+		if self.ui.rdoFunction.isChecked():
+			self.ui.comboBoxProject.setEnabled(False)
+			self.ui.comboBoxGroup.setEnabled(False)
+			self.ui.comboBoxSubgroup.setEnabled(False)
+
+		if self.ui.checkBoxFileStruc.isChecked():
+			self.ui.comboBoxProject.setEnabled(True)
+			self.ui.comboBoxGroup.setEnabled(True)
+			self.ui.comboBoxSubgroup.setEnabled(True)
+
+			if self.ui.tabWidget.currentIndex() == 0:
+				if self.path10x == '':
+					return
+				else:
+					dirs = self.path10x.split('/')
+					if len(dirs) > 3:
+						dirs = dirs[-3:]
+
+					if len(dirs) == 3:
+						project = dirs[0]
+						group = dirs[1]
+						subgroup = dirs[2]
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+						self.ui.comboBoxSubgroup.addItem(subgroup)
+						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+					elif len(dirs) == 2:
+						project = dirs[0]
+						group = dirs[1]
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+					elif len(dirs) == 1:
+						project = dirs[0]
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+					else:
+						pass
+			elif self.ui.tabWidget.currentIndex() == 1:
+				if self.pathFasta == '':
+					return
+				else:
+					dirs = self.pathFasta.split('/')
+					if len(dirs) > 3:
+						dirs = dirs[-3:]
+
+					if len(dirs) == 3:
+						project = dirs[0]
+						group = dirs[1]
+						subgroup = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+						self.ui.comboBoxSubgroup.addItem(subgroup)
+						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+					elif len(dirs) == 2:
+						project = dirs[0]
+						group = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+					elif len(dirs) == 1:
+						project = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+					else:
+						pass
 
 	def updateName(self):
 		ori_name = 'clonotype2_consensus_1'
@@ -739,6 +866,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if directory == None or directory == '':
 			return
 		else:
+			self.path10x = directory
 			seq_file = os.path.join(directory,'consensus.fasta')
 			anno_file = os.path.join(directory,'filtered_contig_annotations.csv')
 			if os.path.exists(seq_file):
@@ -760,15 +888,17 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					Msg = 'Can not find consensus.fasta under your folder! Please check your input!'
 					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 					return
+			self.updateGroupSetting()
 
 	def browseFasta(self):
-		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
-		                                                   "getOpenFileNames", "~/Documents",
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
 		                                                   "Fasta Files (*.fasta, *.fas, *.fa);;All Files (*)")
 		if len(files) == 0:
 			return
 		else:
 			self.ui.listWidgetFasta.addItems(files)
+			self.pathFasta = files[0]
+			self.updateGroupSetting()
 
 	def browseCSV(self):
 		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
@@ -780,6 +910,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.listWidgetCSV.addItems(files)
 
 	def switchTab(self, num):
+		self.updateGroupSetting()
 		if num == 0:
 			self.ui.radioButtonHuman.setEnabled(True)
 			self.ui.radioButtonMouse.setEnabled(True)
@@ -840,91 +971,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			pass
 
 	def accept(self):
-		num =  self.ui.tabWidget.currentIndex()
+		num = self.ui.tabWidget.currentIndex()
 		if num == 0:
-			#MaxNum = self.MaxImport.value()
-			MaxNum = 0
-			Alldone = self.InitiateImportFrom10X('none', MaxNum)
-			if Alldone == True:
-				self.close()
+			self.InitiateImportFrom10X('none', 0)
 		elif num == 1:
-			pass
+			self.InitiateImportFromFasta('none', 0)
 		elif num == 2:
-			pass
+			self.InitiateImportFromCSV('none', 0)
 		elif num == 3:
-			pass
+			self.InitiateImportFromVDB('none', 0)
 		else:
 			pass
 
 	def reject(self):
 		print('close')
 		self.hide()
-
-	@pyqtSlot()
-	def on_rdoChoose_clicked(self):
-		if self.ui.rdoChoose.isChecked():
-			self.ui.comboBoxProject.setEditable(True)
-			self.ui.comboBoxGroup.setEditable(True)
-			self.ui.comboBoxSubgroup.setEditable(True)
-			self.ui.comboBoxProject.setCurrentText('')
-			self.ui.comboBoxGroup.setCurrentText('')
-			self.ui.comboBoxSubgroup.setCurrentText('')
-
-			fields = ['Project']  # , 'Grouping', 'SubGroup'
-			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
-
-			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
-
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-			if len(DataIn) > 0:
-				for item in DataIn:
-					self.ui.comboBoxProject.addItem(item[0])
-			DataIn.clear()
-
-			fields = ['Grouping']  # , 'Grouping', 'SubGroup'
-			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
-
-			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
-
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			if len(DataIn) > 0:
-				for item in DataIn:
-					self.ui.comboBoxGroup.addItem(item[0])
-			DataIn.clear()
-
-			fields = ['SubGroup']  # , 'Grouping', 'SubGroup'
-			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
-
-			SQLStatement = SQLStatement1[:7] + 'DISTINCT ' + SQLStatement1[7:]
-
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-			if len(DataIn) > 0:
-				for item in DataIn:
-					self.ui.comboBoxSubgroup.addItem(item[0])
-
-
-		else:
-			self.comboBoxProject.setEditable(False)
-			self.comboBoxGroup.setEditable(False)
-			self.comboBoxSubgroup.setEditable(False)
-
-	@pyqtSlot()
-	def on_checkBoxFileStruc_clicked(self):
-
-		if self.ui.checkBoxFileStruc.isChecked():
-			self.ui.comboBoxProject.setEditable(False)
-			self.ui.comboBoxGroup.setEditable(False)
-			self.ui.comboBoxSubgroup.setEditable(False)
-			self.ui.comboBoxProject.setCurrentText('')
-			self.ui.comboBoxGroup.setCurrentText('')
-			self.ui.comboBoxSubgroup.setCurrentText('')
-
-		else:
-			self.ui.comboBoxProject.setEditable(True)
-			self.ui.comboBoxGroup.setEditable(True)
-			self.ui.comboBoxSubgroup.setEditable(True)
 
 	def disableWidgets(self):
 		self.ui.tabWidget.setEnabled(False)
@@ -985,6 +1046,126 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		return barcode_dict
 
 	def InitiateImportFrom10X(self, Filenamed, MaxNum):
+		# need to transfer species grouping to IgBlaster
+		answer = ''
+		thetype = 'FASTA'
+		species = ''
+		datalist = []
+		global answer3
+		# answerTo = answer3
+
+		if self.ui.radioButtonHuman.isChecked():
+			species = 'Human'
+		elif self.ui.radioButtonMouse.isChecked():
+			species = 'Mouse'
+
+		seq_pathname = self.ui.Seqpath.text()
+		anno_path_name = self.ui.Annopath.text()
+		self.anno_path_name = anno_path_name
+
+		self.rep1 = self.ui.lineEditRep1.text()
+		if self.ui.radioButtonChain.isChecked():
+			self.rep2 = 'byChain'
+		else:
+			self.rep2 = self.ui.lineEditRep2.text()
+		self.prefix = self.ui.lineEditRep3.text()
+
+		if self.ui.rdoProductive.isChecked() == True:
+			GetProductive = True
+		else:
+			GetProductive = False
+
+		if seq_pathname == None:
+			return
+		answer2 = ''
+
+		ErlogFile = os.path.join(temp_folder,'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		header = "Began input at " + time.strftime('%c')
+		with open(ErlogFile2, 'w') as currentFile:
+			currentFile.write(header)
+		# firstOne = True
+
+		if self.ui.rdoChoose.isChecked() or self.ui.checkBoxFileStruc.isChecked():
+			if Filenamed == 'none':
+				project = self.ui.comboBoxProject.currentText()
+				grouping = self.ui.comboBoxGroup.currentText()
+				subgroup = self.ui.comboBoxSubgroup.currentText()
+			else:
+				project = Filenamed[1]
+				grouping = Filenamed[2]
+				subgroup = Filenamed[3]
+
+			if project == '': project = 'none'
+			if grouping == '': grouping = 'none'
+			if subgroup == '': subgroup = 'none'
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			f.write(seq_pathname)
+			f.close()
+
+			self.disableWidgets()
+			self.checkProgress()
+			return
+		elif self.ui.rdoFunction.isChecked():
+			project = 'ByFunction'
+			grouping = ''
+			subgroup = ''
+
+			multiProject = ''
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+			datalist.append(multiProject)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			f.write(seq_pathname)
+			f.close()
+
+			#self.disableWidgets()
+			self.checkProgress()
+			return
+
+	def InitiateImportFromFasta(self, Filenamedm, MaxNu):
 		# need to transfer species grouping to IgBlaster
 		answer = ''
 		thetype = 'FASTA'
@@ -1202,6 +1383,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			#self.disableWidgets()
 			self.checkProgress()
 			return
+
+	def InitiateImportFromCSV(self, Filenamed, MaxNu):
+		pass
+
+	def InitiateImportFromVDB(self, Filenamed, MaxNu):
+		pass
+
 
 	@pyqtSlot()
 	def multi_callback(self):
@@ -2237,9 +2425,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.annoDialog.show()
 
-
-
-
 	def openAlter(self):
 		self.AlterWindow.ui.pushButtonSave.setEnabled(False)
 		if self.AlterWindow.intial:
@@ -2850,7 +3035,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.match_table_to_tree()
 
-	# this function could be optimized later
 	def match_tree_to_table(self):
 		global TreeSelected
 		global MoveNotChange
