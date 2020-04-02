@@ -169,9 +169,8 @@ FieldTypeList = ["Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", 
                  "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
                  "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
                  "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
-                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Customized", "Customized", "Customized",
-                 "Customized", "Customized", "Customized", "Customized", "Customized", "Customized", "Customized",
-                 "Customized", "Customized", "Customized", "Customized", "Customized"]
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed",
+                 "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed", "Fixed"]
 global FieldCommentList
 FieldCommentList = ["", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "","", "", "",
                     "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "",
@@ -531,6 +530,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.listWidget.itemSelectionChanged.connect(self.ListItemChanged)
 		self.ui.pushButtonNew.clicked.connect(self.addField)
 		self.ui.pushButtonDelete.clicked.connect(self.deleteField)
+		self.ui.lineEditNickName.setReadOnly(False)
 
 	def deleteField(self):
 		global FieldList
@@ -647,18 +647,12 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			name = item.text()
 
 		index = FieldList.index(name)
-		if FieldTypeList[index] == "Fixed":
-			FieldCommentList[index] = self.ui.textEditNote.toPlainText()
-		else:
-			RealNameList[index] = self.ui.lineEditNickName.text()
-			FieldCommentList[index] = self.ui.textEditNote.toPlainText()
+		RealNameList[index] = self.ui.lineEditNickName.text()
+		FieldCommentList[index] = self.ui.textEditNote.toPlainText()
 
 		# save to DB
-		if FieldTypeList[index] == "Fixed":
-			VGenesSQL.UpdateFieldTable(name, self.ui.textEditNote.toPlainText(), 'FieldComment', DBFilename)
-		else:
-			VGenesSQL.UpdateFieldTable(name, self.ui.textEditNote.toPlainText(), 'FieldComment', DBFilename)
-			VGenesSQL.UpdateFieldTable(name, self.ui.lineEditNickName.text(), 'FieldNickName', DBFilename)
+		VGenesSQL.UpdateFieldTable(name, self.ui.textEditNote.toPlainText(), 'FieldComment', DBFilename)
+		VGenesSQL.UpdateFieldTable(name, self.ui.lineEditNickName.text(), 'FieldNickName', DBFilename)
 
 		self.ui.pushButtonSave.setEnabled(False)
 		self.refreshDBSignal.emit()
@@ -679,10 +673,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.lineEditType.setText(FieldTypeList[index])
 		self.ui.textEditNote.setText(FieldCommentList[index])
 		self.ui.pushButtonSave.setEnabled(False)
-		if self.ui.lineEditType.text() == "Fixed":
-			self.ui.lineEditNickName.setReadOnly(True)
-		else:
-			self.ui.lineEditNickName.setReadOnly(False)
+		self.ui.lineEditNickName.setReadOnly(False)
 
 	def reject(self):
 		self.hide()
@@ -2974,7 +2965,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def GenerateFigure(self):
 		global DBFilename
-		global data
+		#global data
 
 		# select data or not
 		if self.ui.checkBoxSelection.isChecked():
