@@ -218,8 +218,8 @@ def checkFieldTable(DBpathname):
             i += 1
 
         cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) VALUES(?,?,?,?,?)''',FieldList)
+        conn.commit()
 
-    conn.commit()
     conn.close()
 
 
@@ -1019,17 +1019,10 @@ def RunSQL(DBpathname, SQLStatement):
     Fields = []
     # rows = cursor.rowcount
     for row in cursor:
-        # i = 0
         Fields.clear()
         for column in row:
-            # if i == 0:
-            #     KeyName = column
-            # else:
             Fields.append(column)
-            # i +=1
-
         DataIs.append(tuple(Fields))
-
 
     # conn.commit()  #  saves data into file
     conn.close()

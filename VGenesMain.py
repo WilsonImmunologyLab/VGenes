@@ -854,13 +854,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.updateName()
 
 	def browseVDB(self):
-		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
-		                                                         "getOpenFileNames", "~/Documents",
-		                                                         "VGene DB Files (*.vdb);;All Files (*)")
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
+		                                                          "VGene DB Files (*.vdb);;All Files (*)")
 		if len(files) == 0:
 			return
 		else:
 			self.ui.listWidgetVDB.addItems(files)
+			self.pathVDB = files
 
 	def browse10x(self):
 		directory = QtWidgets.QFileDialog.getExistingDirectory(self, "getExistingDirectory", "～/Documents")
@@ -909,6 +909,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		else:
 			self.ui.listWidgetCSV.addItems(files)
+			self.pathCSV = files
 
 	def switchTab(self, num):
 		self.updateGroupSetting()
@@ -1341,13 +1342,116 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def InitiateImportFromCSV(self, Filenamed, MaxNu):
 		self.calling = 3
-
+		files = self.pathCSV
+		Msg = 'We do not support import from CSV! Will do later!'
+		QMessageBox.warning(self, 'Warning', Msg,
+		                    QMessageBox.Ok, QMessageBox.Ok)
+		return
 		pass
 
 	def InitiateImportFromVDB(self, Filenamed, MaxNu):
-		self.calling = 4
+		global FieldList
+		global FieldCommentList
+		global FieldTypeList
+		global RealNameList
 
-		pass
+		self.calling = 4
+		files = self.pathVDB
+
+		if os.path.isfile(DBFilename):
+			# collect information, alter the DB structure
+			Msg = 'We added new fileds from the follow VDBs:\n'
+			for vdb_file in files:
+				VGenesSQL.checkFieldTable(vdb_file)
+
+				SQLSTATEMENT = 'SELECT Field,FieldNickName,FieldComment,FieldType FROM fieldsname'
+				DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
+				cur_field = [i[0] for i in DataIn]
+				cur_field_name = [i[1] for i in DataIn]
+				cur_field_comment = [i[2] for i in DataIn]
+				cur_field_type = [i[3] for i in DataIn]
+
+				new_cols = [i for i in cur_field if i not in FieldList]
+
+				if len(new_cols) > 0:
+					for	new_col in new_cols:
+						new_col_index = cur_field.index(new_col)
+						new_col_name = cur_field_name[new_col_index]
+						new_col_comment = cur_field_comment[new_col_index]
+
+						# update table
+						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
+						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+						                'VALUES(' + str(len(FieldList) + 1) + ',"' + new_col + '", "' + new_col_name + \
+						                '", "Customized", "' + new_col_comment + '")'
+						try:
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+						except:
+							msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+							QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+							                    QMessageBox.Ok)
+							return
+
+						try:
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+						except:
+							msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+							QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+							                    QMessageBox.Ok)
+							return
+
+						RealNameList.append(new_col)
+						FieldCommentList.append(new_col_comment)
+						FieldTypeList.append('Customized')
+						FieldList.append(new_col_name)
+
+						Msg = Msg + new_col + ' from    ' + vdb_file + '\n'
+
+			QMessageBox.information(self, 'Information', Msg,QMessageBox.Ok, QMessageBox.Ok)
+
+			# import data from VDBs
+			print('import data from VDBs')
+			for vdb_file in files:
+				SQLSTATEMENT = 'SELECT Field FROM fieldsname'
+				DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
+				field_str = ''
+				question_str = ''
+				for item in DataIn:
+					field_str = field_str + item[0] + ','
+					question_str = question_str + '?,'
+				field_str = field_str.rstrip(',')
+				question_str = question_str.rstrip(',')
+
+				SQLSTATEMENT = 'SELECT ' + field_str + ' FROM vgenesDB'
+				DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
+
+				# update ID (ID should be unique)
+				SQLSTATEMENT = 'SELECT COUNT(ID) FROM vgenesDB'
+				Count = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+				Count = Count[0][0]
+
+				InputData = []
+				for records in DataIn:
+					cur_line = list(records)
+					cur_line[119] = str(int(records[119]) + Count)
+					InputData.append(cur_line)
+
+				# insert into DB
+				print('insert into DB')
+				conn = db.connect(DBFilename)
+				cursor = conn.cursor()
+				SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
+				cursor.executemany(SQLSTATEMENT, InputData)
+				conn.commit()
+				conn.close()
+				print(vdb_file)
+			Msg = 'Data import finished!'
+			QMessageBox.information(self, 'Information', Msg,QMessageBox.Ok, QMessageBox.Ok)
+
+			Vgenes.LoadDB(DBFilename)
+			self.hide()
+		else:
+			return
 
 	@pyqtSlot()
 	def multi_callback(self):
