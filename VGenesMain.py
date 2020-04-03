@@ -56,6 +56,7 @@ VGenesTextWindows = {}
 
 from itertools import combinations
 from collections import Counter
+from Bio import SeqIO
 from pyecharts.render import make_snapshot
 from snapshot_selenium import snapshot
 from subprocess import call, Popen, PIPE
@@ -805,7 +806,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				if self.pathFasta == '':
 					return
 				else:
-					dirs = self.pathFasta.split('/')
+					dirs = self.pathFasta[0].split('/')
 					if len(dirs) > 3:
 						dirs = dirs[-3:]
 
@@ -897,7 +898,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		else:
 			self.ui.listWidgetFasta.addItems(files)
-			self.pathFasta = files[0]
+			self.pathFasta = files
 			self.updateGroupSetting()
 
 	def browseCSV(self):
@@ -1046,6 +1047,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		return barcode_dict
 
 	def InitiateImportFrom10X(self, Filenamed, MaxNum):
+		self.calling = 1
+
 		# need to transfer species grouping to IgBlaster
 		answer = ''
 		thetype = 'FASTA'
@@ -1165,8 +1168,12 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.checkProgress()
 			return
 
-	def InitiateImportFromFasta(self, Filenamedm, MaxNu):
+	def InitiateImportFromFasta(self, Filenamed, MaxNum):
+		self.calling = 2
+
 		# need to transfer species grouping to IgBlaster
+		if self.pathFasta == "":
+			return
 		answer = ''
 		thetype = 'FASTA'
 		species = ''
@@ -1179,17 +1186,27 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		elif self.ui.radioButtonMouse.isChecked():
 			species = 'Mouse'
 
-		seq_pathname = self.ui.Seqpath.text()
-		anno_path_name = self.ui.Annopath.text()
-		self.anno_path_name = anno_path_name
+		# process sequence
+		time_stamp = str(int(time.time() * 100)) + '.fasta'
+		seq_pathname = os.path.join(temp_folder,time_stamp)
+		fout = open(seq_pathname,'w')
+		fasta_files = self.pathFasta
+		for fasta_file in fasta_files:
+			file_name = fasta_file.split('/')[-1]
+			file_name = re.sub(r'\..+','',file_name)
+			try:
+				for record in SeqIO.parse(fasta_file, "fasta"):
+					#print(record)
+					seq_name = '>' + file_name + '_' + record.id
+					fout.write(seq_name + '\n')
+					fout.write(record.seq._data + '\n')
+			except:
+				Msg = 'Can not parse file\n ' + fasta_file + '\n as fasta file! Check your input!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+		fout.close()
 
-		self.rep1 = self.ui.lineEditRep1.text()
-		if self.ui.radioButtonChain.isChecked():
-			self.rep2 = 'byChain'
-		else:
-			self.rep2 = self.ui.lineEditRep2.text()
-		self.prefix = self.ui.lineEditRep3.text()
-
+		# settings
 		if self.ui.rdoProductive.isChecked() == True:
 			GetProductive = True
 		else:
@@ -1207,102 +1224,38 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		# firstOne = True
 
 		if self.ui.checkBoxFileStruc.isChecked():
-			for item in seq_pathname:
-				(dirname, filename) = os.path.split(item)
-				dirparts = dirname.split('/')
-				NumParts = len(dirparts)
+			project = self.ui.comboBoxProject.currentText()
+			grouping = self.ui.comboBoxGroup.currentText()
+			subgroup = self.ui.comboBoxSubgroup.currentText()
 
-				subgroup = dirparts[NumParts - 1]
+			datalist.clear()
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
 
-				for i in range((self.ui.comboBoxSubgroup.count()) - 1):
-					if self.ui.comboBoxSubgroup.itemText(i) == subgroup:
-						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
-				if self.ui.comboBoxSubgroup.currentText() != subgroup:
-					self.ui.comboBoxSubgroup.addItem(subgroup)
-					self.ui.comboBoxSubgroup.setCurrentText(subgroup)
-				# need to check this code and add to other combos
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
 
-				if NumParts > 2:
-					grouping = dirparts[NumParts - 2]
-					for i in range((self.ui.comboBoxGroup.count()) - 1):
-						if self.ui.comboBoxGroup.itemText(i) == grouping:
-							self.ui.comboBoxGroup.setCurrentText(grouping)
-					if self.ui.comboBoxGroup.currentText() != grouping:
-						self.ui.comboBoxGroup.addItem(grouping)
-						self.ui.comboBoxGroup.setCurrentText(grouping)
-				# need to check this code and add to other combos
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			file_list_str = '\n'.join(fasta_files)
+			f.write(file_list_str)
+			f.close()
 
-				else:
-					grouping = dirparts[NumParts - 1]
-					for i in range((self.ui.comboBoxGroup.count()) - 1):
-						if self.ui.comboBoxGroup.itemText(i) == grouping:
-							self.ui.comboBoxGroup.setCurrentText(grouping)
-					if self.ui.comboBoxGroup.currentText() != grouping:
-						self.ui.comboBoxGroup.addItem(grouping)
-						self.ui.comboBoxGroup.setCurrentText(grouping)
-
-				if NumParts > 3:
-					project = dirparts[NumParts - 3]
-					for i in range((self.ui.comboBoxProject.count()) - 1):
-						if self.ui.comboBoxProject.itemText(i) == project:
-							self.ui.comboBoxProject.setCurrentText(project)
-					if self.ui.comboBoxProject.currentText() != project:
-						self.ui.comboBoxProject.addItem(project)
-						self.ui.comboBoxProject.setCurrentText(project)
-
-				elif NumParts > 2:
-					project = dirparts[NumParts - 1]
-					for i in range((self.ui.comboBoxProject.count()) - 1):
-						if self.ui.comboBoxProject.itemText(i) == project:
-							self.ui.comboBoxProject.setCurrentText(project)
-					if self.ui.comboBoxProject.currentText() != project:
-						self.ui.comboBoxProject.addItem(project)
-						self.ui.comboBoxProject.setCurrentText(project)
-
-				else:
-					project = dirparts[NumParts - 1]
-					self.ui.comboBoxProject.setCurrentText(project)
-
-					# if thetype != 'Sequence':
-					if answer2 == '':
-						if len(pathname) > 1:
-							msg = 'More then 1 FASTA file was selected. Make each a seperate project based on the filenames?'
-							buttons = 'YN'
-							answer2 = informationMessage(self, msg, buttons)
-
-							firstOne = False
-
-				if answer2 == 'Yes':
-					preproject = os.path.splitext(filename)
-					project = preproject[0]
-
-				datalist.clear()
-				datalist.append(project)
-				datalist.append(grouping)
-				datalist.append(subgroup)
-				datalist.append(species)
-				datalist.append(GetProductive)
-				datalist.append(MaxNum)
-
-				# try multi-thread
-				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-				file_handle = open(progressBarFile, 'w')
-				file_handle.write('0')
-				file_handle.close()
-				workThread = WorkThread(self)
-				workThread.item = item
-				workThread.datalist = datalist
-				workThread.start()
-				workThread.trigger.connect(self.multi_callback)
-
-				import_file = os.path.join(temp_folder, "import_file_name.txt")
-				f = open(import_file, 'w')
-				f.write(item)
-				f.close()
-
-				self.disableWidgets()
-				self.checkProgress()
-				return
+			self.disableWidgets()
+			self.checkProgress()
+			return
 		elif self.ui.rdoChoose.isChecked():
 			(dirname, filename) = os.path.split(seq_pathname)
 
@@ -1341,7 +1294,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
-			f.write(seq_pathname)
+			file_list_str = '\n'.join(fasta_files)
+			f.write(file_list_str)
 			f.close()
 
 			self.disableWidgets()
@@ -1377,7 +1331,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
-			f.write(seq_pathname)
+			file_list_str = '\n'.join(fasta_files)
+			f.write(file_list_str)
 			f.close()
 
 			#self.disableWidgets()
@@ -1385,11 +1340,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 
 	def InitiateImportFromCSV(self, Filenamed, MaxNu):
+		self.calling = 3
+
 		pass
 
 	def InitiateImportFromVDB(self, Filenamed, MaxNu):
-		pass
+		self.calling = 4
 
+		pass
 
 	@pyqtSlot()
 	def multi_callback(self):
@@ -1403,30 +1361,45 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			if Startprocessed == 0:
 				self.close()
 
-		# match barcode
-		barcodeDict = self.readBarcode(self.anno_path_name)
+		a = IgBLASTAnalysis
 
-		for record in IgBLASTAnalysis:
-			if record[0] in barcodeDict.keys():
-				record[108] = barcodeDict[record[0]]
+		if self.calling == 1:
+			# match barcode
+			barcodeDict = self.readBarcode(self.anno_path_name)
 
-			if self.rep2 == "byChain":
-				rep2 = record[2][0]
-			else:
-				rep2 = self.rep2
-			record[0] = reName(record[0], self.rep1, rep2, self.prefix)
+			for record in IgBLASTAnalysis:
+				if record[0] in barcodeDict.keys():
+					record[108] = barcodeDict[record[0]]
 
+				if self.rep2 == "byChain":
+					rep2 = record[2][0]
+				else:
+					rep2 = self.rep2
+				record[0] = reName(record[0], self.rep1, rep2, self.prefix)
+		elif self.calling == 2:
+			for record in IgBLASTAnalysis:
+				sampleName = record[0].split('_')[0]
+				if record[75][0] == '$':
+					record[75] = sampleName
+					continue
+				if record[76][0] == '$':
+					record[76] = sampleName
+					continue
+				if record[77][0] == '$':
+					record[77] = sampleName
+					continue
 		#a = IgBLASTAnalysis
 
 		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
 
 		import_file = os.path.join(temp_folder, "import_file_name.txt")
 		file_handle = open(import_file, 'r')
-		file_name = file_handle.readline()
+		file_name = file_handle.readlines()
+		file_name = ''.join(file_name)
 		file_handle.close()
 
 		i = 0
-		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + file_name + '\n'
+		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: \n' + file_name + '\n'
 
 		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
 		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
