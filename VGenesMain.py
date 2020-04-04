@@ -532,6 +532,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.pushButtonNew.clicked.connect(self.addField)
 		self.ui.pushButtonDelete.clicked.connect(self.deleteField)
 		self.ui.lineEditNickName.setReadOnly(False)
+		self.ui.pushButtonSave.setEnabled(False)
 
 	def deleteField(self):
 		global FieldList
@@ -2437,6 +2438,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.AlterWindow = AlterDielog()
 		self.AlterWindow.refreshDBSignal.connect(self.refreshDB)
 		self.AlterWindow.intial = True
+		self.AlterWindow.ui.pushButtonSave.setEnabled(False)
 
 		self.ui.HTMLview = ResizeWidget(self)
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
@@ -2507,12 +2509,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.AlterWindow.intial:
 			if DBFilename != "":
 				self.AlterWindow.ui.listWidget.addItems(FieldList)
-				# self.AlterWindow.ui.listWidget.setCurrentIndex(0)
+				self.AlterWindow.ui.listWidget.setCurrentItem(self.AlterWindow.ui.listWidget.item(0))
 				self.AlterWindow.ui.lineEditName.setText(FieldList[0])
 				self.AlterWindow.ui.lineEditNickName.setText(RealNameList[0])
 				self.AlterWindow.ui.lineEditType.setText(FieldTypeList[0])
 				self.AlterWindow.ui.textEditNote.setText(FieldCommentList[0])
 				self.AlterWindow.intial = False
+				self.AlterWindow.ui.pushButtonSave.setDisabled(True)
 		self.AlterWindow.show()
 
 	def selectionMode(self):
@@ -4458,6 +4461,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		print(name)
 
+		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+		if len(found) > 0:
+			found = found[0]
+			self.ui.treeWidget.setCurrentItem(found)
+
+	def select_tree_by_name(self, name):
 		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
 		if len(found) > 0:
 			found = found[0]
@@ -6688,6 +6697,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		records = len(NameIndex)
 		if value < records and value > -1:
 			self.updateF(value)
+			NameIs = self.MatchingValue(value)
+			self.select_tree_by_name(NameIs)
+			self.tree_to_table_selection()
 
 	def findTableViewRecord(self, FieldName):
 
