@@ -2421,6 +2421,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.toolButtonCloneRaxml.clicked.connect(self.buildCloneTree)
 		self.ui.EditLock.clicked.connect(self.ChangeEditMode)
 		self.ui.checkBoxAll.stateChanged.connect(self.checkAll)
+		self.ui.checkBoxAll1.stateChanged.connect(self.checkAll1)
 		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
 		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
 		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
@@ -3076,9 +3077,29 @@ class VGenesForm(QtWidgets.QMainWindow):
 		MoveNotChange = True
 		rows = self.ui.SeqTable.rowCount()
 		if self.ui.checkBoxAll.isChecked():
+			self.ui.checkBoxAll1.setChecked(True)
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
 		else:
+			self.ui.checkBoxAll1.setChecked(False)
+			for row in range(rows):
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+		MoveNotChange = False
+		self.match_table_to_tree()
+
+	def checkAll1(self):
+		global MoveNotChange
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
+		MoveNotChange = True
+		rows = self.ui.SeqTable.rowCount()
+		if self.ui.checkBoxAll1.isChecked():
+			self.ui.checkBoxAll.setChecked(True)
+			for row in range(rows):
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+		else:
+			self.ui.checkBoxAll.setChecked(False)
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
 		MoveNotChange = False
@@ -4442,7 +4463,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def tree_to_table_selection(self):
 		Selected = self.ui.treeWidget.selectedItems()
-		Selected = Selected[-1]
+		try:
+			Selected = Selected[-1]
+		except:
+			Selected = Selected[0]
 		name = Selected.text(0)
 
 		print(name)
@@ -7818,12 +7842,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 		FieldIS = 'Blank6'
 		self.FieldChanger(valueTo, FieldIS)
 
+
+
 	@pyqtSlot()
 	def on_btnClearTreeChecks_clicked(self):
 		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
 			return
 
 		self.clearTreeChecks()
+		self.match_tree_to_table()
+		self.ui.checkBoxAll.setChecked(False)
 
 	@pyqtSlot()
 	def on_actionSuggestCanonical_triggered(self):
@@ -8615,6 +8643,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.ckReportText.setDisabled(True)
 			self.ui.ckReportText.setChecked(False)
 
+		elif option == 'CSV format Entire VDB':
+			self.ui.ckReportCSV.setDisabled(True)
+			self.ui.ckReportCSV.setChecked(True)
+			self.ui.ckReportDisplay.setDisabled(True)
+			self.ui.ckReportDisplay.setChecked(False)
+			self.ui.ckReportText.setDisabled(True)
+			self.ui.ckReportText.setChecked(False)
 
 		elif option == 'Custom report':
 			self.ui.ckReportCSV.setDisabled(True)
@@ -9859,6 +9894,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.findTreeItem(currentitemIs)
 		# self.ui.treeWidget.
 		DontFindTwice = False
+
+		self.ui.checkBoxAll.setChecked(False)
+		self.ui.checkBoxAll1.setChecked(False)
 
 	def findTreeItem(self, ChildName):
 

@@ -2907,6 +2907,11 @@
              <string>10x Synthesis report</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>CSV format Entire VDB</string>
+            </property>
+           </item>
           </widget>
           <widget class="QCheckBox" name="ckReportDisplay">
            <property name="geometry">
@@ -6966,17 +6971,30 @@ If the J-end is off the J gene end may need adjusted</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QPushButton" name="btnClearTreeChecks">
-         <property name="text">
-          <string>Clear checks</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
         <widget class="QPushButton" name="btnUpdateTree">
          <property name="text">
           <string>Update tree</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>25</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkBoxAll1">
+         <property name="text">
+          <string>Check All</string>
          </property>
         </widget>
        </item>

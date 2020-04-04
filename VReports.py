@@ -3,6 +3,7 @@ import VGenesSQL
 import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
 	setText
+import re
 import time
 global FieldList
 global RealNameList
@@ -825,6 +826,34 @@ def StandardReports(self, option, SequenceName, DBFilename):
             CSVOut += Vfam
             CSVOut += ','+filename
             CSVOut += '\n'
+
+        Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
+
+        with open(Pathname, 'w') as currentfile:
+            currentfile.write(CSVOut)
+
+    elif option == 'CSV format Entire VDB':
+
+        SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+        fields = [i[0] for i in DataIn]
+        field_names = [i[1] for i in DataIn]
+
+        SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        (dirname, filename) = os.path.split(DBFilename)
+        filename = filename[:(len(filename)-4)]
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        CSVOut = ''
+
+        CSVOut += ','.join(fields) + '\n'
+        CSVOut += ','.join(field_names) + '\n'
+        for record in DataIs:
+            record_new = [str(x) for x in record]
+            record_new[58] = re.sub(r'\n','#',record_new[58])
+            record_new[97] = re.sub(',', '|', record_new[97])
+            CSVOut += ','.join(record_new) + '\n'
 
         Pathname = saveFile(self, 'csv')
         if Pathname == None:
