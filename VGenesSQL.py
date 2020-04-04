@@ -1247,14 +1247,11 @@ def MakeSQLStatement(self, fields, SeqName):
                 SQLStatement += ', '
             firstmore = False
 
+        SQLStatement += 'SeqName IN ('
         for item in checkedkids:
-            SQLStatement += 'SeqName = "'
-            SQLStatement += item
-            if i < len(checkedkids):
-                SQLStatement += '" OR '
-            else:
-                SQLStatement += '"'
+            SQLStatement += '"' + item + '",'
             i += 1
-
+        SQLStatement = SQLStatement.rstrip(',')
+        SQLStatement += ')'
     return SQLStatement
 
