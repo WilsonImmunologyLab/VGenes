@@ -903,8 +903,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.updateGroupSetting()
 
 	def browseCSV(self):
-		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, self,
-		                                                   "getOpenFileNames", "~/Documents",
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
 		                                                   "VGene exported CSV Files (*.csv);;All Files (*)")
 		if len(files) == 0:
 			return
@@ -1342,13 +1341,120 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 
 	def InitiateImportFromCSV(self, Filenamed, MaxNu):
+		global FieldList
+		global FieldCommentList
+		global FieldTypeList
+		global RealNameList
+
 		self.calling = 3
 		files = self.pathCSV
-		Msg = 'We do not support import from CSV! Will do later!'
-		QMessageBox.warning(self, 'Warning', Msg,
-		                    QMessageBox.Ok, QMessageBox.Ok)
-		return
-		pass
+
+		if os.path.isfile(DBFilename):
+			# collect information, alter the DB structure
+			Msg = 'We added new fileds from the follow VDBs:\n'
+			for csv_file in files:
+				csvFile = open(csv_file, "r")
+				reader = csv.reader(csvFile)
+				line = 0
+				for item in reader:
+					if line == 0:
+						cur_field = item
+					elif line == 1:
+						cur_field_name = item
+					else:
+						break
+					line += 1
+				csvFile.close()
+
+				new_cols = [i for i in cur_field if i not in FieldList]
+
+				if len(new_cols) > 0:
+					for new_col in new_cols:
+						new_col_index = cur_field.index(new_col)
+						new_col_name = cur_field_name[new_col_index]
+						new_col_comment = ''
+
+						# update table
+						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
+						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+						                'VALUES(' + str(len(FieldList) + 1) + ',"' + new_col + '", "' + new_col_name + \
+						                '", "Customized", "' + new_col_comment + '")'
+						try:
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+						except:
+							msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+							QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+							                    QMessageBox.Ok)
+							return
+
+						try:
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+						except:
+							msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+							QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+							                    QMessageBox.Ok)
+							return
+
+						RealNameList.append(new_col)
+						FieldCommentList.append(new_col_comment)
+						FieldTypeList.append('Customized')
+						FieldList.append(new_col_name)
+
+						Msg = Msg + new_col + ' from    ' + csv_file + '\n'
+
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+			# import data from VDBs
+			print('import data from VDBs')
+			for csv_file in files:
+
+				csvFile = open(csv_file, "r")
+				reader = csv.reader(csvFile)
+				line = 0
+				DataIn = []
+				for item in reader:
+					if line == 0:
+						cur_field = item
+					elif line == 1:
+						cur_field_name = item
+					else:
+						DataIn.append(item)
+					line += 1
+				csvFile.close()
+
+				question_list = ['?' for n in range(len(cur_field))]
+				field_str = ','.join(cur_field)
+				question_str = ','.join(question_list)
+
+				# update ID (ID should be unique)
+				SQLSTATEMENT = 'SELECT COUNT(ID) FROM vgenesDB'
+				Count = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+				Count = Count[0][0]
+
+				InputData = []
+				for records in DataIn:
+					cur_line = list(records)
+					cur_line[119] = str(int(records[119]) + Count)
+					cur_line[58] = re.sub('#','\n',records[58])
+					cur_line[97] = re.sub('|', ',', records[97])
+					InputData.append(cur_line)
+
+				# insert into DB
+				print('insert into DB')
+				conn = db.connect(DBFilename)
+				cursor = conn.cursor()
+				SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
+				cursor.executemany(SQLSTATEMENT, InputData)
+				conn.commit()
+				conn.close()
+				print(csv_file)
+			Msg = 'Data import finished!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+			Vgenes.LoadDB(DBFilename)
+			self.hide()
+
+
 
 	def InitiateImportFromVDB(self, Filenamed, MaxNu):
 		global FieldList
