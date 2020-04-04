@@ -6250,7 +6250,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#FieldCheck = self.FieldChangeCheck()
 		try:
 			MatchingIndex = NameIndex[name]
-			self.DialScroll(MatchingIndex)
+			self.DialScroll(MatchingIndex, False)
 		except:
 			print('wrong')
 			return
@@ -6714,16 +6714,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		val = value  # could also refer directly to control instead of value: self.ui.spinBox.value()
 		self.ui.dial.setValue(self.ui.horizontalScrollBar.value())
 		self.ui.lcdNumber_current.display(val)
-		self.DialScroll(value)
+		self.DialScroll(value, True)
 
 	@pyqtSlot(int)
-	def DialScroll(self, value):
+	def DialScroll(self, value, update):
 		records = len(NameIndex)
 		if value < records and value > -1:
 			self.updateF(value)
-			NameIs = self.MatchingValue(value)
-			self.select_tree_by_name(NameIs)
-			self.tree_to_table_selection()
+			if update:
+				NameIs = self.MatchingValue(value)
+				self.select_tree_by_name(NameIs)
+				self.tree_to_table_selection()
 
 	def findTableViewRecord(self, FieldName):
 
