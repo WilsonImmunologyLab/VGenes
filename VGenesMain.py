@@ -396,6 +396,11 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 		self.ui.pushButtonOK.clicked.connect(self.accept)
 
 	def accept(self):
+		global RealNameList
+		global FieldCommentList
+		global FieldTypeList
+		global FieldList
+
 		col_index = []
 		col_fields = []
 
@@ -414,6 +419,47 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 			if my_widget.currentText() != "":
 				col_index.append(col)
 				col_fields.append(my_widget.currentText())
+
+				# add new column if field name not exit in current col
+				tmp_field_name = re.sub(r'\s.+', '', my_widget.currentText())
+				if tmp_field_name in FieldList:
+					pass
+				else:
+					# check if the new field name can be used:
+					HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+					HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+					ALL_Fields = [i[1] for i in HeaderIn]
+
+					if tmp_field_name in ALL_Fields:
+						pass
+					else:
+						# update vgene table
+						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + tmp_field_name + " text"
+
+						try:
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+						except:
+							msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+							QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+							                    QMessageBox.Ok)
+							return
+
+					# update field name table
+					SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+					                'VALUES(' + str(len(FieldList) + 1) + ',"' + tmp_field_name + '", "' + \
+					                tmp_field_name + '", "Customized", "")'
+					try:
+						VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+					except:
+						msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+						QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+						                    QMessageBox.Ok)
+						return
+
+					RealNameList.append(tmp_field_name)
+					FieldCommentList.append('')
+					FieldTypeList.append('Customized')
+					FieldList.append(tmp_field_name)
 
 		for row in range(num_row):
 			if row == 0:
@@ -475,6 +521,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 				cell_comBox.addItems([''] + Fields)
 				cell_comBox.setMaximumSize(10086, 40)
 				cell_comBox.setMinimumSize(50, 20)
+				cell_comBox.setEditable(True)
 				self.ui.tableWidget.setCellWidget(0, col_index, cell_comBox)
 
 			for row_index in range(num_row):
@@ -508,6 +555,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 				cell_comBox.addItems([''] + Fields)
 				cell_comBox.setMaximumSize(10086, 40)
 				cell_comBox.setMinimumSize(50, 20)
+				cell_comBox.setEditable(True)
 				self.ui.tableWidget.setCellWidget(0, col_index, cell_comBox)
 
 			for row_index in range(num_row):
@@ -2613,6 +2661,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			cell_comBox.addItems([''] + Fields)
 			cell_comBox.setMaximumSize(10086,40)
 			cell_comBox.setMinimumSize(50,20)
+			cell_comBox.setEditable(True)
 			self.annoDialog.ui.tableWidget.setCellWidget(0, col_index, cell_comBox)
 
 		for row_index in range(num_row):
