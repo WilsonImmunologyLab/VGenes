@@ -102,6 +102,7 @@ class Ui_AlterDialog(object):
         font = QtGui.QFont()
         font.setPointSize(15)
         self.lineEditName.setFont(font)
+        self.lineEditName.setReadOnly(True)
         self.lineEditName.setObjectName("lineEditName")
         self.gridLayout_3.addWidget(self.lineEditName, 1, 0, 1, 2)
         self.label_3 = QtWidgets.QLabel(self.frame_3)

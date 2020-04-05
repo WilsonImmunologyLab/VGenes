@@ -607,18 +607,29 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		else:
 			return
 
-		# update table
-		SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + tmp_field_name + " text"
-		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
-		                'VALUES(' + str(self.ui.listWidget.count() + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "")'
-		try:
-			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
-		except:
-			msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
-			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
-			                    QMessageBox.Ok)
-			return
+		# check if the new field name can be used:
+		HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+		HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+		ALL_Fields = [i[1] for i in HeaderIn]
 
+		if tmp_field_name in ALL_Fields:
+			pass
+		else:
+			# update vgene table
+			SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + tmp_field_name + " text"
+
+			try:
+				VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+			except:
+				msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+				QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+				                    QMessageBox.Ok)
+				return
+
+		# update field name table
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+		                'VALUES(' + str(
+			self.ui.listWidget.count() + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "")'
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
 		except:
