@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>MKPR.png</file>
+    <file>ATCG.png</file>
     <file>logo.png</file>
     <file>Flu.png</file>
     <file>mAB.png</file>

@@ -39,6 +39,8 @@ from ui_Import_Dialogue import Ui_DialogImport
 global OldName
 global UpdateSpecific
 UpdateSpecific = True
+global from_table
+from_table = False
 import csv
 import copy
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
@@ -317,7 +319,7 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 	def PopulateCombo(self):
 		# # todo need to make this filename fall in VGenes directory upon deployment
 		try:
-			filename = os.path.join(working_prefix, 'RecentPaths.vtx')
+			filename = os.path.join(working_prefix, 'Conf', 'RecentPaths.vtx')
 
 			with open(filename, 'r') as currentfile:
 				self.cboRecent.clear()
@@ -4645,6 +4647,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				return
 
 	def table_to_tree_selection(self):
+		global from_table
+
 		items = self.ui.SeqTable.selectedItems()
 		item = items[-1]
 		name = self.ui.SeqTable.item(self.ui.SeqTable.indexFromItem(item).row(), 1).text()
@@ -4654,7 +4658,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
 		if len(found) > 0:
 			found = found[0]
+			from_table = True
 			self.ui.treeWidget.setCurrentItem(found)
+			from_table = False
 
 	def select_tree_by_name(self, name):
 		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
@@ -6407,6 +6413,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def TreeSelectChanged(self):
+		global from_table
+
 		value = self.ui.treeWidget.selectedItems()
 
 		name = ''
@@ -6428,8 +6436,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			NewHead  = str(NumSelected) + ' items selected'
 			self.ui.label_Name.setText(NewHead)
 
-		self.tree_to_table_selection()
-		self.match_tree_to_table()
+		if from_table:
+			return
+		else:
+			self.tree_to_table_selection()
+			self.match_tree_to_table()
 
 	def MatchingValue(self, IndexIs):
 		try:
@@ -6524,7 +6535,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# todo may need to switch this to configparser which is python modle to save ini files
 		# todo change to app folder
 		try:
-			filename = os.path.join(working_prefix, 'RecentPaths.vtx')
+			filename = os.path.join(working_prefix, 'Conf', 'RecentPaths.vtx')
 			with open(filename, 'r') as currentfile:
 				vv = currentfile
 
@@ -6884,13 +6895,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot(int)
 	def DialScroll(self, value, update):
+		global from_table
+
 		records = len(NameIndex)
 		if value < records and value > -1:
 			self.updateF(value)
 			if update:
-				NameIs = self.MatchingValue(value)
-				self.select_tree_by_name(NameIs)
-				self.tree_to_table_selection()
+				if from_table:
+					return
+				else:
+					NameIs = self.MatchingValue(value)
+					self.select_tree_by_name(NameIs)
+					self.tree_to_table_selection()
 
 	def findTableViewRecord(self, FieldName):
 

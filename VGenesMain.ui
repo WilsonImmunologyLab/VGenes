@@ -6624,7 +6624,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonDownload">
             <property name="minimumSize">
              <size>
-              <width>130</width>
+              <width>90</width>
               <height>0</height>
              </size>
             </property>
@@ -6647,13 +6647,16 @@ If the J-end is off the J gene end may need adjusted</string>
               <height>30</height>
              </size>
             </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
           <item row="0" column="0">
            <widget class="QPushButton" name="pushButtonDraw">
             <property name="minimumSize">
              <size>
-              <width>130</width>
+              <width>90</width>
               <height>0</height>
              </size>
             </property>
@@ -6675,6 +6678,9 @@ If the J-end is off the J gene end may need adjusted</string>
               <width>30</width>
               <height>30</height>
              </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -6708,12 +6714,25 @@ If the J-end is off the J gene end may need adjusted</string>
          <widget class="QPushButton" name="pushButtonAA">
           <property name="minimumSize">
            <size>
-            <width>200</width>
+            <width>100</width>
             <height>0</height>
            </size>
           </property>
           <property name="text">
-           <string>Peptide Logo</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/MKPR.png</normaloff>:/PNG-Icons/MKPR.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>60</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -6721,12 +6740,25 @@ If the J-end is off the J gene end may need adjusted</string>
          <widget class="QPushButton" name="pushButtonNT">
           <property name="minimumSize">
            <size>
-            <width>200</width>
+            <width>100</width>
             <height>0</height>
            </size>
           </property>
           <property name="text">
-           <string>Nucleotide Logo</string>
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/ATCG.png</normaloff>:/PNG-Icons/ATCG.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -6803,7 +6835,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">

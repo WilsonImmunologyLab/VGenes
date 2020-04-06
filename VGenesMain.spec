@@ -3,14 +3,35 @@
 block_cipher = None
 
 added_files = [
-             ('/Users/leil/Documents/Projects/VGene/Resources/Js/echarts.min.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/Resources/Js/jquery.js','Js')
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/echarts.js','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/jquery.js','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/bootstrap-theme.min.css','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/bootstrap.min.css','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/bootstrap.min.js','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/d3.js','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/phylotree.css','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/phylotree.js','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/underscore-min.js','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/underscore-min.map','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/path_setting.txt','Conf'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/RecentPaths.vtx','Conf'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog.txt','Temp'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog2.txt','Temp'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/raxml','Tools'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/clustalo','Tools'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/muscle','Tools'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/igblastn','Tools'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/igblastp','Tools'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/makeblastdb','Tools'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template.html','Data'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_raxml_tree.html','Data'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_tree.html','Data')
              ]
 
 a = Analysis(['VGenesMain.py'],
              pathex=['/Users/leil/Documents/Projects/VGene/VGenes'],
              binaries=[],
-             datas=[],
+             datas=added_files,
              hiddenimports=[],
              hookspath=['hooks'],
              runtime_hooks=[],
@@ -23,19 +44,27 @@ pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
           a.scripts,
-          a.binaries,
-          a.zipfiles,
-          a.datas,
           [],
-          name='VGenes',
+          exclude_binaries=True,
+          name='VGene',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          upx_exclude=[],
-          runtime_tmpdir=None,
           console=False )
-app = BUNDLE(exe,
-             name='VGenes.app',
-             icon=None,
-             bundle_identifier=None)
+coll = COLLECT(exe,
+               a.binaries,
+               a.zipfiles,
+               a.datas,
+               strip=False,
+               upx=True,
+               upx_exclude=[],
+               name='VGene')
+app = BUNDLE(coll,
+             name='VGene.app',
+             icon='Flu.icns',
+             bundle_identifier=None,
+             info_plist={
+              'NSHumanReadableCopyright':"Copyright @ 2019, Wilson Lab, All Rights Reserved",
+              'NSHighResolutionCapable': 'True'
+             })
