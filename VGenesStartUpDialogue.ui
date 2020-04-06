@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>605</width>
-    <height>619</height>
+    <width>638</width>
+    <height>685</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -258,7 +258,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/mAB.png</pixmap>
+      <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/logo.png</pixmap>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
