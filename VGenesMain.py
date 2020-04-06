@@ -7169,8 +7169,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboFindField.addItem("Grouping")
 		self.ui.cboFindField.addItem("Subgroup")
 
+		self.ui.cboFindField1.addItem("Project")
+		self.ui.cboFindField1.addItem("Grouping")
+		self.ui.cboFindField1.addItem("Subgroup")
+
 		for item in RealNameList:
 			self.ui.cboFindField.addItem(item)
+			self.ui.cboFindField1.addItem(item)
 			self.ui.cboTreeOp1.addItem(item)
 			self.ui.cboTreeOp2.addItem(item)
 			self.ui.cboTreeOp3.addItem(item)
@@ -7241,6 +7246,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global LastSelected
 		valueis = self.ui.txtDgene.toPlainText()
 		LastSelected = ('D1', valueis)
+		field = LastSelected[0]
+		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText('D gene 1')
+		self.ui.valueLine.setText(valueis)
+
+	def on_txtName_selectionChanged(self):
+		global LastSelected
+		valueis = self.ui.txtName.toPlainText()
+		LastSelected = ('SeqName', valueis)
 		field = LastSelected[0]
 		Fiedlvalue = self.TransLateFieldtoReal(field, False)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
@@ -7971,6 +7987,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.cboFindField.currentText() == 'Autoreactivity':
 			self.AutoRXSet()
 
+		self.ui.cboFindField1.setCurrentText(self.ui.cboFindField.currentText())
+
 	def SpecSet(self):
 		global LastSelected
 
@@ -8024,8 +8042,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueTo = self.ui.Autoreactivity.currentText()
 		FieldIS = 'Blank6'
 		self.FieldChanger(valueTo, FieldIS)
-
-
 
 	@pyqtSlot()
 	def on_btnClearTreeChecks_clicked(self):
@@ -8481,60 +8497,68 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnFieldBulk_clicked(self):
-		search = self.ui.txtFieldSearch.text()
-		if search == '':
-			answer = informationMessage(self, 'Enter a value to the edit/search field', 'OK')
+		cur_field = self.ui.cboFindField1.currentText()
+		if cur_field in RealNameList:
+			index = RealNameList.index(cur_field)
+			cur_field = FieldList[index]
+		else:
+			answer = informationMessage(self, 'The field name you determined is not exist!', 'OK')
 			return
 
-		field = self.ui.cboFindField.currentText()
-		fieldsearch = self.TransLateFieldtoReal(field, True)
-		if fieldsearch == "SeqName":
-			answer = informationMessage(self, 'Sequence names cannot be changed in bulk', 'OK')
-			return
+		str_target = self.ui.lineEditTarget.text()
+		if str_target == "":
+			question = "Your target field is empty, will update the whole cell, OK?"
+			buttons = 'YN'
+			answer = questionMessage(self, question, buttons)
+			if answer == 'No':
+				return
 
-		value = self.ui.treeWidget.selectedItems()
-		currentitemIs = ''
+		str_replace = self.ui.lineEditReplace.text()
+		if str_replace == '':
+			question = "Your replace field is empty, will clear everything match target field, OK?"
+			buttons = 'YN'
+			answer = questionMessage(self, question, buttons)
+			if answer == 'No':
+				return
 
-		for item in value:
-			currentitemIs = item.text(0)
+		# find ID for all selected items
+		selected_name = self.getTreeCheckedChild()
+		selected_name = selected_name[3]
 
-		fields = self.ui.cboTreeOp1.currentText()
-		field1 = self.TransLateFieldtoReal(fields, True)
+		SQLStatement = 'SELECT ID FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-		fields = self.ui.cboTreeOp2.currentText()
-		field2 = self.TransLateFieldtoReal(fields, True)
-		# field2Index = self.ui.cboTreeOp2.currentIndex()
+		# update each records
+		for record in DataIn:
+			id = record[0]
+			SQLStatement = ""
+			if str_target == "":
+				SQLStatement = "UPDATE vgenesdb SET " + cur_field + " = '" + str_replace + "' WHERE ID = " + str(id)
+			else:
+				SQLStatement = 'SELECT ' + cur_field + ' FROM vgenesdb WHERE ID = ' + str(id)
+				thisData = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				thisData = thisData[0][0]
 
-		fields = self.ui.cboTreeOp3.currentText()
-		field3 = self.TransLateFieldtoReal(fields, True)
-		# field3Index = self.ui.cboTreeOp3.currentIndex()
+				if self.ui.radioButtonReg.isChecked():
+					regx = re.compile(str_target)
+					new_str = re.sub(regx, str_replace, thisData)
+				else:
+					new_str = re.sub(str_target, str_replace, thisData)
 
-		if field1 == '': field1 = 'None'
-		if field2 == '': field1 = 'None'
-		if field3 == '': field1 = 'None'
-		TreeFields = []
-		TreeFields.append(field1)
-		TreeFields.append(field2)
-		TreeFields.append(field3)
+				if new_str != thisData:
+					SQLStatement = "UPDATE vgenesdb SET " + cur_field + " = '" + new_str + "' WHERE ID = " + str(id)
 
-		fields = ['ID']
-		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
+			try:
+				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+			except:
+				Msg = 'SQL ERROR! Current CMD:\n' + SQLStatement
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
 
-		WhereStart = SQLStatement.find('WHERE')
-		WhereState = SQLStatement[WhereStart - 1:]  # + ' AND '
-		SQLStatement = 'UPDATE vgenesDB SET ' + fieldsearch + ' = "' + search + '"' + WhereState  # -7.000000' WHERE locId = 173567"
-		# ' WHERE SeqName = "A116_1B04H-2" OR SeqName = "A116_1B04H-3"'
-		foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
-
-		#model = self.ui.tableView.model()
-		#model.refresh()
-		# self.GOOpen(False)
-
-		if fieldsearch == field1 or fieldsearch == field2 or fieldsearch == field3:
-			self.on_btnUpdateTree_clicked()
-
-		self.findTreeItem(currentitemIs)
+		SQLFields = (
+			self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+		self.initializeTreeView(SQLFields)
+		self.ui.treeWidget.expandAll()
 
 	@pyqtSlot()
 	def on_btnEditLock_clicked(self):

@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1547</width>
-    <height>1145</height>
+    <width>1503</width>
+    <height>1175</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,6 +43,83 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout_8">
+    <item row="2" column="0" rowspan="2">
+     <widget class="QGroupBox" name="groupBox_2">
+      <property name="maximumSize">
+       <size>
+        <width>500</width>
+        <height>200</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <pointsize>13</pointsize>
+       </font>
+      </property>
+      <property name="title">
+       <string>Tree navigation order (choose then update):</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout_11">
+       <item row="3" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp1">
+         <property name="minimumSize">
+          <size>
+           <width>180</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp2">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp3">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="btnUpdateTree">
+         <property name="text">
+          <string>Update tree</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>25</width>
+           <height>25</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QCheckBox" name="checkBoxAll1">
+         <property name="text">
+          <string>Check All</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
     <item row="0" column="1" rowspan="3">
      <widget class="QTabWidget" name="tabWidget">
       <property name="sizePolicy">
@@ -208,7 +285,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1160</width>
+             <width>1116</width>
              <height>821</height>
             </rect>
            </property>
@@ -2097,31 +2174,6 @@
                <enum>QFrame::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_13">
-               <item row="0" column="1">
-                <widget class="QTextEdit" name="txtComments">
-                 <property name="sizePolicy">
-                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="minimumSize">
-                  <size>
-                   <width>0</width>
-                   <height>0</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>16777215</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                 <property name="readOnly">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
                <item row="0" column="0">
                 <widget class="QLabel" name="label_7">
                  <property name="sizePolicy">
@@ -2144,6 +2196,31 @@
                  </property>
                  <property name="text">
                   <string>Comments:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="0" column="1">
+                <widget class="QTextEdit" name="txtComments">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>0</width>
+                   <height>0</height>
+                  </size>
+                 </property>
+                 <property name="maximumSize">
+                  <size>
+                   <width>16777215</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -6956,81 +7033,44 @@ If the J-end is off the J gene end may need adjusted</string>
       </widget>
      </widget>
     </item>
-    <item row="2" column="0" rowspan="2">
-     <widget class="QGroupBox" name="groupBox_2">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_Name">
+      <property name="minimumSize">
+       <size>
+        <width>225</width>
+        <height>30</height>
+       </size>
+      </property>
       <property name="maximumSize">
        <size>
         <width>500</width>
-        <height>200</height>
+        <height>16777215</height>
        </size>
       </property>
       <property name="font">
        <font>
-        <pointsize>13</pointsize>
+        <family>Franklin Gothic Medium</family>
+        <pointsize>17</pointsize>
        </font>
       </property>
-      <property name="title">
-       <string>Tree navigation order (choose then update):</string>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
       </property>
-      <layout class="QGridLayout" name="gridLayout_11">
-       <item row="3" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp1">
-         <property name="minimumSize">
-          <size>
-           <width>180</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp3">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QPushButton" name="btnUpdateTree">
-         <property name="text">
-          <string>Update tree</string>
-         </property>
-         <property name="icon">
-          <iconset resource="Resources/VgenesResources.qrc">
-           <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>25</width>
-           <height>25</height>
-          </size>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0">
-        <widget class="QCheckBox" name="checkBoxAll1">
-         <property name="text">
-          <string>Check All</string>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="lineWidth">
+       <number>1</number>
+      </property>
+      <property name="midLineWidth">
+       <number>0</number>
+      </property>
+      <property name="text">
+       <string>Sequence Name</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
      </widget>
     </item>
     <item row="1" column="0">
@@ -7099,46 +7139,6 @@ If the J-end is off the J gene end may need adjusted</string>
       </column>
      </widget>
     </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label_Name">
-      <property name="minimumSize">
-       <size>
-        <width>225</width>
-        <height>30</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>500</width>
-        <height>16777215</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <family>Franklin Gothic Medium</family>
-        <pointsize>17</pointsize>
-       </font>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
-      </property>
-      <property name="lineWidth">
-       <number>1</number>
-      </property>
-      <property name="midLineWidth">
-       <number>0</number>
-      </property>
-      <property name="text">
-       <string>Sequence Name</string>
-      </property>
-      <property name="alignment">
-       <set>Qt::AlignCenter</set>
-      </property>
-     </widget>
-    </item>
     <item row="3" column="1">
      <widget class="QFrame" name="frame_11">
       <property name="sizePolicy">
@@ -7150,13 +7150,13 @@ If the J-end is off the J gene end may need adjusted</string>
       <property name="minimumSize">
        <size>
         <width>0</width>
-        <height>100</height>
+        <height>200</height>
        </size>
       </property>
       <property name="maximumSize">
        <size>
         <width>16777215</width>
-        <height>120</height>
+        <height>200</height>
        </size>
       </property>
       <property name="frameShape">
@@ -7165,7 +7165,7 @@ If the J-end is off the J gene end may need adjusted</string>
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <layout class="QGridLayout" name="gridLayout_43">
+      <layout class="QGridLayout" name="gridLayout_44">
        <item row="0" column="0">
         <widget class="QFrame" name="frame_3">
          <property name="minimumSize">
@@ -7193,24 +7193,17 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item row="3" column="0">
-           <widget class="QRadioButton" name="rdoAll">
-            <property name="text">
-             <string>All</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" rowspan="2">
-           <widget class="QRadioButton" name="rdoLocal">
-            <property name="text">
-             <string>Local</string>
+          <item row="4" column="1">
+           <widget class="QLineEdit" name="txtFieldSearch">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>22</height>
+             </size>
             </property>
            </widget>
           </item>
-          <item row="3" column="1" rowspan="2">
+          <item row="4" column="0">
            <widget class="QComboBox" name="cboFindField">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -7256,24 +7249,120 @@ If the J-end is off the J gene end may need adjusted</string>
             </item>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="2" column="0">
            <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>Search/edit fields:</string>
+             <string>Search fields:</string>
             </property>
            </widget>
           </item>
-          <item row="5" column="1">
-           <widget class="QLineEdit" name="txtFieldSearch">
+          <item row="2" column="1">
+           <widget class="QRadioButton" name="rdoLocal">
+            <property name="text">
+             <string>Local</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2">
+           <widget class="QRadioButton" name="rdoAll">
+            <property name="text">
+             <string>All</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QPushButton" name="btnFieldSearch">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>0</width>
-              <height>22</height>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Search</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="1" rowspan="2">
+        <widget class="Line" name="line">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2" rowspan="2">
+        <widget class="QFrame" name="frame_10">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_43">
+          <item row="1" column="0" colspan="3">
+           <widget class="QComboBox" name="cboFindField1"/>
+          </item>
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pushButtonLock">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Edit</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLineEdit" name="lineEditTarget">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
              </size>
             </property>
            </widget>
           </item>
-          <item row="5" column="2">
+          <item row="0" column="2">
            <widget class="QPushButton" name="btnFieldBulk">
             <property name="enabled">
              <bool>false</bool>
@@ -7302,159 +7391,33 @@ If the J-end is off the J gene end may need adjusted</string>
            </widget>
           </item>
           <item row="3" column="2">
-           <widget class="QPushButton" name="btnFieldSearch">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+           <widget class="QLineEdit" name="lineEditReplace">
             <property name="minimumSize">
              <size>
               <width>0</width>
               <height>30</height>
              </size>
             </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QLabel" name="label_61">
             <property name="text">
-             <string>Search</string>
+             <string>To</string>
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QPushButton" name="pushButtonLock">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>16777215</height>
-             </size>
-            </property>
+          <item row="2" column="0" colspan="3">
+           <widget class="QRadioButton" name="radioButtonReg">
             <property name="text">
-             <string>Bulk Edit</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>20</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
+             <string>Regular Expression allowed</string>
             </property>
            </widget>
           </item>
          </layout>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="Line" name="line">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>100</height>
-          </size>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QFrame" name="frame_4">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_9">
-          <item row="0" column="0">
-           <widget class="QLineEdit" name="fieldLine">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_58">
-            <property name="text">
-             <string>=</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QLineEdit" name="valueLine">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>25</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="3">
-           <widget class="QPushButton" name="pushButtonSimilar">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>1000</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Click a field from the Record tab and records with similar values will be checked</string>
-            </property>
-            <property name="text">
-             <string>Check all match records</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>40</width>
-              <height>40</height>
-             </size>
-            </property>
-            <property name="autoDefault">
-             <bool>false</bool>
-            </property>
-            <property name="default">
-             <bool>false</bool>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="3">
+       <item row="0" column="3" rowspan="2">
         <widget class="Line" name="line_3">
          <property name="minimumSize">
           <size>
@@ -7467,7 +7430,7 @@ If the J-end is off the J gene end may need adjusted</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="4">
+       <item row="0" column="4" rowspan="2">
         <widget class="QFrame" name="frame_5">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -7486,13 +7449,13 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
             <property name="minimumSize">
              <size>
-              <width>0</width>
-              <height>70</height>
+              <width>120</width>
+              <height>120</height>
              </size>
             </property>
             <property name="maximumSize">
              <size>
-              <width>70</width>
+              <width>120</width>
               <height>16777215</height>
              </size>
             </property>
@@ -7507,25 +7470,6 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
             <property name="notchesVisible">
              <bool>false</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="1">
-           <widget class="QLabel" name="label_12">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>10</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Record:</string>
             </property>
            </widget>
           </item>
@@ -7609,11 +7553,116 @@ If the J-end is off the J gene end may need adjusted</string>
             <property name="minimumSize">
              <size>
               <width>300</width>
-              <height>15</height>
+              <height>30</height>
              </size>
             </property>
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_12">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>10</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Record:</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QFrame" name="frame_4">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_9">
+          <item row="0" column="2">
+           <widget class="QLineEdit" name="valueLine">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLabel" name="label_58">
+            <property name="text">
+             <string>=</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLineEdit" name="fieldLine">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>25</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QPushButton" name="pushButtonSimilar">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>1000</width>
+              <height>40</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Click a field from the Record tab and records with similar values will be checked</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="autoDefault">
+             <bool>false</bool>
+            </property>
+            <property name="default">
+             <bool>false</bool>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -7630,7 +7679,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1547</width>
+     <width>1503</width>
      <height>22</height>
     </rect>
    </property>
