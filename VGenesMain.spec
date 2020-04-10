@@ -25,7 +25,9 @@ added_files = [
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/makeblastdb','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template.html','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_raxml_tree.html','Data'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_tree.html','Data')
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_tree.html','Data'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/VDJGenes.db','Data'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/IgBlast/*','IgBlast'),
              ]
 
 a = Analysis(['VGenesMain.py'],
@@ -62,7 +64,7 @@ coll = COLLECT(exe,
                name='VGene')
 app = BUNDLE(coll,
              name='VGene.app',
-             icon='Flu.icns',
+             icon='mAB.icns',
              bundle_identifier=None,
              info_plist={
               'NSHumanReadableCopyright':"Copyright @ 2019, Wilson Lab, All Rights Reserved",

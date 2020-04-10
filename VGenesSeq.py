@@ -484,8 +484,8 @@ def ClustalO(SeqDict, wrapLength, ordered):
     # workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega', 'my-in-seqs.fa')
     # savefilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega', 'my-out-seqs.fa')
 
-    workingfilename = os.path.join(working_prefix, 'ClustalOmega', MyInFiles)
-    savefilename = os.path.join(working_prefix, 'ClustalOmega', MyOutFiles)
+    workingfilename = os.path.join(temp_folder, MyInFiles)
+    savefilename = os.path.join(temp_folder, MyOutFiles)
 
 
     workingdir, filename = os.path.split(workingfilename)

@@ -1,0 +1,701 @@
+BLASTN 2.2.29+
+
+
+Reference: Stephen F. Altschul, Thomas L. Madden, Alejandro A.
+Schaffer, Jinghui Zhang, Zheng Zhang, Webb Miller, and David J.
+Lipman (1997), "Gapped BLAST and PSI-BLAST: a new generation of
+protein database search programs", Nucleic Acids Res. 25:3389-3402.
+
+
+
+Database: human_gl_V_IMGT.nuc; human_gl_D_IMGT.nuc; human_gl_J_IMGT.nuc
+           398 sequences; 101,305 total letters
+
+
+
+Query= SFV005_2A04H-4
+
+Length=361
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV3-23*01                                                                                         339   1e-95
+lcl|IGHV3-23D*01                                                                                        339   1e-95
+lcl|IGHV3-23*04                                                                                         336   1e-94
+lcl|IGHD5/OR15-5a*01                                                                                  18.4    0.73 
+lcl|IGHD5/OR15-5b*01                                                                                  18.4    0.73 
+lcl|IGHD1-7*01                                                                                        16.4    2.9  
+lcl|IGHJ4*02                                                                                          75.8    3e-18
+lcl|IGHJ5*02                                                                                          69.9    2e-16
+lcl|IGHJ4*01                                                                                          67.9    8e-16
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV3-23*01,IGHV3-23D*01	IGHD5/OR15-5a*01,IGHD5/OR15-5b*01	IGHJ4*02	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+TCCAA	TACGCCTGGAACTCTTTCGGGCCCG	AGTGT	(CTAC)	TGGGG	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+FR1	1	90	90	81	9	0	90
+CDR1	91	105	15	12	3	0	80
+FR2	106	147	42	42	0	0	100
+CDR2	148	198	51	38	13	0	74.5
+FR3	199	293	95	82	13	0	86.3
+Total	N/A	N/A	293	255	38	0	87
+
+
+Alignments
+
+                                           <-------------------------------------------FR1------------------------------------------>
+                                            E  V  Q  L  L  E  S  G  G  G  L  V  P  P  G  G  S  L  R  L  S  C  A  V  S  G  L  K  F  N 
+                    Query_1           1    GAGGTGCAGCTGTTGGAGTCTGGGGGCGGTTTGGTTCCGCCTGGGGGGTCCCTGAGACTCTCCTGTGCAGTCTCTGGACTCAAATTTAAC  90
+V  87.0% (255/293)  IGHV3-23*01       1    ..........................A..C.....A.A................................C.......T...CC....G.  90
+                                            E  V  Q  L  L  E  S  G  G  G  L  V  Q  P  G  G  S  L  R  L  S  C  A  A  S  G  F  T  F  S 
+V  87.0% (255/293)  IGHV3-23D*01      1    ..........................A..C.....A.A................................C.......T...CC....G.  90
+V  86.7% (254/293)  IGHV3-23*04       1    ............G.............A..C.....A.A................................C.......T...CC....G.  90
+
+                                           <----CDR1-----><-------------------FR2------------------><----------------------CDR2------
+                                            T  Y  D  M  T  W  V  R  Q  A  P  G  K  G  L  E  W  V  S  A  I  S  P  S  G  H  L  S  H  Y 
+                    Query_1           91   ACCTATGACATGACCTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTCTCAGCTATTAGTCCGAGTGGTCATCTCAGTCACTAC  180
+V  87.0% (255/293)  IGHV3-23*01       91   .G.....C.....G....................................................GGT......GG.AG..CAT.....  180
+                                            S  Y  A  M  S  W  V  R  Q  A  P  G  K  G  L  E  W  V  S  A  I  S  G  S  G  G  S  T  Y  Y 
+V  87.0% (255/293)  IGHV3-23D*01      91   .G.....C.....G....................................................GGT......GG.AG..CAT.....  180
+V  86.7% (254/293)  IGHV3-23*04       91   .G.....C.....G....................................................GGT......GG.AG..CAT.....  180
+
+                                           -----------------><----------------------------------------------FR3----------------------
+                                            A  D  S  V  R  G  R  F  T  I  S  R  D  D  S  E  N  T  L  Y  L  H  L  D  S  L  R  P  E  D 
+                    Query_1           181  GCAGACTCCGTGCGTGGCCGGTTCACCATCTCCAGAGACGATTCCGAGAACACTCTTTACCTGCATCTGGACAGCCTGAGACCCGAAGAC  270
+V  87.0% (255/293)  IGHV3-23*01       181  ............AAG........................A.....A.......G..G..T.....AA..A...........G....G...  270
+                                            A  D  S  V  K  G  R  F  T  I  S  R  D  N  S  K  N  T  L  Y  L  Q  M  N  S  L  R  A  E  D 
+V  87.0% (255/293)  IGHV3-23D*01      181  ............AAG........................A.....A.......G..G..T.....AA..A...........G....G...  270
+V  86.7% (254/293)  IGHV3-23*04       181  ............AAG........................A.....A.......G..G..T.....AA..A...........G....G...  270
+
+                                           ----------------------->                                                                  
+                                            T  A  V  Y  Y  C  S  N  T  P  G  T  L  S  G  P  S  V  Y  W  G  Q  G  T  L  V  T  V  S  S 
+                    Query_1           271  ACGGCCGTGTATTACTGTTCCAATACGCCTGGAACTCTTTCGGGCCCGAGTGTCTACTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCA  360
+V  87.0% (255/293)  IGHV3-23*01       271  ........A.........G.G..-------------------------------------------------------------------  293
+                                            T  A  V  Y  Y  C  A                                                                      
+V  87.0% (255/293)  IGHV3-23D*01      271  ........A.........G.G..-------------------------------------------------------------------  293
+V  86.7% (254/293)  IGHV3-23*04       271  ........A.........G.G..-------------------------------------------------------------------  293
+D  100.0% (9/9)     IGHD5/OR15-5a*01  9    ------------------------------------------------.........---------------------------------  17
+D  100.0% (9/9)     IGHD5/OR15-5b*01  9    ------------------------------------------------.........---------------------------------  17
+D  100.0% (8/8)     IGHD1-7*01        8    ----------------------------........------------------------------------------------------  15
+J  100.0% (38/38)   IGHJ4*02          11   -----------------------------------------------------.....................................  47
+J  100.0% (35/35)   IGHJ5*02          17   --------------------------------------------------------..................................  50
+J  97.4% (37/38)    IGHJ4*01          11   -----------------------------------------------------............A........................  47
+
+                                            
+                                            
+                    Query_1           361  G  361
+J  100.0% (38/38)   IGHJ4*02          48   .  48
+J  100.0% (35/35)   IGHJ5*02          51   .  51
+J  97.4% (37/38)    IGHJ4*01          48   .  48
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 30169218
+
+
+Query= SFV005_2A03H
+
+Length=370
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV3-21*01                                                                                         310   1e-86
+lcl|IGHV3-21*02                                                                                         310   1e-86
+lcl|IGHV3-21*03                                                                                         307   1e-85
+lcl|IGHD5-12*01                                                                                       16.4    3.0  
+lcl|IGHD1-26*01                                                                                       14.4       12
+lcl|IGHD3-22*01                                                                                       14.4       12
+lcl|IGHJ4*02                                                                                          73.8    1e-17
+lcl|IGHJ4*01                                                                                          65.9    3e-15
+lcl|IGHJ5*02                                                                                          61.9    5e-14
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV3-21*01,IGHV3-21*02	IGHD5-12*01	IGHJ4*02	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+AGAGA	TAGGG	ATAGTGGC	AGTTACTACACGGACGGCTG	TGACT	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+FR1	51	90	40	38	2	0	95
+CDR1	91	105	15	10	5	0	66.7
+FR2	106	147	42	41	1	0	97.6
+CDR2	148	198	51	41	10	0	80.4
+FR3	199	294	96	90	6	0	93.8
+CDR3 (V gene only)	295	296	2	2	0	0	100
+Total	N/A	N/A	246	222	24	0	90.2
+
+
+Alignments
+
+                                      <------------------FR1-----------------><----CDR1-----><-------------------FR2------------
+                                        L  R  L  S  C  V  A  S  G  F  T  F  S  D  Y  T  M  N  W  V  R  Q  A  P  G  K  G  L  E  W
+                    Query_2      51   CCTGAGACTCTCCTGTGTAGCCTCTGGATTCACCTTTAGTGACTACACAATGAACTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTG  140
+V  90.2% (222/246)  IGHV3-21*01  51   .................C..................C...AG...T.GC.........................................  140
+                                        L  R  L  S  C  A  A  S  G  F  T  F  S  S  Y  S  M  N  W  V  R  Q  A  P  G  K  G  L  E  W
+V  90.2% (222/246)  IGHV3-21*02  51   .................C..................C...AG...T.GC.........................................  140
+V  89.8% (221/246)  IGHV3-21*03  51   .................C..................C...AG...T.GC.........................................  140
+
+                                      ------><----------------------CDR2-----------------------><-------------------------------
+                                        V  S  S  I  T  S  F  G  G  Y  I  Y  Y  A  D  S  V  K  G  R  F  T  I  S  R  D  N  A  R  N
+                    Query_2      141  GGTCTCTTCCATTACCAGTTTCGGTGGATATATATACTATGCAGACTCAGTGAAGGGCCGATTCACCATCTCCAGAGACAACGCCAGAAA  230
+V  90.2% (222/246)  IGHV3-21*01  141  ......A.......GT...AGTA..A.T..C........C..............................................AG..  230
+                                        V  S  S  I  S  S  S  S  S  Y  I  Y  Y  A  D  S  V  K  G  R  F  T  I  S  R  D  N  A  K  N
+V  90.2% (222/246)  IGHV3-21*02  141  ......A.......GT...AGTA..A.T..C........C..............................................AG..  230
+V  89.8% (221/246)  IGHV3-21*03  141  ......A.......GT...AGTA..A.T..C........C..............................................AG..  230
+
+                                      ---------------FR3--------------------------------------------->                          
+                                        S  L  F  L  Q  M  N  S  L  R  A  E  D  T  A  V  Y  Y  C  A  R  D  R  D  S  G  S  Y  Y  T
+                    Query_2      231  CTCATTGTTTCTGCAAATGAACAGCCTGAGAGCCGAGGACACGGCTGTGTACTATTGTGCGAGAGATAGGGATAGTGGCAGTTACTACAC  320
+V  90.2% (222/246)  IGHV3-21*01  231  ....C...A..........................................T..C...........------------------------  296
+                                        S  L  Y  L  Q  M  N  S  L  R  A  E  D  T  A  V  Y  Y  C  A  R                           
+V  90.2% (222/246)  IGHV3-21*02  231  ....C...A..........................................T..C...........------------------------  296
+V  89.8% (221/246)  IGHV3-21*03  231  ....C...A.................................A........T..C...........------------------------  296
+D  100.0% (8/8)     IGHD5-12*01  7    -----------------------------------------------------------------------........-----------  14
+D  100.0% (7/7)     IGHD1-26*01  4    -----------------------------------------------------------------------.......------------  10
+D  100.0% (7/7)     IGHD3-22*01  25   ---------------------------------------------------------------------------------.......--  31
+
+                                                                                        
+                                        D  G  C  D  Y  W  G  Q  G  T  L  V  S  V  S  S  
+                    Query_2      321  GGACGGCTGTGACTACTGGGGCCAGGGAACCCTGGTCAGCGTCTCCTCAG  370
+J  97.6% (40/41)    IGHJ4*02     8    ---------.............................C...........  48
+J  95.1% (39/41)    IGHJ4*01     8    ---------...............A.............C...........  48
+J  97.1% (34/35)    IGHJ5*02     17   ---------------.......................C...........  51
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 30982161
+
+
+Query= SFV005_2A01H
+
+Length=367
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV1-69*10                                                                                         221   6e-60
+lcl|IGHV1-69*01                                                                                         218   5e-59
+lcl|IGHV1-69*02                                                                                         218   5e-59
+lcl|IGHD2-15*01                                                                                       34.4    1e-05
+lcl|IGHD2-2*01                                                                                        16.4    3.0  
+lcl|IGHD2-2*02                                                                                        16.4    3.0  
+lcl|IGHJ4*02                                                                                          73.8    1e-17
+lcl|IGHJ4*01                                                                                          65.9    3e-15
+lcl|IGHJ5*02                                                                                          63.9    1e-14
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV1-69*10	IGHD2-15*01	IGHJ4*02	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+TGCGA	ATTACGCCAAATGTAA	TGGTGGTAGCTG	(CTACT)	TTGAC	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+FR2	110	147	38	37	1	0	97.4
+CDR2	148	198	51	41	10	0	80.4
+FR3	199	292	94	84	10	0	89.4
+Total	N/A	N/A	183	162	21	0	88.5
+
+
+Alignments
+
+                                      <-----------------FR2----------------><----------------------CDR2-----------------------><
+                                         R  Q  A  P  G  H  G  L  E  W  M  G  G  L  I  P  L  L  G  F  P  N  Y  S  Q  K  F  K  G  
+                    Query_3      110  TGCGACAGGCCCCTGGACATGGGCTTGAGTGGATGGGAGGGCTCATCCCTCTGCTTGGCTTTCCAAACTACTCACAGAAATTCAAGGGCA  199
+V  88.5% (162/183)  IGHV1-69*10  110  ...................A.....................A........A.C.....TA.AG........G.......G...C......  199
+                                         R  Q  A  P  G  Q  G  L  E  W  M  G  G  I  I  P  I  L  G  I  A  N  Y  A  Q  K  F  Q  G  
+V  88.0% (161/183)  IGHV1-69*01  110  ...................A.....................A........A.CT....TACAG........G.......G...C......  199
+V  88.0% (161/183)  IGHV1-69*02  110  ...................A..................A..A........A.C.....TA.AG........G.......G...C......  199
+
+                                      ----------------------------------------------FR3-----------------------------------------
+                                      R  V  T  I  S  A  D  E  S  T  S  T  V  Y  M  E  V  A  S  L  T  S  G  D  T  A  V  Y  F  C  
+                    Query_3      200  GAGTCACGATTAGCGCGGACGAGTCCACGAGCACAGTCTACATGGAGGTGGCCAGCCTGACATCTGGGGACACGGCCGTGTATTTCTGTG  289
+V  88.5% (162/183)  IGHV1-69*10  200  ............C.......A.A.............C..........C..AG........G.....A.................A.....  289
+                                      R  V  T  I  T  A  D  K  S  T  S  T  A  Y  M  E  L  S  S  L  R  S  E  D  T  A  V  Y  Y  C  
+V  88.0% (161/183)  IGHV1-69*01  200  ............C.........A.............C..........C..AG........G.....A.................A.....  289
+V  88.0% (161/183)  IGHV1-69*02  200  ............C.......A.A.............C..........C..AG........G.....A.................A.....  289
+
+                                      ---->                                                                       
+                                      A  N  Y  A  K  C  N  G  G  S  C  Y  F  D  S  W  G  Q  G  T  L  V  T  V  S  S
+                    Query_3      290  CGAATTACGCCAAATGTAATGGTGGTAGCTGCTACTTTGACTCTTGGGGCCAGGGAACCCTGGTCACCGTCTCCTC  365
+V  88.5% (162/183)  IGHV1-69*10  290  ...-------------------------------------------------------------------------  292
+                                      A                                                                           
+V  88.0% (161/183)  IGHV1-69*01  290  ...-------------------------------------------------------------------------  292
+V  88.0% (161/183)  IGHV1-69*02  290  ...-------------------------------------------------------------------------  292
+D  100.0% (17/17)   IGHD2-15*01  13   -------------------.................----------------------------------------  29
+D  100.0% (8/8)     IGHD2-2*01   20   --------------------------........------------------------------------------  27
+D  100.0% (8/8)     IGHD2-2*02   20   --------------------------........------------------------------------------  27
+J  95.6% (43/45)    IGHJ4*02     2    -------------------------------...........AC................................  46
+J  93.3% (42/45)    IGHJ4*01     2    -------------------------------...........AC........A.......................  46
+J  100.0% (32/32)   IGHJ5*02     18   --------------------------------------------................................  49
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 30711180
+
+
+Query= SFV005_2F06H
+
+Length=367
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV3-23*01                                                                                         244   6e-67
+lcl|IGHV3-23*04                                                                                         244   6e-67
+lcl|IGHV3-23*05                                                                                         244   6e-67
+lcl|IGHD3-3*01                                                                                        26.4    0.003
+lcl|IGHD3-3*02                                                                                        20.4    0.19 
+lcl|IGHD3-22*01                                                                                       14.4       12
+lcl|IGHJ4*02                                                                                          63.9    1e-14
+lcl|IGHJ5*02                                                                                          60.0    2e-13
+lcl|IGHJ4*01                                                                                          56.0    3e-12
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV3-23*01,IGHV3-23*04,IGHV3-23*05	IGHD3-3*01	IGHJ4*02	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+GCGAA	GGGGCAGAA	ACGATTTCTGGAGTGGTT	GTTGTAC	GACTA	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+CDR1	96	105	10	9	1	0	90
+FR2	106	147	42	42	0	0	100
+CDR2	148	198	51	38	13	0	74.5
+FR3	199	293	95	88	7	0	92.6
+Total	N/A	N/A	198	177	21	0	89.4
+
+
+Alignments
+
+                                      <--CDR1--><-------------------FR2------------------><----------------------CDR2-----------
+                                        A  M  S  W  V  R  Q  A  P  G  K  G  L  E  W  V  S  G  S  N  G  S  G  D  K  E  M  Y  A  D
+                    Query_4      96   TGCCATGAGTTGGGTCCGCCAGGCTCCAGGGAAGGGGCTGGAGTGGGTCTCAGGTAGTAATGGCAGTGGTGATAAAGAAATGTATGCAGA  185
+V  89.4% (177/198)  IGHV3-23*01  96   .........C...........................................C..T..G...T.......G..GCAC.TAC..C.....  185
+                                        A  M  S  W  V  R  Q  A  P  G  K  G  L  E  W  V  S  A  I  S  G  S  G  G  S  T  Y  Y  A  D
+V  89.4% (177/198)  IGHV3-23*04  96   .........C...........................................C..T..G...T.......G..GCAC.TAC..C.....  185
+V  89.4% (177/198)  IGHV3-23*05  96   .........C...........................................C..T.T..A........AG..GCAC.TAC........  185
+
+                                      ------------><----------------------------------------------FR3---------------------------
+                                        S  V  K  G  R  F  T  I  S  R  D  N  F  Q  N  T  L  Y  L  Q  M  N  S  L  R  V  E  D  T  A
+                    Query_4      186  CTCCGTGAAGGGCCGGTTCACCATCTCCAGAGACAATTTCCAGAACACCTTGTATCTGCAAATGAACAGCCTGAGAGTCGAAGACACGGC  275
+V  89.4% (177/198)  IGHV3-23*01  186  ......................................C.A.......GC...........................C...G........  275
+                                        S  V  K  G  R  F  T  I  S  R  D  N  S  K  N  T  L  Y  L  Q  M  N  S  L  R  A  E  D  T  A
+V  89.4% (177/198)  IGHV3-23*04  186  ......................................C.A.......GC...........................C...G........  275
+V  89.4% (177/198)  IGHV3-23*05  186  ......................................C.A.......GC...........................C...G........  275
+
+                                      ------------------>                                                                       
+                                        V  Y  Y  C  A  K  G  Q  K  R  F  L  E  W  L  L  Y  D  Y  W  G  Q  G  I  L  V  T  V  S  S
+                    Query_4      276  CGTATATTACTGCGCGAAGGGGCAGAAACGATTTCTGGAGTGGTTGTTGTACGACTATTGGGGCCAGGGAATCCTGGTCACCGTCTCCTC  365
+V  89.4% (177/198)  IGHV3-23*01  276  ............T.....------------------------------------------------------------------------  293
+                                        V  Y  Y  C  A                                                                           
+V  89.4% (177/198)  IGHV3-23*04  276  ............T.....------------------------------------------------------------------------  293
+V  89.4% (177/198)  IGHV3-23*05  276  ............T.....------------------------------------------------------------------------  293
+D  94.4% (17/18)    IGHD3-3*01   6    ---------------------------.......T..........---------------------------------------------  23
+D  100.0% (10/10)   IGHD3-3*02   14   -----------------------------------..........---------------------------------------------  23
+D  100.0% (7/7)     IGHD3-22*01  17   --------------------------------------.......---------------------------------------------  23
+J  95.0% (38/40)    IGHJ4*02     9    ----------------------------------------------------.....C.............C..................  46
+J  97.1% (33/34)    IGHJ5*02     18   ----------------------------------------------------------.............C..................  49
+J  92.5% (37/40)    IGHJ4*01     9    ----------------------------------------------------.....C........A....C..................  46
+
+                                        
+                                        
+                    Query_4      366  AG  367
+J  95.0% (38/40)    IGHJ4*02     47   ..  48
+J  97.1% (33/34)    IGHJ5*02     50   ..  51
+J  92.5% (37/40)    IGHJ4*01     47   ..  48
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 30711180
+
+
+Query= SFV005_2G05H
+
+Length=346
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV3-53*01                                                                                         151   8e-39
+lcl|IGHV3-53*02                                                                                         151   8e-39
+lcl|IGHV3-53*03                                                                                         148   7e-38
+lcl|IGHD3-10*01                                                                                       10.4      178
+lcl|IGHD3-10*02                                                                                       10.4      178
+lcl|IGHD3-16*01                                                                                       10.4      178
+lcl|IGHJ5*02                                                                                          75.8    3e-18
+lcl|IGHJ4*02                                                                                          69.9    2e-16
+lcl|IGHJ5*01                                                                                          63.9    1e-14
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV3-53*01,IGHV3-53*02	IGHD3-10*01,IGHD3-10*02,IGHD3-16*01	IGHJ5*02	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+CTGTG	(CG)	GGG	GCGGGTAAAAACANCTT	CCCCT	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+CDR2	183	195	13	12	1	0	92.3
+FR3	196	288	93	89	4	0	95.7
+Total	N/A	N/A	106	101	5	0	95.3
+
+
+Alignments
+
+                                      <---CDR2----><----------------------------------------------FR3---------------------------
+                                        S  X  K  G  R  F  T  I  S  R  D  N  S  K  N  M  V  Y  L  Q  M  N  S  L  R  A  E  D  T  A
+                    Query_5      183  CTCCNTGAAGGGCCGATTCACCATCTCCAGAGACAATTCCAAGAACATGGTTTATCTTCAAATGAACAGCCTGAGAGCCGAGGACACGGC  272
+V  95.3% (101/106)  IGHV3-53*01  183  ....G..........................................C.C.G......................................  272
+                                        S  V  K  G  R  F  T  I  S  R  D  N  S  K  N  T  L  Y  L  Q  M  N  S  L  R  A  E  D  T  A
+V  95.3% (101/106)  IGHV3-53*02  183  ....G..........................................C.C.G......................................  272
+V  92.7% (102/110)  IGHV3-53*03  183  ...TG..........................................C.C.G......................................  272
+
+                                      ------------------>                                                       
+                                        M  Y  Y  C  A  G  A  G  K  N  X  F  P  W  G  Q  G  T  L  V  T  V  S  S  
+                    Query_5      273  CATGTATTACTGTGCGGGGGCGGGTAAAAACANCTTCCCCTGGGGCCAGGGAACCCTGGTCACCGTCTCCTCAG  346
+V  95.3% (101/106)  IGHV3-53*01  273  .G..............----------------------------------------------------------  288
+                                        V  Y  Y  C  A                                                           
+V  95.3% (101/106)  IGHV3-53*02  273  .G..............----------------------------------------------------------  288
+V  92.7% (102/110)  IGHV3-53*03  273  .G.............TA...------------------------------------------------------  292
+D  100.0% (5/5)     IGHD3-10*01  15   --------------.....-------------------------------------------------------  19
+D  100.0% (5/5)     IGHD3-10*02  14   --------------.....-------------------------------------------------------  18
+D  100.0% (5/5)     IGHD3-16*01  18   ---------------.....------------------------------------------------------  22
+J  100.0% (38/38)   IGHJ5*02     14   ------------------------------------......................................  51
+J  100.0% (35/35)   IGHJ4*02     14   ---------------------------------------...................................  48
+J  97.2% (35/36)    IGHJ5*01     16   --------------------------------------..........A.........................  51
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 28814313
+
+
+Query= SFV005_1G05H_B
+
+Length=359
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV4-34*09                                                                                         244   6e-67
+lcl|IGHV4-34*01                                                                                         243   2e-66
+lcl|IGHV4-34*02                                                                                         243   2e-66
+lcl|IGHD6-19*01                                                                                       16.4    2.9  
+lcl|IGHD3-16*01                                                                                       12.4       46
+lcl|IGHD3-16*02                                                                                       12.4       46
+lcl|IGHJ4*02                                                                                          63.9    1e-14
+lcl|IGHJ5*02                                                                                          63.9    1e-14
+lcl|IGHJ1*01                                                                                          56.0    3e-12
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV4-34*09	IGHD6-19*01	IGHJ4*02,IGHJ5*02	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+NANAG	N/A	GCAGTGGC	GTCCCTCCNATGAAGTATGATCAT	TGGGG	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+FR1	47	90	44	37	7	0	84.1
+CDR1	91	105	15	11	4	0	73.3
+FR2	106	147	42	36	6	0	85.7
+CDR2	148	195	48	40	8	0	83.3
+FR3	196	291	96	76	20	0	79.2
+CDR3 (V gene only)	292	292	1	1	0	0	100
+Total	N/A	N/A	246	201	45	0	81.7
+
+
+Alignments
+
+                                      <--------------------FR1-------------------><----CDR1-----><-------------------FR2--------
+                                         T  L  S  L  X  C  X  V  F  G  D  S  F  S  D  Y  Y  W  T  W  I  X  X  T  P  X  K  G  L  
+                    Query_6      47   AGACCCTGTCCCTCANTTGCNATGTCTTTGGTGATTCCTTCAGTGATTATTACTGGACATGGATCCNCCANACCCCANANAAGGGACTGG  136
+V  81.7% (201/246)  IGHV4-34*09  47   ...............CC...GC.....A.....GG..........G...C.......GC.......G...GC.....GGG..........  136
+                                         T  L  S  L  T  C  A  V  Y  G  G  S  F  S  G  Y  Y  W  S  W  I  R  Q  P  P  G  K  G  L  
+V  81.4% (201/247)  IGHV4-34*01  47   ...............CC...GC.....A.....GG..........G...C.......GC.......G...GC.....GGG.....G....  136
+V  81.4% (201/247)  IGHV4-34*02  47   ...............CC...GC.....A.....GG..........G...C.......GC.......G...GC.....GGG.....G....  136
+
+                                      ----------><---------------------CDR2---------------------><------------------------------
+                                      E  W  I  G  E  I  Y  R  R  A  I  T  N  Y  N  P  S  L  K  S  R  V  T  I  S  X  X  T  S  R  
+                    Query_6      137  AGTGGATTGGGGAGATCTATCGTCGTGCAATTACCAACTACAATCCGTCCCTCAAGAGTCGAGTCACCATCTCANTCNACACGTCCAGGA  226
+V  81.7% (201/246)  IGHV4-34*09  137  .............A...A...A.A...G..GC...........C....................T.....A...G.AG.......T.A..  226
+                                      E  W  I  G  E  I  N  H  S  G  S  T  N  Y  N  P  S  L  K  S  R  V  T  I  S  V  D  T  S  K  
+V  81.4% (201/247)  IGHV4-34*01  137  .............A...A...A.A...G..GC...........C..........................A...G.AG.........A..  226
+V  81.4% (201/247)  IGHV4-34*02  137  .............A...A...A.A...G..GC...........C..........................A...G.AG.........A..  226
+
+                                      ----------------FR3--------------------------------------------->                         
+                                      R  Q  F  S  L  T  L  N  S  M  T  A  A  N  T  A  L  Y  Y  C  A  X  G  S  G  V  P  P  M  K  
+                    Query_6      227  GGCAGTTCTCCCTGACACTGAACTCNATGACTGCCGCAAACACGGCCCTTTATTACTGTGCNANAGGCAGTGGCGTCCCTCCNATGAAGT  316
+V  81.7% (201/246)  IGHV4-34*09  227  AC.............AG....G...TG..........GG........G.G...........G.G..------------------------  292
+                                      N  Q  F  S  L  K  L  S  S  V  T  A  A  D  T  A  V  Y  Y  C  A  R                          
+V  81.4% (201/247)  IGHV4-34*01  227  AC.............AG....G...TG....C.....GG.......TG.G...........G.G...-----------------------  293
+V  81.4% (201/247)  IGHV4-34*02  227  AC.............AG....G...TG....C.....GG.......TG.G...........G.G...-----------------------  293
+D  100.0% (8/8)     IGHD6-19*01  8    ------------------------------------------------------------------........----------------  15
+D  100.0% (6/6)     IGHD3-16*01  5    -----------------------------------------------------------------------------------------.  5
+D  100.0% (6/6)     IGHD3-16*02  5    -----------------------------------------------------------------------------------------.  5
+
+                                                                              
+                                      Y  D  H  W  G  Q  G  T  L  V  T  V  S  S
+                    Query_6      317  ATGATCATTGGGGCCAGGGAACCCTGGTCACCGTCTCCTC  356
+D  100.0% (6/6)     IGHD3-16*01  6    .....-----------------------------------  10
+D  100.0% (6/6)     IGHD3-16*02  6    .....-----------------------------------  10
+J  100.0% (32/32)   IGHJ4*02     15   --------................................  46
+J  100.0% (32/32)   IGHJ5*02     18   --------................................  49
+J  96.9% (31/32)    IGHJ1*01     19   --------...........C....................  50
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 29988564
+
+
+Query= SFV005_1G04H_B
+
+Length=352
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV3-7*03                                                                                          352   2e-99
+lcl|IGHV3-7*01                                                                                          349   2e-98
+lcl|IGHV3-7*02                                                                                          346   2e-97
+lcl|IGHD6-19*01                                                                                       16.4    2.8  
+lcl|IGHD2-21*01                                                                                       12.4       45
+lcl|IGHD3-9*01                                                                                        12.4       45
+lcl|IGHJ4*02                                                                                          60.0    2e-13
+lcl|IGHJ4*03                                                                                          60.0    2e-13
+lcl|IGHJ1*01                                                                                          58.0    7e-13
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV3-7*03	IGHD6-19*01	IGHJ4*02,IGHJ4*03	VH	No	In-frame	Yes	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+GTGCG	GCAGGGAA	TGGCTGGT	TGA	TTGAC	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+FR1	19	90	72	69	3	0	95.8
+CDR1	91	105	15	10	5	0	66.7
+FR2	106	147	42	41	1	0	97.6
+CDR2	148	198	51	46	5	0	90.2
+FR3	199	291	93	83	10	0	89.2
+Total	N/A	N/A	273	249	24	0	91.2
+
+
+Alignments
+
+                                      <----------------------------------FR1---------------------------------><----CDR1-----><--
+                                       S  G  G  G  L  V  Q  P  G  G  S  L  R  L  S  C  V  A  S  G  L  T  F  S  H  N  W  M  T  W 
+                    Query_7      19   TCTGGGGGAGGCTTGGTCCAGCCTGGGGGGTCCCTGAGACTCTCCTGTGTCGCCTCTGGACTCACCTTTAGTCACAATTGGATGACGTGG  108
+V  91.2% (249/273)  IGHV3-7*03   19   .................................................CA.........T...........AG.T.........GC...  108
+                                       S  G  G  G  L  V  Q  P  G  G  S  L  R  L  S  C  A  A  S  G  F  T  F  S  S  Y  W  M  S  W 
+V  90.8% (248/273)  IGHV3-7*01   19   .................................................CA.........T...........AG.T.........GC...  108
+V  90.5% (247/273)  IGHV3-7*02   19   .................................................CA.........T...........AG.T.........GC...  108
+
+                                      -----------------FR2------------------><----------------------CDR2----------------------->
+                                       V  R  Q  A  P  G  K  G  L  E  W  V  A  I  I  K  Q  D  G  S  E  T  Y  Y  V  D  S  V  E  G 
+                    Query_7      109  GTCCGCCAGGCTCCAGGGAAGGGCCTGGAGTGGGTGGCCATTATAAAGCAAGACGGAAGTGAGACATACTATGTGGACTCTGTGGAGGGC  198
+V  91.2% (249/273)  IGHV3-7*03   109  .......................G................AC...........T..........A...................A.....  198
+                                       V  R  Q  A  P  G  K  G  L  E  W  V  A  N  I  K  Q  D  G  S  E  K  Y  Y  V  D  S  V  K  G 
+V  90.8% (248/273)  IGHV3-7*01   109  .......................G................AC...........T..........A...................A.....  198
+V  90.5% (247/273)  IGHV3-7*02   109  ....................A..G................AC...........T..........A...................A.....  198
+
+                                      <----------------------------------------------FR3----------------------------------------
+                                       R  F  I  I  S  R  D  N  A  R  N  S  L  S  L  Q  M  N  N  L  R  A  E  D  T  A  V  Y  F  C 
+                    Query_7      199  CGATTCATAATCAGCAGAGATAACGCCAGGAATTCACTGTCTCTGCAAATGAACAACCTGAGAGCCGAGGACACGGCCGTGTATTTCTGT  288
+V  91.2% (249/273)  IGHV3-7*03   199  .......CC...TC......C.......A...C.......A..............G.............................A....  288
+                                       R  F  T  I  S  R  D  N  A  K  N  S  L  Y  L  Q  M  N  S  L  R  A  E  D  T  A  V  Y  Y  C 
+V  90.8% (248/273)  IGHV3-7*01   199  .......CC...TC......C.......A...C.......A..............G.....................T.......A....  288
+V  90.5% (247/273)  IGHV3-7*02   199  .......CC...TC......C.......A...C.......A..............G.....................T.......A....  288
+
+                                      ----->                                                          
+                                       A  A  G  N  G  W  L  I  D  H  W  G  Q  G  T  L  V  T  V  S  S  
+                    Query_7      289  GCGGCAGGGAATGGCTGGTTGATTGACCACTGGGGCCAGGGGACGCTGGTCACCGTCTCCTCAG  352
+V  91.2% (249/273)  IGHV3-7*03   289  ...-------------------------------------------------------------  291
+                                       A                                                              
+V  90.8% (248/273)  IGHV3-7*01   289  ...-------------------------------------------------------------  291
+V  90.5% (247/273)  IGHV3-7*02   289  ...-------------------------------------------------------------  291
+D  100.0% (8/8)     IGHD6-19*01  12   -----------........---------------------------------------------  19
+D  100.0% (6/6)     IGHD2-21*01  16   -------------------......---------------------------------------  21
+D  100.0% (6/6)     IGHD3-9*01   18   --------------......--------------------------------------------  23
+J  92.9% (39/42)    IGHJ4*02     7    ----------------------.....T.............A..C...................  48
+J  92.9% (39/42)    IGHJ4*03     7    ----------------------.....T..........A.....C...................  48
+J  94.6% (35/37)    IGHJ1*01     16   ---------------------------..............C..C...................  52
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 29356275
+
+
+Query= SFV005_1F04H_B
+
+Length=431
+                                                                                                      Score     E
+Sequences producing significant alignments:                                                          (Bits)  Value
+
+lcl|IGHV1-69*01                                                                                         427   9e-122
+lcl|IGHV1-69*12                                                                                         427   9e-122
+lcl|IGHV1-69D*01                                                                                        427   9e-122
+lcl|IGHD3-22*01                                                                                       48.3    9e-10 
+lcl|IGHD3-10*02                                                                                       22.4    0.055 
+lcl|IGHD3-3*01                                                                                        22.4    0.055 
+lcl|IGHJ4*02                                                                                          93.7    2e-23 
+lcl|IGHJ4*01                                                                                          85.7    4e-21 
+lcl|IGHJ4*03                                                                                          79.8    2e-19 
+
+
+Domain classification requested: kabat
+
+
+V-(D)-J rearrangement summary for query sequence (Top V gene match, Top D gene match, Top J gene match, Chain type, stop codon, V-J frame, Productive, Strand).  Multiple equivalent top matches having the same score and percent identity, if present, are separated by a comma.
+IGHV1-69*01,IGHV1-69*12,IGHV1-69D*01	IGHD3-22*01	IGHJ4*02	VH	Yes	In-frame	No	+
+
+V-(D)-J junction details based on top germline gene matches (V end, V-D junction, D region, D-J junction, J start).  Note that possible overlapping nucleotides at VDJ junction (i.e, nucleotides that could be assigned to either rearranging gene) are indicated in parentheses (i.e., (TACT)) but are not included under the V, D, or J gene itself
+CGAGA	TCCCC	CTATGATAGTAGTGGTTATTACTA	TGTGGG	CTACT	
+
+Alignment summary between query and top germline V gene hit (from, to, length, matches, mismatches, gaps, percent identity)
+FR1	10	89	81	77	3	1	95.1
+CDR1	90	104	15	15	0	0	100
+FR2	105	146	42	42	0	0	100
+CDR2	147	197	51	51	0	0	100
+FR3	198	293	96	96	0	0	100
+Total	N/A	N/A	285	281	3	1	98.6
+
+
+Alignments
+
+                                       <--------------------------------------FR1--------------------------------------><----CDR1
+                                        L  V  X  S  G  A  E  V   R  S  L  G  P  R  *  R  S  P  A  R  L  L  E  A  P  S  A  A  M  L
+                    Query_8       10   CTGGTGCNNTCTGGGGCTGAGGTGA-GAAGCCTGGGTCCNCGGTGAAGGTCTCCTGCAAGGCTTCTGGAGGCACCTTCAGCAGCTATGCT  98
+V  98.6% (281/285)  IGHV1-69*01   10   .......AG................A.............T..................................................  99
+                                        L  V  Q  S  G  A  E  V  K  K  P  G  S  S  V  K  V  S  C  K  A  S  G  G  T  F  S  S  Y  A 
+V  98.6% (281/285)  IGHV1-69*12   10   .......AG................A.............T..................................................  99
+V  98.6% (281/285)  IGHV1-69D*01  10   .......AG................A.............T..................................................  99
+
+                                       -----><-------------------FR2------------------><----------------------CDR2---------------
+                                         S  A  G  C  D  R  P  L  D  K  G  L  S  G  W  E  G  S  S  L  S  L  V  Q  Q  T  T  H  R  S
+                    Query_8       99   ATCAGCTGGGTGCGACAGGCCCCTGGACAAGGGCTTGAGTGGATGGGAGGGATCATCCCTATCTTTGGTACAGCAAACTACGCACAGAAG  188
+V  98.6% (281/285)  IGHV1-69*01   100  ..........................................................................................  189
+                                        I  S  W  V  R  Q  A  P  G  Q  G  L  E  W  M  G  G  I  I  P  I  F  G  T  A  N  Y  A  Q  K 
+V  98.6% (281/285)  IGHV1-69*12   100  ..........................................................................................  189
+V  98.6% (281/285)  IGHV1-69D*01  100  ..........................................................................................  189
+
+                                       --------><----------------------------------------------FR3-------------------------------
+                                         S  R  A  E  S  R  L  P  R  T  N  P  R  A  Q  P  T  W  S  *  A  A  *  D  L  R  T  R  P  C
+                    Query_8       189  TTCCAGGGCAGAGTCACGATTACCGCGGACGAATCCACGAGCACAGCCTACATGGAGCTGAGCAGCCTGAGATCTGAGGACACGGCCGTG  278
+V  98.6% (281/285)  IGHV1-69*01   190  ..........................................................................................  279
+                                        F  Q  G  R  V  T  I  T  A  D  E  S  T  S  T  A  Y  M  E  L  S  S  L  R  S  E  D  T  A  V 
+V  98.6% (281/285)  IGHV1-69*12   190  ..........................................................................................  279
+V  98.6% (281/285)  IGHV1-69D*01  190  ..........................................................................................  279
+
+                                       -------------->                                                                           
+                                         I  T  V  R  D  P  P  M  I  V  V  V  I  T  M  W  A  T  L  T  T  G  A  R  E  P  W  S  P  S
+                    Query_8       279  TATTACTGTGCGAGATCCCCCTATGATAGTAGTGGTTATTACTATGTGGGCTACTTTGACTACTGGGGCCAGGGAACCCTGGTCACCGTC  368
+V  98.6% (281/285)  IGHV1-69*01   280  ...............---------------------------------------------------------------------------  294
+                                        Y  Y  C  A  R                                                                            
+V  98.6% (281/285)  IGHV1-69*12   280  ...............---------------------------------------------------------------------------  294
+V  98.6% (281/285)  IGHV1-69D*01  280  ...............---------------------------------------------------------------------------  294
+D  100.0% (24/24)   IGHD3-22*01   7    --------------------........................----------------------------------------------  30
+D  100.0% (11/11)   IGHD3-10*02   2    ------------------------------------...........-------------------------------------------  12
+D  100.0% (11/11)   IGHD3-3*01    17   ------------------------------...........-------------------------------------------------  27
+J  100.0% (47/47)   IGHJ4*02      2    --------------------------------------------------........................................  41
+J  97.9% (46/47)    IGHJ4*01      2    --------------------------------------------------.....................A..................  41
+J  95.8% (46/48)    IGHJ4*03      1    -------------------------------------------------......................A..G...............  41
+
+                                              
+                                         P  Q 
+                    Query_8       369  TCCTCAG  375
+J  100.0% (47/47)   IGHJ4*02      42   .......  48
+J  97.9% (46/47)    IGHJ4*01      42   .......  48
+J  95.8% (46/48)    IGHJ4*03      42   .......  48
+
+
+Lambda      K        H
+    1.10    0.333    0.549 
+
+Gapped
+Lambda      K        H
+    1.08    0.280    0.540 
+
+Effective search space used: 36492108
+
+
+  Database: human_gl_V_IMGT.nuc
+    Posted date:  Jul 31, 2014  1:24 PM
+  Number of letters in database: 99,534
+  Number of sequences in database:  341
+
+  Database: human_gl_D_IMGT.nuc
+    Posted date:  Jul 31, 2014  1:24 PM
+  Number of letters in database: 1,070
+  Number of sequences in database:  44
+
+  Database: human_gl_J_IMGT.nuc
+    Posted date:  Jul 31, 2014  1:24 PM
+  Number of letters in database: 701
+  Number of sequences in database:  13
+
+
+
+Matrix: blastn matrix 1 -1
+Gap Penalties: Existence: 4, Extension: 1

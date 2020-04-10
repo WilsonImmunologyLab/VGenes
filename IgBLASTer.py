@@ -81,10 +81,10 @@ def ProcessFASTA(FASTAfile, MaxNum):
 
 
 
-	WorkingDir  = os.path.join(working_prefix, 'IgBlast', 'database')
+	WorkingDir  = os.path.join(working_prefix, 'IgBlast')
 	os.chdir(WorkingDir)
 
-	workingfilename = os.path.join(working_prefix, 'IgBlast', 'database', 'WorkingFile.nt')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
 
 	if CleanSeq == '':
 		msg = 'There were no good variable gene seqeunces in this set'
@@ -121,13 +121,13 @@ def IgBLASTit(FASTAFile, datalist):
 	import os
 	#todo change to app folder
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'database', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 	ErLog  = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
 	with open(ErlogFile, 'w') as currentFile:  #using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
 
 	try:
-		DBpathname = os.path.join(working_prefix, 'VDJGenes.db')
+		DBpathname = os.path.join(working_prefix, 'Data','VDJGenes.db')
 		(dirname, filename) = os.path.split(DBpathname)
 		os.chdir(dirname)
 
@@ -165,8 +165,8 @@ def IgBLASTit(FASTAFile, datalist):
 	ErLog, TotSeqs = ProcessFASTA(FASTAFile, MaxNum)
 
 
-	workingdir = os.path.join(working_prefix, 'IgBlast', 'database')
-	workingfilename = os.path.join(working_prefix, 'IgBlast', 'database', 'WorkingFile.nt')
+	workingdir = os.path.join(working_prefix, 'IgBlast')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
 	# add code in ProcessFASTA to also return number of seqs then split into 10,000 seq
 	# sets to send through independently with different final names...might need split
 	# IgBlastit out from this code to get parallel. Actually, it's after IgBLASTn that
@@ -1604,8 +1604,8 @@ def GetGLCDRs(Sequence, species):
 	IgBLASTAnalysis = []
 
 
-	workingdir = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database')  #'/Applications/IgBlast/database'
-	workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'database', 'WorkingFile.nt') #'/Applications/IgBlast/database/WorkingFile.nt'
+	workingdir = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast')  #'/Applications/IgBlast/database'
+	workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'WorkingFile.nt') #'/Applications/IgBlast/database/WorkingFile.nt'
 	os.chdir(workingdir)
 
 	Sequence = '>It\n' + Sequence + '\n'

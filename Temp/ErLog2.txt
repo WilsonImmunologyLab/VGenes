@@ -1,3 +1,3 @@
-Began input at Mon Apr  6 17:47:15 2020
+Began input at Fri Apr 10 15:20:28 2020
 240 sequences were input by IgBLAST for file: 
 /Users/leil/Documents/Projects/VGene/HA6-vdj/outs/consensus.fasta
