@@ -3377,8 +3377,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 				#model = self.ui.tableView.model()
 				#model.refresh()
 				# update tree
-				SQLFields = (
-				self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+				#SQLFields = (
+				#self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+
+				index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
+				index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
+				index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
+
+				SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
 				self.initializeTreeView(SQLFields)
 				self.ui.treeWidget.expandAll()
 		except:
@@ -5945,7 +5951,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 				#model.refresh()
 
 		# update tree
-		SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(),self.ui.cboTreeOp3.currentText())
+		#SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(),self.ui.cboTreeOp3.currentText())
+		index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
+		index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
+		index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
+
+		SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
 
@@ -8497,6 +8508,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_btnFieldBulk_clicked(self):
+		# find ID for all selected items
+		selected_name = self.getTreeCheckedChild()
+		selected_name = selected_name[3]
+
+		if len(selected_name) == 0:
+			Msg = 'Please check at least one record you want to edit!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		SQLStatement = 'SELECT ID FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+
 		cur_field = self.ui.cboFindField1.currentText()
 		if cur_field in RealNameList:
 			index = RealNameList.index(cur_field)
@@ -8520,13 +8544,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			answer = questionMessage(self, question, buttons)
 			if answer == 'No':
 				return
-
-		# find ID for all selected items
-		selected_name = self.getTreeCheckedChild()
-		selected_name = selected_name[3]
-
-		SQLStatement = 'SELECT ID FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
-		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 		# update each records
 		for record in DataIn:
@@ -8555,8 +8572,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
-		SQLFields = (
-			self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+		#SQLFields = (
+		#	self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+
+		index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
+		index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
+		index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
+
+		SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
 
@@ -8763,8 +8786,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# update database marker
 				updateMarker = True
 				# update tree
-				SQLFields = (
-					self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+				#SQLFields = (
+				#	self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
+
+				index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
+				index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
+				index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
+
+				SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
+
 				self.initializeTreeView(SQLFields)
 				self.ui.treeWidget.expandAll()
 		else:
