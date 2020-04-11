@@ -1,1 +1,0 @@
-/Users/leil/Documents/Projects/VGene/HA6-vdj/outs/consensus.fasta
