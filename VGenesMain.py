@@ -1035,6 +1035,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def accept(self):
 		num = self.ui.tabWidget.currentIndex()
+
+		self.ui.progressBar.setValue(1)
+		self.ui.labelpct.setText('Start processing and loading...')
+
 		if num == 0:
 			self.InitiateImportFrom10X('none', 0)
 		elif num == 1:
@@ -2911,6 +2915,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# if not listItems: do nothing
 		DataSet = []
 		if NumSeqs < 1:
+			msg = 'Please select(check) at least one sequence!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 		else:
 			i = 1
@@ -3015,6 +3021,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# if not listItems: do nothing
 		DataSet = []
 		if NumSeqs < 1:
+			msg = 'Please select(check) at least one sequence!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 		else:
 			i = 1
@@ -5339,9 +5347,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# result = VGenesSeq.Intraclonal(Pool)
 
 			# if len(result) > 0:
-
-
-
 			# CPList, DuplicateList = VGenesCloneCaller.CloneCaller(Pool)  # should return list of tuple with SeqNames in each Clonal Pool
 
 			CPList = VGenesCloneCaller.CloneCaller(Pool, Duplicates)
@@ -5409,6 +5414,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		ErLog2 = str(CPs) + ' clonal pools containing ' + str(CPseqs) + ' sequences were identified from ' + str(
 			TotSeqs) + ' total sequences analyzed.\n'
 
+		SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		list1 = []
+		for ele in DataIn:
+			list1.append(ele[0])
+		list_unique = list(set(list1))
+		list_unique.remove('0')
+		list_unique.sort()
+		self.ui.comboBoxTree.clear()
+		self.ui.comboBoxTree.addItems(list_unique)
+
 		if remove == True:
 
 			self.LoadDB(DBFilename)
@@ -5434,6 +5450,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.tree_to_table_selection()
 		else:
 			updateMarker == True
+
+
 
 	@pyqtSlot()
 	def on_actionAnalyze_Mutations_triggered(self):
@@ -8941,6 +8959,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_btnExtractRecords_clicked(self):
 		New = True
 		self.MoveRecords(New)
+
+	@pyqtSlot()
+	def on_action_Help_triggered(self):
+		Msg = 'VGene was developed and supported by Wilson Lab. Please refer to \nhttp://Wilsonlab.uchicago.edu\n' \
+		      'for more information'
+		QMessageBox.information(self, 'information', Msg, QMessageBox.Ok,
+		                        QMessageBox.Ok)
 
 	@pyqtSlot()
 	def MoveRecords(self, New):

@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1503</width>
+    <width>1515</width>
     <height>1175</height>
    </rect>
   </property>
@@ -285,7 +285,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1116</width>
+             <width>1128</width>
              <height>821</height>
             </rect>
            </property>
@@ -4618,7 +4618,7 @@
            <number>36</number>
           </property>
           <property name="value">
-           <number>10</number>
+           <number>12</number>
           </property>
          </widget>
         </item>
@@ -4634,7 +4634,7 @@
           <property name="font">
            <font>
             <family>Courier New</family>
-            <pointsize>10</pointsize>
+            <pointsize>12</pointsize>
            </font>
           </property>
           <property name="verticalScrollBarPolicy">
@@ -6912,7 +6912,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
@@ -7290,6 +7290,19 @@ If the J-end is off the J gene end may need adjusted</string>
             <property name="text">
              <string>Search</string>
             </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>25</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -7385,8 +7398,18 @@ If the J-end is off the J gene end may need adjusted</string>
             <property name="text">
              <string>Bulk Edit</string>
             </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
             <property name="flat">
-             <bool>false</bool>
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -7643,7 +7666,7 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Click a field from the Record tab and records with similar values will be checked</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Match</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -7679,7 +7702,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1503</width>
+     <width>1515</width>
      <height>22</height>
     </rect>
    </property>

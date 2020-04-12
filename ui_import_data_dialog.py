@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ImportDataDialog(object):
     def setupUi(self, ImportDataDialog):
         ImportDataDialog.setObjectName("ImportDataDialog")
-        ImportDataDialog.resize(597, 891)
+        ImportDataDialog.resize(597, 899)
         self.gridLayout_9 = QtWidgets.QGridLayout(ImportDataDialog)
         self.gridLayout_9.setObjectName("gridLayout_9")
         self.label = QtWidgets.QLabel(ImportDataDialog)
@@ -328,10 +328,12 @@ class Ui_ImportDataDialog(object):
         self.label_15.setText(_translate("ImportDataDialog", "10X seq name: clonotype2_consensus_1"))
         self.label_16.setText(_translate("ImportDataDialog", "1) Replace \"clonotype\" by"))
         self.label_17.setText(_translate("ImportDataDialog", "2) Replace \"consensus_\" by"))
+        self.lineEditRep2.setText(_translate("ImportDataDialog", "consensus_"))
         self.radioButtonChain.setText(_translate("ImportDataDialog", "ChainType(H,L,K)"))
         self.label_18.setText(_translate("ImportDataDialog", "3) Add prefix:"))
         self.label_19.setText(_translate("ImportDataDialog", "Your sequence name will be: "))
         self.labelName.setText(_translate("ImportDataDialog", "clonotype2_H1"))
+        self.lineEditRep1.setText(_translate("ImportDataDialog", "clonetype"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("ImportDataDialog", "10X VDJ"))
         self.label_8.setText(_translate("ImportDataDialog", "Click to choose your Fasta files:"))
         self.label_9.setText(_translate("ImportDataDialog", "Sequences from the following files will be processed and imported:"))

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>597</width>
-    <height>891</height>
+    <height>899</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -145,6 +145,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="text">
+             <string>consensus_</string>
+            </property>
            </widget>
           </item>
           <item row="2" column="2">
@@ -179,7 +182,11 @@
            </widget>
           </item>
           <item row="1" column="1" colspan="2">
-           <widget class="QLineEdit" name="lineEditRep1"/>
+           <widget class="QLineEdit" name="lineEditRep1">
+            <property name="text">
+             <string>clonetype</string>
+            </property>
+           </widget>
           </item>
           <item row="3" column="1" colspan="2">
            <widget class="QLineEdit" name="lineEditRep3">
