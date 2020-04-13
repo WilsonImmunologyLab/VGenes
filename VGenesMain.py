@@ -2597,6 +2597,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
 		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
 		self.ui.pushButtonAlter.clicked.connect(self.openAlter)
+		self.ui.listWidgetClone.itemSelectionChanged.connect(self.selectClone)
+		self.ui.pushButtonDrawClone.clicked.connect(self.GenerateFigureClone)
+		self.ui.checkBoxFigLegendClone.clicked.connect(self.GenerateFigureClone)
+		self.ui.checkBoxStackClone.clicked.connect(self.GenerateFigureClone)
+		self.ui.pushButtonDownloadClone.clicked.connect(self.downloadFigClone)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -2616,7 +2621,79 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
+		self.ui.HTMLviewClone = ResizeWidget(self)
+		self.ui.gridLayoutClone.addWidget(self.ui.HTMLviewClone)
+		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
+
 		self.enableEdit = False
+
+	def initial_Clone(self):
+		# identify if clones exist
+		SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		list1 = []
+		for ele in DataIn:
+			list1.append(ele[0])
+		list_unique = list(set(list1))
+		list_unique.remove('0')
+
+		if len(list_unique) == 0:
+			return
+
+		list_unique = [int(i) for i in list_unique]
+		list_unique.sort()
+		list_unique = ['Clone' + str(i) for i in list_unique]
+
+		self.ui.listWidgetClone.clear()
+		self.ui.listWidgetClone.addItems(list_unique)
+		msg = 'Total ' + str(len(list_unique)) + ' Clones identified'
+		self.ui.titleClone.setText(msg)
+
+		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
+			fields_name = VGenesSQL.ColName(DBFilename)
+			fields_name = [""] + fields_name
+			self.ui.comboBoxPieClone.clear()
+			self.ui.comboBoxPieClone.addItems(fields_name)
+			self.ui.comboBoxCol1Clone.clear()
+			self.ui.comboBoxCol1Clone.addItems(fields_name)
+			self.ui.comboBoxCol2Clone.clear()
+			self.ui.comboBoxCol2Clone.addItems(fields_name)
+			self.ui.comboBoxBoxDataClone.clear()
+			self.ui.comboBoxBoxDataClone.addItems(fields_name)
+			self.ui.comboBoxBox1Clone.clear()
+			self.ui.comboBoxBox1Clone.addItems(fields_name)
+			self.ui.comboBoxBox2Clone.clear()
+			self.ui.comboBoxBox2Clone.addItems(fields_name)
+
+	def selectClone(self):
+		items = self.ui.listWidgetClone.selectedItems()
+		for item in items:
+			clone_id = item.text()
+		clone_id = re.sub('Clone','',clone_id)
+
+		SQLStatement = 'SELECT GeneType,V1,D1,J1,CDR3Length,SeqName FROM vgenesDB WHERE ClonalPool = "' + clone_id + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		seq_num = len(DataIn)
+
+		if seq_num == 0:
+			return
+
+		record = DataIn[0]
+
+		self.ui.lineEditCloneName.setText('Clone' + clone_id)
+		self.ui.lineEditCloneType.setText(record[0])
+		self.ui.lineEditCloneNum.setText(str(seq_num))
+
+		self.ui.lineEditCloneV.setText(record[1])
+		self.ui.lineEditCloneD.setText(record[2])
+		self.ui.lineEditCloneJ.setText(record[3])
+		self.ui.lineEditCloneCDR3len.setText(record[4])
+
+		mab_names = []
+		for record in DataIn:
+			mab_names.append(record[5])
+		self.ui.listWidgetCloneMember.clear()
+		self.ui.listWidgetCloneMember.addItems(mab_names)
 
 	@pyqtSlot()
 	def refreshDB(self):
@@ -3167,7 +3244,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 					list1.append(ele[0])
 				list_unique = list(set(list1))
 				list_unique.remove('0')
+
+				list_unique = [int(i) for i in list_unique]
 				list_unique.sort()
+				list_unique = ['Clone' + str(i) for i in list_unique]
+
 				self.ui.comboBoxTree.clear()
 				self.ui.comboBoxTree.addItems(list_unique)
 			elif self.ui.tabWidget.currentIndex() == 0:
@@ -3429,6 +3510,378 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.EditLock.setIcon(lock_icon)
 			self.ui.EditLock.setText('Edit Lock: Locked')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
+	def GenerateFigureClone(self):
+		msg = 'h:' + str(self.ui.HTMLviewClone.h) + ',w:' +str(self.ui.HTMLviewClone.w)
+		print(msg)
+
+		global DBFilename
+		# global data
+
+		# select data or not
+		clone_id = self.ui.lineEditCloneName.text()
+		clone_id = re.sub('Clone','',clone_id)
+		try:
+			int(clone_id)
+		except:
+			return
+		where_statement = 'WHERE ClonalPool = "' + clone_id + '"'
+
+		# pie chart
+		if self.ui.tabWidgetClone.currentIndex() == 0:
+			# get data
+			field = self.ui.comboBoxPieClone.currentText()
+			if field == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if len(DataIn) == 0:
+				Msg = 'No records can be fetched!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			data = []
+			for element in DataIn:
+				data.append(element[0])
+			result = Counter(data)
+			labels = result.keys()
+			values = result.values()
+
+			my_pyecharts = (
+				Pie(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg'))\
+				.add('', [list(z) for z in zip(labels, values)], radius=["40%", "75%"])\
+				.set_global_opts(
+					title_opts=opts.TitleOpts(title=""),
+					legend_opts=opts.LegendOpts(
+						is_show=self.ui.checkBoxFigLegendClone.isChecked()
+					),
+				)
+				.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c} ({d}%)"))
+			)  #
+		# Bar chart
+		elif self.ui.tabWidgetClone.currentIndex() == 1:
+			# get data
+			field1 = self.ui.comboBoxCol1Clone.currentText()
+			field2 = self.ui.comboBoxCol2Clone.currentText()
+			if field1 == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+			if field2 == field1:
+				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			multi_factor = False
+			if field2 == "":
+				field = field1
+			else:
+				field = field1 + "," + field2
+				multi_factor = True
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if multi_factor == True:
+				if self.ui.checkBoxStackClone.isChecked():
+					stack = "stack1"
+				else:
+					stack = None
+
+				label_data = []
+				for element in DataIn:
+					label_data.append(element[0])
+
+				result = Counter(label_data)
+				labels = list(result.keys())
+				values = list(result.values())
+
+				data = {}
+				for element in DataIn:
+					if data.__contains__(element[1]):
+						data[element[1]] = data[element[1]] + [element[0]]
+					else:
+						data[element[1]] = [element[0]]
+
+				dic_keys = list(data.keys())
+
+				my_bar = Bar(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg')) \
+					.add_xaxis(labels) \
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						xaxis_opts=opts.AxisOpts(
+							name=field1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							name='Count',
+							name_location='center',
+							name_gap=30,
+						),
+					)
+
+				for group in dic_keys:
+					cur_data = data[group]
+					group_data = []
+					for ele in labels:
+						group_data.append(cur_data.count(ele))
+					my_bar.add_yaxis(group, group_data, stack=stack)
+				my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+
+				my_pyecharts = (
+					my_bar
+				)
+			else:
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+
+				result = Counter(data)
+				labels = list(result.keys())
+				values = list(result.values())
+
+				my_pyecharts = (
+					Bar(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg'))
+					.add_xaxis(labels)
+					.add_yaxis(field1, values)
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(
+							is_show=self.ui.checkBoxFigLegendClone.isChecked()
+						),
+					)
+					.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+				)
+		# Box plot
+		elif self.ui.tabWidgetClone.currentIndex() == 2:
+			# get data
+			data_field = self.ui.comboBoxBoxDataClone.currentText()
+			field1 = self.ui.comboBoxBox1Clone.currentText()
+			field2 = self.ui.comboBoxBox2Clone.currentText()
+			if field1 == "":
+				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+			if field2 == field1:
+				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+			multi_factor = False
+			if field2 == "":
+				field = data_field + "," + field1
+			else:
+				field = data_field + "," + field1 + "," + field2
+				multi_factor = True
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			box_data = [i[0] for i in DataIn]
+			try:
+				box_data = list(map(float, box_data))
+			except:
+				QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			if min(box_data) >= 0:
+				null_data = [0, 0, 0, 0, 0]
+			else:
+				null_data = [min(box_data), min(box_data), min(box_data), min(box_data), min(box_data)]
+
+			if multi_factor == True:
+				label_data = []
+				g2_label = []
+				for element in DataIn:
+					label_data.append(element[1])
+					g2_label.append(element[2])
+
+				result = Counter(label_data)
+				labels = list(result.keys())
+
+				g2_dict = {}
+				i = 0
+				for ele in g2_label:
+					if g2_dict.__contains__(ele):
+						g2_dict[ele] = g2_dict[ele] + [i]
+					else:
+						g2_dict[ele] = [i]
+					i += 1
+				g2_dict_keys = list(g2_dict.keys())
+
+				my_bar = Boxplot(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg')) \
+					.add_xaxis(labels) \
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						xaxis_opts=opts.AxisOpts(
+							name=field1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							name='Count',
+							name_location='center',
+							name_gap=30,
+						),
+						# toolbox_opts = opts.ToolboxOpts()
+					)
+
+				# for each group in field 2
+				for group in g2_dict_keys:
+					cur_box_data = []
+					cur_label_data = []
+					for i in g2_dict[group]:
+						cur_box_data.append(box_data[i])
+						cur_label_data.append(label_data[i])
+
+					sub_dict = {}
+					i = 0
+					for ele in cur_label_data:
+						if sub_dict.__contains__(ele):
+							sub_dict[ele] = sub_dict[ele] + [i]
+						else:
+							sub_dict[ele] = [i]
+						i += 1
+
+					data_v1 = []
+					for ele in labels:
+						if sub_dict.__contains__(ele):
+							cur_data = []
+							for i in sub_dict[ele]:
+								cur_data.append(cur_box_data[i])
+							data_v1.append(cur_data)
+						else:
+							data_v1.append(null_data)
+
+					my_bar.add_yaxis(group, Boxplot.prepare_data(data_v1))
+
+				my_pyecharts = (
+					my_bar
+				)
+			else:
+				data = []
+				for element in DataIn:
+					data.append(element[1])
+
+				result = Counter(data)
+				labels = list(result.keys())
+
+				my_dict = {}
+				i = 0
+				for ele in data:
+					if my_dict.__contains__(ele):
+						my_dict[ele] = my_dict[ele] + [i]
+					else:
+						my_dict[ele] = [i]
+					i += 1
+
+				data_v1 = []
+				for ele in labels:
+					if my_dict.__contains__(ele):
+						cur_data = []
+						for i in my_dict[ele]:
+							cur_data.append(box_data[i])
+						data_v1.append(cur_data)
+					else:
+						data_v1.append(null_data)
+
+				my_pyecharts = (
+					Boxplot(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg'))
+					.add_xaxis(labels)
+					.add_yaxis(field1, Boxplot.prepare_data(data_v1))
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+						xaxis_opts=opts.AxisOpts(
+							name=field1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							name='Count',
+							name_location='center',
+							name_gap=30,
+						),
+					)
+				)
+
+		# load figure
+		html_path = os.path.join(temp_folder, 'figure_clone.html')
+		my_pyecharts.render(path=html_path)
+		# adjust the window size seting
+		file_handle = open(html_path, 'r')
+		lines = file_handle.readlines()
+		file_handle.close()
+		# edit js line
+		js_line = '<script type="text/javascript" src="' + \
+		          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
+		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
+		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
+		lines[5] = js_line
+		# edit style line
+		style_line = lines[9]
+		style_pos = style_line.find('style')
+		style_line = style_line[
+		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
+			self.ui.HTMLviewClone.h - 20) + 'px;"></div>'
+		lines[9] = style_line
+		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
+		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
+		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+		            'my_object.download(text);});$("#update").click(function(){' \
+		            'my_object.updateSelection(text);});});});</script>'
+		insert_btn = '<input id="download" type="button" value="" style="display:none;"/>' \
+		             '<input id="update" type="button" value="" style="display:none;"/>'
+		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
+
+		if self.ui.tabWidgetFig.currentIndex() in [0, 1, 2, 6]:
+			# insert click response function
+			echart_init_line = lines[13]
+			matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
+			chart_id = matchObj.group(1)
+			js_cmd = chart_id + ".on('click', function (params) {" \
+			                    "if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}" \
+			                    "else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}" \
+			                    "$('#update').click();});"
+			lines = lines[:-3] + [js_cmd] + lines[-3:]
+
+		content = '\n'.join(lines)
+		file_handle = open(html_path, 'w')
+		file_handle.write(content)
+		file_handle.close()
+		# show local HTML
+		self.ui.HTMLviewClone.load(QUrl('file://' + html_path))
+		self.ui.HTMLviewClone.show()
+		self.ui.HTMLviewClone.html = "loaded"
+		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTML)
+
+		# try to export figures
+		# make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
+		# self.ui.HTMLview.page().view().toPlainText(self.ui.HTMLview._callable)
+		# print(self.ui.HTMLview.html)
+
+		# build qweb channel
+		channelClone = QWebChannel(self.ui.HTMLviewClone.page())
+		my_objectClone = MyObjectCls(self.ui.HTMLviewClone)
+		channelClone.registerObject('connection', my_objectClone)
+		self.ui.HTMLviewClone.page().setWebChannel(channelClone)
+		my_objectClone.downloadFigSignal.connect(self.downloadSVGClone)
+
+	def downloadSVGClone(self, msg):
+		options = QtWidgets.QFileDialog.Options()
+		save_file_name, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+		                                                          "My_svg",
+		                                                          "My_svg",
+		                                                          "Scalable Vector Graphics (*.svg);;All Files (*)",
+		                                                          options=options)
+
+		try:
+			file_handle = open(save_file_name, 'w')
+			file_handle.write(msg)
+			file_handle.close()
+		except:
+			return
 
 	def GenerateFigure(self):
 		global DBFilename
@@ -4178,6 +4631,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			self.GenerateFigure()
 
+	def resizeHTMLClone(self):
+		if self.ui.HTMLviewClone.html == '':
+			return
+		else:
+			self.GenerateFigureClone()
+
 	def updateSelection(self, msg):
 		if self.ui.checkBoxUpdateSelection.isChecked():
 			# split msg
@@ -4259,6 +4718,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#js_cmd= 'svg=document.getElementsByTagName("svg")[0];var a = document.createElement("a");a.href = svg.src;' \
 		#        'a.download = "~/Downloads/test.svg";a.click();'
 		self.ui.HTMLview.page().runJavaScript(js_cmd)
+
+	def downloadFigClone(self):
+		js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
+
+		#js_cmd= 'svg=document.getElementsByTagName("svg")[0];var a = document.createElement("a");a.href = svg.src;' \
+		#        'a.download = "~/Downloads/test.svg";a.click();'
+		self.ui.HTMLviewClone.page().runJavaScript(js_cmd)
 
 	def _callable(self, data):
 		self.html = data
@@ -7163,6 +7629,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.setWindowTitle(titletext)
 
 		self.load_table()
+		self.initial_Clone()
 
 	def GenerateNameIndex(self):
 		global NameIndex
