@@ -2602,6 +2602,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxFigLegendClone.clicked.connect(self.GenerateFigureClone)
 		self.ui.checkBoxStackClone.clicked.connect(self.GenerateFigureClone)
 		self.ui.pushButtonDownloadClone.clicked.connect(self.downloadFigClone)
+		self.ui.pushButtonCheckCloone.clicked.connect(self.checkClone)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -2626,6 +2627,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
 
 		self.enableEdit = False
+
+	def checkClone(self):
+		global MoveNotChange
+
+		member_names = []
+		n_member = self.ui.listWidgetCloneMember.count()
+		for i in range(n_member):
+			item = self.ui.listWidgetCloneMember.item(i)
+			member_names.append(item.text())
+
+		MoveNotChange = True
+		rows = self.ui.SeqTable.rowCount()
+		for row in range(rows):
+			cur_name = self.ui.SeqTable.item(row, 1).text()
+			if cur_name in member_names:
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+			else:
+				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+		MoveNotChange = False
+
+		self.match_table_to_tree()
 
 	def initial_Clone(self):
 		# identify if clones exist
@@ -2832,6 +2854,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def buildCloneTree(self):
 		clone_name = self.ui.comboBoxTree.currentText()
+		clone_name = re.sub('Clone','',clone_name)
+
 		WHEREStatement = 'WHERE ClonalPool = "' + clone_name + '"'
 		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB ' + WHEREStatement
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)

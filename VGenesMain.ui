@@ -7275,7 +7275,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="text">
-           <string/>
+           <string>Peptide logo</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -7288,7 +7288,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="flat">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -7301,7 +7301,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="text">
-           <string/>
+           <string>Nucleotide logo</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -7314,7 +7314,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="flat">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
          </widget>
         </item>
@@ -7391,7 +7391,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
@@ -7399,29 +7399,24 @@ If the J-end is off the J gene end may need adjusted</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_39">
             <item row="0" column="2">
-             <widget class="QToolButton" name="toolButtonIgphyml">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
+             <widget class="QPushButton" name="toolButtonIgphyml">
               <property name="text">
                <string>Load igphyml results</string>
               </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <spacer name="horizontalSpacer_18">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/page.png</normaloff>:/PNG-Icons/page.png</iconset>
               </property>
-              <property name="sizeHint" stdset="0">
+              <property name="iconSize">
                <size>
-                <width>950</width>
-                <height>17</height>
+                <width>25</width>
+                <height>25</height>
                </size>
               </property>
-             </spacer>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
             </item>
             <item row="0" column="1">
              <widget class="QTextEdit" name="igphyml_line">
@@ -7445,6 +7440,19 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_18">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>950</width>
+                <height>17</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
            </layout>
           </widget>
           <widget class="QWidget" name="tab_6">
@@ -7452,21 +7460,6 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>Build Ig phylogeny for each clone</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_40">
-            <item row="0" column="3">
-             <widget class="QToolButton" name="toolButtonCloneRaxml">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Build clone phylogeny with RAxML</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QComboBox" name="comboBoxTree"/>
-            </item>
             <item row="0" column="1">
              <widget class="QLabel" name="label_59">
               <property name="font">
@@ -7491,6 +7484,29 @@ If the J-end is off the J gene end may need adjusted</string>
                </size>
               </property>
              </spacer>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="toolButtonCloneRaxml">
+              <property name="text">
+               <string>Build clone phylogeny with RAxML</string>
+              </property>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>25</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QComboBox" name="comboBoxTree"/>
             </item>
            </layout>
           </widget>
@@ -7563,13 +7579,25 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_46">
-           <item row="0" column="0">
+           <item row="1" column="0">
             <widget class="QListWidget" name="listWidgetClone">
              <property name="maximumSize">
               <size>
                <width>140</width>
                <height>16777215</height>
               </size>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_62">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Clones:</string>
              </property>
             </widget>
            </item>
@@ -7585,7 +7613,142 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_53">
-           <item row="2" column="1">
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_76">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Sequences in this clone:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QLabel" name="label_63">
+               <property name="text">
+                <string>Clone:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneName">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_64">
+               <property name="text">
+                <string>Gene Type</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneType">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_65">
+               <property name="text">
+                <string>Number of Seq</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneNum">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_10">
+             <item>
+              <widget class="QLabel" name="label_66">
+               <property name="text">
+                <string>V gene:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneV">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_67">
+               <property name="text">
+                <string>D gene:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneD">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_68">
+               <property name="text">
+                <string>J gene:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneJ">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_69">
+               <property name="text">
+                <string>CDR3 length:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneCDR3len">
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="3" column="0">
+            <widget class="QListWidget" name="listWidgetCloneMember">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QPushButton" name="pushButtonCheckCloone">
+             <property name="text">
+              <string>Check all</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1" rowspan="3">
             <widget class="QGroupBox" name="groupBox_11">
              <property name="title">
               <string/>
@@ -7847,122 +8010,6 @@ If the J-end is off the J gene end may need adjusted</string>
                </layout>
               </item>
              </layout>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QLabel" name="label_63">
-               <property name="text">
-                <string>Clone:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneName">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_64">
-               <property name="text">
-                <string>Gene Type</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneType">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_65">
-               <property name="text">
-                <string>Number of Seq</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneNum">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="1" column="0" colspan="2">
-            <layout class="QHBoxLayout" name="horizontalLayout_10">
-             <item>
-              <widget class="QLabel" name="label_66">
-               <property name="text">
-                <string>V gene:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneV">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_67">
-               <property name="text">
-                <string>D gene:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneD">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_68">
-               <property name="text">
-                <string>J gene:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneJ">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_69">
-               <property name="text">
-                <string>CDR3 length:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneCDR3len">
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item row="2" column="0">
-            <widget class="QListWidget" name="listWidgetCloneMember">
-             <property name="maximumSize">
-              <size>
-               <width>250</width>
-               <height>16777215</height>
-              </size>
-             </property>
             </widget>
            </item>
           </layout>

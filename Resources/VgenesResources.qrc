@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>tree.png</file>
     <file>MKPR.png</file>
     <file>ATCG.png</file>
     <file>logo.png</file>
