@@ -991,9 +991,10 @@ def RunUpdateSQL(DBpathname, SQLStatement):
     os.chdir(dirname)
     conn = db.connect(DBpathname)
     cursor = conn.cursor()
-    cursor.execute(SQLStatement)
+    res = cursor.execute(SQLStatement)
     conn.commit()
     conn.close()
+    return res.rowcount
 
 def RunSQL(DBpathname, SQLStatement):
     # returns a dictionary with seqname as key and all other fileds  as a list as data

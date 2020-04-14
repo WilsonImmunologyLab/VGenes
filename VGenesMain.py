@@ -463,6 +463,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 					FieldTypeList.append('Customized')
 					FieldList.append(tmp_field_name)
 
+		count = 0
 		for row in range(num_row):
 			if row == 0:
 				continue
@@ -478,21 +479,24 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 				SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
 				SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
 				try:
-					VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
-					print(SQLSTATEMENT)
+					count += VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
+					#print(SQLSTATEMENT)
 				except:
 					Msg = 'SQL error! Current SQL statement is:\n' + SQLSTATEMENT
 					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
 					                        QMessageBox.Ok)
 					return
 				#print(SQLSTATEMENT)
+		if count == 0:
+			Msg = "Total " + str(count) + ' records affected! Maybe check if you anchor column is correct?'
+			QMessageBox.information(self, 'information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
-		Msg = "Update successfully!"
-		QMessageBox.information(self, 'information', Msg, QMessageBox.Ok,
-		                        QMessageBox.Ok)
+		else:
+			Msg = "Update successfully!\nTotal " + str(count) + ' records affected!'
+			QMessageBox.information(self, 'information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
-		self.refreshDBSignal.emit()
-		self.hide()
+			self.refreshDBSignal.emit()
+			self.hide()
 
 
 	def reject(self):
@@ -1518,8 +1522,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			Vgenes.LoadDB(DBFilename)
 			self.hide()
-
-
 
 	def InitiateImportFromVDB(self, Filenamed, MaxNu):
 		global FieldList
@@ -2603,6 +2605,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxStackClone.clicked.connect(self.GenerateFigureClone)
 		self.ui.pushButtonDownloadClone.clicked.connect(self.downloadFigClone)
 		self.ui.pushButtonCheckCloone.clicked.connect(self.checkClone)
+		self.ui.listWidgetCloneMember.itemSelectionChanged.connect(self.updateClone)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -2627,6 +2630,28 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
 
 		self.enableEdit = False
+
+	def updateClone(self):
+		items = self.ui.listWidgetCloneMember.selectedItems()
+		seq_name = ''
+		for item in items:
+			seq_name = item.text()
+
+		SQLStatement = 'SELECT GeneType,V1,D1,J1,CDR3Length FROM vgenesDB WHERE SeqName = "' + seq_name + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		seq_num = len(DataIn)
+
+		if seq_num == 0:
+			return
+
+		record = DataIn[0]
+
+		self.ui.lineEditCloneType.setText(record[0])
+
+		self.ui.lineEditCloneV.setText(record[1])
+		self.ui.lineEditCloneD.setText(record[2])
+		self.ui.lineEditCloneJ.setText(record[3])
+		self.ui.lineEditCloneCDR3len.setText(record[4])
 
 	def checkClone(self):
 		global MoveNotChange
@@ -2657,7 +2682,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for ele in DataIn:
 			list1.append(ele[0])
 		list_unique = list(set(list1))
-		list_unique.remove('0')
+		try:
+			list_unique.remove('0')
+		except:
+			return
 
 		if len(list_unique) == 0:
 			return
@@ -2716,6 +2744,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			mab_names.append(record[5])
 		self.ui.listWidgetCloneMember.clear()
 		self.ui.listWidgetCloneMember.addItems(mab_names)
+		self.ui.listWidgetCloneMember.setCurrentItem(self.ui.listWidgetCloneMember.item(0))
 
 	@pyqtSlot()
 	def refreshDB(self):
@@ -3472,6 +3501,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		horizontalHeader = self.ui.SeqTable.fields
 		col_name = horizontalHeader[col]
+		index = RealNameList.index(col_name)
+		col_name = FieldList[index]
 
 		if col == 1:  # update sequence name
 			SeqName = item.last_name
