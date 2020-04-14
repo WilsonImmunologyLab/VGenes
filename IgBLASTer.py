@@ -201,17 +201,20 @@ def IgBLASTit(FASTAFile, datalist):
 
 	# TODO on deployment need to ensure base user /Applications/IgBlast/database contains igblastn, and databases
 
-	start = time.time()
-
-	if species == 'Human':
-		BLASTCommandLine = "./igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
-		IgBlastOut = os.popen(BLASTCommandLine)
-	elif species == 'Mouse':
-		BLASTCommandLine = "./igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
-		IgBlastOut = os.popen(BLASTCommandLine)
-
-	end = time.time()
-	print('Run time for IgBlast: ' + str(end - start))
+	try:
+		start = time.time()
+		if species == 'Human':
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			IgBlastOut = os.popen(BLASTCommandLine)
+		elif species == 'Mouse':
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			IgBlastOut = os.popen(BLASTCommandLine)
+		end = time.time()
+		print('Run time for IgBlast: ' + str(end - start))
+	except:
+		ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+		with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
+			currentFile.write(ErLog)
 
 	# IgBlastOut += '\nBLASTend'
 	# igblastn -germline_db_V human_gl_V_IMGT -germline_db_J human_gl_J_IMGT -germline_db_D human_gl_D_IMGT -organism human -domain_system kabat -query SFV-005H.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3
@@ -796,12 +799,9 @@ def IgBLASTit(FASTAFile, datalist):
 
 							try:
 								outfilename = VGenesSeq.ClustalO(ToClustalO,wraplength,False)
-
-
 								if os.path.isfile(outfilename):
 									# outfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega', 'my-out-seqs.fa')
 									# while Aligned is None:
-
 									Aligned = VGenesSeq.readClustalOutput(outfilename)
 							except:
 								NotValid = True
@@ -1617,10 +1617,10 @@ def GetGLCDRs(Sequence, species):
 
 
 	if species == 'Human':
-		BLASTCommandLine = "igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+		BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 		IgBlastOut = os.popen(BLASTCommandLine)
 	elif species == 'Mouse':
-		BLASTCommandLine = "igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+		BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 		IgBlastOut = os.popen(BLASTCommandLine)
 
 

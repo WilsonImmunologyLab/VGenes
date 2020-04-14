@@ -7,9 +7,11 @@ from PyQt5.QtWidgets import QApplication
 
 global working_prefix
 global temp_folder
+global bin_folder
 
-working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
-temp_folder = os.path.join(working_prefix, '..', 'Resources', 'Temp')
+working_prefix = os.path.dirname(os.path.realpath(sys.argv[0]))
+temp_folder = os.path.join(working_prefix, 'Temp')
+bin_folder = os.path.join(working_prefix, 'Tools')
 
 def Translator(Sequence, frame):
 
@@ -523,11 +525,9 @@ def ClustalO(SeqDict, wrapLength, ordered):
         currentFile.write('The clustal output is not done yet')
 
     if ordered == True:
-        ClustalOCommandLine = 'clustalo -i '+ MyInFiles + ' -o '+ MyOutFiles + ' -v --force --output-order=tree-order --outfmt=vie --resno --wrap=' + str(
-            wrapLength)  #
+        ClustalOCommandLine = bin_folder + '/clustalo -i '+ MyInFiles + ' -o '+ MyOutFiles + ' -v --force --output-order=tree-order --outfmt=vie --resno --wrap=' + str(wrapLength)  #
     else:
-
-        ClustalOCommandLine = 'clustalo -i '+ MyInFiles + ' -o '+ MyOutFiles + ' -v --force --output-order=tree-order --outfmt=vie --resno --wrap=1000'
+        ClustalOCommandLine = bin_folder + '/clustalo -i '+ MyInFiles + ' -o '+ MyOutFiles + ' -v --force --output-order=tree-order --outfmt=vie --resno --wrap=1000'
     ClustalOut = os.popen(ClustalOCommandLine)
 
     # if ordered == True:
