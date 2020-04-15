@@ -2606,6 +2606,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonDownloadClone.clicked.connect(self.downloadFigClone)
 		self.ui.pushButtonCheckCloone.clicked.connect(self.checkClone)
 		self.ui.listWidgetCloneMember.itemSelectionChanged.connect(self.updateClone)
+		self.ui.pushButtonNewickTree.clicked.connect(self.loadNewickTree)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -2880,6 +2881,58 @@ class VGenesForm(QtWidgets.QMainWindow):
 		view.show()
 		layout.addWidget(view)
 		VGenesTextWindows[window_id].show()
+
+	def loadNewickTree(self):
+		treefile, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select Newick file", '~/',
+		                                                  "Newick File (*.nwk);;All Files (*)")
+		if treefile == '' or treefile == None:
+			return
+		self.ui.lineEditNewick.setText(treefile)
+
+		# generate html page
+		treefile = treefile
+		f = open(treefile, 'r')
+		tree_str = f.readline()
+		f.close()
+		tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
+
+		out_html_file = os.path.join(temp_folder, 'newick_tree.html')
+		header_file = os.path.join(working_prefix, 'Data', 'template_newick_tree.html')
+		shutil.copyfile(header_file, out_html_file)
+
+		foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+		       '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+		       'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+		       '});\n</script>\n</body>\n</html>'
+		out_file_handle = open(out_html_file, 'a')
+		out_file_handle.write(tree_str)
+		out_file_handle.write(foot)
+		out_file_handle.close()
+
+		if self.ui.radioButtonNewick.isChecked():
+			# display
+			window_id = int(time.time() * 100)
+			VGenesTextWindows[window_id] = htmlDialog()
+			VGenesTextWindows[window_id].id = window_id
+			layout = QGridLayout(VGenesTextWindows[window_id])
+			view = QWebEngineView(self)
+			view.load(QUrl("file://" + out_html_file))
+			view.show()
+			layout.addWidget(view)
+			VGenesTextWindows[window_id].show()
+		else:
+			# display
+			view = QWebEngineView()
+			view.load(QUrl("file://" + out_html_file))
+			view.show()
+
+			layout = self.ui.groupBoxTree.layout()
+			if layout == None:
+				layout = QGridLayout(self.ui.groupBoxTree)
+			else:
+				for i in range(layout.count()):
+					layout.removeWidget(layout.itemAt(i).widget())
+			layout.addWidget(view)
 
 	def buildCloneTree(self):
 		clone_name = self.ui.comboBoxTree.currentText()
@@ -5941,8 +5994,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for ele in DataIn:
 			list1.append(ele[0])
 		list_unique = list(set(list1))
-		list_unique.remove('0')
+		try:
+			list_unique.remove('0')
+		except:
+			pass
+
+		list_unique = [int(i) for i in list_unique]
 		list_unique.sort()
+		list_unique = ['Clone' + str(i) for i in list_unique]
+
 		self.ui.comboBoxTree.clear()
 		self.ui.comboBoxTree.addItems(list_unique)
 

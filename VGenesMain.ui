@@ -7391,17 +7391,27 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
-            <string>load Igphyml</string>
+            <string>Load IgPhyML</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_39">
-            <item row="0" column="2">
+            <item row="0" column="1">
+             <widget class="QLineEdit" name="igphyml_line">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>25</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
              <widget class="QPushButton" name="toolButtonIgphyml">
               <property name="text">
-               <string>Load igphyml results</string>
+               <string>Load IgPhyML results</string>
               </property>
               <property name="icon">
                <iconset resource="Resources/VgenesResources.qrc">
@@ -7418,28 +7428,6 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QTextEdit" name="igphyml_line">
-              <property name="enabled">
-               <bool>true</bool>
-              </property>
-              <property name="minimumSize">
-               <size>
-                <width>400</width>
-                <height>0</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>16777215</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="readOnly">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_18">
               <property name="orientation">
@@ -7452,6 +7440,63 @@ If the J-end is off the J gene end may need adjusted</string>
                </size>
               </property>
              </spacer>
+            </item>
+           </layout>
+          </widget>
+          <widget class="QWidget" name="tab_11">
+           <attribute name="title">
+            <string>Load Newick formet tree</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_48">
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_20">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>333</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="3">
+             <widget class="QPushButton" name="pushButtonNewickTree">
+              <property name="text">
+               <string>Load Newick tree file</string>
+              </property>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/page.png</normaloff>:/PNG-Icons/page.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>25</width>
+                <height>25</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLineEdit" name="lineEditNewick">
+              <property name="minimumSize">
+               <size>
+                <width>400</width>
+                <height>25</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QRadioButton" name="radioButtonNewick">
+              <property name="text">
+               <string>open on a pop-up window</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
