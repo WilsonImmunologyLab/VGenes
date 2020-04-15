@@ -620,7 +620,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>8</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -7455,7 +7455,7 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>333</width>
+                <width>454</width>
                 <height>20</height>
                </size>
               </property>
@@ -7488,13 +7488,6 @@ If the J-end is off the J gene end may need adjusted</string>
                 <width>400</width>
                 <height>25</height>
                </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="QRadioButton" name="radioButtonNewick">
-              <property name="text">
-               <string>open on a pop-up window</string>
               </property>
              </widget>
             </item>
@@ -7557,7 +7550,7 @@ If the J-end is off the J gene end may need adjusted</string>
           </widget>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="0" colspan="2">
          <widget class="QGroupBox" name="groupBoxTree">
           <property name="font">
            <font>
@@ -7566,6 +7559,13 @@ If the J-end is off the J gene end may need adjusted</string>
           </property>
           <property name="title">
            <string>Lineage trees</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QRadioButton" name="radioButtonNewick">
+          <property name="text">
+           <string>open on a pop-up window</string>
           </property>
          </widget>
         </item>

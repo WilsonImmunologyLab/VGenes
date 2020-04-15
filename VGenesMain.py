@@ -3017,18 +3017,30 @@ class VGenesForm(QtWidgets.QMainWindow):
 		out_file_handle.write(foot)
 		out_file_handle.close()
 
-		# display
-		view = QWebEngineView()
-		view.load(QUrl("file://" + out_html_file))
-		view.show()
-
-		layout = self.ui.groupBoxTree.layout()
-		if layout == None:
-			layout = QGridLayout(self.ui.groupBoxTree)
+		if self.ui.radioButtonNewick.isChecked():
+			# display
+			window_id = int(time.time() * 100)
+			VGenesTextWindows[window_id] = htmlDialog()
+			VGenesTextWindows[window_id].id = window_id
+			layout = QGridLayout(VGenesTextWindows[window_id])
+			view = QWebEngineView(self)
+			view.load(QUrl("file://" + out_html_file))
+			view.show()
+			layout.addWidget(view)
+			VGenesTextWindows[window_id].show()
 		else:
-			for i in range(layout.count()):
-				layout.removeWidget(layout.itemAt(i).widget())
-		layout.addWidget(view)
+			# display
+			view = QWebEngineView()
+			view.load(QUrl("file://" + out_html_file))
+			view.show()
+
+			layout = self.ui.groupBoxTree.layout()
+			if layout == None:
+				layout = QGridLayout(self.ui.groupBoxTree)
+			else:
+				for i in range(layout.count()):
+					layout.removeWidget(layout.itemAt(i).widget())
+			layout.addWidget(view)
 
 	def loadIgphyml(self):
 		ig_out, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select igphyml output", '~/',
@@ -3074,18 +3086,30 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		print("html done!")
 
-		# display
-		view = QWebEngineView()
-		view.load(QUrl("file://" + out_html_file))
-		view.show()
-
-		layout = self.ui.groupBoxTree.layout()
-		if layout == None:
-			layout = QGridLayout(self.ui.groupBoxTree)
+		if self.ui.radioButtonNewick.isChecked():
+			# display
+			window_id = int(time.time() * 100)
+			VGenesTextWindows[window_id] = htmlDialog()
+			VGenesTextWindows[window_id].id = window_id
+			layout = QGridLayout(VGenesTextWindows[window_id])
+			view = QWebEngineView(self)
+			view.load(QUrl("file://" + out_html_file))
+			view.show()
+			layout.addWidget(view)
+			VGenesTextWindows[window_id].show()
 		else:
-			for i in range(layout.count()):
-				layout.removeWidget(layout.itemAt(i).widget())
-		layout.addWidget(view)
+			# display
+			view = QWebEngineView()
+			view.load(QUrl("file://" + out_html_file))
+			view.show()
+
+			layout = self.ui.groupBoxTree.layout()
+			if layout == None:
+				layout = QGridLayout(self.ui.groupBoxTree)
+			else:
+				for i in range(layout.count()):
+					layout.removeWidget(layout.itemAt(i).widget())
+			layout.addWidget(view)
 
 	def makeNTLogo(self):
 		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
