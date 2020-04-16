@@ -96,6 +96,9 @@ r.close()
 global IgBLASTAnalysis
 IgBLASTAnalysis = []
 
+global IMGTAnalysis
+Analysis = []
+
 global TreeSelected
 TreeSelected = []
 
@@ -962,6 +965,68 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
 						pass
+			elif self.ui.tabWidget.currentIndex() == 4:
+				if self.pathIgBlast == '':
+					return
+				else:
+					dirs = self.pathIgBlast.split('/')
+					if len(dirs) > 3:
+						dirs = dirs[-3:]
+
+					if len(dirs) == 3:
+						project = dirs[0]
+						group = dirs[1]
+						subgroup = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+						self.ui.comboBoxSubgroup.addItem(subgroup)
+						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+					elif len(dirs) == 2:
+						project = dirs[0]
+						group = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+					elif len(dirs) == 1:
+						project = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+					else:
+						pass
+			elif self.ui.tabWidget.currentIndex() == 5:
+				if self.pathIMGT == '':
+					return
+				else:
+					dirs = self.pathIMGT.split('/')
+					if len(dirs) > 3:
+						dirs = dirs[-3:]
+
+					if len(dirs) == 3:
+						project = dirs[0]
+						group = dirs[1]
+						subgroup = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+						self.ui.comboBoxSubgroup.addItem(subgroup)
+						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+					elif len(dirs) == 2:
+						project = dirs[0]
+						group = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+					elif len(dirs) == 1:
+						project = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+					else:
+						pass
 
 	def updateName(self):
 		ori_name = 'clonotype2_consensus_1'
@@ -1025,6 +1090,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		else:
 			self.ui.lineEditIgOut.setText(file)
+			self.pathIgBlast = file
 
 	def browseIgBlastFasta(self):
 		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
@@ -1035,13 +1101,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.lineEditIgFasta.setText(file)
 
 	def browseIMGT(self):
-		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
-		                                                   "IMGT output Files (*.txt);;All Files (*)")
-		if len(files) == 0:
+		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
+		                                                   "IMGT output File (*.txt);;All Files (*)")
+		if len(file) == 0:
 			return
 		else:
-			self.ui.listWidgetIMGT.addItems(files)
-			self.pathIMGT = files
+			self.ui.lineEditIMGT.setText(file)
+			self.pathIMGT = file
 
 	def switchTab(self, num):
 		self.updateGroupSetting()
@@ -1110,7 +1176,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.rdoAll.setEnabled(True)
 			self.ui.rdoChoose.setEnabled(True)
 			self.ui.rdoProductive.setEnabled(True)
-			self.ui.checkBoxFileStruc.setEnabled(False)
+			self.ui.checkBoxFileStruc.setEnabled(True)
 			self.ui.comboBoxProject.setEnabled(True)
 			self.ui.comboBoxGroup.setEnabled(True)
 			self.ui.comboBoxSubgroup.setEnabled(True)
@@ -1727,6 +1793,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 
 	def InitiateImportFromIgBlast(self, Filenamed, MaxNum):
+		if os.path.isfile(self.ui.lineEditIgOut.text()) and os.path.isfile(self.ui.lineEditIgFasta.text()):
+			pass
+		else:
+			msg = 'Please setup IgOut file and Fasta file!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 		self.calling = 4
 
 		# need to transfer species grouping to IgBlaster
@@ -1843,6 +1916,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			# self.disableWidgets()
 			self.checkProgress()
 			return
+
+	def InitiateImportFromIMGT(self):
+		pass
 
 	@pyqtSlot()
 	def multi_callback(self):
@@ -2790,6 +2866,20 @@ class WorkThread1(QThread):
 	def run(self):
 		global IgBLASTAnalysis
 		IgBLASTAnalysis = IgBLASTer.IgBLASTitResults(self.item, self.igOut, self.datalist)
+		self.trigger.emit(self.item)
+
+class WorkThreadIMGTparser(QThread):
+	trigger = pyqtSignal(str)
+
+	def __int__(self):
+		super(WorkThread1, self).__init__()
+		self.parent = parent
+		self.item = ''
+		self.datalist = ''
+
+	def run(self):
+		global IMGTAnalysis
+		IMGTAnalysis = IMGTparser(self.item, self.datalist)
 		self.trigger.emit(self.item)
 
 class VGenesForm(QtWidgets.QMainWindow):
