@@ -770,6 +770,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.rdoChoose.clicked.connect(self.updateGroupSetting)
 		self.ui.rdoFunction.clicked.connect(self.updateGroupSetting)
 		self.ui.checkBoxFileStruc.clicked.connect(self.updateGroupSetting)
+		self.ui.toolButtonIgFasta.clicked.connect(self.browseIgBlastFasta)
+		#self.ui.radioButtonAllcontig.clicked.connect(self.update10x)
+		#self.ui.radioButtonConsensus.clicked.connect(self.update10x)
+		#self.ui.radioButtonFiltercontig.clicked.connect(self.update10x)
 
 		self.path10x = ''
 		self.pathFasta = ''
@@ -780,6 +784,59 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		global answer3
 		answer3 = 'No'
+
+	def update10x(self, directory):
+		if isinstance(directory, str):
+			pass
+		else:
+			if self.path10x == '':
+				return
+			else:
+				pass
+
+		choosed_seq = 'consensus.fasta'
+		choose_annotate = 'filtered_contig_annotations.csv'
+
+		'''
+		choosed_seq = ''
+		choose_annotate = ''
+		if self.ui.radioButtonFiltercontig.isChecked():
+			choosed_seq = 'filtered_contig.fasta'
+			choose_annotate = 'filtered_contig_annotations.csv'
+		elif self.ui.radioButtonConsensus.isChecked():
+			choosed_seq = 'consensus.fasta'
+			choose_annotate = 'filtered_contig_annotations.csv'
+		elif self.ui.radioButtonAllcontig.isChecked():
+			choosed_seq = 'all_contig.fasta'
+			choose_annotate = 'all_contig_annotations.csv'
+		'''
+		if choosed_seq == '':
+			return
+
+		if isinstance(directory, str):
+			self.path10x = directory
+
+		seq_file = os.path.join(self.path10x, choosed_seq)
+		anno_file = os.path.join(self.path10x, choose_annotate)
+		if os.path.exists(seq_file):
+			if os.path.exists(anno_file):
+				self.ui.Seqpath.setText(seq_file)
+				self.ui.Annopath.setText(anno_file)
+			else:
+				self.ui.Seqpath.setText(seq_file)
+		else:
+			seq_file = os.path.join(self.path10x, 'outs', choosed_seq)
+			anno_file = os.path.join(self.path10x, 'outs', choose_annotate)
+			if os.path.exists(seq_file):
+				if os.path.exists(anno_file):
+					self.ui.Seqpath.setText(seq_file)
+					self.ui.Annopath.setText(anno_file)
+				else:
+					self.ui.Seqpath.setText(seq_file)
+			else:
+				Msg = 'Can not find consensus.fasta under your folder! Please check your input!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
 
 	def updateGroupSetting(self):
 		if self.ui.rdoChoose.isChecked():
@@ -939,28 +996,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if directory == None or directory == '':
 			return
 		else:
-			self.path10x = directory
-			seq_file = os.path.join(directory,'consensus.fasta')
-			anno_file = os.path.join(directory,'filtered_contig_annotations.csv')
-			if os.path.exists(seq_file):
-				if os.path.exists(anno_file):
-					self.ui.Seqpath.setText(seq_file)
-					self.ui.Annopath.setText(anno_file)
-				else:
-					self.ui.Seqpath.setText(seq_file)
-			else:
-				seq_file = os.path.join(directory, 'outs', 'consensus.fasta')
-				anno_file = os.path.join(directory, 'outs', 'filtered_contig_annotations.csv')
-				if os.path.exists(seq_file):
-					if os.path.exists(anno_file):
-						self.ui.Seqpath.setText(seq_file)
-						self.ui.Annopath.setText(anno_file)
-					else:
-						self.ui.Seqpath.setText(seq_file)
-				else:
-					Msg = 'Can not find consensus.fasta under your folder! Please check your input!'
-					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-					return
+			self.update10x(directory)
 			self.updateGroupSetting()
 
 	def browseFasta(self):
@@ -983,13 +1019,20 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.pathCSV = files
 
 	def browseIgBlast(self):
-		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
-		                                                   "igBlast output Files (*.txt);;All Files (*)")
-		if len(files) == 0:
+		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
+		                                                   "igBlast output File (*.txt);;All Files (*)")
+		if file == '' or file == None:
 			return
 		else:
-			self.ui.listWidgetIgBlast.addItems(files)
-			self.pathIgBlast = files
+			self.ui.lineEditIgOut.setText(file)
+
+	def browseIgBlastFasta(self):
+		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
+		                                                       "igBlast output File (*.txt);;All Files (*)")
+		if file == '' or file == None:
+			return
+		else:
+			self.ui.lineEditIgFasta.setText(file)
 
 	def browseIMGT(self):
 		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
@@ -1067,7 +1110,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.rdoAll.setEnabled(True)
 			self.ui.rdoChoose.setEnabled(True)
 			self.ui.rdoProductive.setEnabled(True)
-			self.ui.checkBoxFileStruc.setEnabled(True)
+			self.ui.checkBoxFileStruc.setEnabled(False)
 			self.ui.comboBoxProject.setEnabled(True)
 			self.ui.comboBoxGroup.setEnabled(True)
 			self.ui.comboBoxSubgroup.setEnabled(True)
@@ -1684,11 +1727,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 
 	def InitiateImportFromIgBlast(self, Filenamed, MaxNum):
-		self.calling = 2
+		self.calling = 4
 
 		# need to transfer species grouping to IgBlaster
-		if self.pathFasta == "":
-			return
 		answer = ''
 		thetype = 'FASTA'
 		species = ''
@@ -1701,27 +1742,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		elif self.ui.radioButtonMouse.isChecked():
 			species = 'Mouse'
 
-		# process sequence
-		time_stamp = str(int(time.time() * 100)) + '.fasta'
-		seq_pathname = os.path.join(temp_folder,time_stamp)
-		fout = open(seq_pathname,'w')
-		fasta_files = self.pathFasta
-		for fasta_file in fasta_files:
-			file_name = fasta_file.split('/')[-1]
-			file_name = re.sub(r'\..+','',file_name)
-			try:
-				for record in SeqIO.parse(fasta_file, "fasta"):
-					#print(record)
-					seq_name = '>' + file_name + '_' + record.id
-					fout.write(seq_name + '\n')
-					fout.write(record.seq._data + '\n')
-			except:
-				Msg = 'Can not parse file\n ' + fasta_file + '\n as fasta file! Check your input!'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-				return
-		fout.close()
+		igOut = self.ui.lineEditIgOut.text()
+		seq_pathname = self.ui.lineEditIgFasta.text()
 
-		# settings
 		if self.ui.rdoProductive.isChecked() == True:
 			GetProductive = True
 		else:
@@ -1729,51 +1752,18 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		if seq_pathname == None:
 			return
+		if igOut == None:
+			return
 		answer2 = ''
 
-		ErlogFile = os.path.join(temp_folder,'ErLog.txt')
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
 		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
 		header = "Began input at " + time.strftime('%c')
 		with open(ErlogFile2, 'w') as currentFile:
 			currentFile.write(header)
 		# firstOne = True
 
-		if self.ui.checkBoxFileStruc.isChecked():
-			project = self.ui.comboBoxProject.currentText()
-			grouping = self.ui.comboBoxGroup.currentText()
-			subgroup = self.ui.comboBoxSubgroup.currentText()
-
-			datalist.clear()
-			datalist.append(project)
-			datalist.append(grouping)
-			datalist.append(subgroup)
-			datalist.append(species)
-			datalist.append(GetProductive)
-			datalist.append(MaxNum)
-
-			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
-			workThread = WorkThread1(self)
-			workThread.item = seq_pathname
-			workThread.datalist = datalist
-			workThread.start()
-			workThread.trigger.connect(self.multi_callback)
-
-			import_file = os.path.join(temp_folder, "import_file_name.txt")
-			f = open(import_file, 'w')
-			file_list_str = '\n'.join(fasta_files)
-			f.write(file_list_str)
-			f.close()
-
-			self.disableWidgets()
-			self.checkProgress()
-			return
-		elif self.ui.rdoChoose.isChecked():
-			(dirname, filename) = os.path.split(seq_pathname)
-
+		if self.ui.rdoChoose.isChecked() or self.ui.checkBoxFileStruc.isChecked():
 			if Filenamed == 'none':
 				project = self.ui.comboBoxProject.currentText()
 				grouping = self.ui.comboBoxGroup.currentText()
@@ -1802,6 +1792,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			file_handle.write('0')
 			file_handle.close()
 			workThread = WorkThread1(self)
+			workThread.igOut = igOut
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
 			workThread.start()
@@ -1809,8 +1800,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
-			file_list_str = '\n'.join(fasta_files)
-			f.write(file_list_str)
+			f.write(seq_pathname)
 			f.close()
 
 			self.disableWidgets()
@@ -1839,6 +1829,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			file_handle.write('0')
 			file_handle.close()
 			workThread = WorkThread1(self)
+			workThread.igOut = igOut
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
 			workThread.start()
@@ -1846,11 +1837,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
-			file_list_str = '\n'.join(fasta_files)
-			f.write(file_list_str)
+			f.write(seq_pathname)
 			f.close()
 
-			#self.disableWidgets()
+			# self.disableWidgets()
 			self.checkProgress()
 			return
 

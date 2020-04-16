@@ -1574,7 +1574,7 @@ def IgBLASTit(FASTAFile, datalist):
 
 	conn.close()
 
-def IgBLASTitResults(FASTAFile, IgBlastOut, datalist):
+def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 	import os
 	#todo change to app folder
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -1633,7 +1633,32 @@ def IgBLASTitResults(FASTAFile, IgBlastOut, datalist):
 	Sequences.clear()
 	IgBLASTset.clear()
 
-	IgBlastOut = 'xxx'
+	with open(workingfilename, 'r') as currentFile:  # make dictionary of seqs keyed by name
+		# Sequences = fasta_dictionary(currentFile)
+
+		# # Then use it to retrieve sequences with names as key
+		# if len(currentFile) == 0:
+		#     print('no')
+
+		for FASTAline in currentFile:
+			FASTAline = FASTAline.replace('\n', '').replace('\r', '')
+			if FASTAline[0] == '>':
+				# print(FASTAline)
+				SeqNamed = FASTAline[1:]
+				SeqNamed = SeqNamed.strip()
+
+			else:
+				Sequence = FASTAline
+				# print(Sequence)
+				if Sequence != '':
+					Sequences[SeqNamed] = Sequence
+				SeqNamed = ''
+				Sequence = ''
+
+	IgBlastOut = ''
+	fh = open(IgBlastOutFile,'r')
+	IgBlastOut = fh.readlines()
+
 	#
 	global IgBlastThreadTest
 	# IgBlastThreadTest = IgBlastOut

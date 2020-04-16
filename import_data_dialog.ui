@@ -45,35 +45,10 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="0" column="0" colspan="2">
+          <item row="0" column="0" colspan="3">
            <widget class="QLabel" name="label_5">
             <property name="text">
              <string>Click to choose your 10X VDJ output folder path:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="QToolButton" name="browse10x">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-             </font>
-            </property>
-            <property name="text">
-             <string>Browse</string>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0">
-           <widget class="QLabel" name="label_6">
-            <property name="maximumSize">
-             <size>
-              <width>100</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>Sequence file:</string>
             </property>
            </widget>
           </item>
@@ -90,15 +65,40 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="2">
-           <widget class="QLineEdit" name="Seqpath"/>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Sequence file:</string>
+            </property>
+           </widget>
           </item>
-          <item row="2" column="1" colspan="2">
+          <item row="2" column="1" colspan="3">
            <widget class="QLineEdit" name="Annopath">
             <property name="text">
              <string/>
             </property>
            </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QToolButton" name="browse10x">
+            <property name="font">
+             <font>
+              <pointsize>12</pointsize>
+             </font>
+            </property>
+            <property name="text">
+             <string>Browse</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="3">
+           <widget class="QLineEdit" name="Seqpath"/>
           </item>
          </layout>
         </widget>
@@ -313,14 +313,39 @@
        <string>IgBlast</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_13">
-       <item row="0" column="0">
+       <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_21">
          <property name="text">
-          <string>Click to choose IgBlast output files:</string>
+          <string>Choose IgBlast output files:</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="2" column="0">
+        <widget class="QLabel" name="label_20">
+         <property name="text">
+          <string>Choose corresponding FASTA files:</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QToolButton" name="toolButtonIgFasta">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="text">
+          <string>Browse</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="lineEditIgOut"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLineEdit" name="lineEditIgFasta"/>
+       </item>
+       <item row="1" column="1">
         <widget class="QToolButton" name="browseIgBlast">
          <property name="font">
           <font>
@@ -332,15 +357,18 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_20">
-         <property name="text">
-          <string>Records from the following VDBs will be imported: </string>
+       <item row="4" column="0" colspan="2">
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QListWidget" name="listWidgetIgBlast"/>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>
@@ -349,14 +377,7 @@
        <string>IMGT</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_14">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label_23">
-         <property name="text">
-          <string>Click to choose IMGT output files:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
+       <item row="1" column="1">
         <widget class="QToolButton" name="browseIMGT">
          <property name="font">
           <font>
@@ -368,15 +389,28 @@
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QLabel" name="label_22">
+       <item row="0" column="0" colspan="2">
+        <widget class="QLabel" name="label_23">
          <property name="text">
-          <string>Records from the following VDBs will be imported: </string>
+          <string>Click to choose IMGT output file:</string>
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLineEdit" name="lineEdit_3"/>
+       </item>
        <item row="2" column="0" colspan="2">
-        <widget class="QListWidget" name="listWidgetIMGT"/>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
        </item>
       </layout>
      </widget>

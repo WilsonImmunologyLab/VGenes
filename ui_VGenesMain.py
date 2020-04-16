@@ -3681,7 +3681,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionclearTrash)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(8)
+        self.tabWidget.setCurrentIndex(1)
         self.tabWidgetFig.setCurrentIndex(0)
         self.tabWidgetTree.setCurrentIndex(0)
         self.tabWidgetClone.setCurrentIndex(0)
