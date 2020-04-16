@@ -1573,7 +1573,1387 @@ def IgBLASTit(FASTAFile, datalist):
 		# TODO maybe need to analyze IgBLAST output for SHM
 
 	conn.close()
+
+def IgBLASTitResults(FASTAFile, IgBlastOut, datalist):
+	import os
+	#todo change to app folder
+	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+	ErLog  = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
+	with open(ErlogFile, 'w') as currentFile:  #using with for this automatically closes the file even if you crash
+		currentFile.write(ErLog)
+
+	try:
+		DBpathname = os.path.join(working_prefix, 'Data','VDJGenes.db')
+		(dirname, filename) = os.path.split(DBpathname)
+		os.chdir(dirname)
+
+		GetProductive = False
+		conn = db.connect(DBpathname)
+
+	except:
+		DBpathname = '/Volumes/Promise Pegasus/Dropbox/VGenes/VDJGenes.db'
+		(dirname, filename) = os.path.split(DBpathname)
+		os.chdir(dirname)
+
+		GetProductive = False
+		conn = db.connect(DBpathname)
+
+	#  then need to create a cursor that lets you traverse the database
+	cursor = conn.cursor()
+
+	IgBLASTAnalysis = []
+	IgBLASTset = []
+	Sequences = {}
+
+	project = datalist[0]
+	grouping  = datalist[1]
+	subgroup = datalist[2]
+	species = datalist[3]
+	GetProductive = datalist[4]
+	MaxNum = int(datalist[5])
+
+	try:
+		multiProject = datalist[6]
+	except:
+		print('ops')
+
+	# IgBlastOut = ''
+	ErLog, TotSeqs = ProcessFASTA(FASTAFile, MaxNum)
+
+	workingdir = os.path.join(working_prefix, 'IgBlast')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
+	# add code in ProcessFASTA to also return number of seqs then split into 10,000 seq
+	# sets to send through independently with different final names...might need split
+	# IgBlastit out from this code to get parallel. Actually, it's after IgBLASTn that
+	# needs to be split because BLASTngoes faster the more it has
+
+	os.chdir(workingdir)
+
+	Sequences.clear()
+	IgBLASTset.clear()
+
+	IgBlastOut = 'xxx'
+	#
+	global IgBlastThreadTest
+	# IgBlastThreadTest = IgBlastOut
+	# listnames = ['list1', 'list2']#, 'list3','list4', 'list5', 'list6']
+	# pool = ThreadPool(2)
+	# results = pool.map(TimeCheck, listnames)
+	# pool.close()
+	# pool.join()
+	#
+
+
+	# ErLog2  = 'VGenes input ended at: '+ time.strftime('%c') + '\n'
+	# return
+
+
+
+	Importing  = False
+	NotValid = False
+	GrabAlignment = False
+	GrabRecomb = False
+	GrabJunction = False
+	LineCount = 0
+	TotMut = 0
+	x = ''
+	SeqAlignment = ''
+	SeqNumber = 0
+	BadSeqs = 0
+	ErReport = ''
+	GermlineSeq = ''
+	GVgene = ''
+	GDgene = ''
+	GJgene = ''
+	GVseq = []
+	GDseq = []
+	GJseq = []
+	Aligned = []
+	MutList = []
+	DgeneLocus = ''
+
+	Isotype = ''
+	GVbeg = 0
+	GVend = 0
+	GD1beg = 0
+	GD1end = 0
+	GD2beg = 0
+	GD2end = 0
+	GJbeg = 0
+	GJend = 0
+	Vbeg = 0
+	Vend = 0
+	D1beg = 0
+	D1end = 0
+	D2beg = 0
+	D2end = 0
+	Jbeg = 0
+	Jend = 0
+
+	current_seq = 0
+	totel_seq = len(Sequences)
+	for IgLine in IgBlastOut:
+
+		# Alignment is actually last thing that comes up but have to code first to retain /n and /r just for the alignment field
+		if GrabAlignment == False:
+			IgLine = IgLine.replace('\n', '').replace('\r', '')
+
+		if IgLine[0:7] == 'Matrix:':
+		# Analysis is completed but last seq analysis needs saved as no new seqname to trigger
+			if NotValid == False:
+
+				IgBLASTAnalysis.append(project)
+				IgBLASTAnalysis.append(grouping)
+				IgBLASTAnalysis.append(subgroup)
+				IgBLASTAnalysis.append(species)
+				try:
+
+					Sequence = Sequences[IgBLASTAnalysis[0]]
+				except:
+					if SeqName:
+						print(SeqName)
+					else:
+						return
+
+				if Sequence != '':
+					IgBLASTAnalysis.append(Sequence)
+				else:
+					NotValid = True
+					ErLog = SeqName + 'has no sequence (line 210)\n'
+					with open(ErlogFile, 'a') as currentfile:
+						currentfile.write(ErLog)
+					BadSeqs += 1
+				#
+				# TODO need code for following for now just added as blanks for database fields: can delete each as completed
+				# CDR3DNA text, CDR3AA text, CDR3Length text, CDR3beg text, CDR3end text,
+
+
+				IgBLASTAnalysis.append(GermlineSeq)
+				IgBLASTAnalysis.append(CDR3DNA)
+				IgBLASTAnalysis.append(CDR3AA)
+				IgBLASTAnalysis.append(CDR3AALength)
+				IgBLASTAnalysis.append(CDR3beg)
+				IgBLASTAnalysis.append(CDR3end)
+				IgBLASTAnalysis.append('Specificity')
+				IgBLASTAnalysis.append('Subspecificity')
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(VGeneLocus)
+				IgBLASTAnalysis.append(JgeneLocus)
+				IgBLASTAnalysis.append(DgeneLocus)
+				IgBLASTAnalysis.append(now)
+				IgBLASTAnalysis.append(' ')
+				IgBLASTAnalysis.append(' ')
+				IgBLASTAnalysis.append(TotalMuts)
+				IgBLASTAnalysis.append(MutListDB)
+				IgBLASTAnalysis.append(IDevent)
+				IgBLASTAnalysis.append(CDR3MW)
+				IgBLASTAnalysis.append(CDR3pI)
+				if Isotype == '':
+					Isotype = "Unknown"
+				IgBLASTAnalysis.append(Isotype)
+				IgBLASTAnalysis.append(GCDR3beg)
+				IgBLASTAnalysis.append(GCDR3end)
+				IgBLASTAnalysis.append('Blank6')
+				IgBLASTAnalysis.append('Blank7')
+				IgBLASTAnalysis.append('Blank8')
+				IgBLASTAnalysis.append('Blank9')
+				IgBLASTAnalysis.append('Blank10')
+				IgBLASTAnalysis.append('Blank11')
+				IgBLASTAnalysis.append('Blank12')
+				IgBLASTAnalysis.append('Blank13')
+				IgBLASTAnalysis.append('Blank14')
+				IgBLASTAnalysis.append('Blank15')
+				IgBLASTAnalysis.append('Blank16')
+				IgBLASTAnalysis.append('Blank17')
+				IgBLASTAnalysis.append('Blank18')
+				IgBLASTAnalysis.append('Blank19')
+				IgBLASTAnalysis.append('Blank20')
+
+				# IgBLASTAnalysis.append('TheEnd')  #  entry to signal SQL generator properly
+
+				# IgBLASTset[SeqNumber-1] = IgBLASTAnalysis  #  if not first record it saves
+
+				if project == 'ByFunction':
+					if Importing == False:
+						IgBLASTAnalysis[75] = GeneType
+						if multiProject != '':
+							IgBLASTAnalysis[75] = multiProject
+						if Productive == "Yes":
+							IgBLASTAnalysis[76] = 'Functional'
+						else:
+							IgBLASTAnalysis[76] = 'Nonfunctional'
+
+						if multiProject != '':
+							IgBLASTAnalysis[76] = GeneType
+
+					# grouping = Productive
+					IgBLASTAnalysis[77] = ReadingFrame
+					if multiProject != '':
+						if Productive == "Yes":
+							IgBLASTAnalysis[77] = 'Functional'
+						else:
+							IgBLASTAnalysis[77] = 'Nonfunctional'
+
+
+				IgBLASTset.append((IgBLASTAnalysis))
+			NotValid = False
+
+
+			# if ErLog != '':
+			NumberAnalyzed = SeqNumber - BadSeqs
+			# ErLog = ErLog.replace('>', '')
+			# if NumberAnalyzed > 0:
+			#     ErLog = '\n' + str(NumberAnalyzed) + ' sequences were analyzed by IgBLAST \nThe following sequences appear to have errors and were not processed: \n' + ErLog
+			# else:
+			#     ErReport = 'NoGoodSeqs'
+
+				# TODO make ErLog one permanent file deleted every time unless user wants to save on Main query
+
+			ErLog  = ErLog + '\nVGenes input ended at: '+ time.strftime('%c')
+			with open(ErlogFile, 'a') as currentFile:  #using with for this automatically closes the file even if you crash
+				currentFile.write(ErLog)
+
+			# TODO need to use error log contents to determine if seqs should be added to database
+
+
+			return IgBLASTset
+
+		if IgLine[0:10] == 'Alignments':
+			GrabAlignment = True
+		elif GrabAlignment == True:
+			if NotValid == False:
+				if IgLine[0:6] != "Lambda":
+					SeqAlignment += IgLine
+				else:
+					GrabAlignment = False
+					IgBLASTAnalysis.append(SeqAlignment)
+					AlignParts = []
+					AlignParts = ParseAlignment(SeqAlignment)
+					if AlignParts == 'None':
+						NotValid = True
+						ErLog = SeqName + 'was problematic ParseAlignment of IgBLAST, line 323\n'
+						with open(ErlogFile, 'a') as currentfile:
+							currentfile.write(ErLog)
+						BadSeqs += 1
+
+					if AlignParts == 'short':
+						NotValid = True
+						# ErLog = SeqName + 'was problematic ParseAlignment of IgBLAST\n'
+						# with open(ErlogFile, 'a') as currentfile:
+						#     currentfile.write(ErLog)
+						# BadSeqs += 1
+
+
+					if NotValid == False:
+						Dend = 0
+						# for part in AlignParts:
+						GVbeg = AlignParts[0]
+						GVend = AlignParts[1]
+						GD1beg = AlignParts[2]
+						GD1end = AlignParts[3]
+						GJbeg = AlignParts[4]
+						GJend = AlignParts[5]
+						AdjustEnd = AlignParts[6]
+						SeqOrient = AlignParts[7]
+						SeqBegin = AlignParts[8]
+						SeqAdjust = SeqBegin - 1
+						Vbeg = GVbeg + AdjustEnd
+						Vend = GVend + AdjustEnd
+
+						try:
+							if SeqBegin > Vbeg and int(FR1From) == SeqBegin:
+								IgBLASTAnalysis[22] = int(FR1From) - SeqAdjust
+								IgBLASTAnalysis[23] = int(FR1To) - SeqAdjust
+								IgBLASTAnalysis[29] = int(CDR1From) - SeqAdjust
+								IgBLASTAnalysis[30] = int(CDR1To) - SeqAdjust
+								IgBLASTAnalysis[36] = int(FR2From) - SeqAdjust
+
+								IgBLASTAnalysis[37] = int(FR2To) - SeqAdjust
+
+									# print('no')
+								IgBLASTAnalysis[43] = int(CDR2From) - SeqAdjust
+								IgBLASTAnalysis[44] = int(CDR2To) - SeqAdjust
+								IgBLASTAnalysis[50] = int(FR3From) - SeqAdjust
+								IgBLASTAnalysis[51] = int(FR3To) - SeqAdjust
+
+							elif SeqBegin > Vbeg and int(CDR1From) == SeqBegin:
+								IgBLASTAnalysis[29] = int(CDR1From) - SeqAdjust
+								IgBLASTAnalysis[30] = int(CDR1To) - SeqAdjust
+								IgBLASTAnalysis[36] = int(FR2From) - SeqAdjust
+								IgBLASTAnalysis[37] = int(FR2To) - SeqAdjust
+								IgBLASTAnalysis[43] = int(CDR2From) - SeqAdjust
+								IgBLASTAnalysis[44] = int(CDR2To) - SeqAdjust
+								IgBLASTAnalysis[50] = int(FR3From) - SeqAdjust
+								IgBLASTAnalysis[51] = int(FR3To) - SeqAdjust
+
+							elif SeqBegin > Vbeg and int(FR2From) == SeqBegin:
+								IgBLASTAnalysis[36] = int(FR2From) - SeqAdjust
+								IgBLASTAnalysis[37] = int(FR2To) - SeqAdjust
+								IgBLASTAnalysis[43] = int(CDR2From) - SeqAdjust
+								IgBLASTAnalysis[44] = int(CDR2To) - SeqAdjust
+								IgBLASTAnalysis[50] = int(FR3From) - SeqAdjust
+								IgBLASTAnalysis[51] = int(FR3To) - SeqAdjust
+
+							elif SeqBegin > Vbeg and int(CDR2From) == SeqBegin:
+								IgBLASTAnalysis[43] = int(CDR2From) - SeqAdjust
+								IgBLASTAnalysis[44] = int(CDR2To) - SeqAdjust
+								IgBLASTAnalysis[50] = int(FR3From) - SeqAdjust
+								IgBLASTAnalysis[51] = int(FR3To) - SeqAdjust
+
+							elif SeqBegin > Vbeg and int(FR3From) == SeqBegin:
+								IgBLASTAnalysis[50] = int(FR3From) - SeqAdjust
+								IgBLASTAnalysis[51] = int(FR3To) - SeqAdjust
+
+
+							if SeqOrient == 'reversed':
+								Sequence = Sequences[IgBLASTAnalysis[0]]
+								Sequence2 = VGenesSeq.ReverseComp(Sequence)
+								Sequences[IgBLASTAnalysis[0]]=Sequence2
+								Sequence = Sequence2
+
+							if SeqBegin > Vbeg:
+								Sequence = Sequences[IgBLASTAnalysis[0]]
+								Sequence = Sequence[SeqBegin-1:]
+								Sequences[IgBLASTAnalysis[0]] = Sequence
+
+							if GD1beg != 0:
+								VDJun = IgBLASTAnalysis[17]
+								if VDJun[:2] == 'N/A' or VDJun == '':  #  if no VD junction
+
+									D1beg = Vend #+ 1
+									D1end = Vend + len(IgBLASTAnalysis[18])
+
+								elif VDJun[0] != '(':  # not overlapping with end of V
+									D1beg = Vend + len(VDJun)+1
+									D1end = D1beg + len(IgBLASTAnalysis[18])-1
+								else:
+
+									D1beg = Vend + 1
+									D1end = Vend + len(IgBLASTAnalysis[18])-1
+							else:
+								D1beg = 0
+								D1end = 0
+						except:
+
+							NotValid = True
+							ErLog = SeqName + 'was problematic with sequence segments, line 348\n'
+							with open(ErlogFile, 'a') as currentfile:
+								currentfile.write(ErLog)
+
+						GD2beg = 'GD2beg'
+						GD2end = 'GD2end'
+						D2beg = 'D2beg'
+						D2end = 'D2end'
+
+
+						if GeneType == 'Heavy':
+							if IgBLASTAnalysis[17] != 'N/A':
+								VD = IgBLASTAnalysis[17]
+							else:
+								VD = ''
+
+							if IgBLASTAnalysis[19] != 'N/A':
+								DJ = IgBLASTAnalysis[19]
+							else:
+								DJ = ''
+							if DJ != '':
+
+								try:
+									if DJ[0] == '(':
+										DJ = ''
+								except:
+									DJ = ''
+
+							if VD != '':
+								try:
+									if VD[0] == '(':
+										VD = ''
+								except:
+									VD = ''
+
+							if GJbeg != 0:   # if there is a J
+								Jbeg = (Vend+1) + len(VD) + (D1end-D1beg+1) +len(DJ)
+								Jend = (Jbeg) + (GJend-GJbeg + 1)
+
+							else:
+								Jbeg = 0
+								Jend = 0
+						else:  # light chain
+							try:
+								Jjunc = IgBLASTAnalysis[21]
+								if Jjunc == 'N/A':
+									Jjunc = ''
+									IgBLASTAnalysis[21] = ''
+
+								Jbeg = Vend + len(Jjunc) + 1
+								Jend = Jbeg + (GJend-GJbeg)
+							except:
+								NotValid = True
+								ErLog = SeqName + 'was problematic (line 621)\n'
+								with open(ErlogFile, 'a') as currentfile:
+									currentfile.write(ErLog)
+								BadSeqs += 1
+
+						# if GJbeg != 0:
+						#
+						#     # Jend = int(IgBLASTAnalysis[1])
+						#     Jend = GVend +
+						#
+
+
+
+
+						SeqDelin = [GVbeg, GVend, GD1beg, GD1end, GD2beg, GD2end, GJbeg, GJend, Vbeg, Vend, D1beg, D1end, D2beg, D2end, Jbeg, Jend]
+
+
+
+
+						for segment in SeqDelin:
+							IgBLASTAnalysis.append(segment)
+						SeqAlignment = ''
+
+						# Vgene =
+						if species == 'Human':
+							SqlStatementV = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Human" AND Allele = "' + Vgene1 + '"'
+							# SqlStatementV = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence FROM GermLineDB'
+							if GeneType == 'Heavy':
+								SqlStatementD = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Human" AND Allele = "' + Dgene1 + '"'
+							SqlStatementJ = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Human" AND Allele = "' + Jgene1 + '"'
+						elif species == 'Mouse':
+							SqlStatementV = 'SELECT SeqName, Allele, Strain, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Mouse" AND Allele = "' + Vgene1 + '"'
+							# SqlStatementV = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence FROM GermLineDB'
+							if GeneType == 'Heavy':
+								SqlStatementD = 'SELECT SeqName, Allele, Strain, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Mouse" AND Allele = "' + Dgene1 + '"'
+							SqlStatementJ = 'SELECT SeqName, Allele, Strain, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Mouse" AND Allele = "' + Jgene1 + '"'
+
+						GVseq.clear()
+						GDseq.clear()
+						GJseq.clear()
+						cursor.execute(SqlStatementV)
+						for row in cursor:
+							for column in row:
+								GVseq.append(column)     # 0 SeqName, 1 Allele, 2 Species, 3 CodingStartNucleotide, 4 Sequence, 5 IMGTSequence
+						VGeneLocus = GVseq[0]
+						GVgene = GVseq[4]
+						GStart = int(GVseq[3])-1
+						GVgene = GVgene[GStart:GVend]
+						IMGTVgene = ''
+						IMGTGVgene = GVseq[5]
+						dotsIn = IMGTGVgene.count('.')
+						# CharCount = 0
+
+						# if GStart-1 != 0:
+						#      #make sure no '.' in beginning (like if seq starts after CDR1)
+						#     while CharCount != GStart-1:
+						#         if IMGTVgene[CharCount] == '.':
+						#             dotsIn -= 1
+
+						IMGTend = GVend + dotsIn
+
+						IMGTVDJ = IMGTGVgene[int(GVseq[3])-1:IMGTend]  #full length germline V with IMGT spacers
+
+
+
+						if GeneType == 'Heavy':
+
+							cursor.execute(SqlStatementD)
+							for row in cursor:
+								for column in row:
+									GDseq.append(column)
+							try:
+								GDgene = GDseq[4]
+								DgeneLocus = GDseq[0]
+								GDgene = GDgene[(GD1beg-1):(GD1end)]
+							except:
+								GDgene = ''
+								GDgeneLocus = 'N/A'
+
+
+						else:
+							GDgene = ''
+							GDgeneLocus = 'N/A'
+							DgeneLocus = 'N/A'
+							for thing in range(0, 4):
+								GDseq.append('N/A')
+
+						cursor.execute(SqlStatementJ)
+						for row in cursor:
+							for column in row:
+								GJseq.append(column)
+
+							try:
+								GJgene = GJseq[4]
+								JgeneLocus = GJseq[0]
+								GJgene = GJgene[(GJbeg-1):(GJend)]
+							except:
+								GJgene = ''
+								GJgeneLocus = 'none'
+
+						# GJgene = GJseq[4]
+						# GJgene = GJgene[(GJbeg-1):(GJend)]
+
+
+						if GeneType == 'Heavy':
+							if IgBLASTAnalysis[17] != 'N/A':
+								VD = IgBLASTAnalysis[17]
+							else:
+								VD = ''
+
+							if IgBLASTAnalysis[19] != 'N/A':
+								DJ = IgBLASTAnalysis[19]
+							else:
+								DJ = ''
+							if DJ != '':
+								try:
+									if DJ[0] == '(':
+										Overlap = len(DJ)-2
+										GDgene = GDgene[Overlap:]
+										DJ = ''
+								except:
+									DJ = ''
+							if VD != '':
+								try:
+									if VD[0] == '(':
+										Overlap = len(VD)-2
+										GDgene = GDgene[Overlap:]
+										VD = ''
+								except:
+									VD = ''
+
+
+							GermlineSeq = GVgene + VD + GDgene + DJ + GJgene
+							IMGTVDJ = IMGTVDJ + VD + GDgene + DJ + GJgene
+							JunctionLength = len(VD) + len(GDgene) + len(DJ)
+
+						else:
+
+							try:
+								GermlineSeq = GVgene + IgBLASTAnalysis[21] + GJgene
+								IMGTVDJ = IMGTVDJ + IgBLASTAnalysis[21] + GJgene
+								JunctionLength = len(IgBLASTAnalysis[21])
+							except:
+								NotValid = True
+								ErLog = SeqName + 'was problematic (line 621)\n'
+								with open(ErlogFile, 'a') as currentfile:
+									currentfile.write(ErLog)
+								BadSeqs += 1
+
+						if int(GVend) < 200:
+							NotValid = True
+							ErLog = SeqName + 'V gene insufficiently long\n'
+							with open(ErlogFile, 'a') as currentfile:
+								currentfile.write(ErLog)
+							BadSeqs += 1
+
+
+						try:
+							SeqIs = Sequences[IgBLASTAnalysis[0]]
+						except:
+							print("shit")
+						# SeqIs = SeqIs[:Jend]
+						# todo showing use of ClustalO
+						ToClustalO = []
+						Seq = (SeqName, SeqIs)
+						ToClustalO.append(Seq)
+						Seq = ('Germline', GermlineSeq)
+
+
+						ToClustalO.append(Seq)
+						if len(SeqIs) >= len(GermlineSeq):
+							wraplength = len(SeqIs)+1
+						else:
+							wraplength = len(GermlineSeq)+1
+						wraplength  = 80
+						Aligned.clear()
+
+
+						if NotValid == False:
+
+							try:
+								outfilename = VGenesSeq.ClustalO(ToClustalO,wraplength,False)
+								if os.path.isfile(outfilename):
+									# outfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega', 'my-out-seqs.fa')
+									# while Aligned is None:
+									Aligned = VGenesSeq.readClustalOutput(outfilename)
+							except:
+								NotValid = True
+								ErLog = SeqName + 'was problematic (line 621)\n'
+								with open(ErlogFile, 'a') as currentfile:
+									currentfile.write(ErLog)
+								BadSeqs += 1
+								print(SeqName + ' goofed at clustal call in IgBlast line 777')
+
+
+							finally:
+								os.remove(outfilename)
+
+							MutList.clear()
+
+						try:
+							MutList, SeqFixed, IDLength, AlignedSeq = VGenesSeq.Mutations(Aligned, GVend)
+						except:
+							print(SeqName)
+
+						try:
+							Sequences[IgBLASTAnalysis[0]] = SeqFixed
+							if IDLength > 0:  #have to adjust for insertion...seq already adjusted for del
+								IgBLASTAnalysis[69] = IgBLASTAnalysis[69]+ IDLength #  D1beg
+								IgBLASTAnalysis[70] = IgBLASTAnalysis[70]+ IDLength #  D1end
+								# IgBLASTAnalysis[71] = IgBLASTAnalysis[71]+ IDLength #  todo D2beg for when D2 found
+								# IgBLASTAnalysis[72] = IgBLASTAnalysis[72]+ IDLength #  D2end
+								IgBLASTAnalysis[73] = IgBLASTAnalysis[73]+ IDLength #  Jbeg
+								IgBLASTAnalysis[74] = IgBLASTAnalysis[74]+ IDLength #  Jend
+						except:
+							NotValid = True
+							ErLog = SeqName + 'was problematic (line 621)\n'
+							with open(ErlogFile, 'a') as currentfile:
+								currentfile.write(ErLog)
+							BadSeqs += 1
+
+						MutListDB = ''
+						TotalMuts = 0
+						IDevent = 'None'
+
+						if SeqNumber >0:
+							if NotValid == False:
+								try:
+									fw1end = int(IgBLASTAnalysis[23])
+									cw1beg = int(IgBLASTAnalysis[29])
+									cw1end = int(IgBLASTAnalysis[30])
+									fw2beg = int(IgBLASTAnalysis[36])
+									fw2end = int(IgBLASTAnalysis[37])
+									cw2beg = int(IgBLASTAnalysis[43])
+									cw2end = int(IgBLASTAnalysis[44])
+									fw3beg = int(IgBLASTAnalysis[50])
+									fw3end = int(IgBLASTAnalysis[51])
+								except:
+									NotValid = True
+									ErLog = SeqName + 'was problematic (line 644)\n'
+									with open(ErlogFile, 'a') as currentfile:
+										currentfile.write(ErLog)
+									BadSeqs += 1
+
+
+
+					change = 0
+					if NotValid == False:
+						if len(MutList) > 0:
+							for Mutation in MutList:
+								listnum = 0
+								for data in Mutation:
+									MutListDB += str(data)
+									if listnum <2: MutListDB+= '-'
+									listnum +=1
+									if data == 'Insertion' or data == 'Deletion':
+										if IDevent == 'None':
+											IDevent = data
+										elif IDevent != data:
+											IDevent = 'Both'
+								#             (ins , position, sequence)
+										if data == 'Insertion':
+											change = len(Mutation[2])
+										# elif data == 'Deletion':
+										#     change = 0-len(Mutation[2])
+
+										if SeqNumber >0:
+
+											if int(Mutation[1]) < fw1end:
+												IgBLASTAnalysis[23] = str(fw1end+change)
+												IgBLASTAnalysis[29] = str(cw1beg+change)
+												IgBLASTAnalysis[30] = str(cw1end+change)
+												IgBLASTAnalysis[36] = str(fw2beg+change)
+												IgBLASTAnalysis[37] = str(fw2end+change)
+												IgBLASTAnalysis[43] = str(cw2beg+change)
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < cw1beg:
+												IgBLASTAnalysis[29] = str(cw1beg+change)
+												IgBLASTAnalysis[30] = str(cw1end+change)
+												IgBLASTAnalysis[36] = str(fw2beg+change)
+												IgBLASTAnalysis[37] = str(fw2end+change)
+												IgBLASTAnalysis[43] = str(cw2beg+change)
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < cw1end:
+												IgBLASTAnalysis[30] = str(cw1end+change)
+												IgBLASTAnalysis[36] = str(fw2beg+change)
+												IgBLASTAnalysis[37] = str(fw2end+change)
+												IgBLASTAnalysis[43] = str(cw2beg+change)
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < fw2beg:
+												IgBLASTAnalysis[36] = str(fw2beg+change)
+												IgBLASTAnalysis[37] = str(fw2end+change)
+												IgBLASTAnalysis[43] = str(cw2beg+change)
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < fw2end:
+												IgBLASTAnalysis[37] = str(fw2end+change)
+												IgBLASTAnalysis[43] = str(cw2beg+change)
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < cw2beg:
+												IgBLASTAnalysis[43] = str(cw2beg+change)
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < cw2end:
+												IgBLASTAnalysis[44] = str(cw2end+change)
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < fw3beg:
+												IgBLASTAnalysis[50] = str(fw3beg+change)
+												IgBLASTAnalysis[51] = str(fw3end+change)
+											elif int(Mutation[1]) < fw3end:
+												IgBLASTAnalysis[51] = str(fw3end+change)
+
+
+								MutListDB += ','
+								try:
+									TotalMuts += 1
+								except:
+									#print(SeqName)
+									NotValid = True
+									ErLog = SeqName + 'was problematic (line 735)\n'
+									with open(ErlogFile, 'a') as currentfile:
+										currentfile.write(ErLog)
+									BadSeqs += 1
+
+							try:
+								if MutListDB[len(MutListDB)-1] == ',':
+									MutListDB = MutListDB[:len(MutListDB)-1]
+							except:
+								#print(SeqName)
+								NotValid = True
+								ErLog = SeqName + 'was problematic (line 746)\n'
+								with open(ErlogFile, 'a') as currentfile:
+									currentfile.write(ErLog)
+								BadSeqs += 1
+
+
+					# FindCDR3(SeqFixed, IMGTVDJ, Vend, JGeneName, GJbeg, species, IDSeqLen, JunctionLength)
+					# todo seq SFV-4C02 has CDR3 off because
+
+					try:
+						GCDR3beg, GCDR3end, CDR3DNA, CDR3AA, CDR3AALength, CDR3MW, CDR3pI = FindCDR3(AlignedSeq, IMGTVDJ, IgBLASTAnalysis[60], IgBLASTAnalysis[9], GJbeg, species, IDLength, JunctionLength) # DermVDJ, IMGTGermVDJ, Jgene1Name, Jbeg
+						# IgBLASTAnalysis[51] = CDR3beg-1  # because IgBLAST made FW3 to end of V...
+						CDR3beg = SeqFixed.find(CDR3DNA)+1
+						CDR3end = CDR3beg + len(CDR3DNA)-1
+						IgBLASTAnalysis[51] = CDR3beg-1
+
+						now = time.strftime('%c')
+					except:
+						#print(SeqName)
+						NotValid = True
+						ErLog = SeqName + 'was problematic (line 766)\n'
+						with open(ErlogFile, 'a') as currentfile:
+							currentfile.write(ErLog)
+						BadSeqs += 1
+
+		if IgLine[0:7] == 'Query= ':
+			# write current progress to file
+			file_handle = open(progressBarFile,'w')
+			progress = str(int(current_seq*100/totel_seq))
+			file_handle.write(progress)
+			file_handle.write(',' + str(current_seq) + '/' + str(totel_seq))
+			file_handle.close()
+			#print('Current Progress: ' + progress)
+			current_seq += 1
+
+
+			if SeqNumber >0:
+				if NotValid == False:
+
+
+					IgBLASTAnalysis.append(project)
+					IgBLASTAnalysis.append(grouping)
+					IgBLASTAnalysis.append(subgroup)
+					IgBLASTAnalysis.append(species)
+
+					Sequence = Sequences[IgBLASTAnalysis[0]]
+					if Sequence != '':
+						IgBLASTAnalysis.append(Sequence)
+					else:
+						NotValid = True
+						ErLog = SeqName + 'has no sequence (line 210)\n'
+						with open(ErlogFile, 'a') as currentfile:
+							currentfile.write(ErLog)
+						BadSeqs += 1
+
+					if GeneType == 'Heavy':
+						IsoSeq = (Sequence[(Jend):])
+						#print(SeqName)
+						IsoSeq = IsoSeq.strip('N')
+						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') +IsoSeq.count('C') +IsoSeq.count('T')
+						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+							#print('Start ' + SeqName + ' counts at ' + time.strftime('%c'))
+							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							#print('end ' + SeqName + ' counts at ' + time.strftime('%c'))
+
+						else:
+							if len(IsoSeq) > 2:
+								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+									Isotype = 'IgG'
+								elif IsoSeq[:3] == 'CAT':
+									Isotype  = 'IgA'
+								elif IsoSeq[:3] == 'GGA':
+									Isotype  = 'IgM'
+								elif IsoSeq[:3] == 'CAC':
+									Isotype  = 'IgD'
+								else:
+									Isotype = IsoSeq
+							else:
+								Isotype = 'Unknown'
+					else:
+						if GeneType == 'Kappa':
+							Isotype = 'Kappa'
+						elif GeneType == 'Lambda':
+							Isotype = 'Lambda'
+
+					# TODO need code for following for now just added as blanks for database fields: can delete each as completed
+
+					IgBLASTAnalysis.append(GermlineSeq)
+					IgBLASTAnalysis.append(CDR3DNA)
+					IgBLASTAnalysis.append(CDR3AA)
+					IgBLASTAnalysis.append(CDR3AALength)
+					IgBLASTAnalysis.append(CDR3beg)
+					IgBLASTAnalysis.append(CDR3end)
+					IgBLASTAnalysis.append('Specificity')
+					IgBLASTAnalysis.append('Subspecificity')
+					IgBLASTAnalysis.append(0)
+					IgBLASTAnalysis.append(0)
+					IgBLASTAnalysis.append(VGeneLocus)
+					IgBLASTAnalysis.append(JgeneLocus)
+					# if DgeneLocus == '':
+					#     DgeneLocus = 'none'
+					IgBLASTAnalysis.append(DgeneLocus)
+					IgBLASTAnalysis.append(now)
+					IgBLASTAnalysis.append(' ')
+					IgBLASTAnalysis.append(' ')
+					IgBLASTAnalysis.append(TotalMuts)
+					IgBLASTAnalysis.append(MutListDB)
+					IgBLASTAnalysis.append(IDevent)
+					IgBLASTAnalysis.append(CDR3MW)
+					IgBLASTAnalysis.append(CDR3pI)
+					IgBLASTAnalysis.append(Isotype)
+					IgBLASTAnalysis.append(GCDR3beg)
+					IgBLASTAnalysis.append(GCDR3end)
+					IgBLASTAnalysis.append('Blank6')
+					IgBLASTAnalysis.append('Blank7')
+					IgBLASTAnalysis.append('Blank8')
+					IgBLASTAnalysis.append('Blank9')
+					IgBLASTAnalysis.append('Blank10')
+					IgBLASTAnalysis.append('Blank11')
+					IgBLASTAnalysis.append('Blank12')
+					IgBLASTAnalysis.append('Blank13')
+					IgBLASTAnalysis.append('Blank14')
+					IgBLASTAnalysis.append('Blank15')
+					IgBLASTAnalysis.append('Blank16')
+					IgBLASTAnalysis.append('Blank17')
+					IgBLASTAnalysis.append('Blank18')
+					IgBLASTAnalysis.append('Blank19')
+					IgBLASTAnalysis.append('Blank20')
+					# IgBLASTAnalysis.append('TheEnd')
+
+					# IgBLASTset[SeqNumber-1] = IgBLASTAnalysis  #  if not first record it saves
+					if project == 'ByFunction':
+						if Importing == False:
+							IgBLASTAnalysis[75] = GeneType
+							if multiProject != '':
+								IgBLASTAnalysis[75] = multiProject
+							if Productive == "Yes":
+								IgBLASTAnalysis[76] = 'Functional'
+							else:
+								IgBLASTAnalysis[76]  = 'Nonfunctional'
+
+							if multiProject != '':
+								IgBLASTAnalysis[76] = GeneType
+
+						# grouping = Productive
+						IgBLASTAnalysis[77] = ReadingFrame
+						if multiProject != '':
+							if Productive == "Yes":
+								IgBLASTAnalysis[77] = 'Functional'
+							else:
+								IgBLASTAnalysis[77]  = 'Nonfunctional'
+
+
+					IgBLASTset.append((IgBLASTAnalysis))
+
+
+				IgBLASTAnalysis = []  # can now empty IgBLASTANalysis for next seq
+				NotValid = False
+
+
+
+
+			SeqNumber += 1
+			LineCount = 0
+			TotMut = 0
+			GrabAlignment = False
+			GrabRecomb = False
+			GrabJunction = False
+
+			# NotValid = False
+			SeqAlignment = ''
+			FR1hit = False
+			CDR1hit = False
+			FW2hit = False
+			CDR2hit = False
+
+
+
+
+			SeqName = IgLine[7:]
+			SeqName = SeqName.strip()  # removes any spaces before or after
+			if SeqName[(len(SeqName)-6):] == 'Import':
+				Importing = True
+				SeqNameSplit = Segments.split("_")
+				SeqName = SeqNameSplit[0]
+				project = SeqNameSplit[1]
+				grouping = SeqNameSplit[2]
+
+
+
+			IgBLASTAnalysis.append(SeqName)
+		elif IgLine[0:7] == 'Length=':
+			LenSeq = int(IgLine[7:])
+
+			IgBLASTAnalysis.append(str(LenSeq))
+		elif IgLine[0:25] == '***** No hits found *****':
+			NotValid = True
+
+			ErLog = SeqName + ': No hits found\n'
+			with open(ErlogFile, 'a') as currentfile:
+				currentfile.write(ErLog)
+			BadSeqs += 1
+		elif IgLine[0:21] == 'V-(D)-J rearrangement':  # trick to get next line based on line count
+			GrabRecomb = True  #  trick to get next line based on line count
+		elif GrabRecomb == True: #  spring this only if previous line was V-(D)-J...
+			# Should make this a different function to clean up
+			GrabRecomb = False
+			Segments = IgLine
+
+			RecombParts = Segments.split("\t")
+			#  Generates a list of each item in the string
+			# seperated by tabs or any character '/n' is para mark
+
+			GeneType = ""
+			for segment in RecombParts:
+				if segment == 'VH':
+					GeneType = 'Heavy'
+					break
+				elif segment == 'VK':
+					GeneType = 'Kappa'
+					break
+				else:
+					GeneType = 'Lambda'
+
+			IgBLASTAnalysis.append(GeneType)
+
+
+			Vgene1 = ''
+			Vgene2 = ''
+			Vgene3 = ''
+			Dgene1 = ''
+			Dgene2 = ''
+			Dgene3 = ''
+			Jgene1 = ''
+			Jgene2 = ''
+			Jgene3 = ''
+
+			Vgene = RecombParts[0]
+			VChoice = Vgene.split(',')
+			i = 0
+			for i in range(0, len(VChoice)):
+				Vgene1 = VChoice[0]
+
+				if len(VChoice) == 2:
+					Vgene2 = VChoice[1]
+				elif len(VChoice) == 3:
+					Vgene3 = VChoice[2]
+			if Vgene1 != 'N/A':
+				IgBLASTAnalysis.append(Vgene1)
+				IgBLASTAnalysis.append(Vgene2)
+				IgBLASTAnalysis.append(Vgene3)
+			else:
+				NotValid = True
+
+				ErLog = SeqName + ': No V gene found\n'
+				with open(ErlogFile, 'a') as currentfile:
+					currentfile.write(ErLog)
+				BadSeqs += 1
+
+			IndexN = 0
+
+			if GeneType == 'Heavy':
+				IndexN = 1
+			Dgene = RecombParts[IndexN]
+			DChoice = Dgene.split(',')
+			i = 0
+			for i in range(0, len(DChoice)):
+				Dgene1 = DChoice[0]
+				if len(DChoice) == 2:
+					Dgene2 = DChoice[1]
+				elif len(DChoice) == 3:
+					Dgene3 = DChoice[2]
+
+			if GeneType == 'Heavy':  #only ned insert D for H chains
+				IgBLASTAnalysis.append(Dgene1)
+				IgBLASTAnalysis.append(Dgene2)
+				IgBLASTAnalysis.append(Dgene3)
+			else:
+				IgBLASTAnalysis.append('None')
+				IgBLASTAnalysis.append('None')
+				IgBLASTAnalysis.append('None')
+
+
+			IndexN += 1
+
+			Jgene = RecombParts[IndexN]
+			JChoice = Jgene.split(',')
+			i = 0
+			for i in range(0, len(JChoice)):
+				Jgene1 = JChoice[0]
+				if len(JChoice) == 2:
+					Jgene2 = JChoice[1]
+				elif len(JChoice) == 3:
+					Jgene3 = JChoice[2]
+
+			if Jgene1 != 'N/A':
+				IgBLASTAnalysis.append(Jgene1)
+				IgBLASTAnalysis.append(Jgene2)
+				IgBLASTAnalysis.append(Jgene3)
+			else:
+				if GetProductive == True:
+					NotValid = True
+
+				ErLog = SeqName + ': No J gene found\n'
+				with open(ErlogFile, 'a') as currentfile:
+					currentfile.write(ErLog)
+				BadSeqs += 1
+
+			IndexN += 2
+			StopCodon = RecombParts[IndexN]
+			IgBLASTAnalysis.append(StopCodon)
+
+			IndexN += 1
+			ReadingFrame = RecombParts[IndexN]
+			IgBLASTAnalysis.append(ReadingFrame)
+
+			IndexN += 1
+			Productive = RecombParts[IndexN]
+			#print(Productive)
+			if GetProductive == True:
+				if Productive == 'Yes':
+					IgBLASTAnalysis.append(Productive)
+				else:
+					NotValid = True
+					ErLog = SeqName + ' was not a productive rearrangement\n'
+					with open(ErlogFile, 'a') as currentfile:
+						currentfile.write(ErLog)
+					BadSeqs += 1
+			else:
+				IgBLASTAnalysis.append(Productive)
+
+			IndexN += 1
+			Strand = RecombParts[IndexN]
+			IgBLASTAnalysis.append(Strand)
+		elif IgLine[0:16] == 'V-(D)-J junction':  # trick to get next line based on line count
+			GrabJunction = True  #  trick to get next line based on line count
+			GrabIt = LineCount
+		elif GrabJunction == True:
+			GrabJunction = False
+			Junction = IgLine
+			#print(Junction)
+			RecombParts = Junction.split("\t")
+			#  Generates a list of each item in the string seperated by tabs or any character '/n' is para mark
+			VSeqend = RecombParts[0]
+			IgBLASTAnalysis.append(VSeqend)
+
+			if GeneType == "Heavy":
+				VDJunction = RecombParts[1]
+				Dregion = RecombParts[2]
+				DJJunction = RecombParts[3]
+				begJ = RecombParts[4]
+				VJunction = ''  # only for Light chains but need to add field for database integrity
+
+				IgBLASTAnalysis.append(VDJunction)
+				IgBLASTAnalysis.append(Dregion)
+				IgBLASTAnalysis.append(DJJunction)
+				IgBLASTAnalysis.append(begJ)
+				IgBLASTAnalysis.append(VJunction) # only for Light chains but need to add field for database integrity
+
+			else: #  TODO need to set up for light chain so not out of whack with fewer fields
+
+				VJunction = RecombParts[1]
+				begJ = RecombParts[2]
+				VDJunction = ''  # only for heavy chains but need to add field for database integrity
+				Dregion = ''  # only for heavy chains but need to add field for database integrity
+				DJJunction = ''  # only for heavy chains but need to add field for database integrity
+
+				IgBLASTAnalysis.append(VDJunction)  # only for heavy chains but need to add field for database integrity
+				IgBLASTAnalysis.append(Dregion)  # only for heavy chains but need to add field for database integrity
+				IgBLASTAnalysis.append(DJJunction)  # only for heavy chains but need to add field for database integrity
+
+				IgBLASTAnalysis.append(begJ)
+				IgBLASTAnalysis.append(VJunction)
+		elif IgLine[0:3] == 'FR1':
+			Junction = IgLine
+			#print(Junction)
+			RecombParts = Junction.split("\t")
+			#  Generates a list of each item in the string seperated by tabs or any character '/n' is para mark
+
+			FR1From = RecombParts[1]
+			FR1To = RecombParts[2]
+			FR1length = RecombParts[3]
+			FR1matches = RecombParts[4]
+			FR1mis = RecombParts[5]
+			FR1gaps = RecombParts[6]
+			FR1PercentIdentity = RecombParts[7]
+
+			IgBLASTAnalysis.append(FR1From)
+			IgBLASTAnalysis.append(FR1To)
+			IgBLASTAnalysis.append(FR1length)
+			IgBLASTAnalysis.append(FR1matches)
+			IgBLASTAnalysis.append(FR1mis)
+			IgBLASTAnalysis.append(FR1gaps)
+			IgBLASTAnalysis.append(FR1PercentIdentity)
+
+			FR1hit = True
+
+
+
+			TotMut += int(FR1mis)
+			TotMut += int(FR1gaps)
+		elif IgLine[0:4] == 'CDR1':
+			if FR1hit == False:
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+			Junction = IgLine
+
+			RecombParts = Junction.split("\t")
+			#  Generates a list of each item in the string seperated by tabs or any character '/n' is para mark
+
+			CDR1From = RecombParts[1]
+			CDR1To = RecombParts[2]
+			CDR1length = RecombParts[3]
+			CDR1matches = RecombParts[4]
+			CDR1mis = RecombParts[5]
+			CDR1gaps = RecombParts[6]
+			CDR1PercentIdentity = RecombParts[7]
+
+
+			IgBLASTAnalysis.append(CDR1From)
+			IgBLASTAnalysis.append(CDR1To)
+			IgBLASTAnalysis.append(CDR1length)
+			IgBLASTAnalysis.append(CDR1matches)
+			IgBLASTAnalysis.append(CDR1mis)
+			IgBLASTAnalysis.append(CDR1gaps)
+			IgBLASTAnalysis.append(CDR1PercentIdentity)
+
+			CDR1hit = True
+
+			try:
+				TotMut += int(CDR1mis)
+			except:
+				TotMut += 0
+
+			try:
+				TotMut += int(CDR1gaps)
+			except:
+				TotMut += 0
+		elif IgLine[0:3] == 'FR2':
+			if CDR1hit == False:
+				IgBLASTAnalysis.append(0) #FW1
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+				IgBLASTAnalysis.append(0) #CDR1
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+			Junction = IgLine
+			#print(Junction)
+			RecombParts = Junction.split("\t")
+			#  Generates a list of each item in the string seperated by tabs or any character '/n' is para mark
+
+			FR2From = RecombParts[1]
+			FR2To = RecombParts[2]
+			FR2length = RecombParts[3]
+			FR2matches = RecombParts[4]
+			FR2mis = RecombParts[5]
+			FR2gaps = RecombParts[6]
+			FR2PercentIdentity = RecombParts[7]
+
+			IgBLASTAnalysis.append(FR2From)
+			IgBLASTAnalysis.append(FR2To)
+			IgBLASTAnalysis.append(FR2length)
+			IgBLASTAnalysis.append(FR2matches)
+			IgBLASTAnalysis.append(FR2mis)
+			IgBLASTAnalysis.append(FR2gaps)
+			IgBLASTAnalysis.append(FR2PercentIdentity)
+
+			FW2hit = True
+
+			TotMut += int(FR2mis)
+			TotMut += int(FR2gaps)
+		elif IgLine[0:4] == 'CDR2':
+			if FW2hit == False:
+				IgBLASTAnalysis.append(0) #FW1
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+				IgBLASTAnalysis.append(0) #CDR1
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+				IgBLASTAnalysis.append(0)  #FW2
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+			Junction = IgLine
+			#print(Junction)
+			RecombParts = Junction.split("\t")
+			#  Generates a list of each item in the string seperated by tabs or any character '/n' is para mark
+
+			CDR2From = RecombParts[1]
+			CDR2To = RecombParts[2]
+			CDR2length = RecombParts[3]
+			CDR2matches = RecombParts[4]
+			CDR2mis = RecombParts[5]
+			CDR2gaps = RecombParts[6]
+			CDR2PercentIdentity = RecombParts[7]
+
+			IgBLASTAnalysis.append(CDR2From)
+			IgBLASTAnalysis.append(CDR2To)
+			IgBLASTAnalysis.append(CDR2length)
+			IgBLASTAnalysis.append(CDR2matches)
+			IgBLASTAnalysis.append(CDR2mis)
+			IgBLASTAnalysis.append(CDR2gaps)
+			IgBLASTAnalysis.append(CDR2PercentIdentity)
+
+			CDR2hit = True
+
+			if CDR2hit != 'N/A' and CDR2mis != 'N/A':
+				try:
+					TotMut += int(CDR2mis)
+					TotMut += int(CDR2gaps)
+				except:
+					print('oops')
+		elif IgLine[0:3] == 'FR3':
+			if CDR2hit == False:
+				IgBLASTAnalysis.append(0) #FW1
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+				IgBLASTAnalysis.append(0) #CDR1
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+				IgBLASTAnalysis.append(0)  #FW2
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+				IgBLASTAnalysis.append(0)  #CDR2
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+				IgBLASTAnalysis.append(0)
+
+
+			Junction = IgLine
+			#print(Junction)
+			RecombParts = Junction.split("\t")
+			#  Generates a list of each item in the string seperated by tabs or any character '/n' is para mark
+
+			FR3From = RecombParts[1]
+			FR3To = RecombParts[2]
+			FR3length = RecombParts[3]
+			FR3matches = RecombParts[4]
+			FR3mis = RecombParts[5]
+			FR3gaps = RecombParts[6]
+			FR3PercentIdentity = RecombParts[7]
+
+			IgBLASTAnalysis.append(FR3From)
+			IgBLASTAnalysis.append(FR3To)
+			IgBLASTAnalysis.append(FR3length)
+			IgBLASTAnalysis.append(FR3matches)
+			IgBLASTAnalysis.append(FR3mis)
+			IgBLASTAnalysis.append(FR3gaps)
+			IgBLASTAnalysis.append(FR3PercentIdentity)
+			try:
+				if FR3mis == 'N/A':
+					FR3mis = 0
+				if FR3gaps == 'N/A':
+					FR3gaps = 0
+				TotMut += int(FR3mis)
+				TotMut += int(FR3gaps)
+			except:
+				print('mistake')
+
+			IgBLASTAnalysis.append(str(TotMut))
+		# elif IgLine[0:4] == 'CDR3':
+
+		# SeqNumber += 1
+
+		# TODO maybe need to analyze IgBLAST output for SHM
+
+	conn.close()
 		# os.remove(workingfilename)
+
+def parseIgBlast(Files, datalist):
+	pass
+
+def parseIMGT(Files, datalist):
+	pass
 
 
 def GetGLCDRs(Sequence, species):

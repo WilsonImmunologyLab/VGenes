@@ -1,4 +1,0 @@
-27 clonal pools containing 86 sequences were identified from 239 total sequences analyzed.
-The following 0 sequences could not be anaylzed for
-clonality because no CDR3s are indicated:
-Clonal analysis for P398

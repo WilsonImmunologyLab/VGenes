@@ -59,10 +59,10 @@ VGenesTextWindows = {}
 from itertools import combinations
 from collections import Counter
 from Bio import SeqIO
-from pyecharts.render import make_snapshot
-from snapshot_selenium import snapshot
 from subprocess import call, Popen, PIPE
-from platform import system
+
+# import changeo
+from changeo.IO import getDbFields, extractIMGT, readGermlines, IgBLASTReader, IMGTReader
 
 from PyQt5.QtWidgets import QMessageBox, QInputDialog
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
@@ -761,6 +761,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.browseCSV.clicked.connect(self.browseCSV)
 		self.ui.browseFasta.clicked.connect(self.browseFasta)
 		self.ui.browseVDB.clicked.connect(self.browseVDB)
+		self.ui.browseIgBlast.clicked.connect(self.browseIgBlast)
+		self.ui.browseIMGT.clicked.connect(self.browseIMGT)
 		self.ui.radioButtonChain.clicked.connect(self.ChainClicked)
 		self.ui.lineEditRep1.textChanged.connect(self.updateName)
 		self.ui.lineEditRep2.textChanged.connect(self.updateName)
@@ -771,6 +773,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		self.path10x = ''
 		self.pathFasta = ''
+		self.pathIMGT = ''
+		self.pathIgBlast = ''
+		self.pathCSV = ''
+		self.pathVDB = ''
 
 		global answer3
 		answer3 = 'No'
@@ -976,6 +982,24 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.listWidgetCSV.addItems(files)
 			self.pathCSV = files
 
+	def browseIgBlast(self):
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
+		                                                   "igBlast output Files (*.txt);;All Files (*)")
+		if len(files) == 0:
+			return
+		else:
+			self.ui.listWidgetIgBlast.addItems(files)
+			self.pathIgBlast = files
+
+	def browseIMGT(self):
+		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
+		                                                   "IMGT output Files (*.txt);;All Files (*)")
+		if len(files) == 0:
+			return
+		else:
+			self.ui.listWidgetIMGT.addItems(files)
+			self.pathIMGT = files
+
 	def switchTab(self, num):
 		self.updateGroupSetting()
 		if num == 0:
@@ -1034,6 +1058,34 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxGroup.setEnabled(False)
 			self.ui.comboBoxSubgroup.setEnabled(False)
 			self.ui.txtComment.setEnabled(False)
+		elif num == 4:
+			self.ui.radioButtonHuman.setEnabled(True)
+			self.ui.radioButtonMouse.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.rdoVandJ.setEnabled(True)
+			self.ui.rdoFunction.setEnabled(True)
+			self.ui.rdoAll.setEnabled(True)
+			self.ui.rdoChoose.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.checkBoxFileStruc.setEnabled(True)
+			self.ui.comboBoxProject.setEnabled(True)
+			self.ui.comboBoxGroup.setEnabled(True)
+			self.ui.comboBoxSubgroup.setEnabled(True)
+			self.ui.txtComment.setEnabled(True)
+		elif num == 5:
+			self.ui.radioButtonHuman.setEnabled(True)
+			self.ui.radioButtonMouse.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.rdoVandJ.setEnabled(True)
+			self.ui.rdoFunction.setEnabled(True)
+			self.ui.rdoAll.setEnabled(True)
+			self.ui.rdoChoose.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(True)
+			self.ui.checkBoxFileStruc.setEnabled(True)
+			self.ui.comboBoxProject.setEnabled(True)
+			self.ui.comboBoxGroup.setEnabled(True)
+			self.ui.comboBoxSubgroup.setEnabled(True)
+			self.ui.txtComment.setEnabled(True)
 		else:
 			pass
 
@@ -1051,6 +1103,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.InitiateImportFromCSV('none', 0)
 		elif num == 3:
 			self.InitiateImportFromVDB('none', 0)
+		elif num == 4:
+			self.InitiateImportFromIgBlast('none', 0)
+		elif num == 5:
+			self.InitiateImportFromIMGT('none', 0)
 		else:
 			pass
 
@@ -1625,6 +1681,177 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			Vgenes.LoadDB(DBFilename)
 			self.hide()
 		else:
+			return
+
+	def InitiateImportFromIgBlast(self, Filenamed, MaxNum):
+		self.calling = 2
+
+		# need to transfer species grouping to IgBlaster
+		if self.pathFasta == "":
+			return
+		answer = ''
+		thetype = 'FASTA'
+		species = ''
+		datalist = []
+		global answer3
+		# answerTo = answer3
+
+		if self.ui.radioButtonHuman.isChecked():
+			species = 'Human'
+		elif self.ui.radioButtonMouse.isChecked():
+			species = 'Mouse'
+
+		# process sequence
+		time_stamp = str(int(time.time() * 100)) + '.fasta'
+		seq_pathname = os.path.join(temp_folder,time_stamp)
+		fout = open(seq_pathname,'w')
+		fasta_files = self.pathFasta
+		for fasta_file in fasta_files:
+			file_name = fasta_file.split('/')[-1]
+			file_name = re.sub(r'\..+','',file_name)
+			try:
+				for record in SeqIO.parse(fasta_file, "fasta"):
+					#print(record)
+					seq_name = '>' + file_name + '_' + record.id
+					fout.write(seq_name + '\n')
+					fout.write(record.seq._data + '\n')
+			except:
+				Msg = 'Can not parse file\n ' + fasta_file + '\n as fasta file! Check your input!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+		fout.close()
+
+		# settings
+		if self.ui.rdoProductive.isChecked() == True:
+			GetProductive = True
+		else:
+			GetProductive = False
+
+		if seq_pathname == None:
+			return
+		answer2 = ''
+
+		ErlogFile = os.path.join(temp_folder,'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		header = "Began input at " + time.strftime('%c')
+		with open(ErlogFile2, 'w') as currentFile:
+			currentFile.write(header)
+		# firstOne = True
+
+		if self.ui.checkBoxFileStruc.isChecked():
+			project = self.ui.comboBoxProject.currentText()
+			grouping = self.ui.comboBoxGroup.currentText()
+			subgroup = self.ui.comboBoxSubgroup.currentText()
+
+			datalist.clear()
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread1(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			file_list_str = '\n'.join(fasta_files)
+			f.write(file_list_str)
+			f.close()
+
+			self.disableWidgets()
+			self.checkProgress()
+			return
+		elif self.ui.rdoChoose.isChecked():
+			(dirname, filename) = os.path.split(seq_pathname)
+
+			if Filenamed == 'none':
+				project = self.ui.comboBoxProject.currentText()
+				grouping = self.ui.comboBoxGroup.currentText()
+				subgroup = self.ui.comboBoxSubgroup.currentText()
+			else:
+				project = Filenamed[1]
+				grouping = Filenamed[2]
+				subgroup = Filenamed[3]
+
+			if project == '': project = 'none'
+			if grouping == '': grouping = 'none'
+			if subgroup == '': subgroup = 'none'
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread1(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			file_list_str = '\n'.join(fasta_files)
+			f.write(file_list_str)
+			f.close()
+
+			self.disableWidgets()
+			self.checkProgress()
+			return
+		elif self.ui.rdoFunction.isChecked():
+			project = 'ByFunction'
+			grouping = ''
+			subgroup = ''
+
+			multiProject = ''
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+			datalist.append(multiProject)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread1(self)
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			file_list_str = '\n'.join(fasta_files)
+			f.write(file_list_str)
+			f.close()
+
+			#self.disableWidgets()
+			self.checkProgress()
 			return
 
 	@pyqtSlot()
@@ -2558,6 +2785,21 @@ class WorkThread(QThread):
 	def run(self):
 		global IgBLASTAnalysis
 		IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
+		self.trigger.emit(self.item)
+
+class WorkThread1(QThread):
+	trigger = pyqtSignal(str)
+
+	def __int__(self):
+		super(WorkThread1, self).__init__()
+		self.parent = parent
+		self.item = ''
+		self.datalist = ''
+		self.igOut = ''
+
+	def run(self):
+		global IgBLASTAnalysis
+		IgBLASTAnalysis = IgBLASTer.IgBLASTitResults(self.item, self.igOut, self.datalist)
 		self.trigger.emit(self.item)
 
 class VGenesForm(QtWidgets.QMainWindow):
