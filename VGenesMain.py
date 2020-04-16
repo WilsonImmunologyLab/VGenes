@@ -843,6 +843,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def updateGroupSetting(self):
 		if self.ui.rdoChoose.isChecked():
+			self.ui.comboBoxProject.clear()
+			self.ui.comboBoxGroup.clear()
+			self.ui.comboBoxSubgroup.clear()
+
 			fields = ['Project']  # , 'Grouping', 'SubGroup'
 			SQLStatement1 = Vgenes.MakeSQLStatement(fields)
 
@@ -894,11 +898,19 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxSubgroup.setEnabled(True)
 
 		if self.ui.rdoFunction.isChecked():
+			self.ui.comboBoxProject.clear()
+			self.ui.comboBoxGroup.clear()
+			self.ui.comboBoxSubgroup.clear()
+
 			self.ui.comboBoxProject.setEnabled(False)
 			self.ui.comboBoxGroup.setEnabled(False)
 			self.ui.comboBoxSubgroup.setEnabled(False)
 
 		if self.ui.checkBoxFileStruc.isChecked():
+			self.ui.comboBoxProject.clear()
+			self.ui.comboBoxGroup.clear()
+			self.ui.comboBoxSubgroup.clear()
+
 			self.ui.comboBoxProject.setEnabled(True)
 			self.ui.comboBoxGroup.setEnabled(True)
 			self.ui.comboBoxSubgroup.setEnabled(True)
@@ -1182,14 +1194,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxSubgroup.setEnabled(True)
 			self.ui.txtComment.setEnabled(True)
 		elif num == 5:
-			self.ui.radioButtonHuman.setEnabled(True)
-			self.ui.radioButtonMouse.setEnabled(True)
-			self.ui.rdoProductive.setEnabled(True)
-			self.ui.rdoVandJ.setEnabled(True)
+			self.ui.radioButtonHuman.setEnabled(False)
+			self.ui.radioButtonMouse.setEnabled(False)
+			self.ui.rdoVandJ.setEnabled(False)
 			self.ui.rdoFunction.setEnabled(True)
-			self.ui.rdoAll.setEnabled(True)
+			self.ui.rdoAll.setEnabled(False)
 			self.ui.rdoChoose.setEnabled(True)
-			self.ui.rdoProductive.setEnabled(True)
+			self.ui.rdoProductive.setEnabled(False)
 			self.ui.checkBoxFileStruc.setEnabled(True)
 			self.ui.comboBoxProject.setEnabled(True)
 			self.ui.comboBoxGroup.setEnabled(True)
@@ -1918,7 +1929,114 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 
 	def InitiateImportFromIMGT(self):
-		pass
+		if os.path.isfile(self.ui.lineEditIMGT.text()):
+			pass
+		else:
+			msg = 'Please setup IGMT output file!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		self.calling = 5
+
+		# need to transfer species grouping to IgBlaster
+		answer = ''
+		thetype = 'FASTA'
+		species = ''
+		datalist = []
+		global answer3
+		# answerTo = answer3
+
+		IMGT_out = self.ui.lineEditIMGT.text()
+
+		answer2 = ''
+
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		header = "Began input at " + time.strftime('%c')
+		with open(ErlogFile2, 'w') as currentFile:
+			currentFile.write(header)
+		# firstOne = True
+
+		if self.ui.rdoChoose.isChecked() or self.ui.checkBoxFileStruc.isChecked():
+			if Filenamed == 'none':
+				project = self.ui.comboBoxProject.currentText()
+				grouping = self.ui.comboBoxGroup.currentText()
+				subgroup = self.ui.comboBoxSubgroup.currentText()
+			else:
+				project = Filenamed[1]
+				grouping = Filenamed[2]
+				subgroup = Filenamed[3]
+
+			if project == '': project = 'none'
+			if grouping == '': grouping = 'none'
+			if subgroup == '': subgroup = 'none'
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread1(self)
+			workThread.igOut = igOut
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			f.write(seq_pathname)
+			f.close()
+
+			self.disableWidgets()
+			self.checkProgress()
+			return
+		elif self.ui.rdoFunction.isChecked():
+			project = 'ByFunction'
+			grouping = ''
+			subgroup = ''
+
+			multiProject = ''
+
+			datalist.clear()
+
+			datalist.append(project)
+			datalist.append(grouping)
+			datalist.append(subgroup)
+			datalist.append(species)
+			datalist.append(GetProductive)
+			datalist.append(MaxNum)
+			datalist.append(multiProject)
+
+			# try multi-thread
+			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			file_handle = open(progressBarFile, 'w')
+			file_handle.write('0')
+			file_handle.close()
+			workThread = WorkThread1(self)
+			workThread.igOut = igOut
+			workThread.item = seq_pathname
+			workThread.datalist = datalist
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+
+			import_file = os.path.join(temp_folder, "import_file_name.txt")
+			f = open(import_file, 'w')
+			f.write(seq_pathname)
+			f.close()
+
+			# self.disableWidgets()
+			self.checkProgress()
+			return
 
 	@pyqtSlot()
 	def multi_callback(self):
@@ -1960,6 +2078,73 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					record[77] = sampleName
 					continue
 		#a = IgBLASTAnalysis
+
+		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+
+		import_file = os.path.join(temp_folder, "import_file_name.txt")
+		file_handle = open(import_file, 'r')
+		file_name = file_handle.readlines()
+		file_name = ''.join(file_name)
+		file_handle.close()
+
+		i = 0
+		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: \n' + file_name + '\n'
+
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		with open(ErlogFile, 'r') as currentFile:  # using with for this automatically closes the file even if you crash
+			for line in currentFile:
+				if i > 0:
+					newErLog += line
+				i += 1
+
+		with open(ErlogFile2, 'a') as currentFile:
+			currentFile.write(newErLog)
+
+		Vgenes.LoadDB(DBFilename)
+		self.ShowVGenesText(ErlogFile2)
+		self.hide()
+
+	@pyqtSlot()
+	def multiIMGT_callback(self):
+		global IgBLASTAnalysis
+
+		Startprocessed = 0
+		try:
+			Startprocessed = len(IgBLASTAnalysis)
+			self.close()
+		except:
+			if Startprocessed == 0:
+				self.close()
+
+		a = IgBLASTAnalysis
+
+		if self.calling == 1:
+			# match barcode
+			barcodeDict = self.readBarcode(self.anno_path_name)
+
+			for record in IgBLASTAnalysis:
+				if record[0] in barcodeDict.keys():
+					record[108] = barcodeDict[record[0]]
+
+				if self.rep2 == "byChain":
+					rep2 = record[2][0]
+				else:
+					rep2 = self.rep2
+				record[0] = reName(record[0], self.rep1, rep2, self.prefix)
+		elif self.calling == 2:
+			for record in IgBLASTAnalysis:
+				sampleName = record[0].split('_')[0]
+				if record[75][0] == '$':
+					record[75] = sampleName
+					continue
+				if record[76][0] == '$':
+					record[76] = sampleName
+					continue
+				if record[77][0] == '$':
+					record[77] = sampleName
+					continue
+		# a = IgBLASTAnalysis
 
 		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
 
