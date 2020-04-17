@@ -1226,7 +1226,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		elif num == 4:
 			self.InitiateImportFromIgBlast('none', 0)
 		elif num == 5:
-			self.InitiateImportFromIMGT('none', 0)
+			self.InitiateImportFromIMGT()
 		else:
 			pass
 
@@ -1939,9 +1939,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.calling = 5
 
 		# need to transfer species grouping to IgBlaster
-		answer = ''
-		thetype = 'FASTA'
-		species = ''
 		datalist = []
 		global answer3
 		# answerTo = answer3
@@ -1958,43 +1955,30 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		# firstOne = True
 
 		if self.ui.rdoChoose.isChecked() or self.ui.checkBoxFileStruc.isChecked():
-			if Filenamed == 'none':
-				project = self.ui.comboBoxProject.currentText()
-				grouping = self.ui.comboBoxGroup.currentText()
-				subgroup = self.ui.comboBoxSubgroup.currentText()
-			else:
-				project = Filenamed[1]
-				grouping = Filenamed[2]
-				subgroup = Filenamed[3]
-
-			if project == '': project = 'none'
-			if grouping == '': grouping = 'none'
-			if subgroup == '': subgroup = 'none'
+			project = self.ui.comboBoxProject.currentText()
+			grouping = self.ui.comboBoxGroup.currentText()
+			subgroup = self.ui.comboBoxSubgroup.currentText()
 
 			datalist.clear()
 
 			datalist.append(project)
 			datalist.append(grouping)
 			datalist.append(subgroup)
-			datalist.append(species)
-			datalist.append(GetProductive)
-			datalist.append(MaxNum)
 
 			# try multi-thread
 			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 			file_handle = open(progressBarFile, 'w')
 			file_handle.write('0')
 			file_handle.close()
-			workThread = WorkThread1(self)
-			workThread.igOut = igOut
-			workThread.item = seq_pathname
+			workThread = WorkThreadIMGTparser(self)
+			workThread.item = IMGT_out
 			workThread.datalist = datalist
 			workThread.start()
-			workThread.trigger.connect(self.multi_callback)
+			workThread.trigger.connect(self.multiIMGT_callback)
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
-			f.write(seq_pathname)
+			f.write(IMGT_out)
 			f.close()
 
 			self.disableWidgets()
@@ -2012,26 +1996,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(project)
 			datalist.append(grouping)
 			datalist.append(subgroup)
-			datalist.append(species)
-			datalist.append(GetProductive)
-			datalist.append(MaxNum)
-			datalist.append(multiProject)
 
 			# try multi-thread
 			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 			file_handle = open(progressBarFile, 'w')
 			file_handle.write('0')
 			file_handle.close()
-			workThread = WorkThread1(self)
-			workThread.igOut = igOut
-			workThread.item = seq_pathname
+			workThread = WorkThreadIMGTparser(self)
+			workThread.item = IMGT_out
 			workThread.datalist = datalist
 			workThread.start()
-			workThread.trigger.connect(self.multi_callback)
+			workThread.trigger.connect(self.multiIMGT_callback)
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
-			f.write(seq_pathname)
+			f.write(IMGT_out)
 			f.close()
 
 			# self.disableWidgets()
@@ -3065,6 +3044,7 @@ class WorkThreadIMGTparser(QThread):
 	def run(self):
 		global IMGTAnalysis
 		IMGTAnalysis = IMGTparser(self.item, self.datalist)
+		a = IMGTAnalysis
 		self.trigger.emit(self.item)
 
 class VGenesForm(QtWidgets.QMainWindow):
@@ -13020,6 +13000,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#model.refresh()
 
 		self.updateF(data[119])
+
+def IMGTparser(IMGT_out, data_list):
+	# Extract IMGT files from txz package
+	temp_dir, files = extractIMGT(IMGT_out)
+
+	DATA = []
+	# Parse
+	with open(files['summary'], 'r') as summary, \
+			open(files['gapped'], 'r') as gapped, \
+			open(files['ntseq'], 'r') as ntseq, \
+			open(files['junction'], 'r') as junction:
+		result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
+		for record in result:
+			#print(record)
+			DATA.append(record)
+	# Remove IMGT temporary directory
+	temp_dir.cleanup()
+
+	return DATA
 
 def AlignSequencesHTML(DataSet, template):
 	# import tempfile
