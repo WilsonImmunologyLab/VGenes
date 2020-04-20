@@ -21,6 +21,7 @@ from pyecharts import options as opts
 from pyecharts.globals import SymbolType
 from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_formatter, svg_formatter
 import itertools
+from itertools import chain, groupby, zip_longest
 import threading as thd
 
 
@@ -32,6 +33,10 @@ import VGenesSQL
 import VGenesSeq
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
+
+import tarfile
+import zipfile
+from tempfile import TemporaryDirectory
 
 import VGenesCloneCaller
 from ui_Import_Dialogue import Ui_DialogImport
@@ -62,7 +67,7 @@ from Bio import SeqIO
 from subprocess import call, Popen, PIPE
 
 # import changeo
-from changeo.IO import getDbFields, extractIMGT, readGermlines, IgBLASTReader, IMGTReader
+from changeo.IO import IMGTReader
 
 from PyQt5.QtWidgets import QMessageBox, QInputDialog
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
@@ -13008,17 +13013,76 @@ def IMGTparser(IMGT_out, data_list):
 	DATA = []
 	# Parse
 	with open(files['summary'], 'r') as summary, \
-			open(files['gapped'], 'r') as gapped, \
+			open(files['gapped-nt'], 'r') as gapped, \
 			open(files['ntseq'], 'r') as ntseq, \
 			open(files['junction'], 'r') as junction:
-		result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
+
+		result = csv.reader(summary,delimiter='\t')
 		for record in result:
-			#print(record)
-			DATA.append(record)
+			pass
+		#result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
+		#for record in result:
+		#	#print(record)
+		#	DATA.append(record)
 	# Remove IMGT temporary directory
 	temp_dir.cleanup()
 
 	return DATA
+
+def extractIMGT(imgt_output):
+    """
+    Extract necessary files from IMGT/HighV-QUEST results. This function is imported from change-o.
+
+    Arguments:
+      imgt_output : zipped file or unzipped folder output by IMGT/HighV-QUEST.
+
+    Returns:
+      tuple : (temporary directory handle, dictionary with names of extracted IMGT files).
+    """
+    # Map of IMGT file names
+    imgt_names = ('1_Summary', '2_IMGT-gapped', '3_Nt-sequences', '4_IMGT-gapped', '5_AA', '6_Junction',
+                  '7_V-REGION-mutation', '8_V-REGION-nt-mutation', '9_V-REGION-AA-change','10_V-REGION-mutation')
+    imgt_keys = ('summary', 'gapped-nt', 'ntseq', 'gapped-aa', 'aaseq', 'junction',
+                 '7-v-mutation-aa-table', '8-v-mutation-nt','9-v-mutation-aa', '10-v-mutation')
+
+    # Open temporary directory and intialize return dictionary
+    temp_dir = TemporaryDirectory()
+
+    # Zip input
+    if zipfile.is_zipfile(imgt_output):
+        imgt_zip = zipfile.ZipFile(imgt_output, 'r')
+        # Extract required files
+        imgt_files = sorted([n for n in imgt_zip.namelist() \
+                             if os.path.basename(n).startswith(imgt_names)])
+        imgt_zip.extractall(temp_dir.name, imgt_files)
+        # Define file dictionary
+        imgt_dict = {k: os.path.join(temp_dir.name, f) for k, f in zip_longest(imgt_keys, imgt_files)}
+    # Folder input
+    elif os.path.isdir(imgt_output):
+        folder_files = []
+        for root, dirs, files in os.walk(imgt_output):
+            folder_files.extend([os.path.join(os.path.abspath(root), f) for f in files])
+        # Define file dictionary
+        imgt_files = sorted([n for n in folder_files \
+                             if os.path.basename(n).startswith(imgt_names)])
+        imgt_dict = {k: f for k, f in zip_longest(imgt_keys, imgt_files)}
+    # Tarball input
+    elif tarfile.is_tarfile(imgt_output):
+        imgt_tar = tarfile.open(imgt_output, 'r')
+        # Extract required files
+        imgt_files = sorted([n for n in imgt_tar.getnames() \
+                             if os.path.basename(n).startswith(imgt_names)])
+        imgt_tar.extractall(temp_dir.name, [imgt_tar.getmember(n) for n in imgt_files])
+        # Define file dictionary
+        imgt_dict = {k: os.path.join(temp_dir.name, f) for k, f in zip_longest(imgt_keys, imgt_files)}
+    else:
+        printError('Unsupported IGMT output file. Must be either a zipped file (.zip), LZMA compressed tarfile (.txz) or a folder.')
+
+    # Check extraction for errors
+    if len(imgt_dict) != len(imgt_names):
+        printError('Extra files or missing necessary file IMGT output %s.' % imgt_output)
+
+    return temp_dir, imgt_dict
 
 def AlignSequencesHTML(DataSet, template):
 	# import tempfile
