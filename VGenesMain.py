@@ -1083,7 +1083,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def browseFasta(self):
 		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
-		                                                   "Fasta Files (*.fasta, *.fas, *.fa);;All Files (*)")
+		                                                   "Fasta Files (*.fasta);Fasta Files (*.fas);Fasta Files (*.fa);All Files (*)")
 		if len(files) == 0:
 			return
 		else:
@@ -1111,7 +1111,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def browseIgBlastFasta(self):
 		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
-		                                                       "igBlast output File (*.txt);;All Files (*)")
+		                                                       "Fasta Files (*.fasta);Fasta Files (*.fas);Fasta Files (*.fa);All Files (*)")
 		if file == '' or file == None:
 			return
 		else:
@@ -1119,7 +1119,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def browseIMGT(self):
 		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
-		                                                   "IMGT output File (*.txt);;All Files (*)")
+		                                                   "IMGT output Zip File (*.zip);;All Files (*)")
 		if len(file) == 0:
 			return
 		else:
@@ -13010,17 +13010,184 @@ def IMGTparser(IMGT_out, data_list):
 	# Extract IMGT files from txz package
 	temp_dir, files = extractIMGT(IMGT_out)
 
+	now = time.strftime('%c')
 	DATA = []
 	# Parse
 	with open(files['summary'], 'r') as summary, \
 			open(files['gapped-nt'], 'r') as gapped, \
 			open(files['ntseq'], 'r') as ntseq, \
-			open(files['junction'], 'r') as junction:
+			open(files['junction'], 'r') as junction, \
+			open(files['para'], 'r') as para, \
+			open(files['8V-mut'], 'r') as vmut, \
+			open(files['aaseq'], 'r') as aaseq:
 
-		result = csv.reader(summary,delimiter='\t')
+		# read species
+		result = para.readlines()
+		spe = result[3]
+		spe = re.sub('Species\t','',spe)
+		spe = re.sub('\t', '', spe)
+		spe = re.sub('\n', '', spe)
+		
+		if spe == "Homo sapiens":
+			spe = 'Human'
+		elif spe == '':
+			spe = 'Mouse'
+		else:
+			Msg = 'Your species\n' + spe + 'is not supported! Only support Human and Mouse!'
+			return Msg
+
+		# read records from summary file
+		result = csv.reader(summary, delimiter="\t")
+		line_id = 0
 		for record in result:
-			pass
-		#result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
+			if line_id == 0:
+				pass
+			else:
+				this_data = [''] * 120
+
+				this_data[0] = record[1]
+				this_data[1] = record[27]
+				this_data[13] = record[19]
+				this_data[14] = record[2]
+				this_data[15] = record[20]
+				this_data[79] = record[24]
+				this_data[78] = spe
+				this_data[93] = now
+
+				v_str = record[3]
+				v_genes = v_str.split('or ')
+				index = 3
+				for ele in v_genes:
+					this_data[index] = ele
+					index += 1
+
+				d_str = record[11]
+				d_genes = d_str.split('or ')
+				index = 6
+				for ele in d_genes:
+					this_data[index] = ele
+					index += 1
+
+				j_str = record[7]
+				j_genes = j_str.split('or ')
+				index = 9
+				for ele in j_genes:
+					this_data[index] = ele
+					index += 1
+
+				m = re.search('IG\S+', this_data[3])
+				try:
+					v_locus = m.group(0)
+					v_locus = re.sub('^IG','',v_locus)
+					v_locus = re.sub('\*.+', '', v_locus)
+					v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
+					this_data[90] = v_locus
+				except:
+					pass
+
+				m = re.search('IG\S+', this_data[6])
+				try:
+					d_locus = m.group(0)
+					d_locus = re.sub('^IG', '', d_locus)
+					d_locus = re.sub('\*.+', '', d_locus)
+					d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
+					this_data[91] = d_locus
+				except:
+					pass
+
+				m = re.search('IG\S+', this_data[9])
+				try:
+					j_locus = m.group(0)
+					j_locus = re.sub('^IG', '', j_locus)
+					j_locus = re.sub('\*.+', '', j_locus)
+					j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
+					this_data[92] = j_locus
+				except:
+					pass
+
+				DATA.append(this_data)
+			line_id += 1
+
+		# read records from ntseq file
+		result = csv.reader(ntseq, delimiter="\t")
+		line_id = 0
+		for record in result:
+			if line_id == 0:
+				pass
+			else:
+				DATA[line_id-1][22] = record[48]
+				DATA[line_id-1][23] = record[49]
+				DATA[line_id-1][24] = str(int(record[49]) - int(record[48]) + 1)
+				DATA[line_id-1][29] = record[50]
+				DATA[line_id-1][30] = record[51]
+				DATA[line_id-1][31] = str(int(record[51]) - int(record[50]) + 1)
+				DATA[line_id-1][36] = record[52]
+				DATA[line_id-1][37] = record[53]
+				DATA[line_id-1][38] = str(int(record[53]) - int(record[52]) + 1)
+				DATA[line_id-1][43] = record[54]
+				DATA[line_id-1][44] = record[55]
+				DATA[line_id-1][45] = str(int(record[55]) - int(record[54]) + 1)
+				DATA[line_id-1][50] = record[56]
+				DATA[line_id-1][51] = record[57]
+				DATA[line_id-1][52] = str(int(record[57]) - int(record[56]) + 1)
+
+				DATA[line_id-1][67] = record[46]
+				DATA[line_id-1][68] = record[47]
+				DATA[line_id-1][69] = record[82]
+				DATA[line_id-1][70] = record[83]
+				DATA[line_id-1][71] = record[90]
+				DATA[line_id-1][72] = record[91]
+				DATA[line_id-1][73] = record[110]
+				DATA[line_id-1][74] = record[111]
+				DATA[line_id-1][79] = record[6]
+				DATA[line_id-1][81] = record[14]
+				DATA[line_id-1][84] = record[58]
+				DATA[line_id-1][85] = record[59]
+			line_id += 1
+
+		# read records from 8-v-mutattion file
+		result = csv.reader(vmut, delimiter="\t")
+		line_id = 0
+		for record in result:
+			if line_id == 0:
+				pass
+			else:
+				DATA[line_id-1][25] = record[24]
+				DATA[line_id-1][26] = record[25]
+				DATA[line_id-1][27] = str(int(record[22]) - int(record[23]))
+				DATA[line_id-1][28] = str(round(int(record[24])/int(record[22])*100,2))
+				DATA[line_id-1][32] = record[42]
+				DATA[line_id-1][33] = record[43]
+				DATA[line_id-1][34] = str(int(record[40]) - int(record[41]))
+				DATA[line_id-1][35] = str(round(int(record[42]) / int(record[40]) * 100, 2))
+				DATA[line_id-1][39] = record[60]
+				DATA[line_id-1][40] = record[61]
+				DATA[line_id-1][41] = str(int(record[58]) - int(record[59]))
+				DATA[line_id-1][42] = str(round(int(record[60]) / int(record[58]) * 100, 2))
+				DATA[line_id-1][46] = record[78]
+				DATA[line_id-1][47] = record[79]
+				DATA[line_id-1][48] = str(int(record[76]) - int(record[77]))
+				DATA[line_id-1][49] = str(round(int(record[78]) / int(record[76]) * 100, 2))
+				DATA[line_id-1][53] = record[96]
+				DATA[line_id-1][54] = record[97]
+				DATA[line_id-1][55] = str(int(record[94]) - int(record[95]))
+				DATA[line_id-1][56] = str(round(int(record[96]) / int(record[94]) * 100, 2))
+				DATA[line_id-1][57] = re.sub('\s.+','',record[7])
+				DATA[line_id-1][96] = re.sub('\s.+','',record[7])
+			line_id += 1
+
+		# read records from aa-seq file
+		result = csv.reader(aaseq, delimiter="\t")
+		line_id = 0
+		for record in result:
+			if line_id == 0:
+				pass
+			else:
+				DATA[line_id-1][82] = record[14]
+				DATA[line_id-1][83] = str(len(record[14]))
+			line_id += 1
+
+	#result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
 		#for record in result:
 		#	#print(record)
 		#	DATA.append(record)
@@ -13040,10 +13207,10 @@ def extractIMGT(imgt_output):
       tuple : (temporary directory handle, dictionary with names of extracted IMGT files).
     """
     # Map of IMGT file names
-    imgt_names = ('1_Summary', '2_IMGT-gapped', '3_Nt-sequences', '4_IMGT-gapped', '5_AA', '6_Junction',
-                  '7_V-REGION-mutation', '8_V-REGION-nt-mutation', '9_V-REGION-AA-change','10_V-REGION-mutation')
-    imgt_keys = ('summary', 'gapped-nt', 'ntseq', 'gapped-aa', 'aaseq', 'junction',
-                 '7-v-mutation-aa-table', '8-v-mutation-nt','9-v-mutation-aa', '10-v-mutation')
+    imgt_names = ('11_Parameters', '1_Summary', '2_IMGT-gapped', '3_Nt-sequences', '4_IMGT-gapped', '5_AA', '6_Junction',
+                  '7_V-REGION-mutation', '8_V-REGION-nt-mutation', '9_V-REGION-AA-change')
+    imgt_keys = ('para', 'summary', 'gapped-nt', 'ntseq', 'gapped-aa', 'aaseq', 'junction',
+                 '7-v-mutation-aa-table', '8V-mut','9-v-mutation-aa')
 
     # Open temporary directory and intialize return dictionary
     temp_dir = TemporaryDirectory()
