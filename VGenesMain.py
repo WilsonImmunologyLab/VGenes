@@ -1021,10 +1021,12 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					if len(dirs) > 3:
 						dirs = dirs[-3:]
 
+					dirs[-1] = re.sub(r'\W.+','',dirs[-1])
+
 					if len(dirs) == 3:
 						project = dirs[0]
 						group = dirs[1]
-						subgroup = '$FileName'
+						subgroup = dirs[2]
 						self.ui.comboBoxProject.addItem(project)
 						self.ui.comboBoxProject.setCurrentText(project)
 						self.ui.comboBoxGroup.addItem(group)
@@ -1033,13 +1035,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
 					elif len(dirs) == 2:
 						project = dirs[0]
-						group = '$FileName'
+						group = dirs[1]
 						self.ui.comboBoxProject.addItem(project)
 						self.ui.comboBoxProject.setCurrentText(project)
 						self.ui.comboBoxGroup.addItem(group)
 						self.ui.comboBoxGroup.setCurrentText(group)
 					elif len(dirs) == 1:
-						project = '$FileName'
+						project = dirs[0]
 						self.ui.comboBoxProject.addItem(project)
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
@@ -13010,8 +13012,13 @@ def IMGTparser(IMGT_out, data_list):
 	# Extract IMGT files from txz package
 	temp_dir, files = extractIMGT(IMGT_out)
 
+	project = data_list[0]
+	grouping = data_list[1]
+	subgroup = data_list[2]
+
 	now = time.strftime('%c')
 	DATA = []
+	raw_seq = []
 	# Parse
 	with open(files['summary'], 'r') as summary, \
 			open(files['gapped-nt'], 'r') as gapped, \
@@ -13048,9 +13055,12 @@ def IMGTparser(IMGT_out, data_list):
 				this_data[0] = record[1]
 				this_data[1] = record[27]
 				this_data[13] = record[19]
-				this_data[14] = record[2]
+				if record[2] == 'productive':
+					this_data[14] = 'Yes'
+				else:
+					this_data[14] = 'No'
 				this_data[15] = record[20]
-				this_data[79] = record[24]
+				#this_data[79] = record[24]
 				this_data[78] = spe
 				this_data[93] = now
 
@@ -13105,7 +13115,29 @@ def IMGTparser(IMGT_out, data_list):
 				except:
 					pass
 
+				# identify gene type
+				GeneType = 'Lambda'
+				if v_locus[:2] == 'VH':
+					GeneType = 'Heavy'
+				elif v_locus[:2] == 'VK':
+					GeneType = 'Kappa'
+				this_data[2] = GeneType
+
+				# identify grouping
+				if project == 'ByFunction':
+					this_data[75] = GeneType
+					if this_data[14] == "Yes":
+						this_data[76] = 'Functional'
+					else:
+						this_data[76] = 'Nonfunctional'
+					this_data[77] = this_data[13]
+				else:
+					this_data[75] = project
+					this_data[76] = grouping
+					this_data[77] = subgroup
+
 				DATA.append(this_data)
+				raw_seq.append(record[24])
 			line_id += 1
 
 		# read records from ntseq file
@@ -13139,10 +13171,49 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id-1][72] = record[91]
 				DATA[line_id-1][73] = record[110]
 				DATA[line_id-1][74] = record[111]
-				DATA[line_id-1][79] = record[6]
+				if DATA[line_id-1][2] == 'Heavy':
+					DATA[line_id-1][79] = record[6]
+				else:
+					DATA[line_id - 1][79] = record[7]
 				DATA[line_id-1][81] = record[14]
 				DATA[line_id-1][84] = record[58]
 				DATA[line_id-1][85] = record[59]
+
+				GeneType = DATA[line_id-1][2]
+				Sequence = DATA[line_id-1][79]
+				# identify isotype
+				if GeneType == 'Heavy':
+					IsoSeq = Sequence.split(raw_seq[line_id-1])
+					try:
+						IsoSeq = IsoSeq[1]
+						# print(SeqName)
+						IsoSeq = IsoSeq.strip('N')
+						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+						else:
+							if len(IsoSeq) > 2:
+								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+									Isotype = 'IgG'
+								elif IsoSeq[:3] == 'CAT':
+									Isotype = 'IgA'
+								elif IsoSeq[:3] == 'GGA':
+									Isotype = 'IgM'
+								elif IsoSeq[:3] == 'CAC':
+									Isotype = 'IgD'
+								else:
+									Isotype = IsoSeq
+							else:
+								Isotype = 'Unknown'
+					except:
+						Isotype = 'Unknown'
+				else:
+					if GeneType == 'Kappa':
+						Isotype = 'Kappa'
+					elif GeneType == 'Lambda':
+						Isotype = 'Lambda'
+				DATA[line_id - 1][101] = Isotype
+
 			line_id += 1
 
 		# read records from 8-v-mutattion file
