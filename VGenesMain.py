@@ -2093,46 +2093,19 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	@pyqtSlot()
 	def multiIMGT_callback(self):
-		global IgBLASTAnalysis
+		global IMGTAnalysis
 
 		Startprocessed = 0
 		try:
-			Startprocessed = len(IgBLASTAnalysis)
+			Startprocessed = len(IMGTAnalysis)
 			self.close()
 		except:
 			if Startprocessed == 0:
 				self.close()
 
-		a = IgBLASTAnalysis
+		a = IMGTAnalysis
 
-		if self.calling == 1:
-			# match barcode
-			barcodeDict = self.readBarcode(self.anno_path_name)
-
-			for record in IgBLASTAnalysis:
-				if record[0] in barcodeDict.keys():
-					record[108] = barcodeDict[record[0]]
-
-				if self.rep2 == "byChain":
-					rep2 = record[2][0]
-				else:
-					rep2 = self.rep2
-				record[0] = reName(record[0], self.rep1, rep2, self.prefix)
-		elif self.calling == 2:
-			for record in IgBLASTAnalysis:
-				sampleName = record[0].split('_')[0]
-				if record[75][0] == '$':
-					record[75] = sampleName
-					continue
-				if record[76][0] == '$':
-					record[76] = sampleName
-					continue
-				if record[77][0] == '$':
-					record[77] = sampleName
-					continue
-		# a = IgBLASTAnalysis
-
-		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+		Processed, answer = VGenesSQL.enterData(self, DBFilename, IMGTAnalysis, answer3)
 
 		import_file = os.path.join(temp_folder, "import_file_name.txt")
 		file_handle = open(import_file, 'r')
@@ -13009,6 +12982,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.updateF(data[119])
 
 def IMGTparser(IMGT_out, data_list):
+	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+
 	# Extract IMGT files from txz package
 	temp_dir, files = extractIMGT(IMGT_out)
 
@@ -13026,7 +13001,8 @@ def IMGTparser(IMGT_out, data_list):
 			open(files['junction'], 'r') as junction, \
 			open(files['para'], 'r') as para, \
 			open(files['8V-mut'], 'r') as vmut, \
-			open(files['aaseq'], 'r') as aaseq:
+			open(files['aaseq'], 'r') as aaseq, \
+			open(files['junction'], 'r') as junction:
 
 		# read species
 		result = para.readlines()
@@ -13050,7 +13026,7 @@ def IMGTparser(IMGT_out, data_list):
 			if line_id == 0:
 				pass
 			else:
-				this_data = [''] * 120
+				this_data = [''] * 119
 
 				this_data[0] = record[1]
 				this_data[1] = record[27]
@@ -13152,6 +13128,29 @@ def IMGTparser(IMGT_out, data_list):
 				raw_seq.append(record[24].upper())
 			line_id += 1
 
+		file_handle = open(progressBarFile, 'w')
+		progress = str(int(20))
+		file_handle.write(progress)
+		file_handle.write(',Summary file processed')
+		file_handle.close()
+
+		# read records from junction file
+		result = csv.reader(junction, delimiter="\t")
+		line_id = 0
+		for record in result:
+			if line_id == 0:
+				pass
+			else:
+				DATA[line_id - 1][99] = record[71]
+				DATA[line_id - 1][100] = record[72]
+			line_id += 1
+
+		file_handle = open(progressBarFile, 'w')
+		progress = str(int(40))
+		file_handle.write(progress)
+		file_handle.write(',Junction file processed')
+		file_handle.close()
+
 		# read records from ntseq file
 		result = csv.reader(ntseq, delimiter="\t")
 		line_id = 0
@@ -13228,6 +13227,12 @@ def IMGTparser(IMGT_out, data_list):
 
 			line_id += 1
 
+		file_handle = open(progressBarFile, 'w')
+		progress = str(int(60))
+		file_handle.write(progress)
+		file_handle.write(',NT-sequence file processed')
+		file_handle.close()
+
 		# read records from 8-v-mutattion file
 		result = csv.reader(vmut, delimiter="\t")
 		line_id = 0
@@ -13259,6 +13264,12 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id-1][96] = re.sub('\s.+','',record[7])
 			line_id += 1
 
+		file_handle = open(progressBarFile, 'w')
+		progress = str(int(80))
+		file_handle.write(progress)
+		file_handle.write(',Mutation file processed')
+		file_handle.close()
+
 		# read records from aa-seq file
 		result = csv.reader(aaseq, delimiter="\t")
 		line_id = 0
@@ -13270,6 +13281,11 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id-1][83] = str(len(record[14]))
 			line_id += 1
 
+		file_handle = open(progressBarFile, 'w')
+		progress = str(int(100))
+		file_handle.write(progress)
+		file_handle.write(',AA-sequence file processed')
+		file_handle.close()
 	#result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
 		#for record in result:
 		#	#print(record)
