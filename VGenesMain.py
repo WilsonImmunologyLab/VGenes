@@ -13089,7 +13089,7 @@ def IMGTparser(IMGT_out, data_list):
 					d_locus = re.sub('^IG', '', d_locus)
 					d_locus = re.sub('\*.+', '', d_locus)
 					d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
-					this_data[91] = d_locus
+					this_data[92] = d_locus
 				except:
 					pass
 
@@ -13099,7 +13099,7 @@ def IMGTparser(IMGT_out, data_list):
 					j_locus = re.sub('^IG', '', j_locus)
 					j_locus = re.sub('\*.+', '', j_locus)
 					j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
-					this_data[92] = j_locus
+					this_data[91] = j_locus
 				except:
 					pass
 
