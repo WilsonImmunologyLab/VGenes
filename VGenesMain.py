@@ -13068,21 +13068,33 @@ def IMGTparser(IMGT_out, data_list):
 				v_genes = v_str.split('or ')
 				index = 3
 				for ele in v_genes:
-					this_data[index] = ele
+					m = re.search('IG\S+', ele)
+					try:
+						this_data[index] = m.group(0)
+					except:
+						this_data[index] = ele
 					index += 1
 
 				d_str = record[11]
 				d_genes = d_str.split('or ')
 				index = 6
 				for ele in d_genes:
-					this_data[index] = ele
+					m = re.search('IG\S+', ele)
+					try:
+						this_data[index] = m.group(0)
+					except:
+						this_data[index] = ele
 					index += 1
 
 				j_str = record[7]
 				j_genes = j_str.split('or ')
 				index = 9
 				for ele in j_genes:
-					this_data[index] = ele
+					m = re.search('IG\S+', ele)
+					try:
+						this_data[index] = m.group(0)
+					except:
+						this_data[index] = ele
 					index += 1
 
 				m = re.search('IG\S+', this_data[3])
@@ -13137,7 +13149,7 @@ def IMGTparser(IMGT_out, data_list):
 					this_data[77] = subgroup
 
 				DATA.append(this_data)
-				raw_seq.append(record[24])
+				raw_seq.append(record[24].upper())
 			line_id += 1
 
 		# read records from ntseq file
@@ -13172,10 +13184,10 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id-1][73] = record[110]
 				DATA[line_id-1][74] = record[111]
 				if DATA[line_id-1][2] == 'Heavy':
-					DATA[line_id-1][79] = record[6]
+					DATA[line_id-1][79] = record[6].upper()
 				else:
-					DATA[line_id - 1][79] = record[7]
-				DATA[line_id-1][81] = record[14]
+					DATA[line_id - 1][79] = record[7].upper()
+				DATA[line_id-1][81] = record[14].upper()
 				DATA[line_id-1][84] = record[58]
 				DATA[line_id-1][85] = record[59]
 
@@ -13183,7 +13195,7 @@ def IMGTparser(IMGT_out, data_list):
 				Sequence = DATA[line_id-1][79]
 				# identify isotype
 				if GeneType == 'Heavy':
-					IsoSeq = Sequence.split(raw_seq[line_id-1])
+					IsoSeq = raw_seq[line_id-1].split(Sequence)
 					try:
 						IsoSeq = IsoSeq[1]
 						# print(SeqName)
