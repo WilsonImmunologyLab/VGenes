@@ -11335,7 +11335,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				try:
 					Vbeg = int(data[67])
-
 					GVbeg = int(data[59])
 					self.ui.sbVbeg.setValue(Vbeg)
 					Vend = int(data[68])
@@ -11345,9 +11344,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 					VBegAASeq, ErMessage = VGenesSeq.Translator(VBegSeq, 0)
 				except:
 					print('none error')
+
 				try:
 					VbegDisplay = ' ' + VBegAASeq[0] + '   ' + VBegAASeq[1] + '   ' + VBegAASeq[2] + ' \n' + VBegSeq[0:3] + ' ' + VBegSeq[3:6] + ' ' + VBegSeq[6:9]
-
 				except:
 					print('oops')
 
@@ -12989,6 +12988,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 def IMGTparser(IMGT_out, data_list):
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 
+	DBpathname = os.path.join(working_prefix, 'Data', 'VDJGenes.db')
+	conn = db.connect(DBpathname)
+	cursor = conn.cursor()
+
 	# Extract IMGT files from txz package
 	temp_dir, files = extractIMGT(IMGT_out)
 
@@ -13146,15 +13149,126 @@ def IMGTparser(IMGT_out, data_list):
 			if line_id == 0:
 				pass
 			else:
-				DATA[line_id - 1][99] = record[71]
-				DATA[line_id - 1][100] = record[72]
+				if len(record) > 73:
+					DATA[line_id - 1][99] = record[71]
+					DATA[line_id - 1][100] = record[72]
 
-				DATA[line_id - 1][16] = record[9].upper()
-				DATA[line_id - 1][17] = record[12].upper()
-				DATA[line_id - 1][18] = record[14].upper()
-				DATA[line_id - 1][19] = record[19].upper()
-				DATA[line_id - 1][20] = record[29].upper()
-				DATA[line_id - 1][21] = record[11].upper()
+					DATA[line_id - 1][16] = record[9].upper()
+					DATA[line_id - 1][17] = record[12].upper()
+					DATA[line_id - 1][18] = record[14].upper()
+					DATA[line_id - 1][19] = record[19].upper()
+					DATA[line_id - 1][20] = record[29].upper()
+					DATA[line_id - 1][21] = record[11].upper()
+
+					# make Germline sequence
+					if record[6] == 'in-frame':
+						if spe == 'Human':
+							SqlStatementV = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Human" AND Allele = "' + DATA[line_id - 1][3] + '"'
+							SqlStatementD = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Human" AND Allele = "' + DATA[line_id - 1][6] + '"'
+							SqlStatementJ = 'SELECT SeqName, Allele, Species, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Human" AND Allele = "' + DATA[line_id - 1][9] + '"'
+						elif spe == 'Mouse':
+							SqlStatementV = 'SELECT SeqName, Allele, Strain, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Mouse" AND Allele = "' + DATA[line_id - 1][3] + '"'
+							SqlStatementD = 'SELECT SeqName, Allele, Strain, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Mouse" AND Allele = "' + DATA[line_id - 1][6] + '"'
+							SqlStatementJ = 'SELECT SeqName, Allele, Strain, CodingStartNucleotide, Sequence, IMGTSequence FROM GermLineDB WHERE Species = "Mouse" AND Allele = "' + DATA[line_id - 1][9] + '"'
+
+						if DATA[line_id - 1][2] == 'Heavy':
+							# V gene
+							Germline_Vseq = []
+							cursor.execute(SqlStatementV)
+							for row in cursor:
+								for column in row:
+									Germline_Vseq.append(column)
+
+							# D gene
+							Germline_Dseq = []
+							cursor.execute(SqlStatementD)
+							for row in cursor:
+								for column in row:
+									Germline_Dseq.append(column)
+
+							# J gene
+							Germline_Jseq = []
+							cursor.execute(SqlStatementJ)
+							for row in cursor:
+								for column in row:
+									Germline_Jseq.append(column)
+
+							Germline_seq = Germline_Vseq[4] + record[12].upper() + Germline_Dseq[4] + record[19].upper() + Germline_Jseq[4]  # V + D1 + D + D2 + J
+
+							Germline_Vbeg = 1
+							Germline_Vend = len(Germline_Vseq[4])
+							offset = Germline_Vend
+							if record[12] != '':
+								Germline_D1beg = offset + 1
+								Germline_D1end = offset + len(record[12])
+								offset = Germline_D1end
+							else:
+								Germline_D1beg = ''
+								Germline_D1end = ''
+
+							if Germline_Dseq[4] != '':
+								offset = offset + len(Germline_Dseq[4])
+
+							if record[19] != '':
+								Germline_D2beg = offset + 1
+								Germline_D2end = offset + len(record[19])
+								offset = Germline_D2end
+							else:
+								Germline_D2beg = ''
+								Germline_D2end = ''
+
+							Germline_Jbeg = offset + 1
+							Germline_Jend = offset + len(Germline_Jseq[4])
+
+							DATA[line_id - 1][80] = Germline_seq
+							DATA[line_id - 1][59] = str(Germline_Vbeg)
+							DATA[line_id - 1][60] = str(Germline_Vend)
+							DATA[line_id - 1][61] = str(Germline_D1beg)
+							DATA[line_id - 1][62] = str(Germline_D1end)
+							DATA[line_id - 1][63] = str(Germline_D2beg)
+							DATA[line_id - 1][64] = str(Germline_D2end)
+							DATA[line_id - 1][65] = str(Germline_Jbeg)
+							DATA[line_id - 1][66] = str(Germline_Jend)
+						else:
+							# V gene
+							Germline_Vseq = []
+							cursor.execute(SqlStatementV)
+							for row in cursor:
+								for column in row:
+									Germline_Vseq.append(column)
+
+							# J gene
+							Germline_Jseq = []
+							cursor.execute(SqlStatementJ)
+							for row in cursor:
+								for column in row:
+									Germline_Jseq.append(column)
+
+							Germline_seq = Germline_Vseq[4] + record[11].upper() + Germline_Jseq[4]  # V + N + J
+
+							Germline_Vbeg = 1
+							Germline_Vend = len(Germline_Vseq[4])
+							if record[11] != '':
+								offset = Germline_Vend + len(record[11])
+							else:
+								offset = Germline_Vend
+							Germline_D1beg = ''
+							Germline_D1end = ''
+							Germline_D2beg = ''
+							Germline_D2end = ''
+
+							Germline_Jbeg = offset + 1
+							Germline_Jend = offset + len(Germline_Jseq[4])
+
+							DATA[line_id - 1][80] = Germline_seq
+							DATA[line_id - 1][59] = str(Germline_Vbeg)
+							DATA[line_id - 1][60] = str(Germline_Vend)
+							DATA[line_id - 1][61] = str(Germline_D1beg)
+							DATA[line_id - 1][62] = str(Germline_D1end)
+							DATA[line_id - 1][63] = str(Germline_D2beg)
+							DATA[line_id - 1][64] = str(Germline_D2end)
+							DATA[line_id - 1][65] = str(Germline_Jbeg)
+							DATA[line_id - 1][66] = str(Germline_Jend)
 			line_id += 1
 
 		file_handle = open(progressBarFile, 'w')
@@ -13204,6 +13318,13 @@ def IMGTparser(IMGT_out, data_list):
 
 				GeneType = DATA[line_id-1][2]
 				Sequence = DATA[line_id-1][79]
+
+				aa_seq,_msg = Translator(DATA[line_id - 1][79], 0)
+				if '*' in aa_seq:
+					DATA[line_id - 1][12] = 'Yes'
+				else:
+					DATA[line_id - 1][12] = 'No'
+
 				# identify isotype
 				if GeneType == 'Heavy':
 					IsoSeq = raw_seq[line_id-1].split(Sequence)
@@ -13252,6 +13373,22 @@ def IMGTparser(IMGT_out, data_list):
 			if line_id == 0:
 				pass
 			else:
+				record[22] = re.sub('\s.+', '', record[22])
+				record[23] = re.sub('\s.+', '', record[23])
+				record[24] = re.sub('\s.+', '', record[24])
+				record[40] = re.sub('\s.+', '', record[40])
+				record[41] = re.sub('\s.+', '', record[41])
+				record[42] = re.sub('\s.+', '', record[42])
+				record[58] = re.sub('\s.+', '', record[58])
+				record[59] = re.sub('\s.+', '', record[59])
+				record[60] = re.sub('\s.+', '', record[60])
+				record[76] = re.sub('\s.+', '', record[76])
+				record[77] = re.sub('\s.+', '', record[77])
+				record[78] = re.sub('\s.+', '', record[78])
+				record[94] = re.sub('\s.+', '', record[94])
+				record[95] = re.sub('\s.+', '', record[95])
+				record[96] = re.sub('\s.+', '', record[96])
+
 				DATA[line_id-1][25] = record[24]
 				DATA[line_id-1][26] = record[25]
 				DATA[line_id-1][27] = str(int(record[22]) - int(record[23]))
@@ -13930,6 +14067,25 @@ def MakeSeqWithInseetion(class_name,id,AAseq,info):
 	div_seq += '</div>'
 
 	return div_seq
+
+CodonDict={'ATT':'I',   'ATC':'I',  'ATA':'I',  'CTT':'L',  'CTC':'L',
+'CTA':'L',  'CTG':'L',  'TTA':'L',  'TTG':'L',  'GTT':'V',  'GTC':'V',
+'GTA':'V',  'GTG':'V',  'TTT':'F',  'TTC':'F',  'ATG':'M',  'TGT':'C',
+'TGC':'C',  'GCT':'A',  'GCC':'A',  'GCA':'A',  'GCG':'A',  'GGT':'G',
+'GGC':'G',  'GGA':'G',  'GGG':'G',  'CCT':'P',  'CCC':'P',  'CCA':'P',
+'CCG':'P',  'ACT':'T',  'ACC':'T',  'ACA':'T',  'ACG':'T',  'TCT':'S',
+'TCC':'S',  'TCA':'S',  'TCG':'S',  'AGT':'S',  'AGC':'S',  'TAT':'Y',
+'TAC':'Y',  'TGG':'W',  'CAA':'Q',  'CAG':'Q',  'AAT':'N',  'AAC':'N',
+'CAT':'H',  'CAC':'H',  'GAA':'E',  'GAG':'E',  'GAT':'D',  'GAC':'D',
+'AAA':'K',  'AAG':'K',  'CGT':'R',  'CGC':'R',  'CGA':'R',  'CGG':'R',
+'AGA':'R',  'AGG':'R',  'TAA':'*',  'TAG':'*',  'TGA':'*',  '...':'.',
+'NNN':'.'}
+
+AACodonDict={'I':'ATT','L':'CTT','V':'GTT','F':'TTT','M':'ATG','C':'TGT',
+			 'A':'GCT','G':'GGT','P':'CCT','T':'ACT','S':'TCT','Y':'TAT',
+			 'W':'TGG','Q':'CAA','N':'AAT','H':'CAT','E':'GAA','D':'GAT',
+			 'K':'AAA','R':'CGT'}
+
 
 if __name__ == '__main__':
 	import sys
