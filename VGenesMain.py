@@ -3836,18 +3836,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			elif self.ui.tabWidget.currentIndex() == 8:
 				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-				list1 = []
-				for ele in DataIn:
-					list1.append(ele[0])
-				list_unique = list(set(list1))
-				list_unique.remove('0')
+				if len(DataIn) > 1:
+					list1 = []
+					for ele in DataIn:
+						list1.append(ele[0])
+					list_unique = list(set(list1))
+					if '0' in list_unique:
+						list_unique.remove('0')
+					if '' in list_unique:
+						list_unique.remove('')
 
-				list_unique = [int(i) for i in list_unique]
-				list_unique.sort()
-				list_unique = ['Clone' + str(i) for i in list_unique]
+					if len(list_unique) > 0:
+						list_unique = [int(i) for i in list_unique]
+						list_unique.sort()
+						list_unique = ['Clone' + str(i) for i in list_unique]
 
-				self.ui.comboBoxTree.clear()
-				self.ui.comboBoxTree.addItems(list_unique)
+						self.ui.comboBoxTree.clear()
+						self.ui.comboBoxTree.addItems(list_unique)
 			elif self.ui.tabWidget.currentIndex() == 0:
 				# if old table exists, clear table
 				if self.ui.SeqTable.columnCount() > 0:
@@ -13143,6 +13148,13 @@ def IMGTparser(IMGT_out, data_list):
 			else:
 				DATA[line_id - 1][99] = record[71]
 				DATA[line_id - 1][100] = record[72]
+
+				DATA[line_id - 1][16] = record[9].upper()
+				DATA[line_id - 1][17] = record[12].upper()
+				DATA[line_id - 1][18] = record[14].upper()
+				DATA[line_id - 1][19] = record[19].upper()
+				DATA[line_id - 1][20] = record[29].upper()
+				DATA[line_id - 1][21] = record[11].upper()
 			line_id += 1
 
 		file_handle = open(progressBarFile, 'w')
