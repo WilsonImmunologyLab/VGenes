@@ -7967,10 +7967,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_actionGenerate_from_file_triggered(self):  # how to activate menu and toolbar actions!!!
-
-
-		fileNames = openFiles()
-		self.ProcessSeqFiles(fileNames)
+		fileNames = openFiles(self, 'seq')
+		if fileNames != '' and fileNames != None:
+			self.ProcessSeqFiles(fileNames)
 
 	def ShowVGenesText(self, filename):
 
@@ -11269,6 +11268,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			global PreVID
 			PreVID = 0
 
+		# clear fields\
 		global JustMovedIt
 		global FirstupdateF
 		JustMovedIt = True
@@ -11276,6 +11276,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if PreVID != ID:
 			if ID != -1:
 				data.clear()
+
+				self.ui.txtVbeg.clear()
+				self.ui.txtVExp.clear()
+				self.ui.txtJend_2.clear()
+				self.ui.txtJExp.clear()
 
 				#if FirstupdateF == False and ID > -1:
 				# MatchingIndex = NameIndex[name]
@@ -11358,32 +11363,31 @@ class VGenesForm(QtWidgets.QMainWindow):
 				except:
 					print('oops')
 
+				try:
+					Dbeg = int(data[69])
+					self.ui.sbDbeg.setValue(Dbeg)
+					Dend = int(data[70])
+					self.ui.sbDend.setValue(Dend)
+				except:
+					print('D error')
 
 				try:
 					self.ui.txtVbeg.setText(VbegDisplay)
 					self.ui.txtVExp.setText(GVbegDisplay)
 
-
-					Dbeg = int(data[69])
-					self.ui.sbDbeg.setValue(Dbeg)
-					Dend = int(data[70])
-					self.ui.sbDend.setValue(Dend)
-
 					Jbeg = int(data[73])
-
 					self.ui.sbJbeg.setValue(Jbeg)
 					Jend = int(data[74])
 					GJend = int(data[66])
 					self.ui.sbJend.setValue(Jend)
 
-					# VSeq = data[79]
-					JendSeq = VSeq[Jend-11:Jend]
+					JendSeq = VSeq[Jend-11:Jend]    # why last 11bp?
 					JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
 					JendDisplay = ' ' + JendAASeq[0] + '   ' + JendAASeq[1] + '   ' + JendAASeq[2] + ' \n' + JendSeq[0:3] + ' ' + JendSeq[3:6] + ' ' + JendSeq[6:9]
 
 					self.ui.txtJend_2.setText(JendDisplay)
 				except:
-					print('none')
+					print('J error')
 				# GJendSeq = GVSeq[GJend-11:GJend]
 				# GJendAASeq, ErMessage = VGenesSeq.Translator(GJendSeq, 0)
 				# GJendDisplay = ' ' + GJendAASeq[0] + '   ' + GJendAASeq[1] + '   ' + GJendAASeq[2] + ' \n' + GJendSeq[0:3] + ' ' + GJendSeq[3:6] + ' ' + GJendSeq[6:9]
@@ -12791,23 +12795,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			self.ui.lblSeq2.setText(msg)
 
-
 			if self.ui.radioButtonGermView.isChecked():
 				self.on_radioButtonGermView_clicked()
 
-
-			# GLMsg = False
-			# self.on_actionGL_triggered
-			# GLMsg = True
 			self.clearTreeChecks()
 			self.AlignSequences('none')
 
 			msg = 'Results of edits are aligned to the predicted germline in the text editor window. Changes will not be saved until Save Changes is pressed.'
 			buttons = 'OK'
 			answer = informationMessage(self, msg, buttons)
-
 		else:
-
 			msg = 'Saving changes to the sequence will cause it to be reanlyzed (mutations, regions) but will retain other information (clone, isotype). Continue?'
 			buttons = 'OKC'
 			answer = questionMessage(self, msg, buttons)
@@ -13132,6 +13129,12 @@ def IMGTparser(IMGT_out, data_list):
 					this_data[76] = grouping
 					this_data[77] = subgroup
 
+				# clone and rank
+				this_data[86] = 'Specificity'
+				this_data[87] = 'Subspecificity'
+				this_data[88] = '0'
+				this_data[89] = '0'
+
 				DATA.append(this_data)
 				raw_seq.append(record[24].upper())
 			line_id += 1
@@ -13203,8 +13206,8 @@ def IMGTparser(IMGT_out, data_list):
 								Germline_D1end = offset + len(record[12])
 								offset = Germline_D1end
 							else:
-								Germline_D1beg = ''
-								Germline_D1end = ''
+								Germline_D1beg = 0
+								Germline_D1end = 0
 
 							if Germline_Dseq[4] != '':
 								offset = offset + len(Germline_Dseq[4])
@@ -13252,8 +13255,8 @@ def IMGTparser(IMGT_out, data_list):
 								offset = Germline_Vend + len(record[11])
 							else:
 								offset = Germline_Vend
-							Germline_D1beg = ''
-							Germline_D1end = ''
+							Germline_D1beg = 0
+							Germline_D1end = 0
 							Germline_D2beg = ''
 							Germline_D2end = ''
 
@@ -13302,16 +13305,18 @@ def IMGTparser(IMGT_out, data_list):
 
 				DATA[line_id-1][67] = record[46]
 				DATA[line_id-1][68] = record[47]
-				DATA[line_id-1][69] = record[82]
-				DATA[line_id-1][70] = record[83]
 				DATA[line_id-1][71] = record[90]
 				DATA[line_id-1][72] = record[91]
 				DATA[line_id-1][73] = record[110]
 				DATA[line_id-1][74] = record[111]
 				if DATA[line_id-1][2] == 'Heavy':
 					DATA[line_id-1][79] = record[6].upper()
+					DATA[line_id - 1][69] = record[76]
+					DATA[line_id - 1][70] = record[77]
 				else:
 					DATA[line_id - 1][79] = record[7].upper()
+					DATA[line_id - 1][69] = record[82]
+					DATA[line_id - 1][70] = record[83]
 				DATA[line_id-1][81] = record[14].upper()
 				DATA[line_id-1][84] = record[58]
 				DATA[line_id-1][85] = record[59]

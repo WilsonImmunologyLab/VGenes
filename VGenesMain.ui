@@ -4781,6 +4781,9 @@
           <property name="checkable">
            <bool>true</bool>
           </property>
+          <property name="checked">
+           <bool>false</bool>
+          </property>
          </widget>
         </item>
         <item row="5" column="0" colspan="4">
@@ -8487,7 +8490,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="action_Import">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/Import.png</normaloff>:/PNG-Icons/Import.png</iconset>
+     <normaloff>:/PNG-Icons/Import1.png</normaloff>:/PNG-Icons/Import1.png</iconset>
    </property>
    <property name="text">
     <string>&amp;Import</string>
@@ -8502,7 +8505,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionExport">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/Export.png</normaloff>:/PNG-Icons/Export.png</iconset>
+     <normaloff>:/PNG-Icons/Export1.png</normaloff>:/PNG-Icons/Export1.png</iconset>
    </property>
    <property name="text">
     <string>Export</string>
