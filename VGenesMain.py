@@ -12982,6 +12982,347 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.updateF(data[119])
 
+def IgBlastParserFast(FASTAFile, datalist):
+	import os
+	# todo change to app folder
+	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'ErLog.txt')
+	ErLog = 'VGenes input beginning at: ' + time.strftime('%c') + '\n'
+	with open(ErlogFile, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
+		currentFile.write(ErLog)
+
+	try:
+		DBpathname = os.path.join(working_prefix, 'Data', 'VDJGenes.db')
+		(dirname, filename) = os.path.split(DBpathname)
+		os.chdir(dirname)
+		GetProductive = False
+		conn = db.connect(DBpathname)
+	except:
+		Msg = 'VDJ DB connect Error!'
+		return Msg
+
+	#  then need to create a cursor that lets you traverse the database
+	cursor = conn.cursor()
+	DATA = []
+	Sequences = {}
+
+	project = datalist[0]
+	grouping = datalist[1]
+	subgroup = datalist[2]
+	species = datalist[3]
+	GetProductive = datalist[4]
+	MaxNum = int(datalist[5])
+
+	ErLog, TotSeqs = IgBLASTer.ProcessFASTA(FASTAFile, MaxNum)
+	workingdir = os.path.join(working_prefix, 'IgBlast')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
+
+	os.chdir(workingdir)
+	Sequences.clear()
+	IgBLASTset.clear()
+	now = time.strftime('%c')
+	# read input sequence file
+	with open(workingfilename, 'r') as currentFile:  #make dictionary of seqs keyed by name
+		for FASTAline in currentFile:
+			FASTAline = FASTAline.replace('\n', '').replace('\r', '')
+			if FASTAline[0] == '>':
+				#print(FASTAline)
+				SeqNamed  = FASTAline[1:]
+				SeqNamed = SeqNamed.strip()
+
+			else:
+				Sequence  = FASTAline
+				if Sequence != '':
+					Sequences[SeqNamed] = Sequence
+				SeqNamed = ''
+				Sequence = ''
+
+	# run IgBlast
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	igblast_out_fmt19 = os.path.join(temp_folder, time_stamp + '_igblast_out_fmt19.csv')
+	try:
+		start = time.time()
+		if species == 'Human':
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
+			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+		elif species == 'Mouse':
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
+			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+		end = time.time()
+		print('Run time for IgBlast: ' + str(end - start))
+	except:
+		ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+		with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
+			currentFile.write(ErLog)
+
+	# parse IgBlast out fmt 19
+	with open(igblast_out_fmt19, 'r') as IGBLAST_fmt19:
+		result = csv.reader(IGBLAST_fmt19, delimiter="\t")
+		line_id = 0
+		for record in result:
+			if line_id == 0:
+				pass
+			else:
+				this_data = [''] * 119
+
+				this_data[0] = record[0]
+				this_data[1] = str(len(record[1]))
+				if record[2] == 'IGH':
+					this_data[2] = 'Heavy'
+				elif record[2] == 'IGK':
+					this_data[2] = 'Kappa'
+				elif record[2] == 'IGL':
+					this_data[2] = 'Lambda'
+				else:
+					this_data[2] = 'Unknown'
+
+				if record[3] == 'F':
+					this_data[12] = 'No'
+				else:
+					this_data[12] = 'Yes'
+				this_data[13] = record[4]
+				this_data[14] = record[5]
+				if record[6] == 'F':
+					this_data[15] = '+'
+				else:
+					this_data[15] = '-'
+
+				this_data[59] = record[64]
+				this_data[60] = record[65]
+				this_data[61] = record[68]
+				this_data[62] = record[69]
+				this_data[63] = ''
+				this_data[64] = ''
+				this_data[65] = record[72]
+				this_data[66] = record[73]
+
+				this_data[67] = record[14]
+				this_data[68] = record[15]
+				this_data[69] = record[16]
+				this_data[70] = record[17]
+				this_data[71] = ''
+				this_data[72] = ''
+				this_data[73] = record[18]
+				this_data[74] = record[19]
+
+				# identify grouping
+				if project == 'ByFunction':
+					this_data[75] = this_data[2]
+					if this_data[14] == "Yes":
+						this_data[76] = 'Functional'
+					else:
+						this_data[76] = 'Nonfunctional'
+					this_data[77] = this_data[13]
+				else:
+					this_data[75] = project
+					this_data[76] = grouping
+					this_data[77] = subgroup
+
+				this_data[78] = species
+				this_data[79] = record[10]
+				this_data[80] = record[11]
+
+				this_data[86] = "Specificity"
+				this_data[87] = "Subspecificity"
+				this_data[88] = "0"
+				this_data[89] = "0"
+
+				this_data[93] = now
+
+				# identify isotype
+				if this_data[2] == 'Heavy':
+					IsoSeq = record[1]
+					IsoSeq = IsoSeq[int(record[71]):]
+					try:
+						IsoSeq = IsoSeq.strip('N')
+						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+						else:
+							if len(IsoSeq) > 2:
+								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+									Isotype = 'IgG'
+								elif IsoSeq[:3] == 'CAT':
+									Isotype = 'IgA'
+								elif IsoSeq[:3] == 'GGA':
+									Isotype = 'IgM'
+								elif IsoSeq[:3] == 'CAC':
+									Isotype = 'IgD'
+								else:
+									Isotype = IsoSeq
+							else:
+								Isotype = 'Unknown'
+					except:
+						Isotype = 'Unknown'
+				else:
+					if this_data[2] == 'Kappa':
+						Isotype = 'Kappa'
+					elif this_data[2] == 'Lambda':
+						Isotype = 'Lambda'
+				this_data[101] = Isotype
+
+				DATA.append(this_data)
+			line_id += 1
+
+	# parse IgBlast out fmt 3
+	cur_block = ''
+	block_id = 0
+	read_tag = False
+	for IgLine in IgBlastOut_fmt3:
+		line_match = re.findall(r'^Query', IgLine)
+		if len(line_match) > 0:
+			read_tag = True
+
+			if cur_block != '':
+				# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
+				ig_match = re.findall('\nIG[^\n]+', cur_block)
+				## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
+				v_cur_index = 3
+				d_cur_index = 6
+				j_cur_index = 9
+				for line in ig_match[:len(ig_match) - 1]:
+					m = re.search('IG\S+', line)
+					cur_gene = m.group(0)
+					if cur_gene[3] == 'V':
+						DATA[block_id][v_cur_index] = cur_gene
+						v_cur_index += 1
+					elif cur_gene[3] == 'D':
+						DATA[block_id][d_cur_index] = cur_gene
+						d_cur_index += 1
+					else:
+						DATA[block_id][j_cur_index] = cur_gene
+						j_cur_index += 1
+				# V,D,J locus
+				m = re.search('IG\S+', DATA[block_id][3])
+				try:
+					v_locus = m.group(0)
+					v_locus = re.sub('^IG', '', v_locus)
+					v_locus = re.sub('\*.+', '', v_locus)
+					v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
+					DATA[block_id][90] = v_locus
+				except:
+					pass
+
+				m = re.search('IG\S+', DATA[block_id][6])
+				try:
+					d_locus = m.group(0)
+					d_locus = re.sub('^IG', '', d_locus)
+					d_locus = re.sub('\*.+', '', d_locus)
+					d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
+					DATA[block_id][92] = d_locus
+				except:
+					pass
+
+				m = re.search('IG\S+', DATA[block_id][9])
+				try:
+					j_locus = m.group(0)
+					j_locus = re.sub('^IG', '', j_locus)
+					j_locus = re.sub('\*.+', '', j_locus)
+					j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
+					DATA[block_id][91] = j_locus
+				except:
+					pass
+				
+				# import V(D)J junction info
+				ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
+				junction = ig_match[0]
+				junction = junction.split('\n')[1]
+				junction_list = junction.split('\t')
+				if DATA[block_id][2] == 'Heavy':
+					DATA[block_id][16] = junction_list[0]
+					DATA[block_id][17] = junction_list[1]
+					DATA[block_id][18] = junction_list[2]
+					DATA[block_id][19] = junction_list[3]
+					DATA[block_id][20] = junction_list[4]
+				else:
+					DATA[block_id][16] = junction_list[0]
+					DATA[block_id][21] = junction_list[1]
+					DATA[block_id][20] = junction_list[2]
+				
+				# import Alignment summary
+				ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+				fr1_match = ig_match[0]
+				fr1_match = fr1_match[1:]
+				fr1_match = fr1_match.split('\t')
+				DATA[block_id][22] = 1
+				DATA[block_id][23] = str(int(fr1_match[1]) - int(fr1_match[0]) + 1)
+				DATA[block_id][24] = fr1_match[2]
+				DATA[block_id][25] = fr1_match[3]
+				DATA[block_id][26] = fr1_match[4]
+				DATA[block_id][27] = fr1_match[5]
+				DATA[block_id][28] = fr1_match[6]
+
+				ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+				cdr1_match = ig_match[0]
+				cdr1_match = cdr1_match[1:]
+				cdr1_match = cdr1_match.split('\t')
+				DATA[block_id][29] = str(int(cdr1_match[0]) - int(fr1_match[0]) + 1)
+				DATA[block_id][30] = str(int(cdr1_match[1]) - int(fr1_match[0]) + 1)
+				DATA[block_id][31] = cdr1_match[2]
+				DATA[block_id][32] = cdr1_match[3]
+				DATA[block_id][33] = cdr1_match[4]
+				DATA[block_id][34] = cdr1_match[5]
+				DATA[block_id][35] = cdr1_match[6]
+
+				ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+				fr2_match = ig_match[0]
+				fr2_match = fr2_match[1:]
+				fr2_match = fr2_match.split('\t')
+				DATA[block_id][36] = str(int(fr2_match[0]) - int(fr1_match[0]) + 1)
+				DATA[block_id][37] = str(int(fr2_match[1]) - int(fr1_match[0]) + 1)
+				DATA[block_id][38] = fr2_match[2]
+				DATA[block_id][39] = fr2_match[3]
+				DATA[block_id][40] = fr2_match[4]
+				DATA[block_id][41] = fr2_match[5]
+				DATA[block_id][42] = fr2_match[6]
+
+				ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+				cdr2_match = ig_match[0]
+				cdr2_match = cdr2_match[1:]
+				cdr2_match = cdr2_match.split('\t')
+				DATA[block_id][43] = str(int(cdr2_match[0]) - int(fr1_match[0]) + 1)
+				DATA[block_id][44] = str(int(cdr2_match[1]) - int(fr1_match[0]) + 1)
+				DATA[block_id][45] = cdr2_match[2]
+				DATA[block_id][46] = cdr2_match[3]
+				DATA[block_id][47] = cdr2_match[4]
+				DATA[block_id][48] = cdr2_match[5]
+				DATA[block_id][49] = cdr2_match[6]
+
+				ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+				fr3_match = ig_match[0]
+				fr3_match = fr3_match[1:]
+				fr3_match = fr3_match.split('\t')
+				DATA[block_id][50] = str(int(fr3_match[0]) - int(fr1_match[0]) + 1)
+				DATA[block_id][51] = str(int(fr3_match[1]) - int(fr1_match[0]) + 1)
+				DATA[block_id][52] = fr3_match[2]
+				DATA[block_id][53] = fr3_match[3]
+				DATA[block_id][54] = fr3_match[4]
+				DATA[block_id][55] = fr3_match[5]
+				DATA[block_id][56] = fr3_match[6]
+
+				# import Alignment summary
+				ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+				alignment = ig_match[0]
+				alignment = alignment[1:]
+				alignment = re.sub(r'\n+Lambda[\n\S\s]+','',alignment)
+				DATA[block_id][58] = alignment
+
+				# import
+
+
+				block_id += 1
+
+			cur_block = ''
+
+		if read_tag:
+			cur_block += IgLine
+
+	return DATA
+
 def IMGTparser(IMGT_out, data_list):
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 
