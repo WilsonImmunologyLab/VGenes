@@ -2995,6 +2995,7 @@ class WorkThread(QThread):
 	def run(self):
 		global IgBLASTAnalysis
 		IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
+		#IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist)
 		self.trigger.emit(self.item)
 
 class WorkThread1(QThread):
@@ -12986,7 +12987,8 @@ def IgBlastParserFast(FASTAFile, datalist):
 	import os
 	# todo change to app folder
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'ErLog.txt')
+	ErlogFile = os.path.join(temp_folder,  'ErLog.txt')
+	ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
 	ErLog = 'VGenes input beginning at: ' + time.strftime('%c') + '\n'
 	with open(ErlogFile, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
@@ -13019,7 +13021,6 @@ def IgBlastParserFast(FASTAFile, datalist):
 
 	os.chdir(workingdir)
 	Sequences.clear()
-	IgBLASTset.clear()
 	now = time.strftime('%c')
 	# read input sequence file
 	with open(workingfilename, 'r') as currentFile:  #make dictionary of seqs keyed by name
@@ -13037,6 +13038,8 @@ def IgBlastParserFast(FASTAFile, datalist):
 				SeqNamed = ''
 				Sequence = ''
 
+	totel_seq = len(Sequences)
+
 	# run IgBlast
 	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
 	igblast_out_fmt19 = os.path.join(temp_folder, time_stamp + '_igblast_out_fmt19.csv')
@@ -13045,13 +13048,17 @@ def IgBlastParserFast(FASTAFile, datalist):
 		if species == 'Human':
 			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
+			print(BLASTCommandLine)
 			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
-			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+			IgBlastOut_fmt19 = os.system(BLASTCommandLine)
+			print(BLASTCommandLine)
 		elif species == 'Mouse':
 			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
+			print(BLASTCommandLine)
 			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
-			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+			IgBlastOut_fmt19 = os.system(BLASTCommandLine)
+			print(BLASTCommandLine)
 		end = time.time()
 		print('Run time for IgBlast: ' + str(end - start))
 	except:
@@ -13067,6 +13074,12 @@ def IgBlastParserFast(FASTAFile, datalist):
 			if line_id == 0:
 				pass
 			else:
+				file_handle = open(progressBarFile, 'w')
+				progress = str(int((line_id + 1) * 50 / totel_seq))
+				file_handle.write(progress)
+				file_handle.write(',Step1:' + str(line_id + 1) + '/' + str(totel_seq))
+				file_handle.close()
+
 				this_data = [''] * 119
 
 				this_data[0] = record[0]
@@ -13165,6 +13178,28 @@ def IgBlastParserFast(FASTAFile, datalist):
 						Isotype = 'Lambda'
 				this_data[101] = Isotype
 
+				# import CDR3
+				JGeneName = record[9].split(',')[0]
+				CDR3_start = int(record[83]) + 1
+				if species == 'Human':
+					CDR3_end = int(record[70]) + JHuman[JGeneName]
+				else:
+					CDR3_end = int(record[70]) + JMouse[JGeneName]
+				CDR3_NT = record[1]
+				CDR3_NT = CDR3_NT[CDR3_start-1:CDR3_end]
+				CDR3_AA, msg = Translator(CDR3_NT,0)
+				CDR3_len = len(CDR3_AA)
+				CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+				CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+				this_data[81] = CDR3_NT
+				this_data[82] = CDR3_AA
+				this_data[83] = CDR3_len
+				this_data[84] = str(CDR3_start - int(record[62]))
+				this_data[85] = str(CDR3_end - int(record[62]))
+				this_data[99] = CDR3_MW
+				this_data[100] = CDR3_pI
+
 				DATA.append(this_data)
 			line_id += 1
 
@@ -13178,6 +13213,12 @@ def IgBlastParserFast(FASTAFile, datalist):
 			read_tag = True
 
 			if cur_block != '':
+				file_handle = open(progressBarFile, 'w')
+				progress = str(50 + int((block_id + 1) * 50 / totel_seq))
+				file_handle.write(progress)
+				file_handle.write(',Step2:' + str(block_id + 1) + '/' + str(totel_seq))
+				file_handle.close()
+
 				# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
 				ig_match = re.findall('\nIG[^\n]+', cur_block)
 				## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
@@ -13249,60 +13290,60 @@ def IgBlastParserFast(FASTAFile, datalist):
 				fr1_match = fr1_match[1:]
 				fr1_match = fr1_match.split('\t')
 				DATA[block_id][22] = 1
-				DATA[block_id][23] = str(int(fr1_match[1]) - int(fr1_match[0]) + 1)
-				DATA[block_id][24] = fr1_match[2]
-				DATA[block_id][25] = fr1_match[3]
-				DATA[block_id][26] = fr1_match[4]
-				DATA[block_id][27] = fr1_match[5]
-				DATA[block_id][28] = fr1_match[6]
+				DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+				DATA[block_id][24] = fr1_match[3]
+				DATA[block_id][25] = fr1_match[4]
+				DATA[block_id][26] = fr1_match[5]
+				DATA[block_id][27] = fr1_match[6]
+				DATA[block_id][28] = fr1_match[7]
 
 				ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
 				cdr1_match = ig_match[0]
 				cdr1_match = cdr1_match[1:]
 				cdr1_match = cdr1_match.split('\t')
-				DATA[block_id][29] = str(int(cdr1_match[0]) - int(fr1_match[0]) + 1)
-				DATA[block_id][30] = str(int(cdr1_match[1]) - int(fr1_match[0]) + 1)
-				DATA[block_id][31] = cdr1_match[2]
-				DATA[block_id][32] = cdr1_match[3]
-				DATA[block_id][33] = cdr1_match[4]
-				DATA[block_id][34] = cdr1_match[5]
-				DATA[block_id][35] = cdr1_match[6]
+				DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+				DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+				DATA[block_id][31] = cdr1_match[3]
+				DATA[block_id][32] = cdr1_match[4]
+				DATA[block_id][33] = cdr1_match[5]
+				DATA[block_id][34] = cdr1_match[6]
+				DATA[block_id][35] = cdr1_match[7]
 
 				ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
 				fr2_match = ig_match[0]
 				fr2_match = fr2_match[1:]
 				fr2_match = fr2_match.split('\t')
-				DATA[block_id][36] = str(int(fr2_match[0]) - int(fr1_match[0]) + 1)
-				DATA[block_id][37] = str(int(fr2_match[1]) - int(fr1_match[0]) + 1)
-				DATA[block_id][38] = fr2_match[2]
-				DATA[block_id][39] = fr2_match[3]
-				DATA[block_id][40] = fr2_match[4]
-				DATA[block_id][41] = fr2_match[5]
-				DATA[block_id][42] = fr2_match[6]
+				DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+				DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+				DATA[block_id][38] = fr2_match[3]
+				DATA[block_id][39] = fr2_match[4]
+				DATA[block_id][40] = fr2_match[5]
+				DATA[block_id][41] = fr2_match[6]
+				DATA[block_id][42] = fr2_match[7]
 
 				ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
 				cdr2_match = ig_match[0]
 				cdr2_match = cdr2_match[1:]
 				cdr2_match = cdr2_match.split('\t')
-				DATA[block_id][43] = str(int(cdr2_match[0]) - int(fr1_match[0]) + 1)
-				DATA[block_id][44] = str(int(cdr2_match[1]) - int(fr1_match[0]) + 1)
-				DATA[block_id][45] = cdr2_match[2]
-				DATA[block_id][46] = cdr2_match[3]
-				DATA[block_id][47] = cdr2_match[4]
-				DATA[block_id][48] = cdr2_match[5]
-				DATA[block_id][49] = cdr2_match[6]
+				DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+				DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+				DATA[block_id][45] = cdr2_match[3]
+				DATA[block_id][46] = cdr2_match[4]
+				DATA[block_id][47] = cdr2_match[5]
+				DATA[block_id][48] = cdr2_match[6]
+				DATA[block_id][49] = cdr2_match[7]
 
 				ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
 				fr3_match = ig_match[0]
 				fr3_match = fr3_match[1:]
 				fr3_match = fr3_match.split('\t')
-				DATA[block_id][50] = str(int(fr3_match[0]) - int(fr1_match[0]) + 1)
-				DATA[block_id][51] = str(int(fr3_match[1]) - int(fr1_match[0]) + 1)
-				DATA[block_id][52] = fr3_match[2]
-				DATA[block_id][53] = fr3_match[3]
-				DATA[block_id][54] = fr3_match[4]
-				DATA[block_id][55] = fr3_match[5]
-				DATA[block_id][56] = fr3_match[6]
+				DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+				DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+				DATA[block_id][52] = fr3_match[3]
+				DATA[block_id][53] = fr3_match[4]
+				DATA[block_id][54] = fr3_match[5]
+				DATA[block_id][55] = fr3_match[6]
+				DATA[block_id][56] = fr3_match[7]
 
 				# import Alignment summary
 				ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
@@ -13311,15 +13352,16 @@ def IgBlastParserFast(FASTAFile, datalist):
 				alignment = re.sub(r'\n+Lambda[\n\S\s]+','',alignment)
 				DATA[block_id][58] = alignment
 
-				# import
-
-
 				block_id += 1
 
 			cur_block = ''
 
 		if read_tag:
 			cur_block += IgLine
+
+	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
+	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
+		currentFile.write(ErLog)
 
 	return DATA
 
@@ -14432,6 +14474,21 @@ AACodonDict={'I':'ATT','L':'CTT','V':'GTT','F':'TTT','M':'ATG','C':'TGT',
 			 'W':'TGG','Q':'CAA','N':'AAT','H':'CAT','E':'GAA','D':'GAT',
 			 'K':'AAA','R':'CGT'}
 
+# Dictionaries indicating 1st nucleotide after the CDR3 ends in each J gene
+JHuman = {'IGKJ1*01':8, 'IGKJ2*01':9, 'IGKJ2*02':8, 'IGKJ2*03':8,
+		  'IGKJ2*04':9, 'IGKJ3*01':8, 'IGKJ4*01':8, 'IGKJ4*02':8,
+		  'IGKJ5*01':8, 'IGHJ1*01':18, 'IGHJ2*01':19, 'IGHJ3*01':16,
+		  'IGHJ3*02':16, 'IGHJ4*01':14, 'IGHJ4*02':14, 'IGHJ4*03':14,
+		  'IGHJ5*01':17, 'IGHJ5*02':17, 'IGHJ6*01':29, 'IGHJ6*02':29,
+		  'IGHJ6*03':29,    'IGHJ6*04':29, 'IGLJ1*01':8, 'IGLJ2*01':8,
+		  'IGLJ3*01':8, 'IGLJ3*02':8, 'IGLJ4*01':8, 'IGLJ5*01':8,
+		  'IGLJ5*02':8, 'IGLJ6*01':8, 'IGLJ7*01':8, 'IGLJ7*02':8}
+
+JMouse = {'IGKJ1*01':8, 'IGKJ1*02':7, 'IGKJ2*01':9, 'IGKJ2*02':9,
+		  'IGKJ2*03':9, 'IGKJ3*01':8, 'IGKJ3*02':8, 'IGKJ4*01':8,
+		  'IGKJ4*02':8, 'IGKJ5*01':8, 'IGHJ1*01':19, 'IGHJ1*02':19,
+		  'IGHJ1*03':19, 'IGHJ2*01':14, 'IGHJ2*02':14, 'IGHJ2*03':12,
+		  'IGHJ3*01':14, 'IGHJ3*02':14, 'IGHJ4*01':20}
 
 if __name__ == '__main__':
 	import sys

@@ -121,7 +121,8 @@ def IgBLASTit(FASTAFile, datalist):
 	import os
 	#todo change to app folder
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+	ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+	ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
 	ErLog  = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
 	with open(ErlogFile, 'w') as currentFile:  #using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
@@ -1573,6 +1574,10 @@ def IgBLASTit(FASTAFile, datalist):
 		# TODO maybe need to analyze IgBLAST output for SHM
 
 	conn.close()
+
+	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
+	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
+		currentFile.write(ErLog)
 
 def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 	import os
