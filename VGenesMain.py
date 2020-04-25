@@ -189,6 +189,8 @@ FieldCommentList = ["", "", "", "", "", "", "", "", "", "", "","", "", "", "", "
                     "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "",
                     "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", ""]
 
+global StopCheckProgress
+StopCheckProgress = False
 global NameIndex
 NameIndex = {}
 global FieldsChanged
@@ -1282,8 +1284,12 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.labelpct.setText('Loading finished!')
 			self.ui.progressBar.setValue(100)
 			return
-		t = thd.Timer(1, self.checkProgress)
-		t.start()
+
+		if StopCheckProgress:
+			return
+		else:
+			t = thd.Timer(1, self.checkProgress)
+			t.start()
 
 	def readBarcode(self, anno_path_name):
 		# read annotation content
@@ -2994,8 +3000,8 @@ class WorkThread(QThread):
 
 	def run(self):
 		global IgBLASTAnalysis
-		IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
-		#IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist)
+		#IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
+		IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist)
 		self.trigger.emit(self.item)
 
 class WorkThread1(QThread):
@@ -13197,8 +13203,16 @@ def IgBlastParserFast(FASTAFile, datalist):
 				this_data[83] = CDR3_len
 				this_data[84] = str(CDR3_start - int(record[62]))
 				this_data[85] = str(CDR3_end - int(record[62]))
-				this_data[99] = CDR3_MW
-				this_data[100] = CDR3_pI
+				this_data[99] = str(CDR3_MW)
+				this_data[100] = str(CDR3_pI)
+
+				# import mutation
+				mAb_seq = record[10]
+				germline_seq = record[11]
+				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+				this_data[57] = str(num_mut)
+				this_data[96] = str(num_mut)
+				this_data[97] = mut
 
 				DATA.append(this_data)
 			line_id += 1
@@ -13831,6 +13845,19 @@ def IMGTparser(IMGT_out, data_list):
 	temp_dir.cleanup()
 
 	return DATA
+
+def IdentifyMutation(mAb_seq, germline_seq):
+	mut_list = []
+	if len(mAb_seq) == len(germline_seq):
+		for i in range(len(mAb_seq)):
+			pos = i + 1
+			if mAb_seq[i] != germline_seq[i]:
+				if mAb_seq[i] in 'ATCG' and germline_seq[i] in 'ATCG':
+					cur_mut = germline_seq[i] + '-' + str(pos) + '-' + mAb_seq[i]
+					mut_list.append(cur_mut)
+	num_mut = len(mut_list)
+	mut = ','.join(mut_list)
+	return mut, num_mut
 
 def extractIMGT(imgt_output):
     """
