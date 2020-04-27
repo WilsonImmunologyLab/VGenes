@@ -1,4 +1,4 @@
-__author__ = 'wilsonp'
+__author__ = 'wilsonp, lei'
 import os
 import sys
 import sqlite3 as db
@@ -1379,6 +1379,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			if self.ui.radioButtonFast1.isChecked():
+				workThread.method = 'fast'
+			else:
+				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 
@@ -1415,6 +1419,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			if self.ui.radioButtonFast1.isChecked():
+				workThread.method = 'fast'
+			else:
+				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 
@@ -1503,6 +1511,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			if self.ui.radioButtonFast2.isChecked():
+				workThread.method = 'fast'
+			else:
+				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 
@@ -1548,6 +1560,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			if self.ui.radioButtonFast2.isChecked():
+				workThread.method = 'fast'
+			else:
+				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 
@@ -1585,6 +1601,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			if self.ui.radioButtonFast2.isChecked():
+				workThread.method = 'fast'
+			else:
+				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 
@@ -2060,15 +2080,18 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		elif self.calling == 2:
 			for record in IgBLASTAnalysis:
 				sampleName = record[0].split('_')[0]
-				if record[75][0] == '$':
-					record[75] = sampleName
-					continue
-				if record[76][0] == '$':
-					record[76] = sampleName
-					continue
-				if record[77][0] == '$':
-					record[77] = sampleName
-					continue
+				if len(record[75]) > 0:
+					if record[75][0] == '$':
+						record[75] = sampleName
+						continue
+				if len(record[76]) > 0:
+					if record[76][0] == '$':
+						record[76] = sampleName
+						continue
+				if len(record[77]) > 0:
+					if record[77][0] == '$':
+						record[77] = sampleName
+						continue
 		#a = IgBLASTAnalysis
 
 		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
@@ -2997,11 +3020,15 @@ class WorkThread(QThread):
 		self.parent = parent
 		self.item = ''
 		self.datalist = ''
+		self.method = 'slow'
 
 	def run(self):
 		global IgBLASTAnalysis
-		#IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
-		IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist)
+		if self.method == 'fast':
+			IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist)
+		else:
+			IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
+
 		self.trigger.emit(self.item)
 
 class WorkThread1(QThread):
@@ -13103,8 +13130,16 @@ def IgBlastParserFast(FASTAFile, datalist):
 					this_data[12] = 'No'
 				else:
 					this_data[12] = 'Yes'
-				this_data[13] = record[4]
-				this_data[14] = record[5]
+
+				if record[4] == '':
+					this_data[13] = 'N/A'
+				else:
+					this_data[13] = record[4]
+				if record[5] == '':
+					this_data[14] = 'N/A'
+				else:
+					this_data[14] = record[5]
+
 				if record[6] == 'F':
 					this_data[15] = '+'
 				else:

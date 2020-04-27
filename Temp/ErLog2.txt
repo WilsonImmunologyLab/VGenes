@@ -1,0 +1,5 @@
+Began input at Mon Apr 27 10:07:19 2020
+VGenes input ended at: Mon Apr 27 10:07:29 2020
+329 sequences were input by IgBLAST for file: 
+/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA6.fasta
+/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA5.fasta
