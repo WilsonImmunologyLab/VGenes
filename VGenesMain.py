@@ -190,7 +190,7 @@ FieldCommentList = ["", "", "", "", "", "", "", "", "", "", "","", "", "", "", "
                     "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", ""]
 
 global StopCheckProgress
-StopCheckProgress = False
+StopCheckProgress = True
 global NameIndex
 NameIndex = {}
 global FieldsChanged
@@ -1306,6 +1306,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		return barcode_dict
 
 	def InitiateImportFrom10X(self, Filenamed, MaxNum):
+		global StopCheckProgress
 		self.calling = 1
 
 		# need to transfer species grouping to IgBlaster
@@ -1392,6 +1393,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
@@ -1432,6 +1434,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			#self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 
@@ -1525,6 +1528,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 		elif self.ui.rdoChoose.isChecked():
@@ -1574,6 +1578,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
@@ -1615,6 +1620,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			#self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 
@@ -1921,6 +1927,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
@@ -1958,6 +1965,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			# self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 
@@ -2015,6 +2023,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
@@ -2047,12 +2056,16 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			# self.disableWidgets()
+			StopCheckProgress = False
 			self.checkProgress()
 			return
 
 	@pyqtSlot()
 	def multi_callback(self):
 		global IgBLASTAnalysis
+		global StopCheckProgress
+
+		StopCheckProgress = True
 
 		Startprocessed = 0
 		try:
@@ -2123,6 +2136,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	@pyqtSlot()
 	def multiIMGT_callback(self):
 		global IMGTAnalysis
+		global StopCheckProgress
+
+		StopCheckProgress = True
 
 		Startprocessed = 0
 		try:
