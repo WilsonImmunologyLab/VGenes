@@ -1334,9 +1334,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.prefix = self.ui.lineEditRep3.text()
 
 		if self.ui.rdoProductive.isChecked() == True:
-			GetProductive = True
+			GetProductive = 0
+		elif self.ui.rdoVandJ.isChecked() == True:
+			GetProductive = 1
 		else:
-			GetProductive = False
+			GetProductive = 2
 
 		if seq_pathname == None:
 			return
@@ -1440,6 +1442,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def InitiateImportFromFasta(self, Filenamed, MaxNum):
 		self.calling = 2
+		global StopCheckProgress
 
 		# need to transfer species grouping to IgBlaster
 		if self.pathFasta == "":
@@ -1478,9 +1481,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		# settings
 		if self.ui.rdoProductive.isChecked() == True:
-			GetProductive = True
+			GetProductive = 0
+		elif self.ui.rdoVandJ.isChecked() == True:
+			GetProductive = 1
 		else:
-			GetProductive = False
+			GetProductive = 2
 
 		if seq_pathname == None:
 			return
@@ -1869,9 +1874,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		seq_pathname = self.ui.lineEditIgFasta.text()
 
 		if self.ui.rdoProductive.isChecked() == True:
-			GetProductive = True
+			GetProductive = 0
+		elif self.ui.rdoVandJ.isChecked() == True:
+			GetProductive = 1
 		else:
-			GetProductive = False
+			GetProductive = 2
 
 		if seq_pathname == None:
 			return
@@ -2430,10 +2437,12 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			pathname.append(pathname1)
 		# filename = filenames[0]
 
-		if self.rdoProductive.isChecked() == True:
-			GetProductive = True
+		if self.ui.rdoProductive.isChecked() == True:
+			GetProductive = 0
+		elif self.ui.rdoVandJ.isChecked() == True:
+			GetProductive = 1
 		else:
-			GetProductive = False
+			GetProductive = 2
 
 		if pathname == None:
 			return
@@ -13424,9 +13433,191 @@ def IgBlastParserFast(FASTAFile, datalist):
 		if read_tag:
 			cur_block += IgLine
 
+	if cur_block != '':
+		file_handle = open(progressBarFile, 'w')
+		progress = str(50 + int((block_id + 1) * 50 / totel_seq))
+		file_handle.write(progress)
+		file_handle.write(',Step2:' + str(block_id + 1) + '/' + str(totel_seq))
+		file_handle.close()
+
+		# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
+		ig_match = re.findall('\nIG[^\n]+', cur_block)
+		## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
+		v_cur_index = 3
+		d_cur_index = 6
+		j_cur_index = 9
+		for line in ig_match[:len(ig_match) - 1]:
+			m = re.search('IG\S+', line)
+			cur_gene = m.group(0)
+			if cur_gene[3] == 'V':
+				DATA[block_id][v_cur_index] = cur_gene
+				v_cur_index += 1
+			elif cur_gene[3] == 'D':
+				DATA[block_id][d_cur_index] = cur_gene
+				d_cur_index += 1
+			else:
+				DATA[block_id][j_cur_index] = cur_gene
+				j_cur_index += 1
+		# V,D,J locus
+		m = re.search('IG\S+', DATA[block_id][3])
+		try:
+			v_locus = m.group(0)
+			v_locus = re.sub('^IG', '', v_locus)
+			v_locus = re.sub('\*.+', '', v_locus)
+			v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
+			DATA[block_id][90] = v_locus
+		except:
+			pass
+
+		m = re.search('IG\S+', DATA[block_id][6])
+		try:
+			d_locus = m.group(0)
+			d_locus = re.sub('^IG', '', d_locus)
+			d_locus = re.sub('\*.+', '', d_locus)
+			d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
+			DATA[block_id][92] = d_locus
+		except:
+			pass
+
+		m = re.search('IG\S+', DATA[block_id][9])
+		try:
+			j_locus = m.group(0)
+			j_locus = re.sub('^IG', '', j_locus)
+			j_locus = re.sub('\*.+', '', j_locus)
+			j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
+			DATA[block_id][91] = j_locus
+		except:
+			pass
+
+		# import V(D)J junction info
+		ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
+		junction = ig_match[0]
+		junction = junction.split('\n')[1]
+		junction_list = junction.split('\t')
+		if DATA[block_id][2] == 'Heavy':
+			DATA[block_id][16] = junction_list[0]
+			DATA[block_id][17] = junction_list[1]
+			DATA[block_id][18] = junction_list[2]
+			DATA[block_id][19] = junction_list[3]
+			DATA[block_id][20] = junction_list[4]
+		else:
+			DATA[block_id][16] = junction_list[0]
+			DATA[block_id][21] = junction_list[1]
+			DATA[block_id][20] = junction_list[2]
+
+		# import Alignment summary
+		ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+		fr1_match = ig_match[0]
+		fr1_match = fr1_match[1:]
+		fr1_match = fr1_match.split('\t')
+		DATA[block_id][22] = 1
+		DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+		DATA[block_id][24] = fr1_match[3]
+		DATA[block_id][25] = fr1_match[4]
+		DATA[block_id][26] = fr1_match[5]
+		DATA[block_id][27] = fr1_match[6]
+		DATA[block_id][28] = fr1_match[7]
+
+		ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+		cdr1_match = ig_match[0]
+		cdr1_match = cdr1_match[1:]
+		cdr1_match = cdr1_match.split('\t')
+		DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+		DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+		DATA[block_id][31] = cdr1_match[3]
+		DATA[block_id][32] = cdr1_match[4]
+		DATA[block_id][33] = cdr1_match[5]
+		DATA[block_id][34] = cdr1_match[6]
+		DATA[block_id][35] = cdr1_match[7]
+
+		ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+		fr2_match = ig_match[0]
+		fr2_match = fr2_match[1:]
+		fr2_match = fr2_match.split('\t')
+		DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+		DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+		DATA[block_id][38] = fr2_match[3]
+		DATA[block_id][39] = fr2_match[4]
+		DATA[block_id][40] = fr2_match[5]
+		DATA[block_id][41] = fr2_match[6]
+		DATA[block_id][42] = fr2_match[7]
+
+		ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+		cdr2_match = ig_match[0]
+		cdr2_match = cdr2_match[1:]
+		cdr2_match = cdr2_match.split('\t')
+		DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+		DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+		DATA[block_id][45] = cdr2_match[3]
+		DATA[block_id][46] = cdr2_match[4]
+		DATA[block_id][47] = cdr2_match[5]
+		DATA[block_id][48] = cdr2_match[6]
+		DATA[block_id][49] = cdr2_match[7]
+
+		ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+		fr3_match = ig_match[0]
+		fr3_match = fr3_match[1:]
+		fr3_match = fr3_match.split('\t')
+		DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+		DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+		DATA[block_id][52] = fr3_match[3]
+		DATA[block_id][53] = fr3_match[4]
+		DATA[block_id][54] = fr3_match[5]
+		DATA[block_id][55] = fr3_match[6]
+		DATA[block_id][56] = fr3_match[7]
+
+		# import Alignment summary
+		ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+		alignment = ig_match[0]
+		alignment = alignment[1:]
+		alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
+		DATA[block_id][58] = alignment
+
+		block_id += 1
+
 	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
 	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
+
+	# if productive = TRUE, only keep record with V and J
+	start = time.time()
+
+	if GetProductive == 0:  # only keep productive
+		# find record
+		del_index = []
+		for index in range(len(DATA)):
+			if DATA[index][14] == 'Yes':
+				del_index.append(index)
+
+		for i in del_index:
+			ErLog = DATA[i][0] + ' was not a productive rearrangement\n'
+			with open(ErlogFile, 'a') as currentfile:
+				currentfile.write(ErLog)
+
+		# delete record
+		cnt = 0
+		for index in del_index:
+			del DATA[index - cnt]
+			cnt += 1
+	elif GetProductive == 1:    #only keep V and J
+		# find record
+		del_index = []
+		for index in range(len(DATA)):
+			if DATA[index][90] == '' or DATA[index][91] == '':
+				del_index.append(index)
+
+		for i in del_index:
+			ErLog = DATA[i][0] + ' missed V or J\n'
+			with open(ErlogFile, 'a') as currentfile:
+				currentfile.write(ErLog)
+		# delete record
+		cnt = 0
+		for index in del_index:
+			del DATA[index - cnt]
+			cnt += 1
+
+	end = time.time()
+	print('Run time for productive: ' + str(end - start))
 
 	return DATA
 

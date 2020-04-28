@@ -132,7 +132,7 @@ def IgBLASTit(FASTAFile, datalist):
 		(dirname, filename) = os.path.split(DBpathname)
 		os.chdir(dirname)
 
-		GetProductive = False
+		GetProductive = 2
 		conn = db.connect(DBpathname)
 
 	except:
@@ -140,7 +140,7 @@ def IgBLASTit(FASTAFile, datalist):
 		(dirname, filename) = os.path.split(DBpathname)
 		os.chdir(dirname)
 
-		GetProductive = False
+		GetProductive = 2
 		conn = db.connect(DBpathname)
 
 	#  then need to create a cursor that lets you traverse the database
@@ -435,15 +435,28 @@ def IgBLASTit(FASTAFile, datalist):
 			#     ErLog = '\n' + str(NumberAnalyzed) + ' sequences were analyzed by IgBLAST \nThe following sequences appear to have errors and were not processed: \n' + ErLog
 			# else:
 			#     ErReport = 'NoGoodSeqs'
+			if GetProductive == 1:  # only keep V and J
+				# find record
+				del_index = []
+				for index in range(len(IgBLASTset)):
+					if IgBLASTset[index][90] == 'N/A' or IgBLASTset[index][91] == 'N/A':
+						del_index.append(index)
 
-				# TODO make ErLog one permanent file deleted every time unless user wants to save on Main query
+				for i in del_index:
+					ErLog = IgBLASTset[i][0] + ' missed V or J\n'
+					with open(ErlogFile, 'a') as currentfile:
+						currentfile.write(ErLog)
+				# delete record
+				cnt = 0
+				for index in del_index:
+					del IgBLASTset[index - cnt]
+					cnt += 1
 
 			ErLog  = ErLog + '\nVGenes input ended at: '+ time.strftime('%c')
 			with open(ErlogFile, 'a') as currentFile:  #using with for this automatically closes the file even if you crash
 				currentFile.write(ErLog)
 
 			# TODO need to use error log contents to determine if seqs should be added to database
-
 
 			return IgBLASTset
 
@@ -1259,7 +1272,7 @@ def IgBLASTit(FASTAFile, datalist):
 				IgBLASTAnalysis.append(Jgene2)
 				IgBLASTAnalysis.append(Jgene3)
 			else:
-				if GetProductive == True:
+				if GetProductive == 0:
 					NotValid = True
 
 				ErLog = SeqName + ': No J gene found\n'
@@ -1278,7 +1291,7 @@ def IgBLASTit(FASTAFile, datalist):
 			IndexN += 1
 			Productive = RecombParts[IndexN]
 			#print(Productive)
-			if GetProductive == True:
+			if GetProductive == 0:
 				if Productive == 'Yes':
 					IgBLASTAnalysis.append(Productive)
 				else:
@@ -1593,7 +1606,7 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 		(dirname, filename) = os.path.split(DBpathname)
 		os.chdir(dirname)
 
-		GetProductive = False
+		GetProductive = 2
 		conn = db.connect(DBpathname)
 
 	except:
@@ -1601,7 +1614,7 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 		(dirname, filename) = os.path.split(DBpathname)
 		os.chdir(dirname)
 
-		GetProductive = False
+		GetProductive = 2
 		conn = db.connect(DBpathname)
 
 	#  then need to create a cursor that lets you traverse the database
@@ -1846,7 +1859,6 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 				currentFile.write(ErLog)
 
 			# TODO need to use error log contents to determine if seqs should be added to database
-
 
 			return IgBLASTset
 
@@ -2662,7 +2674,7 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 				IgBLASTAnalysis.append(Jgene2)
 				IgBLASTAnalysis.append(Jgene3)
 			else:
-				if GetProductive == True:
+				if GetProductive == 0:
 					NotValid = True
 
 				ErLog = SeqName + ': No J gene found\n'
@@ -2681,7 +2693,7 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 			IndexN += 1
 			Productive = RecombParts[IndexN]
 			#print(Productive)
-			if GetProductive == True:
+			if GetProductive == 0:
 				if Productive == 'Yes':
 					IgBLASTAnalysis.append(Productive)
 				else:
