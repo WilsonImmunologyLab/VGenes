@@ -3138,6 +3138,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonCheckCloone.clicked.connect(self.checkClone)
 		self.ui.listWidgetCloneMember.itemSelectionChanged.connect(self.updateClone)
 		self.ui.pushButtonNewickTree.clicked.connect(self.loadNewickTree)
+		self.ui.listWidgetAll.itemDoubleClicked.connect(self.addFieldsHeatmap)
+		self.ui.listWidgetSelected.itemDoubleClicked.connect(self.delFieldsHeatmap)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -3162,6 +3164,29 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
 
 		self.enableEdit = False
+
+		self.HeatmapList = []
+
+	def addFieldsHeatmap(self):
+		listItems = self.ui.listWidgetAll.selectedItems()
+		for item in listItems:
+			label = item.text()
+			if label in self.HeatmapList:
+				pass
+			else:
+				self.HeatmapList.append(label)
+				self.ui.listWidgetSelected.addItem(label)
+
+	def delFieldsHeatmap(self):
+		listItems = self.ui.listWidgetSelected.selectedItems()
+		for item in listItems:
+			label = item.text()
+			if label in self.HeatmapList:
+				self.HeatmapList.remove(label)
+				self.ui.listWidgetSelected.clear()
+				self.ui.listWidgetSelected.addItems(self.HeatmapList)
+			else:
+				pass
 
 	def updateClone(self):
 		items = self.ui.listWidgetCloneMember.selectedItems()
@@ -3897,6 +3922,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.comboBoxTree2.addItems(fields_name)
 					self.ui.comboBoxTree3.clear()
 					self.ui.comboBoxTree3.addItems(fields_name)
+					self.ui.listWidgetAll.clear()
+					self.ui.listWidgetAll.addItems(fields_name[1:])
 			elif self.ui.tabWidget.currentIndex() == 8:
 				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -5210,8 +5237,39 @@ class VGenesForm(QtWidgets.QMainWindow):
 			)
 		# Heatmap
 		elif self.ui.tabWidgetFig.currentIndex() == 7:
-			return
+			if len(self.HeatmapList) == 0:
+				Msg = 'Please select at least one field!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
 
+			field = ",".join(self.HeatmapList)
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			num_row = len(DataIn)
+			num_col = len(self.HeatmapList)
+
+			try:
+				value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
+				xaxis_data = [str(i) for i in range(num_row)]
+			except:
+				Msg = 'Some values of your selected field/record are not numbers!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			my_pyecharts = (
+				HeatMap()
+					.add_xaxis(xaxis_data)
+					.add_yaxis(
+					"My data selection",
+					self.HeatmapList,
+					value,
+					label_opts=opts.LabelOpts(is_show=False, position="inside"),
+				)
+					.set_global_opts(
+					title_opts=opts.TitleOpts(title="HeatMap"),
+					visualmap_opts=opts.VisualMapOpts(),
+				)
+			)
 		# load figure
 		html_path = os.path.join(temp_folder,'figure.html')
 		my_pyecharts.render(path=html_path)
