@@ -6805,25 +6805,15 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>Box Chart</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_31">
-            <item row="0" column="4">
-             <widget class="QLabel" name="label_31">
-              <property name="text">
-               <string>Select Group 2 (optional):</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="6">
-             <spacer name="horizontalSpacer_12">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
+            <item row="0" column="1" rowspan="2">
+             <widget class="QComboBox" name="comboBoxBoxData">
+              <property name="minimumSize">
                <size>
-                <width>40</width>
-                <height>20</height>
+                <width>150</width>
+                <height>0</height>
                </size>
               </property>
-             </spacer>
+             </widget>
             </item>
             <item row="0" column="2">
              <widget class="QLabel" name="label_32">
@@ -6832,23 +6822,10 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="3">
-             <widget class="QComboBox" name="comboBoxBox1">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="5">
-             <widget class="QComboBox" name="comboBoxBox2">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
+            <item row="2" column="2">
+             <widget class="QLabel" name="label_31">
+              <property name="text">
+               <string>Select Group 2 (optional):</string>
               </property>
              </widget>
             </item>
@@ -6859,8 +6836,18 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBoxBoxData">
+            <item row="1" column="3" rowspan="2">
+             <widget class="QComboBox" name="comboBoxBox2">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QComboBox" name="comboBoxBox1">
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -6913,16 +6900,6 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>River Chart</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_33">
-            <item row="0" column="3">
-             <widget class="QComboBox" name="comboBoxRiver2">
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="0">
              <widget class="QLabel" name="label_41">
               <property name="text">
@@ -6940,25 +6917,22 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
+            <item row="0" column="3">
+             <widget class="QComboBox" name="comboBoxRiver2">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="2">
              <widget class="QLabel" name="label_40">
               <property name="text">
                <string>Select group field(e.g. cluster):</string>
               </property>
              </widget>
-            </item>
-            <item row="0" column="4">
-             <spacer name="horizontalSpacer_14">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
             </item>
            </layout>
           </widget>
