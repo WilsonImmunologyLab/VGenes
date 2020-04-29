@@ -6,6 +6,7 @@ import time
 import re
 import shutil
 import math
+import numpy
 
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
 from PyQt5 import QtWidgets
@@ -3116,6 +3117,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonDraw.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxStack.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonOriginal.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonLog10.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonLog2.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonDownload.clicked.connect(self.downloadFig)
 		self.ui.radioButtonTreeMap.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonTree.clicked.connect(self.GenerateFigure)
@@ -5248,13 +5252,45 @@ class VGenesForm(QtWidgets.QMainWindow):
 			num_row = len(DataIn)
 			num_col = len(self.HeatmapList)
 
+			if num_row == 0:
+				Msg = 'No record fetched!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
 			try:
 				value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
-				xaxis_data = [str(i) for i in range(num_row)]
 			except:
 				Msg = 'Some values of your selected field/record are not numbers!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
+
+			min_value = min(row[2] for row in value)
+			max_value = max(row[2] for row in value)
+
+			if self.ui.radioButtonLog10.isChecked():
+				if min_value >= 0:
+					for i in range(len(value)):
+						value[i][2] = numpy.log1p(value[i][2])/numpy.log(10)
+
+					min_value = numpy.log1p(min_value)/numpy.log(10)
+					max_value = numpy.log1p(max_value) / numpy.log(10)
+				else:
+					Msg = 'Negative values detected in your data! Log scale is not appliable!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+			elif self.ui.radioButtonLog2.isChecked():
+				if min_value >= 0:
+					for i in range(len(value)):
+						value[i][2] = numpy.log1p(value[i][2])/numpy.log(2)
+
+					min_value = numpy.log1p(min_value) / numpy.log(2)
+					max_value = numpy.log1p(max_value) / numpy.log(2)
+				else:
+					Msg = 'Negative values detected in your data! Log scale is not appliable!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+
+			xaxis_data = [str(i) for i in range(num_row)]
 
 			my_pyecharts = (
 				HeatMap()
@@ -5267,7 +5303,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				)
 					.set_global_opts(
 					title_opts=opts.TitleOpts(title="HeatMap"),
-					visualmap_opts=opts.VisualMapOpts(),
+					visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value),
 				)
 			)
 		# load figure

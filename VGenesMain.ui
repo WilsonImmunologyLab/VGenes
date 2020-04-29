@@ -620,7 +620,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>6</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -6697,7 +6697,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>7</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -7133,8 +7133,12 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>HeatMap</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_54">
-            <item row="0" column="0">
-             <widget class="QListWidget" name="listWidgetAll"/>
+            <item row="1" column="3">
+             <widget class="QRadioButton" name="radioButtonLog10">
+              <property name="text">
+               <string>Log10 scale</string>
+              </property>
+             </widget>
             </item>
             <item row="0" column="1">
              <widget class="QLabel" name="label_77">
@@ -7161,8 +7165,42 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QListWidget" name="listWidgetSelected"/>
+            <item row="0" column="0" rowspan="2">
+             <widget class="QListWidget" name="listWidgetAll">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>70</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QRadioButton" name="radioButtonOriginal">
+              <property name="text">
+               <string>Original scale</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" rowspan="2">
+             <widget class="QListWidget" name="listWidgetSelected">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>70</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="3">
+             <widget class="QRadioButton" name="radioButtonLog2">
+              <property name="text">
+               <string>Log2 scale</string>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
