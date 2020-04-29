@@ -3928,6 +3928,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.comboBoxTree3.addItems(fields_name)
 					self.ui.listWidgetAll.clear()
 					self.ui.listWidgetAll.addItems(fields_name[1:])
+					self.ui.comboBoxSortField.clear()
+					self.ui.comboBoxSortField.addItems(fields_name)
 			elif self.ui.tabWidget.currentIndex() == 8:
 				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -5247,7 +5249,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 				return
 
 			field = ",".join(self.HeatmapList)
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			if self.ui.comboBoxSortField.currentText() == '':
+				sort_statement = ''
+				field = field + ',SeqName'
+			else:
+				sort_statement = ' ORDER BY ' + self.ui.comboBoxSortField.currentText() + ' ASC'
+				field = field + ',' + self.ui.comboBoxSortField.currentText()
+
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + sort_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			num_row = len(DataIn)
 			num_col = len(self.HeatmapList)
@@ -5259,6 +5268,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			try:
 				value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
+				xaxis_data = [DataIn[i][-1] for i in range(num_row)]
 			except:
 				Msg = 'Some values of your selected field/record are not numbers!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -5290,10 +5300,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 					return
 
-			xaxis_data = [str(i) for i in range(num_row)]
-
 			my_pyecharts = (
-				HeatMap()
+				HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 					.add_xaxis(xaxis_data)
 					.add_yaxis(
 					"My data selection",
