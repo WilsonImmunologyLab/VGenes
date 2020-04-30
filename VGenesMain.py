@@ -3120,6 +3120,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.radioButtonOriginal.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog10.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog2.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxHideNull.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonDownload.clicked.connect(self.downloadFig)
 		self.ui.radioButtonTreeMap.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonTree.clicked.connect(self.GenerateFigure)
@@ -5258,6 +5259,33 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + sort_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			# parse out record with all null value
+			if self.ui.checkBoxHideNull.isChecked():
+				index_remove = []
+				index = 0
+				for record in DataIn:
+					values = record[:len(record)-1]
+					not_null = False
+					for value in values:
+						try:
+							int(value)
+							not_null = True
+							break
+						except:
+							pass
+
+					if not_null == False:
+						index_remove.append(index)
+
+					index += 1
+
+				# delete all null record
+				cnt = 0
+				for index in index_remove:
+					del DataIn[index - cnt]
+					cnt += 1
+
 			num_row = len(DataIn)
 			num_col = len(self.HeatmapList)
 
@@ -5265,7 +5293,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				Msg = 'No record fetched!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
-
+			'''
 			try:
 				value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
 				xaxis_data = [DataIn[i][-1] for i in range(num_row)]
@@ -5273,14 +5301,33 @@ class VGenesForm(QtWidgets.QMainWindow):
 				Msg = 'Some values of your selected field/record are not numbers!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
-
+				
 			min_value = min(row[2] for row in value)
 			max_value = max(row[2] for row in value)
+			'''
+			# replace all missing values by null
+			value = []
+			min_value = 0
+			max_value = 0
+			for i in range(num_row):
+				for j in range(num_col):
+					try:
+						value.append([i, j, int(DataIn[i][j])])
+						if int(DataIn[i][j]) < min_value:
+							min_value = int(DataIn[i][j])
+						if int(DataIn[i][j]) > max_value:
+							max_value = int(DataIn[i][j])
+					except:
+						value.append([i, j, 'null'])
+			xaxis_data = [DataIn[i][-1] for i in range(num_row)]
 
 			if self.ui.radioButtonLog10.isChecked():
 				if min_value >= 0:
 					for i in range(len(value)):
-						value[i][2] = numpy.log1p(value[i][2])/numpy.log(10)
+						try:
+							value[i][2] = numpy.log1p(value[i][2])/numpy.log(10)
+						except:
+							pass
 
 					min_value = numpy.log1p(min_value)/numpy.log(10)
 					max_value = numpy.log1p(max_value) / numpy.log(10)
@@ -5291,7 +5338,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			elif self.ui.radioButtonLog2.isChecked():
 				if min_value >= 0:
 					for i in range(len(value)):
-						value[i][2] = numpy.log1p(value[i][2])/numpy.log(2)
+						try:
+							value[i][2] = numpy.log1p(value[i][2])/numpy.log(2)
+						except:
+							pass
 
 					min_value = numpy.log1p(min_value) / numpy.log(2)
 					max_value = numpy.log1p(max_value) / numpy.log(2)

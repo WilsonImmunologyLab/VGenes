@@ -7117,7 +7117,73 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item row="0" column="2">
+             <widget class="QListWidget" name="listWidgetSelected">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>70</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <layout class="QVBoxLayout" name="verticalLayout_5">
+              <item>
+               <widget class="QLabel" name="label_78">
+                <property name="text">
+                 <string>Sort Antibodys by:</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBoxSortField">
+                <property name="minimumSize">
+                 <size>
+                  <width>150</width>
+                  <height>0</height>
+                 </size>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="1" column="3">
+             <widget class="QCheckBox" name="checkBoxHideNull">
+              <property name="text">
+               <string>Hide all-null records</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4" rowspan="2">
+             <layout class="QVBoxLayout" name="verticalLayout_3">
+              <item>
+               <widget class="QRadioButton" name="radioButtonOriginal">
+                <property name="text">
+                 <string>Original scale</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButtonLog10">
+                <property name="text">
+                 <string>Log10 scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QRadioButton" name="radioButtonLog2">
+                <property name="text">
+                 <string>Log2 scale</string>
+                </property>
+               </widget>
+              </item>
+             </layout>
+            </item>
+            <item row="0" column="1" rowspan="2">
              <layout class="QVBoxLayout" name="verticalLayout_6">
               <item>
                <widget class="QLabel" name="label_79">
@@ -7166,65 +7232,6 @@ If the J-end is off the J gene end may need adjusted</string>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="0" column="2">
-             <widget class="QListWidget" name="listWidgetSelected">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>70</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="3">
-             <layout class="QVBoxLayout" name="verticalLayout_5">
-              <item>
-               <widget class="QLabel" name="label_78">
-                <property name="text">
-                 <string>Sort Antibodys by:</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QComboBox" name="comboBoxSortField">
-                <property name="minimumSize">
-                 <size>
-                  <width>150</width>
-                  <height>0</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-             </layout>
-            </item>
-            <item row="0" column="4">
-             <layout class="QVBoxLayout" name="verticalLayout_3">
-              <item>
-               <widget class="QRadioButton" name="radioButtonOriginal">
-                <property name="text">
-                 <string>Original scale</string>
-                </property>
-                <property name="checked">
-                 <bool>true</bool>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButtonLog10">
-                <property name="text">
-                 <string>Log10 scale</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QRadioButton" name="radioButtonLog2">
-                <property name="text">
-                 <string>Log2 scale</string>
                 </property>
                </widget>
               </item>
