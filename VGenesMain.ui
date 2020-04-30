@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1561</width>
-    <height>1182</height>
+    <width>1625</width>
+    <height>1187</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -200,8 +200,8 @@
             </property>
             <property name="iconSize">
              <size>
-              <width>25</width>
-              <height>25</height>
+              <width>30</width>
+              <height>30</height>
              </size>
             </property>
             <property name="flat">
@@ -234,43 +234,18 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_43">
-          <item row="1" column="0" colspan="3">
-           <widget class="QComboBox" name="cboFindField1"/>
-          </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pushButtonLock">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>80</width>
-              <height>16777215</height>
-             </size>
-            </property>
+          <item row="3" column="2">
+           <widget class="QLabel" name="label_61">
             <property name="text">
-             <string>Edit</string>
+             <string>To</string>
             </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
             </property>
            </widget>
           </item>
-          <item row="3" column="0">
-           <widget class="QLineEdit" name="lineEditTarget">
+          <item row="3" column="3">
+           <widget class="QLineEdit" name="lineEditReplace">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -279,7 +254,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="3">
            <widget class="QPushButton" name="btnFieldBulk">
             <property name="enabled">
              <bool>false</bool>
@@ -317,8 +292,31 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="2">
-           <widget class="QLineEdit" name="lineEditReplace">
+          <item row="0" column="0">
+           <widget class="QPushButton" name="pushButtonBatch">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Batch Edit</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/tag.png</normaloff>:/PNG-Icons/tag.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLineEdit" name="lineEditTarget">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -327,17 +325,45 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="1">
-           <widget class="QLabel" name="label_61">
-            <property name="text">
-             <string>To</string>
-            </property>
-           </widget>
+          <item row="1" column="0" colspan="4">
+           <widget class="QComboBox" name="cboFindField1"/>
           </item>
-          <item row="2" column="0" colspan="3">
+          <item row="2" column="0" colspan="4">
            <widget class="QRadioButton" name="radioButtonReg">
             <property name="text">
              <string>Regular Expression allowed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QPushButton" name="pushButtonLock">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>50</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -764,7 +790,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1189</width>
+             <width>1253</width>
              <height>821</height>
             </rect>
            </property>
@@ -8369,7 +8395,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1561</width>
+     <width>1625</width>
      <height>22</height>
     </rect>
    </property>

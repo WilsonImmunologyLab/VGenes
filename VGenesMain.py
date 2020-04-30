@@ -12,7 +12,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
@@ -57,6 +57,7 @@ from ui_import_data_dialog import Ui_ImportDataDialog
 from ui_VGenesTextEdit import ui_TextEditor
 from ui_alter_dialog import Ui_AlterDialog
 from ui_annotatedialog import Ui_AnnoDialog
+from ui_batch_dialog import Ui_BatchDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -217,6 +218,52 @@ def reName(ori_name, rep1, rep2, prefix):
 	if prefix != '':
 		my_name = prefix + '_' + my_name
 	return my_name
+
+class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
+	BatchSignal = pyqtSignal(int, str, dict)
+
+	def __init__(self):
+		super(BatchDialog, self).__init__()
+		self.ui = Ui_BatchDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+		self.ui.pushButtonOK.clicked.connect(self.accept)
+
+	def accept(self):
+		Dict = {}
+		layout = self.ui.gridLayout
+		rownum = layout.rowCount()
+		i = 1
+		while i < layout.rowCount():
+			str1 = layout.itemAtPosition(i, 0).widget().text()
+			str2 = layout.itemAtPosition(i, 1).widget().text()
+			if str2 == '':
+				pass
+			else:
+				Dict[str1] = str2
+			i += 1
+
+		if len(Dict) > 0:
+			field = self.ui.lineEdit.text()
+			self.BatchSignal.emit(0, field, Dict)
+		else:
+			self.BatchSignal.emit(1, '', Dict)
+
+		self.close()
+
+	def load_data(self, list):
+		layout = self.ui.gridLayout
+
+		layout.addWidget(QLabel("Original value"),0,0)
+		layout.addWidget(QLabel("New value"), 0, 1)
+
+		i = 1
+		for item in list:
+			layout.addWidget(QLineEdit(item), i, 0)
+			layout.itemAtPosition(i,0).widget().setReadOnly(True)
+			layout.addWidget(QLineEdit(""), i, 1)
+			i += 1
 
 class htmlDialog(QtWidgets.QDialog):
 	def __init__(self):
@@ -9818,6 +9865,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.label_Name.setText(NewLbl)
 
 	@pyqtSlot()
+	def on_pushButtonBatch_clicked(self):
+		cur_field = self.ui.cboFindField1.currentText()
+		if cur_field in RealNameList:
+			index = RealNameList.index(cur_field)
+			cur_field = FieldList[index]
+		else:
+			answer = informationMessage(self, 'The field name you determined is not exist!', 'OK')
+			return
+
+		SQLStatement = 'SELECT DISTINCT(' + cur_field + ') FROM vgenesdb'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		value_list = [row[0] for row in DataIn]
+
+		self.myBatchDialog = BatchDialog()
+		self.myBatchDialog.load_data(value_list)
+		self.myBatchDialog.ui.lineEdit.setText(cur_field)
+		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
+		self.myBatchDialog.show()
+
+	def updateFieldBatch(self, indicator, field, dict):
+		if indicator == 1:
+			Msg = 'You did not specific any value! Do nothing!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			for key in dict:
+				SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + dict[key] + '" WHERE ' + field + ' = "' + key + '"'
+				print(SQLStatement)
+				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+			Msg = 'Update finished!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+			self.refreshDB()
+			value = self.ui.dial.value()
+			self.updateF(value)
+
+	@pyqtSlot()
 	def on_btnFieldBulk_clicked(self):
 		# find ID for all selected items
 		selected_name = self.getTreeCheckedChild()
@@ -10021,11 +10104,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.pushButtonLock.setIcon(lock_icon)
 			self.ui.btnFieldBulk.setEnabled(False)
+			self.ui.pushButtonBatch.setEnabled(False)
 		else:
 			unlock_icon = QIcon()
 			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.pushButtonLock.setIcon(unlock_icon)
 			self.ui.btnFieldBulk.setEnabled(True)
+			self.ui.pushButtonBatch.setEnabled(True)
 
 	@pyqtSlot()
 	def on_btnSaveChange_clicked(self):
