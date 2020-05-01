@@ -58,6 +58,7 @@ from ui_VGenesTextEdit import ui_TextEditor
 from ui_alter_dialog import Ui_AlterDialog
 from ui_annotatedialog import Ui_AnnoDialog
 from ui_batch_dialog import Ui_BatchDialog
+from ui_copydialog import Ui_CopyDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -218,6 +219,33 @@ def reName(ori_name, rep1, rep2, prefix):
 	if prefix != '':
 		my_name = prefix + '_' + my_name
 	return my_name
+
+class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
+	CopySignal = pyqtSignal(str, str)
+
+	def __init__(self):
+		super(CopyDialog, self).__init__()
+		self.ui = Ui_CopyDialog()
+		self.ui.setupUi(self)
+
+		self.ui.Cancel.clicked.connect(self.reject)
+		self.ui.OK.clicked.connect(self.accept)
+
+	def accept(self):
+		field_from = self.ui.comboBoxFrom.currentText()
+		field_to = self.ui.comboBoxTo.currentText()
+
+		if field_from == '' or field_to == '':
+			Msg = 'Both field names can not be empty!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		elif field_from == field_to:
+			Msg = 'Two field names are the same!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		else:
+			self.CopySignal.emit(field_from, field_to)
+			self.close()
 
 class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 	BatchSignal = pyqtSignal(int, str, dict)
@@ -3413,6 +3441,32 @@ class VGenesForm(QtWidgets.QMainWindow):
 				                                       QTableWidgetItem(Content[row_index][col_index]))
 
 		self.annoDialog.show()
+
+	@pyqtSlot()
+	def on_CopyValue_clicked(self):
+		self.copy_dialog = CopyDialog()
+		field_list = [''] + FieldList
+		self.copy_dialog.ui.comboBoxFrom.addItems(field_list)
+		self.copy_dialog.ui.comboBoxTo.addItems(field_list)
+		self.copy_dialog.CopySignal.connect(self.CopyRecord)
+		self.copy_dialog.exec_()
+
+	def CopyRecord(self, field_from, field_to):
+		SQLStatement = 'UPDATE vgenesDB SET ' + field_to + ' = ' + field_from
+		try:
+			VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+			Msg = 'Update finished!'
+
+			self.refreshDB()
+			value = self.ui.dial.value()
+			self.updateF(value)
+
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		except:
+			Msg = 'Error occurs when updating the DB!\nCurrent SQL statement is:\n' + SQLStatement
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
 
 	def openAlter(self):
 		self.AlterWindow.ui.pushButtonSave.setEnabled(False)

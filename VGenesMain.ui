@@ -646,7 +646,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -665,32 +665,6 @@
         <string>Database</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_42">
-        <item row="0" column="4">
-         <widget class="QPushButton" name="EditLock">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Edit Lock: Locked</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
         <item row="0" column="1">
          <widget class="QCheckBox" name="checkBoxAll">
           <property name="text">
@@ -705,10 +679,23 @@
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="8">
+        <item row="0" column="3">
+         <spacer name="horizontalSpacer_21">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>865</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="1" column="0" colspan="9">
          <widget class="QTableWidget" name="SeqTable"/>
         </item>
-        <item row="0" column="6">
+        <item row="0" column="7">
          <widget class="QPushButton" name="pushButtonRefresh">
           <property name="maximumSize">
            <size>
@@ -734,20 +721,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="3">
-         <spacer name="horizontalSpacer_21">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>865</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="7">
+        <item row="0" column="8">
          <widget class="QPushButton" name="pushButtonAlter">
           <property name="maximumSize">
            <size>
@@ -761,6 +735,58 @@
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QPushButton" name="EditLock">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Edit Lock: Locked</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QPushButton" name="CopyValue">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Copy values from a column</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
           </property>
           <property name="iconSize">
            <size>
