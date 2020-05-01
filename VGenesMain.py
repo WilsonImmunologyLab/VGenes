@@ -59,6 +59,7 @@ from ui_alter_dialog import Ui_AlterDialog
 from ui_annotatedialog import Ui_AnnoDialog
 from ui_batch_dialog import Ui_BatchDialog
 from ui_copydialog import Ui_CopyDialog
+from ui_newfielddialog import Ui_NewFieldDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -219,6 +220,33 @@ def reName(ori_name, rep1, rep2, prefix):
 	if prefix != '':
 		my_name = prefix + '_' + my_name
 	return my_name
+
+class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
+	NewFieldSignal = pyqtSignal(str, str)
+
+	def __init__(self):
+		super(NewFieldDialog, self).__init__()
+		self.ui = Ui_NewFieldDialog()
+		self.ui.setupUi(self)
+
+		self.ui.Cancel.clicked.connect(self.reject)
+		self.ui.OK.clicked.connect(self.accept)
+
+	def accept(self):
+		field_from = self.ui.comboBoxFrom.currentText()
+		new_field = self.ui.lineEdit.text()
+
+		if new_field == '':
+			Msg = 'This field name can not be empty!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		if new_field in FieldList:
+			Msg = 'This field name has been taken! Enter another field name!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		else:
+			self.NewFieldSignal.emit(field_from, new_field)
+			self.close()
 
 class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 	CopySignal = pyqtSignal(str, str)
@@ -732,6 +760,64 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.refreshDBSignal.emit()
 
 	def addField(self):
+		self.newFieldDialog = NewFieldDialog()
+		self.newFieldDialog.ui.comboBoxFrom.addItems(FieldList)
+		self.newFieldDialog.NewFieldSignal.connect(self.addFieldAndCopy)
+		self.newFieldDialog.exec_()
+
+	def addFieldAndCopy(self, field_from, new_field):
+		print(field_from)
+		print(new_field)
+		global RealNameList
+		global FieldCommentList
+		global FieldTypeList
+		global FieldList
+
+		# update vgene table
+		SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_field + " text"
+
+		try:
+			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+		except:
+			msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# update field name table
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+		                'VALUES(' + str(
+			self.ui.listWidget.count() + 1) + ',"' + new_field + '", "' + new_field + '", "Customized", "")'
+		try:
+			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+		except:
+			msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# copy record
+		if field_from != '':
+			SQLStatement = 'UPDATE vgenesDB SET ' + new_field + ' = ' + field_from
+			try:
+				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+			except:
+				Msg = 'Error occurs when updating the DB!\nCurrent SQL statement is:\n' + SQLStatement
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+		RealNameList.append(new_field)
+		FieldCommentList.append('')
+		FieldTypeList.append('Customized')
+		FieldList.append(new_field)
+
+		self.ui.listWidget.addItem(new_field)
+		self.ui.listWidget.setCurrentItem(self.ui.listWidget.item(self.ui.listWidget.count() - 1))
+		self.ui.listWidget.scrollToBottom()
+
+		self.refreshDBSignal.emit()
+
+	def addField1(self):
 		global RealNameList
 		global FieldCommentList
 		global FieldTypeList
