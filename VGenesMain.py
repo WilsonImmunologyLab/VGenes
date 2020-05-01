@@ -761,7 +761,8 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 
 	def addField(self):
 		self.newFieldDialog = NewFieldDialog()
-		self.newFieldDialog.ui.comboBoxFrom.addItems(FieldList)
+		field_list = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.newFieldDialog.ui.comboBoxFrom.addItems(field_list)
 		self.newFieldDialog.NewFieldSignal.connect(self.addFieldAndCopy)
 		self.newFieldDialog.exec_()
 
@@ -798,6 +799,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 
 		# copy record
 		if field_from != '':
+			field_from = re.sub(r'\(.+', '', field_from)
 			SQLStatement = 'UPDATE vgenesDB SET ' + new_field + ' = ' + field_from
 			try:
 				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
@@ -3531,13 +3533,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_CopyValue_clicked(self):
 		self.copy_dialog = CopyDialog()
-		field_list = [''] + FieldList
+		field_list = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
 		self.copy_dialog.ui.comboBoxFrom.addItems(field_list)
 		self.copy_dialog.ui.comboBoxTo.addItems(field_list)
 		self.copy_dialog.CopySignal.connect(self.CopyRecord)
 		self.copy_dialog.exec_()
 
 	def CopyRecord(self, field_from, field_to):
+		field_from = re.sub(r'\(.+', '', field_from)
+		field_to = re.sub(r'\(.+', '', field_to)
 		SQLStatement = 'UPDATE vgenesDB SET ' + field_to + ' = ' + field_from
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
@@ -4082,8 +4086,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.tabWidget.currentIndex() == 6:
 				if self.ui.comboBoxPie.count() == 0:
 					# setup options for graph table
-					fields_name = VGenesSQL.ColName(DBFilename)
-					fields_name = [""] + fields_name
+					fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+
 					self.ui.comboBoxPie.clear()
 					self.ui.comboBoxPie.addItems(fields_name)
 					self.ui.comboBoxCol1.clear()
@@ -4799,6 +4803,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
+			field = re.sub(r'\(.+', '', field)
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			if len(DataIn) == 0:
@@ -4837,6 +4842,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
+
+			field1 = re.sub(r'\(.+', '', field1)
+			field2 = re.sub(r'\(.+', '', field2)
 
 			multi_factor = False
 			if field2 == "":
@@ -4924,6 +4932,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			data_field = self.ui.comboBoxBoxData.currentText()
 			field1 = self.ui.comboBoxBox1.currentText()
 			field2 = self.ui.comboBoxBox2.currentText()
+
+			data_field = re.sub(r'\(.+', '', data_field)
+			field1 = re.sub(r'\(.+', '', field1)
+			field2 = re.sub(r'\(.+', '', field2)
+
 			if field1 == "":
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5073,6 +5086,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		elif self.ui.tabWidgetFig.currentIndex() == 3:
 			# get data
 			field = self.ui.comboBoxWord.currentText()
+
+			field = re.sub(r'\(.+', '', field)
+
 			if field == "":
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5148,6 +5164,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# get data
 			field1 = self.ui.comboBoxRiver1.currentText()
 			field2 = self.ui.comboBoxRiver2.currentText()
+
+			field1 = re.sub(r'\(.+', '', field1)
+			field2 = re.sub(r'\(.+', '', field2)
+
 			if field1 == "" or field2 == "":
 				QMessageBox.warning(self, 'Warning', 'Your data field or group field is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5216,6 +5236,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			group1 = self.ui.comboBoxTree1.currentText()
 			group2 = self.ui.comboBoxTree2.currentText()
 			group3 = self.ui.comboBoxTree3.currentText()
+
+			group1 = re.sub(r'\(.+', '', group1)
+			group2 = re.sub(r'\(.+', '', group2)
+			group3 = re.sub(r'\(.+', '', group3)
+
 			if group1 == "":
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5344,6 +5369,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			dim1 = self.ui.comboBoxScatterX.currentText()
 			dim2 = self.ui.comboBoxScatterY.currentText()
 			group = self.ui.comboBoxScatterGroup.currentText()
+
+			dim1 = re.sub(r'\(.+', '', dim1)
+			dim2 = re.sub(r'\(.+', '', dim2)
+			group = re.sub(r'\(.+', '', group)
+
 			if dim1 == "" or dim2 == "":
 				QMessageBox.warning(self, 'Warning', 'Your dim1 or dim2 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5436,16 +5466,24 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
-			field = ",".join(self.HeatmapList)
+			field_list = [re.sub(r'\(.+', '', item) for item in self.HeatmapList]
+
+			field = ",".join(field_list)
 			if self.ui.comboBoxSortField.currentText() == '':
 				sort_statement = ''
 				field = field + ',SeqName'
 			else:
-				sort_statement = ' ORDER BY ' + self.ui.comboBoxSortField.currentText() + ' ASC'
-				field = field + ',' + self.ui.comboBoxSortField.currentText()
+				sort_field = re.sub(r'\(.+', '', self.ui.comboBoxSortField.currentText())
+				sort_statement = ' ORDER BY ' + sort_field + ' ASC'
+				field = field + ',' + sort_field
 
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + sort_statement
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			try:
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			except:
+				Msg = 'SQL error! Current SQL statemernt is:\n' + SQLStatement
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
 
 			# parse out record with all null value
 			if self.ui.checkBoxHideNull.isChecked():
