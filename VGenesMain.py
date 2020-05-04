@@ -5532,7 +5532,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			'''
 			# replace all missing values by null
 			value = []
-			min_value = 0
+			min_value = 9999
 			max_value = 0
 			for i in range(num_row):
 				for j in range(num_col):
@@ -5654,19 +5654,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# this section will add information for latest figure. The information will be used to update element selections on the left
 		if self.ui.tabWidgetFig.currentIndex() == 0:
-			self.ui.HTMLview.info = ['Pie',self.ui.comboBoxPie.currentText()]
+			self.ui.HTMLview.info = ['Pie', re.sub(r'\(.+', '', self.ui.comboBoxPie.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 1:
-			self.ui.HTMLview.info = ['Bar', self.ui.comboBoxCol1.currentText(),self.ui.comboBoxCol2.currentText()]
+			self.ui.HTMLview.info = ['Bar', re.sub(r'\(.+', '', self.ui.comboBoxCol1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxCol2.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 2:
-			self.ui.HTMLview.info = ['Box', self.ui.comboBoxBoxData.currentText(),self.ui.comboBoxBox1.currentText(),self.ui.comboBoxBox2.currentText()]
+			self.ui.HTMLview.info = ['Box', re.sub(r'\(.+', '', self.ui.comboBoxBoxData.currentText()), re.sub(r'\(.+', '',self.ui.comboBoxBox1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxBox2.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 3:
-			self.ui.HTMLview.info = ['Word', self.ui.comboBoxWord.currentText()]
+			self.ui.HTMLview.info = ['Word', re.sub(r'\(.+', '', self.ui.comboBoxWord.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 4:
-			self.ui.HTMLview.info = ['River', self.ui.comboBoxRiver1.currentText(),self.ui.comboBoxRiver2.currentText()]
+			self.ui.HTMLview.info = ['River', re.sub(r'\(.+', '', self.ui.comboBoxRiver1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxRiver2.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 5:
-			self.ui.HTMLview.info = ['Tree', self.ui.comboBoxTree1.currentText(),self.ui.comboBoxTree2.currentText(),self.ui.comboBoxTree3.currentText()]
+			self.ui.HTMLview.info = ['Tree', re.sub(r'\(.+', '', self.ui.comboBoxTree1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxTree2.currentText()) , re.sub(r'\(.+', '', self.ui.comboBoxTree3.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 6:
-			self.ui.HTMLview.info = ['Scatter', self.ui.comboBoxScatterX.currentText(),self.ui.comboBoxScatterY.currentText(),self.ui.comboBoxScatterGroup.currentText()]
+			self.ui.HTMLview.info = ['Scatter', re.sub(r'\(.+', '', self.ui.comboBoxScatterX.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxScatterY.currentText()) ,re.sub(r'\(.+', '', self.ui.comboBoxScatterGroup.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 7:
 			pass
 
