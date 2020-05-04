@@ -4172,9 +4172,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# load data for new table
 		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
-			field1 = self.ui.cboTreeOp1.currentText()
-			field2 = self.ui.cboTreeOp2.currentText()
-			field3 = self.ui.cboTreeOp3.currentText()
+			field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 
 			fields = ','.join(FieldList)
 			SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
@@ -4361,12 +4361,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# update tree
 				#SQLFields = (
 				#self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
-
+				'''
 				index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
 				index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
 				index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
 
 				SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
+				'''
+				SQLFields = (
+					re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()),
+					re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
+					re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+				)
+
 				self.initializeTreeView(SQLFields)
 				self.ui.treeWidget.expandAll()
 		except:
@@ -5841,8 +5848,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				SQLStatement += ', '
 				firstmore = False
-			project = self.ui.cboTreeOp1.currentText()
-			fieldname = self.TransLateFieldtoReal(project, True)
+			#project = self.ui.cboTreeOp1.currentText()
+			#fieldname = self.TransLateFieldtoReal(project, True)
+			fieldname = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 			SQLStatement = SQLStatement + fieldname + ' = '
 			for item in checkedProjects:
 				SQLStatement += ('"' + item)
@@ -5865,10 +5873,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 					SQLStatement += ', '
 
 				firstmore = False
-			group = self.ui.cboTreeOp2.currentText()
-			fieldname = self.TransLateFieldtoReal(group, True)
-			project = self.ui.cboTreeOp1.currentText()
-			Projfieldname = self.TransLateFieldtoReal(project, True)
+			#group = self.ui.cboTreeOp2.currentText()
+			#fieldname = self.TransLateFieldtoReal(group, True)
+			#project = self.ui.cboTreeOp1.currentText()
+			#Projfieldname = self.TransLateFieldtoReal(project, True)
+			fieldname = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+			Projfieldname = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 
 			# SQLStatement = SQLStatement + fieldname + ' = "'
 			for item in checkedGroups:
@@ -5890,12 +5900,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 				else:
 					SQLStatement += ', '
 				firstmore = False
-			Subgroup = self.ui.cboTreeOp3.currentText()
-			fieldname = self.TransLateFieldtoReal(Subgroup, True)
-			group = self.ui.cboTreeOp2.currentText()
-			Groupfieldname = self.TransLateFieldtoReal(group, True)
-			project = self.ui.cboTreeOp1.currentText()
-			Projfieldname = self.TransLateFieldtoReal(project, True)
+			#Subgroup = self.ui.cboTreeOp3.currentText()
+			#fieldname = self.TransLateFieldtoReal(Subgroup, True)
+			#group = self.ui.cboTreeOp2.currentText()
+			#Groupfieldname = self.TransLateFieldtoReal(group, True)
+			#project = self.ui.cboTreeOp1.currentText()
+			#Projfieldname = self.TransLateFieldtoReal(project, True)
+			fieldname = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+			Groupfieldname = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+			Projfieldname = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 
 			# SQLStatement = SQLStatement + fieldname + ' = "'
 			for item in checkedSubGroups:
@@ -6787,8 +6800,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                         'Use a field to delineate multiple subjects (default = "Project")?\n\n "No" will process all selected as one subject.\n\n Press "Cancel" to choose field in the search panel before running analysis.',
 		                         'YNC')
 		if answer == 'Yes':
-			field = self.ui.cboFindField.currentText()
-			fieldsearch = self.TransLateFieldtoReal(field, True)
+			#field = self.ui.cboFindField.currentText()
+			#fieldsearch = self.TransLateFieldtoReal(field, True)
+			fieldsearch = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
 		elif answer == 'No':
 			fieldsearch = 'None'
 		elif answer == 'Cancel':
@@ -6918,7 +6932,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				if os.path.isfile(DBFilename):
 					self.LoadDB(DBFilename)
 		else:
-			if self.ui.cboTreeOp1.currentText() == 'Clonal Pool' or self.ui.cboTreeOp2.currentText() == 'Clonal Pool' or self.ui.cboTreeOp3.currentText() == 'Clonal Pool':
+			if re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()) == 'Clonal Pool' \
+					or re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()) == 'Clonal Pool' \
+					or re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText()) == 'Clonal Pool':
 				self.on_btnUpdateTree_clicked()
 
 		self.findTreeItem(Currentrecord)
@@ -7093,8 +7109,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                         'Use a field to delineate multiple subjects (default = "Project")?\n\n "No" will compare all within each project/group/subgroup.\n\n Press "Cancel" to choose field in the search panel before running analysis.',
 		                         'YNC')
 		if answer == 'Yes':
-			field = self.ui.cboFindField.currentText()
-			fieldsearch = self.TransLateFieldtoReal(field, True)
+			#field = self.ui.cboFindField.currentText()
+			#fieldsearch = self.TransLateFieldtoReal(field, True)
+			fieldsearch = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
 		elif answer == 'No':
 			fieldsearch = 'None'
 		elif answer == 'Cancel':
@@ -7488,11 +7505,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# update tree
 		#SQLFields = (self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(),self.ui.cboTreeOp3.currentText())
+		'''
 		index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
 		index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
 		index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
 
 		SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
+		'''
+		SQLFields = (
+			re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()),
+			re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
+			re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+		)
+
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
 
@@ -7996,12 +8021,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return 'None'
 
 	def TreeviewOptions(self):
-		Option1 = self.ui.cboTreeOp1.currentText()
+		Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 		self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
 		if Option1 == 'None':
 			self.ui.cboTreeOp2.setCurrentText('None')
 			# self.ui.cboTreeOp3.setCurrentText('None')
-		Option2 = self.ui.cboTreeOp2.currentText()
+		Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 		self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
 		Option3 = self.ui.cboTreeOp3.currentText()
 		if Option2 == 'None':
@@ -8708,10 +8733,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#self.GenerateNameIndex()
 
 		self.ui.cboFindField.clear()
+		self.ui.cboFindField1.clear()
 		self.ui.cboTreeOp1.clear()
 		self.ui.cboTreeOp2.clear()
 		self.ui.cboTreeOp3.clear()
 
+		'''
 		self.ui.cboFindField.addItem("Project")
 		self.ui.cboFindField.addItem("Grouping")
 		self.ui.cboFindField.addItem("Subgroup")
@@ -8726,13 +8753,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.cboTreeOp1.addItem(item)
 			self.ui.cboTreeOp2.addItem(item)
 			self.ui.cboTreeOp3.addItem(item)
+		'''
+
+		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.ui.cboFindField.addItems(field_list)
+		self.ui.cboFindField1.addItems(field_list)
+		self.ui.cboTreeOp1.addItems(field_list)
+		self.ui.cboTreeOp2.addItems(field_list)
+		self.ui.cboTreeOp3.addItems(field_list)
+
 		self.ui.cboTreeOp1.addItem('None')
 		self.ui.cboTreeOp2.addItem('None')
 		self.ui.cboTreeOp3.addItem('None')
-		self.ui.cboTreeOp1.setCurrentText('Project')
-		self.ui.cboTreeOp2.setCurrentText('Grouping')
-		self.ui.cboTreeOp3.setCurrentText('Subgroup')
-
+		self.ui.cboTreeOp1.setCurrentText(FieldList[75] + '(' + RealNameList[75] + ')')
+		self.ui.cboTreeOp2.setCurrentText(FieldList[76] + '(' + RealNameList[76] + ')')
+		self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
 
 		try:
 			SQLFields = ('Project', 'Grouping', 'SubGroup')
@@ -8768,6 +8803,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		model.setHeaderData(0, Qt.Horizontal, "SeqName")
 
+	def makeFieldName(self, field):
+		index = FieldList.index(field)
+		cur_field = FieldList[index] + '(' + RealNameList[index] + ')'
+		return cur_field
+
 	@pyqtSlot()
 	def on_radioButtonGermView_clicked(self):
 		self.ui.txtDNASeq.setText(data[80])
@@ -8783,7 +8823,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtVgene.toPlainText()
 		LastSelected = ('V1', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		#Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('V gene 1')
@@ -8794,7 +8835,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtDgene.toPlainText()
 		LastSelected = ('D1', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('D gene 1')
@@ -8805,7 +8847,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtName.toPlainText()
 		LastSelected = ('SeqName', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('D gene 1')
@@ -8816,7 +8859,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtJgene.toPlainText()
 		LastSelected = ('J1', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('J gene 1')
@@ -8829,7 +8873,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtVLocus.toPlainText()
 		LastSelected = ('VLocus', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('VLocus')
@@ -8840,7 +8885,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtDLocus.toPlainText()
 		LastSelected = ('DLocus', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('DLocus')
@@ -8851,7 +8897,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtJLocus.toPlainText()
 		LastSelected = ('JLocus', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('JLocus')
@@ -8862,7 +8909,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.textBarcode.toPlainText()
 		LastSelected = ('Blank10', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Barcode')
@@ -8879,7 +8927,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.textCluster.toPlainText()
 		LastSelected = ('Blank8', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('10X cluster')
@@ -8890,7 +8939,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.textEdit.toPlainText()
 		LastSelected = ('Blank9', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Seurat cluster')
@@ -8901,7 +8951,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtPopulation.toPlainText()
 		LastSelected = ('Blank11', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Population')
@@ -8912,7 +8963,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.textMutations.toPlainText()
 		LastSelected = ('TotMut', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('TotMut')
@@ -9245,7 +9297,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtProject.toPlainText()
 		LastSelected = ('Project', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Project')
@@ -9256,7 +9309,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtGroup.toPlainText()
 		LastSelected = ('Grouping', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Grouping')
@@ -9267,7 +9321,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtGeneType.toPlainText()
 		LastSelected = ('GeneType', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('GeneType')
@@ -9278,7 +9333,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtSubGroup.toPlainText()
 		LastSelected = ('SubGroup', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('SubGroup')
@@ -9289,7 +9345,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtVend.toPlainText()
 		LastSelected = ('VSeqend', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('VSeqend')
@@ -9300,7 +9357,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtD.toPlainText()
 		LastSelected = ('Dregion', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Dregion')
@@ -9311,7 +9369,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtVD.toPlainText()
 		LastSelected = ('VDJunction', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('VDJunction')
@@ -9322,7 +9381,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtDJ.toPlainText()
 		LastSelected = ('DJJunction', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('DJJunction')
@@ -9333,7 +9393,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtJend.toPlainText()
 		LastSelected = ('begJ', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('begJ')
@@ -9344,7 +9405,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtCDR3DNA.toPlainText()
 		LastSelected = ('CDR3DNA', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('CDR3DNA')
@@ -9355,7 +9417,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtIsotype.toPlainText()
 		LastSelected = ('Isotype', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Isotype')
@@ -9367,7 +9430,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtCDR3AA.toPlainText()
 		LastSelected = ('CDR3AA', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('CDR3AA')
@@ -9378,7 +9442,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtCDR3Length.toPlainText()
 		LastSelected = ('CDR3Length', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('CDR3Length')
@@ -9389,7 +9454,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtCDR3pI.toPlainText()
 		LastSelected = ('CDR3pI', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('CDR3pI')
@@ -9400,7 +9466,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtCDR3MW.toPlainText()
 		LastSelected = ('CDR3MW', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('CDR3MW')
@@ -9411,7 +9478,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtProductive.toPlainText()
 		LastSelected = ('productive', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('productive')
@@ -9422,7 +9490,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtReadingFrame.toPlainText()
 		LastSelected = ('ReadingFrame', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('ReadingFrame')
@@ -9433,7 +9502,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtStop.toPlainText()
 		LastSelected = ('StopCodon', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('StopCodon')
@@ -9444,7 +9514,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtQuality.toPlainText()
 		LastSelected = ('Quality', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Quality')
@@ -9455,7 +9526,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtQuality_2.toPlainText()
 		LastSelected = ('Quality', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Quality')
@@ -9466,7 +9538,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtStatus.toPlainText()
 		LastSelected = ('Blank13', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Status')
@@ -9477,7 +9550,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtLabel.toPlainText()
 		LastSelected = ('Blank12', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('Label')
@@ -9488,7 +9562,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtID.toPlainText()
 		LastSelected = ('IDEvent', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('IDEvent')
@@ -9499,7 +9574,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.txtClonalPool.toPlainText()
 		LastSelected = ('ClonalPool', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 		self.ui.fieldLine.setText('ClonalPool')
@@ -9543,7 +9619,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.listViewSpecificity.currentText()
 		LastSelected = ('Specificity', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 	def SubspecSet(self):
@@ -9554,7 +9631,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.listViewSpecificity_2.currentText()
 		LastSelected = ('Subspecificity', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 	def AutoRXSet(self):
@@ -9565,7 +9643,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		valueis = self.ui.Autoreactivity.currentText()
 		LastSelected = ('Blank6', valueis)
 		field = LastSelected[0]
-		Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
 		self.ui.cboFindField.setCurrentText(Fiedlvalue)
 
 	# @pyqtSlot()
@@ -9603,24 +9682,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_actionSuggestCanonical_triggered(self):
 		self.ui.treeWidget.expandAll()
 
-		fields = self.ui.cboTreeOp1.currentText()
-		field1 = self.TransLateFieldtoReal(fields, True)
+		# fields = self.ui.cboTreeOp1.currentText()
+		# field1 = self.TransLateFieldtoReal(fields, True)
+		field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 		i = 0
 		for item in FieldList:
 			if field1 == item:
 				field1Value = data[i]
 			i += 1
 
-		fields = self.ui.cboTreeOp2.currentText()
-		field2 = self.TransLateFieldtoReal(fields, True)
+		# fields = self.ui.cboTreeOp2.currentText()
+		# field2 = self.TransLateFieldtoReal(fields, True)
+		field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 		i = 0
 		for item in FieldList:
 			if field2 == item:
 				field2Value = data[i]
 			i += 1
 
-		fields = self.ui.cboTreeOp3.currentText()
-		field3 = self.TransLateFieldtoReal(fields, True)
+		# fields = self.ui.cboTreeOp3.currentText()
+		# field3 = self.TransLateFieldtoReal(fields, True)
+		field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 		i = 0
 		for item in FieldList:
 			if field3 == item:
@@ -9895,24 +9977,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		search = LastSelected[1]
 
-		fields = self.ui.cboTreeOp1.currentText()
-		field1 = self.TransLateFieldtoReal(fields, True)
+		# fields = self.ui.cboTreeOp1.currentText()
+		# field1 = self.TransLateFieldtoReal(fields, True)
+		field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 		i = 0
 		for item in FieldList:
 			if field1 == item:
 				field1Value = data[i]
 			i += 1
 
-		fields = self.ui.cboTreeOp2.currentText()
-		field2 = self.TransLateFieldtoReal(fields, True)
+		# fields = self.ui.cboTreeOp2.currentText()
+		# field2 = self.TransLateFieldtoReal(fields, True)
+		field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 		i = 0
 		for item in FieldList:
 			if field2 == item:
 				field2Value = data[i]
 			i += 1
 
-		fields = self.ui.cboTreeOp3.currentText()
-		field3 = self.TransLateFieldtoReal(fields, True)
+		# fields = self.ui.cboTreeOp3.currentText()
+		# field3 = self.TransLateFieldtoReal(fields, True)
+		field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 		i = 0
 		for item in FieldList:
 			if field3 == item:
@@ -9968,24 +10053,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# #         todo select one if exact or if no then all similar items in tree and table...best if tree checkable
 
 		if self.ui.rdoLocal.isChecked():
-			fields = self.ui.cboTreeOp1.currentText()
-			field1 = self.TransLateFieldtoReal(fields, True)
+			# fields = self.ui.cboTreeOp1.currentText()
+			# field1 = self.TransLateFieldtoReal(fields, True)
+			field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 			i = 0
 			for item in FieldList:
 				if field1 == item:
 					field1Value = data[i]
 				i += 1
 
-			fields = self.ui.cboTreeOp2.currentText()
-			field2 = self.TransLateFieldtoReal(fields, True)
+			# fields = self.ui.cboTreeOp2.currentText()
+			# field2 = self.TransLateFieldtoReal(fields, True)
+			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 			i = 0
 			for item in FieldList:
 				if field2 == item:
 					field2Value = data[i]
 				i += 1
 
-			fields = self.ui.cboTreeOp3.currentText()
-			field3 = self.TransLateFieldtoReal(fields, True)
+			# fields = self.ui.cboTreeOp3.currentText()
+			# field3 = self.TransLateFieldtoReal(fields, True)
+			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 			i = 0
 			for item in FieldList:
 				if field3 == item:
@@ -10044,14 +10132,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_pushButtonBatch_clicked(self):
-		cur_field = self.ui.cboFindField1.currentText()
+		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField1.currentText())
+		'''
 		if cur_field in RealNameList:
 			index = RealNameList.index(cur_field)
 			cur_field = FieldList[index]
 		else:
 			answer = informationMessage(self, 'The field name you determined is not exist!', 'OK')
 			return
-
+		'''
 		SQLStatement = 'SELECT DISTINCT(' + cur_field + ') FROM vgenesdb'
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		value_list = [row[0] for row in DataIn]
@@ -10092,14 +10181,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		SQLStatement = 'SELECT ID FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-
-		cur_field = self.ui.cboFindField1.currentText()
+		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField1.currentText())
+		'''
 		if cur_field in RealNameList:
 			index = RealNameList.index(cur_field)
 			cur_field = FieldList[index]
 		else:
 			answer = informationMessage(self, 'The field name you determined is not exist!', 'OK')
 			return
+		'''
 
 		str_target = self.ui.lineEditTarget.text()
 		if str_target == "":
@@ -10146,12 +10236,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		#SQLFields = (
 		#	self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
-
+		'''
 		index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
 		index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
 		index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
 
 		SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
+		'''
+		SQLFields = (
+			re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()),
+			re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
+			re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+		)
+
+
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
 
@@ -10362,12 +10460,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# update tree
 				#SQLFields = (
 				#	self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
-
+				'''
 				index1 = RealNameList.index(self.ui.cboTreeOp1.currentText())
 				index2 = RealNameList.index(self.ui.cboTreeOp2.currentText())
 				index3 = RealNameList.index(self.ui.cboTreeOp3.currentText())
 
 				SQLFields = (FieldList[index1], FieldList[index2], FieldList[index3])
+				'''
+				SQLFields = (
+					re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()),
+					re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
+					re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+				)
 
 				self.initializeTreeView(SQLFields)
 				self.ui.treeWidget.expandAll()
@@ -11651,7 +11755,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_btnUpdateTree_clicked(self):
 		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
 			return
-
+		'''
 		fields = self.ui.cboTreeOp1.currentText()
 		field1Index = self.ui.cboTreeOp1.currentIndex()
 
@@ -11676,6 +11780,39 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if field1 == '': field1 = 'None'
 		if field2 == '': field1 = 'None'
 		if field3 == '': field1 = 'None'
+		'''
+
+		# fields = self.ui.cboTreeOp1.currentText()
+		# field1 = self.TransLateFieldtoReal(fields, True)
+		field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+		i = 0
+		for item in FieldList:
+			if field1 == item:
+				field1Value = data[i]
+			i += 1
+
+		# fields = self.ui.cboTreeOp2.currentText()
+		# field2 = self.TransLateFieldtoReal(fields, True)
+		field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+		i = 0
+		for item in FieldList:
+			if field2 == item:
+				field2Value = data[i]
+			i += 1
+
+		# fields = self.ui.cboTreeOp3.currentText()
+		# field3 = self.TransLateFieldtoReal(fields, True)
+		field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+		i = 0
+		for item in FieldList:
+			if field3 == item:
+				field3Value = data[i]
+			i += 1
+
+		if field1 == '': field1 = 'None'
+		if field2 == '': field1 = 'None'
+		if field3 == '': field1 = 'None'
+
 		SQLFields = []
 		SQLFields.append(field1)
 		SQLFields.append(field2)
@@ -11883,9 +12020,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.txtGroup.setText(data[76])
 				self.ui.txtGroup_2.setText(data[76])
 
-				self.ui.cboTreeOp1.setCurrentText(data[75])
-				self.ui.cboTreeOp2.setCurrentText(data[76])
-				self.ui.cboTreeOp3.setCurrentText(data[77])
+				#self.ui.cboTreeOp1.setCurrentText(data[75])
+				#self.ui.cboTreeOp2.setCurrentText(data[76])
+				#self.ui.cboTreeOp3.setCurrentText(data[77])
+				self.ui.cboTreeOp1.setCurrentText(FieldList[75] + '(' + RealNameList[75] + ')')
+				self.ui.cboTreeOp2.setCurrentText(FieldList[76] + '(' + RealNameList[76] + ')')
+				self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
 
 				self.ui.txtSubGroup.setText(data[77])
 				self.ui.txtSubGroup_2.setText(data[77])
