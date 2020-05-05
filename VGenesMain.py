@@ -3475,6 +3475,52 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def refreshDB(self):
 		self.load_table()
 
+		# update combox
+		f_txt = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
+		f_txt1 = re.sub(r'\(.+', '', self.ui.cboFindField1.currentText())
+		tree_txt1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+		tree_txt2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+		tree_txt3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+
+		self.ui.cboFindField.clear()
+		self.ui.cboFindField1.clear()
+		self.ui.cboTreeOp1.clear()
+		self.ui.cboTreeOp2.clear()
+		self.ui.cboTreeOp3.clear()
+
+		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.ui.cboFindField.addItems(field_list)
+		self.ui.cboFindField1.addItems(field_list)
+		self.ui.cboTreeOp1.addItems(field_list)
+		self.ui.cboTreeOp2.addItems(field_list)
+		self.ui.cboTreeOp3.addItems(field_list)
+		self.ui.cboTreeOp1.addItem('None')
+		self.ui.cboTreeOp2.addItem('None')
+		self.ui.cboTreeOp3.addItem('None')
+
+		index = FieldList.index(f_txt)
+		self.ui.cboFindField.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+		index = FieldList.index(f_txt1)
+		self.ui.cboFindField1.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+
+		if tree_txt1 == 'None':
+			self.ui.cboTreeOp1.setCurrentText('None')
+		else:
+			index = FieldList.index(tree_txt1)
+			self.ui.cboTreeOp1.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+
+		if tree_txt2 == 'None':
+			self.ui.cboTreeOp2.setCurrentText('None')
+		else:
+			index = FieldList.index(tree_txt2)
+			self.ui.cboTreeOp2.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+
+		if tree_txt3 == 'None':
+			self.ui.cboTreeOp3.setCurrentText('None')
+		else:
+			index = FieldList.index(tree_txt3)
+			self.ui.cboTreeOp3.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+
 	@pyqtSlot()
 	def on_actionImport_Annotate_triggered(self):
 		anno_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select annotation file", '~/',
@@ -5995,7 +6041,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		field1, field2, field3 = SQLFields
 		NameIndex.clear()
-		SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+		if field1 != 'None' and field2 != 'None' and field3 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+		elif field1 != 'None' and field2 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
+		elif field1 != 'None' and field3 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field3 + ', SeqName'
+		elif field2 != 'None' and field3 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field2 + ', ' + field3 + ', SeqName'
+		elif field1 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', SeqName'
+		elif field2 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field2 + ', SeqName'
+		elif field3 != 'None':
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field3 + ', SeqName'
+		else:
+			SQLStatement = 'select SeqName from vgenesdb ORDER BY SeqName'
+
 		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		Maxi = len(DataIs)
 		for i in range(0, Maxi):
