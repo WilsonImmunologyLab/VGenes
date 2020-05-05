@@ -3268,7 +3268,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.comboBoxSpecies.currentTextChanged.connect(self.on_comboBoxSpecies_editTextChanged)
 		self.ui.cboTreeOp1.currentTextChanged.connect(self.TreeviewOptions)
 		self.ui.cboTreeOp2.currentTextChanged.connect(self.TreeviewOptions)
-		self.ui.cboTreeOp2.currentTextChanged.connect(self.TreeviewOptions)
+		self.ui.cboTreeOp3.currentTextChanged.connect(self.TreeviewOptions)
 		self.ui.cboDecorate.currentTextChanged.connect(self.DecoratePeptide)
 		self.ui.treeWidget.itemChanged.connect(self.handleChanged)
 		self.ui.treeWidget.itemSelectionChanged.connect(self.TreeSelectChanged)
@@ -3310,6 +3310,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.listWidgetSelected.itemDoubleClicked.connect(self.delFieldsHeatmap)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
+
+		self.ui.cboTreeOp1.id = 'TreeOp1'
+		self.ui.cboTreeOp2.id = 'TreeOp2'
+		self.ui.cboTreeOp3.id = 'TreeOp3'
 
 		self.ui.lcdNumber_max.display(self.ui.horizontalScrollBar.maximum())
 		self.ui.dial.setMaximum(self.ui.horizontalScrollBar.maximum())
@@ -6128,7 +6132,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.addChild(VTree_item.child(i1), column, Vcolumn2, 'Field-2')
 				i1 += 1
 				# self.addChild( VTree_item, column, ' ', ' ')
-				return
+			return
 
 		# Field 3
 		i1 = 0
@@ -6158,7 +6162,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						self.addChild(VTree_item.child(i1).child(i2), column, Vcolumn3, 'Field-3')
 					i2 += 1
 				i1 += 1
-				return
+			return
 
 		# Last set only done if all 3 others selected
 		i1 = 0
@@ -8083,19 +8087,43 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return 'None'
 
 	def TreeviewOptions(self):
-		Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-		self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
-		if Option1 == 'None':
-			self.ui.cboTreeOp2.setCurrentText('None')
-			# self.ui.cboTreeOp3.setCurrentText('None')
-		Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-		self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
-		Option3 = self.ui.cboTreeOp3.currentText()
-		if Option2 == 'None':
-			self.ui.cboTreeOp3.setCurrentText('None')
-		self.ui.cboTreeOp3.setToolTip('Press update tree to implement changes')
+		global DontFindTwice
+		if DontFindTwice == True:
+			return
 
-		SqlStatement = 'SELECT DISTINCT '
+		sender = self.sender()
+		if sender.id == 'TreeOp1':
+			Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+			self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
+			if Option1 == 'None':
+				DontFindTwice = True
+				self.ui.cboTreeOp2.setCurrentText('None')
+				self.ui.cboTreeOp3.setCurrentText('None')
+				DontFindTwice = False
+		elif sender.id == 'TreeOp2':
+			Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+			self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
+			if Option1 == 'None':
+				DontFindTwice = True
+				self.ui.cboTreeOp2.setCurrentText('None')
+				self.ui.cboTreeOp3.setCurrentText('None')
+				DontFindTwice = False
+				Msg = 'Upper level grouping factor is empty!\nPlease determine grouping factors from the upper level!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
+		else:
+			Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+			self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
+			Option3 = self.ui.cboTreeOp3.currentText()
+			if Option2 == 'None':
+				DontFindTwice = True
+				self.ui.cboTreeOp3.setCurrentText('None')
+				DontFindTwice = False
+				Msg = 'Upper level grouping factor is empty!\nPlease determine grouping factors from the upper level!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			self.ui.cboTreeOp3.setToolTip('Press update tree to implement changes')
 
 	def ApplicationStarted(self):
 		StartUpOptions = StartUpDialogue()
