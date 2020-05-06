@@ -25,7 +25,11 @@ from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_format
 import itertools
 from itertools import chain, groupby, zip_longest
 import threading as thd
-
+import seaborn as sns
+import matplotlib
+matplotlib.use("Qt5Agg")
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 import VReports
 from ui_VGenesMain import Ui_MainWindow
@@ -221,6 +225,12 @@ def reName(ori_name, rep1, rep2, prefix):
 		my_name = prefix + '_' + my_name
 	return my_name
 
+class MyFigure(FigureCanvas):
+    def __init__(self,width=5, height=4, dpi=100):
+        self.fig = Figure(figsize=(width, height), dpi=dpi)
+        super(MyFigure,self).__init__(self.fig)
+        self.axes = self.fig.add_subplot(111)
+
 class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 	NewFieldSignal = pyqtSignal(str, str)
 
@@ -282,9 +292,63 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		super(BatchDialog, self).__init__()
 		self.ui = Ui_BatchDialog()
 		self.ui.setupUi(self)
+		self.initial = 0
 
 		self.ui.pushButtonCancel.clicked.connect(self.reject)
 		self.ui.pushButtonOK.clicked.connect(self.accept)
+		self.ui.comboBox.currentTextChanged.connect(self.StatFig)
+
+	def StatFig(self):
+		if self.initial == 0:
+			return
+		elif self.initial == 1:
+			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+			SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			value_list = [row[0] for row in DataIn]
+		elif self.initial == 2:
+			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+			SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			value_list = [row[0] for row in DataIn]
+	
+			if len(value_list) > 30:
+				question = 'Distinct values of this field seems too many (number =  ' + str(
+					len(value_list)) + ')\nAre you sure?'
+				buttons = 'YN'
+				answer = questionMessage(self, question, buttons)
+				if answer == 'No':
+					return
+
+		self.load_data(value_list)
+
+		# update figure
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		data = []
+		for element in DataIn:
+			data.append(element[0])
+		result = Counter(data)
+		labels = result.keys()
+		values = result.values()
+		colors = sns.color_palette("hls", len(values))
+
+		F = MyFigure(width=3, height=3, dpi=160)
+		F.axes.bar(labels, values, color=colors)
+		F.axes.set_xticklabels(labels, rotation=-90)
+		F.axes.tick_params(labelsize=7)
+
+		# determine spacing
+		lens = [len(lab) for lab in labels]
+		max_len = max(lens)
+		my_adjust = 0.1 + max_len/50
+		F.fig.subplots_adjust(bottom=my_adjust)
+
+		if self.ui.gridLayoutFig.count() > 0:
+			for i in range(self.ui.gridLayoutFig.count()):
+				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+		self.ui.gridLayoutFig.addWidget(F, 0, 1)
 
 	def accept(self):
 		Dict = {}
@@ -301,7 +365,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			i += 1
 
 		if len(Dict) > 0:
-			field = self.ui.lineEdit.text()
+			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
 			self.BatchSignal.emit(0, field, Dict)
 		else:
 			self.BatchSignal.emit(1, '', Dict)
@@ -311,13 +375,18 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 	def load_data(self, list):
 		layout = self.ui.gridLayout
 
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
+
 		layout.addWidget(QLabel("Original value"),0,0)
 		layout.addWidget(QLabel("New value"), 0, 1)
 
 		i = 1
 		for item in list:
-			layout.addWidget(QLineEdit(item), i, 0)
-			layout.itemAtPosition(i,0).widget().setReadOnly(True)
+			f = QLineEdit(item)
+			f.setReadOnly(True)
+			layout.addWidget(f, i, 0)
 			layout.addWidget(QLineEdit(""), i, 1)
 			i += 1
 
@@ -10229,6 +10298,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_pushButtonBatch_clicked(self):
+		global DontFindTwice
 		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField1.currentText())
 		'''
 		if cur_field in RealNameList:
@@ -10242,11 +10312,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		value_list = [row[0] for row in DataIn]
 
+		if len(value_list) > 30:
+			question = 'Distinct values of this field seems too many (number =  ' + str(len(value_list)) + ')\nAre you sure?'
+			buttons = 'YN'
+			answer = questionMessage(self, question, buttons)
+			if answer == 'No':
+				return
+
 		self.myBatchDialog = BatchDialog()
-		self.myBatchDialog.load_data(value_list)
-		self.myBatchDialog.ui.lineEdit.setText(cur_field)
+		self.myBatchDialog.initial = 0
+		#self.myBatchDialog.load_data(value_list)
+		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.myBatchDialog.ui.comboBox.addItems(field_list)
+		self.myBatchDialog.initial = 1
+		self.myBatchDialog.StatFig()
+		self.myBatchDialog.ui.comboBox.setCurrentText(self.ui.cboFindField1.currentText())
 		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
 		self.myBatchDialog.show()
+		self.myBatchDialog.initial = 2
+		self.myBatchDialog.resize(600, 700)
+
+
 
 	def updateFieldBatch(self, indicator, field, dict):
 		if indicator == 1:
