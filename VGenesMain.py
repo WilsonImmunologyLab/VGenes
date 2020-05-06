@@ -8112,11 +8112,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 			self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
+			Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+			if Option2 == 'None':
+				DontFindTwice = True
+				self.ui.cboTreeOp3.setCurrentText('None')
+				DontFindTwice = False
 		else:
 			Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 			self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
-			Option3 = self.ui.cboTreeOp3.currentText()
-			if Option2 == 'None':
+			Option3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+			if Option3 == 'None':
+				pass
+			elif Option2 == 'None':
 				DontFindTwice = True
 				self.ui.cboTreeOp3.setCurrentText('None')
 				DontFindTwice = False
