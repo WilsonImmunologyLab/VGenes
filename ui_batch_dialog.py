@@ -66,7 +66,7 @@ class Ui_BatchDialog(object):
 
     def retranslateUi(self, BatchDialog):
         _translate = QtCore.QCoreApplication.translate
-        BatchDialog.setWindowTitle(_translate("BatchDialog", "Dialog"))
+        BatchDialog.setWindowTitle(_translate("BatchDialog", "Know your data"))
         self.label.setText(_translate("BatchDialog", "Edit the values of :"))
         self.radioButton.setText(_translate("BatchDialog", "This column is numerical"))
         self.pushButtonCancel.setText(_translate("BatchDialog", "Cancel"))

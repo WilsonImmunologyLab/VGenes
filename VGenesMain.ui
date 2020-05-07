@@ -692,10 +692,36 @@
           </property>
          </spacer>
         </item>
-        <item row="1" column="0" colspan="9">
+        <item row="0" column="5">
+         <widget class="QPushButton" name="CopyValue">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Copy values from a column</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="10">
          <widget class="QTableWidget" name="SeqTable"/>
         </item>
-        <item row="0" column="7">
+        <item row="0" column="8">
          <widget class="QPushButton" name="pushButtonRefresh">
           <property name="maximumSize">
            <size>
@@ -721,7 +747,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="8">
+        <item row="0" column="9">
          <widget class="QPushButton" name="pushButtonAlter">
           <property name="maximumSize">
            <size>
@@ -747,7 +773,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="5">
+        <item row="0" column="6">
          <widget class="QPushButton" name="EditLock">
           <property name="maximumSize">
            <size>
@@ -774,7 +800,7 @@
          </widget>
         </item>
         <item row="0" column="4">
-         <widget class="QPushButton" name="CopyValue">
+         <widget class="QPushButton" name="StatUpdate">
           <property name="maximumSize">
            <size>
             <width>16777215</width>
@@ -782,11 +808,11 @@
            </size>
           </property>
           <property name="text">
-           <string>Copy values from a column</string>
+           <string>Stat/Update</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
+            <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
           </property>
           <property name="iconSize">
            <size>

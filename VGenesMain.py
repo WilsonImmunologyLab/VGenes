@@ -319,6 +319,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 				Msg = 'No value can be converted to number!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				self.ui.radioButton.setChecked(False)
+				self.StatFig()
 				return
 
 			# do it later
@@ -435,6 +436,11 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			layout.addWidget(f, i, 0)
 			layout.addWidget(QLineEdit(""), i, 1)
 			i += 1
+		# delete everything in num layout
+		layout = self.ui.gridLayoutChar
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
 
 	def load_data_num(self, list, min, max):
 		layout = self.ui.gridLayout
@@ -443,7 +449,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 				layout.itemAt(i).widget().deleteLater()
 
 		layout.addWidget(QLabel("Type threshold values:"),0,0)
-		layout.addWidgetQLineEdit(""), 0, 1)
+		layout.addWidget(QLineEdit(""), 0, 1)
 
 		i = 1
 		for item in list:
@@ -10411,8 +10417,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.myBatchDialog.show()
 		self.myBatchDialog.initial = 2
 		self.myBatchDialog.resize(600, 700)
-
-
+	
+	@pyqtSlot()
+	def on_StatUpdate_clicked(self):
+		self.myBatchDialog = BatchDialog()
+		self.myBatchDialog.initial = 0
+		# self.myBatchDialog.load_data(value_list)
+		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.myBatchDialog.ui.comboBox.addItems(field_list)
+		self.myBatchDialog.initial = 1
+		self.myBatchDialog.StatFig()
+		self.myBatchDialog.ui.comboBox.setCurrentText(self.ui.cboFindField1.currentText())
+		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
+		self.myBatchDialog.show()
+		self.myBatchDialog.initial = 2
+		self.myBatchDialog.resize(600, 700)
 
 	def updateFieldBatch(self, indicator, field, dict):
 		if indicator == 1:
