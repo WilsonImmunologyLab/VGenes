@@ -323,7 +323,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
 			# do it later
 			## number list
-			
+
 			## char list
 			char_list = list(set(char_list))
 			self.load_data_char(char_list)
@@ -427,6 +427,23 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
 		layout.addWidget(QLabel("Original value"),0,0)
 		layout.addWidget(QLabel("New value"), 0, 1)
+
+		i = 1
+		for item in list:
+			f = QLineEdit(item)
+			f.setReadOnly(True)
+			layout.addWidget(f, i, 0)
+			layout.addWidget(QLineEdit(""), i, 1)
+			i += 1
+
+	def load_data_num(self, list, min, max):
+		layout = self.ui.gridLayout
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
+
+		layout.addWidget(QLabel("Type threshold values:"),0,0)
+		layout.addWidgetQLineEdit(""), 0, 1)
 
 		i = 1
 		for item in list:
