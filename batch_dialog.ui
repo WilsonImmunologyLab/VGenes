@@ -62,10 +62,13 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>498</height>
+           <height>486</height>
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="3" column="0">
+        <layout class="QGridLayout" name="gridLayoutChar"/>
        </item>
       </layout>
      </widget>
