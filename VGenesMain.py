@@ -293,15 +293,47 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		self.ui = Ui_BatchDialog()
 		self.ui.setupUi(self)
 		self.initial = 0
+		self.ui.LineEditCutoff.setHidden(True)
+		self.ui.LineEditCutoff.min = 0
+		self.ui.LineEditCutoff.max = 0
+		self.ui.gridLayout.num_widget = 0
+		self.ui.gridLayoutChar.num_widget = 0
+
 
 		self.ui.pushButtonCancel.clicked.connect(self.reject)
 		self.ui.pushButtonOK.clicked.connect(self.accept)
 		self.ui.comboBox.currentTextChanged.connect(self.StatFig)
 		self.ui.radioButton.clicked.connect(self.StatFig)
+		self.ui.LineEditCutoff.textChanged.connect(self.updateNum)
+
+	def updateNum(self):
+		if self.ui.radioButton.isChecked():
+			num_list = []
+
+			if self.ui.LineEditCutoff.text() == '':
+				self.load_data_num([], self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
+			else:
+				temp_data = self.ui.LineEditCutoff.text().split(',')
+				if len(temp_data) > 0:
+					for ele in temp_data:
+						try:
+							num = float(ele)
+							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+								num_list.append(num)
+						except:
+							return
+					# remove redudant and sort
+					num_list = list(set(num_list))
+					num_list.sort()
+
+					self.load_data_num(num_list, self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
+		else:
+			self.ui.LineEditCutoff.setHidden(True)
 
 	def StatFig(self):
 		# numeric value
 		if self.ui.radioButton.isChecked():
+			self.ui.LineEditCutoff.setHidden(False)
 			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -324,6 +356,9 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
 			# do it later
 			## number list
+			self.ui.LineEditCutoff.min = min(value_list)
+			self.ui.LineEditCutoff.max = max(value_list)
+			self.updateNum()
 
 			## char list
 			char_list = list(set(char_list))
@@ -344,6 +379,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			self.ui.gridLayoutFig.addWidget(F, 0, 1)
 		# character value
 		else:
+			self.ui.LineEditCutoff.setHidden(True)
 			if self.initial == 0:
 				return
 			elif self.initial == 1:
@@ -396,14 +432,82 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			self.ui.gridLayoutFig.addWidget(F, 0, 1)
 
 	def accept(self):
+		global DontFindTwice
+
 		if self.ui.radioButton.isChecked():
-			pass
+			new_values = []
+			# process num part
+			layout = self.ui.gridLayout
+			i = 1
+			#print('row count = ' + str(layout.rowCount()))
+			while i < layout.num_widget:
+				str2 = layout.itemAtPosition(i, 1).widget().text()
+				new_values.append(str2)
+				i += 1
+
+			num_list = [self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max]
+			if self.ui.LineEditCutoff.text() == '':
+				pass
+			else:
+				temp_data = self.ui.LineEditCutoff.text().split(',')
+				if len(temp_data) > 0:
+					for ele in temp_data:
+						try:
+							num = float(ele)
+							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+								num_list.append(num)
+						except:
+							return
+					# remove redudant and sort
+					num_list = list(set(num_list))
+					num_list.sort()
+
+			# start update records
+			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+			SQLStatement = 'SELECT ' + field + ',ID FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			for ele in DataIn:
+				try:
+					cur_value = float(ele[0])
+					cur_id = str(ele[1])
+					for i in range(len(num_list)-1):
+						if cur_value >= num_list[i] and cur_value < num_list[i+1]:
+							new_value = new_values[i]
+							SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+				except:
+					pass
+			# process char part
+			Dict = {}
+			layout = self.ui.gridLayoutChar
+			i = 1
+			while i < layout.num_widget:
+				str1 = layout.itemAtPosition(i, 0).widget().text()
+				str2 = layout.itemAtPosition(i, 1).widget().text()
+				if str2 == '':
+					pass
+				else:
+					Dict[str1] = str2
+				i += 1
+
+			if len(Dict) > 0:
+				field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+				self.BatchSignal.emit(0, field, Dict)
+			else:
+				DontFindTwice = True
+				Vgenes.refreshDB()
+				value = Vgenes.ui.dial.value()
+				Vgenes.updateF(value)
+				DontFindTwice = False
+
+				Msg = 'Update finished!'
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 		else:
 			Dict = {}
 			layout = self.ui.gridLayout
-			rownum = layout.rowCount()
 			i = 1
-			while i < layout.rowCount():
+			while i < layout.num_widget:
 				str1 = layout.itemAtPosition(i, 0).widget().text()
 				str2 = layout.itemAtPosition(i, 1).widget().text()
 				if str2 == '':
@@ -425,9 +529,11 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		if layout.count() > 0:
 			for i in range(layout.count()):
 				layout.itemAt(i).widget().deleteLater()
+		layout.num_widget = 0
 
 		layout.addWidget(QLabel("Original value"),0,0)
 		layout.addWidget(QLabel("New value"), 0, 1)
+		layout.num_widget += 1
 
 		i = 1
 		for item in list:
@@ -435,46 +541,78 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			f.setReadOnly(True)
 			layout.addWidget(f, i, 0)
 			layout.addWidget(QLineEdit(""), i, 1)
+			layout.num_widget += 1
 			i += 1
-		# delete everything in num layout
+
+		# delete everything in char layout
 		layout = self.ui.gridLayoutChar
 		if layout.count() > 0:
 			for i in range(layout.count()):
 				layout.itemAt(i).widget().deleteLater()
 
 	def load_data_num(self, list, min, max):
+		# clear old widgets
 		layout = self.ui.gridLayout
 		if layout.count() > 0:
 			for i in range(layout.count()):
 				layout.itemAt(i).widget().deleteLater()
+		layout.num_widget = 0
 
-		layout.addWidget(QLabel("Type threshold values:"),0,0)
-		layout.addWidget(QLineEdit(""), 0, 1)
+		if len(list) == 0:
+			layout.addWidget(QLabel("Data range:"), 0, 0)
+			layout.addWidget(QLabel("New value"), 0, 1)
+			layout.num_widget += 1
 
-		i = 1
-		for item in list:
+			item = str(min) + ' <= Value <= ' + str(max)
 			f = QLineEdit(item)
 			f.setReadOnly(True)
-			layout.addWidget(f, i, 0)
-			layout.addWidget(QLineEdit(""), i, 1)
-			i += 1
+			layout.addWidget(f, 1, 0)
+			layout.addWidget(QLineEdit(""), 1, 1)
+			layout.num_widget += 1
+		else:
+			layout.addWidget(QLabel("Data range:"), 0, 0)
+			layout.addWidget(QLabel("New value"), 0, 1)
+			layout.num_widget += 1
+
+			for i in range(len(list)):
+				if i == 0:
+					cur_range = str(min) + ' <= Value < ' + str(list[i])
+				else:
+					cur_range = str(list[i-1]) + ' <= Value < ' + str(list[i])
+
+				f = QLineEdit(cur_range)
+				f.setReadOnly(True)
+				layout.addWidget(f, i+1, 0)
+				layout.addWidget(QLineEdit(""), i+1, 1)
+				layout.num_widget += 1
+
+			cur_range = str(list[-1]) + ' <= Value <= ' + str(max)
+			f = QLineEdit(cur_range)
+			f.setReadOnly(True)
+			layout.addWidget(f, len(list) + 1, 0)
+			layout.addWidget(QLineEdit(""), len(list) + 1, 1)
+			layout.num_widget += 1
 
 	def load_data_char(self, list):
 		layout = self.ui.gridLayoutChar
 		if layout.count() > 0:
 			for i in range(layout.count()):
 				layout.itemAt(i).widget().deleteLater()
-
-		layout.addWidget(QLabel("Original value"),0,0)
-		layout.addWidget(QLabel("New value"), 0, 1)
-
-		i = 1
-		for item in list:
-			f = QLineEdit(item)
-			f.setReadOnly(True)
-			layout.addWidget(f, i, 0)
-			layout.addWidget(QLineEdit(""), i, 1)
-			i += 1
+		layout.num_widget = 0
+		
+		if len(list) > 0:
+			layout.addWidget(QLabel("Original value"),0,0)
+			layout.addWidget(QLabel("New value"), 0, 1)
+			layout.num_widget += 1
+	
+			i = 1
+			for item in list:
+				f = QLineEdit(item)
+				f.setReadOnly(True)
+				layout.addWidget(f, i, 0)
+				layout.addWidget(QLineEdit(""), i, 1)
+				layout.num_widget += 1
+				i += 1
 
 class htmlDialog(QtWidgets.QDialog):
 	def __init__(self):
@@ -3745,16 +3883,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.copy_dialog.exec_()
 
 	def CopyRecord(self, field_from, field_to):
+		global DontFindTwice
 		field_from = re.sub(r'\(.+', '', field_from)
 		field_to = re.sub(r'\(.+', '', field_to)
 		SQLStatement = 'UPDATE vgenesDB SET ' + field_to + ' = ' + field_from
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 			Msg = 'Update finished!'
-
+			DontFindTwice = True
 			self.refreshDB()
 			value = self.ui.dial.value()
 			self.updateF(value)
+			DontFindTwice = False
 
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
@@ -10416,7 +10556,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
 		self.myBatchDialog.show()
 		self.myBatchDialog.initial = 2
-		self.myBatchDialog.resize(600, 700)
+		self.myBatchDialog.resize(1200, 700)
 	
 	@pyqtSlot()
 	def on_StatUpdate_clicked(self):
@@ -10431,7 +10571,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
 		self.myBatchDialog.show()
 		self.myBatchDialog.initial = 2
-		self.myBatchDialog.resize(600, 700)
+		self.myBatchDialog.resize(1200, 700)
 
 	def updateFieldBatch(self, indicator, field, dict):
 		if indicator == 1:

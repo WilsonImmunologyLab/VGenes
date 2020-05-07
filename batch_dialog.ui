@@ -29,13 +29,6 @@
    <item row="1" column="0" colspan="4">
     <layout class="QGridLayout" name="gridLayoutFig"/>
    </item>
-   <item row="2" column="0" colspan="2">
-    <widget class="QRadioButton" name="radioButton">
-     <property name="text">
-      <string>This column is numerical</string>
-     </property>
-    </widget>
-   </item>
    <item row="3" column="0" colspan="4">
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
@@ -47,7 +40,7 @@
         <x>0</x>
         <y>0</y>
         <width>560</width>
-        <height>537</height>
+        <height>530</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
@@ -62,7 +55,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>486</height>
+           <height>479</height>
           </size>
          </property>
         </spacer>
@@ -118,6 +111,16 @@
    </item>
    <item row="0" column="1" colspan="3">
     <widget class="QComboBox" name="comboBox"/>
+   </item>
+   <item row="2" column="0">
+    <widget class="QRadioButton" name="radioButton">
+     <property name="text">
+      <string>This column is numerical</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" colspan="3">
+    <widget class="QLineEdit" name="LineEditCutoff"/>
    </item>
   </layout>
  </widget>
