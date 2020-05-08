@@ -304,7 +304,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		self.ui.pushButtonOK.clicked.connect(self.accept)
 		self.ui.comboBox.currentTextChanged.connect(self.StatFig)
 		self.ui.radioButton.clicked.connect(self.StatFig)
-		self.ui.LineEditCutoff.textChanged.connect(self.updateNum)
+		self.ui.LineEditCutoff.textChanged.connect(self.StatFig)
 
 	def updateNum(self):
 		if self.ui.radioButton.isChecked():
@@ -364,12 +364,34 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			char_list = list(set(char_list))
 			self.load_data_char(char_list)
 
+			num_list = []
+			error = False
+			if self.ui.LineEditCutoff.text() != '':
+				temp_data = self.ui.LineEditCutoff.text().split(',')
+				if len(temp_data) > 0:
+					for ele in temp_data:
+						try:
+							num = float(ele)
+							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+								num_list.append(num)
+						except:
+							error = True
+					# remove redudant and sort
+					num_list = list(set(num_list))
+					num_list.sort()
+
 			# update figure
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 			F = MyFigure(width=3, height=3, dpi=160)
 			F.axes.hist(value_list, bins=30)
+
+			if error == False:
+				ymin, ymax = F.axes.get_ylim()
+				for num in num_list:
+					F.axes.plot([num,num], [ymin, ymax], color='r', linewidth = 1, label="Cutoff")
+
 			F.axes.tick_params(labelsize=7)
 			F.fig.subplots_adjust(bottom=0.1)
 
@@ -8385,47 +8407,49 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global DontFindTwice
 		if DontFindTwice == True:
 			return
-
-		sender = self.sender()
-		if sender.id == 'TreeOp1':
-			Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-			self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
-			if Option1 == 'None':
-				DontFindTwice = True
-				self.ui.cboTreeOp2.setCurrentText('None')
-				self.ui.cboTreeOp3.setCurrentText('None')
-				DontFindTwice = False
-		elif sender.id == 'TreeOp2':
-			Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-			self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
-			if Option1 == 'None':
-				DontFindTwice = True
-				self.ui.cboTreeOp2.setCurrentText('None')
-				self.ui.cboTreeOp3.setCurrentText('None')
-				DontFindTwice = False
-				Msg = 'Upper level grouping factor is empty!\nPlease determine grouping factors from the upper level!'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-				return
-			self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
-			Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-			if Option2 == 'None':
-				DontFindTwice = True
-				self.ui.cboTreeOp3.setCurrentText('None')
-				DontFindTwice = False
-		else:
-			Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-			self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
-			Option3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-			if Option3 == 'None':
-				pass
-			elif Option2 == 'None':
-				DontFindTwice = True
-				self.ui.cboTreeOp3.setCurrentText('None')
-				DontFindTwice = False
-				Msg = 'Upper level grouping factor is empty!\nPlease determine grouping factors from the upper level!'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-				return
-			self.ui.cboTreeOp3.setToolTip('Press update tree to implement changes')
+		try:
+			sender = self.sender()
+			if sender.id == 'TreeOp1':
+				Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+				self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
+				if Option1 == 'None':
+					DontFindTwice = True
+					self.ui.cboTreeOp2.setCurrentText('None')
+					self.ui.cboTreeOp3.setCurrentText('None')
+					DontFindTwice = False
+			elif sender.id == 'TreeOp2':
+				Option1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+				self.ui.cboTreeOp1.setToolTip('Press update tree to implement changes')
+				if Option1 == 'None':
+					DontFindTwice = True
+					self.ui.cboTreeOp2.setCurrentText('None')
+					self.ui.cboTreeOp3.setCurrentText('None')
+					DontFindTwice = False
+					Msg = 'Upper level grouping factor is empty!\nPlease determine grouping factors from the upper level!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+				self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
+				Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+				if Option2 == 'None':
+					DontFindTwice = True
+					self.ui.cboTreeOp3.setCurrentText('None')
+					DontFindTwice = False
+			else:
+				Option2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+				self.ui.cboTreeOp2.setToolTip('Press update tree to implement changes')
+				Option3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+				if Option3 == 'None':
+					pass
+				elif Option2 == 'None':
+					DontFindTwice = True
+					self.ui.cboTreeOp3.setCurrentText('None')
+					DontFindTwice = False
+					Msg = 'Upper level grouping factor is empty!\nPlease determine grouping factors from the upper level!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+				self.ui.cboTreeOp3.setToolTip('Press update tree to implement changes')
+		except:
+			pass
 
 	def ApplicationStarted(self):
 		StartUpOptions = StartUpDialogue()
