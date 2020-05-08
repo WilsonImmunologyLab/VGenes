@@ -859,7 +859,9 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 				# add new column if field name not exit in current col
 				tmp_field_name = re.sub(r'\s.+', '', my_widget.currentText())
 				if tmp_field_name in FieldList:
-					pass
+					if self.ui.radioButtonUpdateName.isChecked():
+						VGenesSQL.UpdateFieldTable(tmp_field_name, header[col], 'FieldNickName', DBFilename)
+						RealNameList[FieldList.index(tmp_field_name)] = header[col]
 				else:
 					# check if the new field name can be used:
 					HEADERStatement = 'PRAGMA table_info(vgenesDB);'
@@ -883,7 +885,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 					# update field name table
 					SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
 					                'VALUES(' + str(len(FieldList) + 1) + ',"' + tmp_field_name + '", "' + \
-					                tmp_field_name + '", "Customized", "")'
+					                header[col] + '", "Customized", "")'
 					try:
 						VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
 					except:
@@ -892,7 +894,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 						                    QMessageBox.Ok)
 						return
 
-					RealNameList.append(tmp_field_name)
+					RealNameList.append(header[col])
 					FieldCommentList.append('')
 					FieldTypeList.append('Customized')
 					FieldList.append(tmp_field_name)
@@ -5796,6 +5798,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					except:
 						err = True
 				if err == True:
+					pass
 					#QMessageBox.information(self, 'Information', 'Non-numerical values/records have been removed from this figure!',
 					#                    QMessageBox.Ok, QMessageBox.Ok)
 
@@ -5835,6 +5838,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					except:
 						err = True
 				if err == True:
+					pass
 					#QMessageBox.information(self, 'Information',
 					#                    'Non-numerical values/records have been removed from this figure!',
 					#                    QMessageBox.Ok, QMessageBox.Ok)

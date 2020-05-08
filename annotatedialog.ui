@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>575</width>
+    <width>583</width>
     <height>652</height>
    </rect>
   </property>
@@ -114,6 +114,13 @@
     <widget class="QLabel" name="label_4">
      <property name="text">
       <string>If you want import data into a new field, just type your field name:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2" colspan="2">
+    <widget class="QRadioButton" name="radioButtonUpdateName">
+     <property name="text">
+      <string>Update Field Nick name</string>
      </property>
     </widget>
    </item>

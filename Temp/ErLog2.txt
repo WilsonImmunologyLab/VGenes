@@ -1,0 +1,4 @@
+Began input at Fri May  8 15:35:57 2020
+VGenes input ended at: Fri May  8 15:36:04 2020
+299 sequences were input by IgBLAST for file: 
+/Users/leil/Documents/Projects/scRNAseq/COVID/VDJ/S179/consensus.fasta
