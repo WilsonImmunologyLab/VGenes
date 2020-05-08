@@ -5784,6 +5784,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
+				x_data = []
+				y_data = []
+				err = False
+				for d in DataIn:
+					try:
+						x = float(d[0])
+						y = float(d[1])
+						x_data.append(x)
+						y_data.append(y)
+					except:
+						err = True
+				if err == True:
+					#QMessageBox.information(self, 'Information', 'Non-numerical values/records have been removed from this figure!',
+					#                    QMessageBox.Ok, QMessageBox.Ok)
+
+				'''
 				x_data = [d[0] for d in DataIn]
 				y_data = [d[1] for d in DataIn]
 				
@@ -5794,6 +5810,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
 					                    QMessageBox.Ok, QMessageBox.Ok)
 					return
+				'''
 
 				# attach data
 				my_scatter.add_xaxis(xaxis_data=x_data)
@@ -5804,6 +5821,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
+				x_data = []
+				y_data = []
+				group_data = []
+				err = False
+				for d in DataIn:
+					try:
+						x = float(d[0])
+						y = float(d[1])
+						x_data.append(x)
+						y_data.append(y)
+						group_data.append(d[2])
+					except:
+						err = True
+				if err == True:
+					#QMessageBox.information(self, 'Information',
+					#                    'Non-numerical values/records have been removed from this figure!',
+					#                    QMessageBox.Ok, QMessageBox.Ok)
+
+				'''
 				x_data = [d[0] for d in DataIn]
 				y_data = [d[1] for d in DataIn]
 				group_data = [d[2] for d in DataIn]
@@ -5814,7 +5850,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
 					                    QMessageBox.Ok, QMessageBox.Ok)
 					return
-
+				'''
 				group_result = Counter(group_data)
 				groups = list(group_result.keys())
 
