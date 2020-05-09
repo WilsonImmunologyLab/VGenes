@@ -268,6 +268,8 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 
 		self.ui.Cancel.clicked.connect(self.reject)
 		self.ui.OK.clicked.connect(self.accept)
+		self.ui.comboBoxFrom.currentTextChanged.connect(self.StatFig)
+		self.ui.radioButton.clicked.connect(self.StatFig)
 
 	def accept(self):
 		field_from = self.ui.comboBoxFrom.currentText()
@@ -284,6 +286,88 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 		else:
 			self.CopySignal.emit(field_from, field_to)
 			self.close()
+
+	def StatFig(self):
+		# numeric value
+		if self.ui.radioButton.isChecked():
+			field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
+			if field == '':
+				return
+			
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			value_list = []
+			char_list = []
+			non_number_count = 0
+			for row in DataIn:
+				try:
+					value_list.append(float(row[0]))
+				except:
+					char_list.append(row[0])
+					non_number_count += 1
+
+			if len(value_list) == 0:
+				Msg = 'No value can be converted to number!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				self.ui.radioButton.setChecked(False)
+				self.StatFig()
+				return
+
+			# update figure
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			F = MyFigure(width=3, height=3, dpi=160)
+			F.axes.hist(value_list, bins=30)
+
+			F.axes.tick_params(labelsize=7)
+			F.fig.subplots_adjust(bottom=0.1)
+
+			if self.ui.gridLayoutFig.count() > 0:
+				for i in range(self.ui.gridLayoutFig.count()):
+					self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+			else:
+				self.resize(1200, 700)
+			self.ui.gridLayoutFig.addWidget(F, 0, 1)
+		# character value
+		else:
+			field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
+			if field == '':
+				return
+		
+			SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			value_list = [row[0] for row in DataIn]
+
+			# update figure
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			data = []
+			for element in DataIn:
+				data.append(element[0])
+			result = Counter(data)
+			labels = result.keys()
+			values = result.values()
+			colors = sns.color_palette("hls", len(values))
+
+			F = MyFigure(width=3, height=3, dpi=160)
+			F.axes.bar(labels, values, color=colors)
+			F.axes.set_xticklabels(labels, rotation=-90)
+			F.axes.tick_params(labelsize=7)
+
+			# determine spacing
+			lens = [len(lab) for lab in labels]
+			max_len = max(lens)
+			my_adjust = 0.1 + max_len / 50
+			F.fig.subplots_adjust(bottom=my_adjust)
+
+			if self.ui.gridLayoutFig.count() > 0:
+				for i in range(self.ui.gridLayoutFig.count()):
+					self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+			else:
+				self.resize(1200, 700)
+			self.ui.gridLayoutFig.addWidget(F, 0, 1)
 
 class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 	BatchSignal = pyqtSignal(int, str, dict)
@@ -1023,6 +1107,86 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.pushButtonDelete.clicked.connect(self.deleteField)
 		self.ui.lineEditNickName.setReadOnly(False)
 		self.ui.pushButtonSave.setEnabled(False)
+		self.ui.lineEditName.textChanged.connect(self.StatFig)
+		self.ui.radioButton.clicked.connect(self.StatFig)
+
+	def StatFig(self):
+		if self.ui.gridLayoutFig.count() > 0:
+			for i in range(self.ui.gridLayoutFig.count()):
+				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+		# numeric value
+		try:
+			if self.ui.radioButton.isChecked():
+				field = re.sub(r'\(.+', '', self.ui.lineEditName.text())
+				if field == '':
+					return
+
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				value_list = []
+				char_list = []
+				non_number_count = 0
+				for row in DataIn:
+					try:
+						value_list.append(float(row[0]))
+					except:
+						char_list.append(row[0])
+						non_number_count += 1
+
+				if len(value_list) == 0:
+					Msg = 'No value can be converted to number!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					self.ui.radioButton.setChecked(False)
+					self.StatFig()
+					return
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.hist(value_list, bins=30)
+
+				F.axes.tick_params(labelsize=7)
+				F.fig.subplots_adjust(bottom=0.1)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+			# character value
+			else:
+				field = re.sub(r'\(.+', '', self.ui.lineEditName.text())
+				if field == '':
+					return
+
+				SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				value_list = [row[0] for row in DataIn]
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+				result = Counter(data)
+				labels = result.keys()
+				values = result.values()
+				colors = sns.color_palette("hls", len(values))
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.bar(labels, values, color=colors)
+				F.axes.set_xticklabels(labels, rotation=-90)
+				F.axes.tick_params(labelsize=7)
+
+				# determine spacing
+				lens = [len(lab) for lab in labels]
+				max_len = max(lens)
+				my_adjust = 0.1 + max_len / 50
+				F.fig.subplots_adjust(bottom=my_adjust)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+		except:
+			return
 
 	def deleteField(self):
 		global FieldList
