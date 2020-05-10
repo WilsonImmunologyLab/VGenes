@@ -3831,6 +3831,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.HeatmapList = []
 
+	@pyqtSlot()
+	def on_actionSave_As_triggered(self):
+		self.saveAS()
+
+	@pyqtSlot()
+	def on_btnSaveAs_clicked(self):
+		self.saveAS()
+
+	def saveAS(self):
+		options = QtWidgets.QFileDialog.Options()
+		newDB, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+		                                                      "New Fragment Database",
+		                                                      "New Fragment database",
+		                                                      "VGene database Files (*.vdb);;All Files (*)",
+		                                                      options=options)
+		if newDB != 'none' and newDB != '':
+			shutil.copyfile(DBFilename, newDB)
+			QMessageBox.information(self, 'Information', 'DB saved to new location!',
+			                    QMessageBox.Ok, QMessageBox.Ok)
+
 	def addFieldsHeatmap(self):
 		listItems = self.ui.listWidgetAll.selectedItems()
 		for item in listItems:
@@ -11108,7 +11128,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
 
 			if name == self.ui.txtName.toPlainText():
-				return
+				pass
 			else:
 				# update name index
 				NameIndex[self.ui.txtName.toPlainText()] = NameIndex[name]
@@ -11136,6 +11156,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				self.initializeTreeView(SQLFields)
 				self.ui.treeWidget.expandAll()
+
+			Msg = 'Change saved!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 		else:
 			Msg = 'Please switch to edit mode first!'
 			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
