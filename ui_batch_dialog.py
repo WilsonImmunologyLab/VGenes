@@ -74,3 +74,4 @@ class Ui_BatchDialog(object):
         self.pushButtonCancel.setText(_translate("BatchDialog", "Cancel"))
         self.pushButtonOK.setText(_translate("BatchDialog", "Confirm"))
         self.radioButton.setText(_translate("BatchDialog", "This column is numerical"))
+        self.LineEditCutoff.setText(_translate("BatchDialog", "Type cutoff here, seprate by ,  (e.g.  500,600,700)"))

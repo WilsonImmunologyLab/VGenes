@@ -120,7 +120,11 @@
     </widget>
    </item>
    <item row="2" column="1" colspan="3">
-    <widget class="QLineEdit" name="LineEditCutoff"/>
+    <widget class="QLineEdit" name="LineEditCutoff">
+     <property name="text">
+      <string>Type cutoff here, seprate by ,  (e.g.  500,600,700)</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

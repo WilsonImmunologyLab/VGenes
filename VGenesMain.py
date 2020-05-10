@@ -396,6 +396,8 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
 			if self.ui.LineEditCutoff.text() == '':
 				self.load_data_num([], self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
+			elif self.ui.LineEditCutoff.text()[0] == 'T':
+				self.load_data_num([], self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
 			else:
 				temp_data = self.ui.LineEditCutoff.text().split(',')
 				if len(temp_data) > 0:
@@ -417,6 +419,15 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 	def StatFig(self):
 		# numeric value
 		if self.ui.radioButton.isChecked():
+			try:
+				sender = self.sender()
+				if sender.objectName() == 'comboBox':
+					self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
+				elif sender.objectName() == 'radioButton':
+					self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
+			except:
+				pass
+
 			self.ui.LineEditCutoff.setHidden(False)
 			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
