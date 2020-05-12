@@ -7487,11 +7487,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		for pool in ClonalPools:
 			Pool = list(pool)
-			# result = VGenesSeq.Intraclonal(Pool)
-
-			# if len(result) > 0:
-			# CPList, DuplicateList = VGenesCloneCaller.CloneCaller(Pool)  # should return list of tuple with SeqNames in each Clonal Pool
-
 			CPList = VGenesCloneCaller.CloneCaller(Pool, Duplicates)
 			i = 1
 
@@ -7506,7 +7501,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 						try:
 							VGenesSQL.UpdateField(data[119], str(i), 'ClonalPool', DBFilename)
 						except:
-
 							print(item + ' caused error in finding clones at line 1798 and so was not annotated as a clone')
 
 					else:
@@ -7602,6 +7596,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.tree_to_table_selection()
 		else:
 			updateMarker == True
+
+		self.initial_Clone()
 
 
 

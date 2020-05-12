@@ -1,6 +1,7 @@
 __author__ = 'wilsonp'
 import sqlite3 as db
 import os
+import re
 # first need connect to a database
 from VGenesDialogues import openFile, openFiles, newFile, questionMessage, setText
 
@@ -1171,7 +1172,8 @@ def MakeSQLStatement(self, fields, SeqName):
             SQLStatement += ', '
             firstmore = False
         project = self.ui.cboTreeOp1.currentText()
-        fieldname = self.TransLateFieldtoReal(project, True)
+        #fieldname = self.TransLateFieldtoReal(project, True)
+        fieldname = re.sub(r'\(.+', '', project)
         SQLStatement = SQLStatement + fieldname + ' = '
         for item in checkedProjects:
             SQLStatement += ('"' + item)
@@ -1195,9 +1197,11 @@ def MakeSQLStatement(self, fields, SeqName):
 
             firstmore = False
         group = self.ui.cboTreeOp2.currentText()
-        fieldname = self.TransLateFieldtoReal(group, True)
+        #fieldname = self.TransLateFieldtoReal(group, True)
+        fieldname = re.sub(r'\(.+', '', group)
         project = self.ui.cboTreeOp1.currentText()
-        Projfieldname = self.TransLateFieldtoReal(project, True)
+        #Projfieldname = self.TransLateFieldtoReal(project, True)
+        Projfieldname = re.sub(r'\(.+', '', project)
 
         # SQLStatement = SQLStatement + fieldname + ' = "'
         for item in checkedGroups:
@@ -1220,11 +1224,14 @@ def MakeSQLStatement(self, fields, SeqName):
                 SQLStatement += ', '
             firstmore = False
         Subgroup = self.ui.cboTreeOp3.currentText()
-        fieldname = self.TransLateFieldtoReal(Subgroup, True)
+        #fieldname = self.TransLateFieldtoReal(Subgroup, True)
+        fieldname = re.sub(r'\(.+', '', Subgroup)
         group = self.ui.cboTreeOp2.currentText()
-        Groupfieldname = self.TransLateFieldtoReal(group, True)
+        #Groupfieldname = self.TransLateFieldtoReal(group, True)
+        Groupfieldname = re.sub(r'\(.+', '', group)
         project = self.ui.cboTreeOp1.currentText()
-        Projfieldname = self.TransLateFieldtoReal(project, True)
+        #Projfieldname = self.TransLateFieldtoReal(project, True)
+        Projfieldname = re.sub(r'\(.+', '', project)
 
         # SQLStatement = SQLStatement + fieldname + ' = "'
         for item in checkedSubGroups:

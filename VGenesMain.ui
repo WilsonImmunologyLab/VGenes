@@ -191,6 +191,9 @@
               <height>30</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Search</string>
+            </property>
             <property name="text">
              <string>Search</string>
             </property>
@@ -297,6 +300,9 @@
             <property name="enabled">
              <bool>false</bool>
             </property>
+            <property name="toolTip">
+             <string>Edit distinct values of selected field in batches</string>
+            </property>
             <property name="text">
              <string>Batch Edit</string>
             </property>
@@ -348,6 +354,9 @@
               <width>50</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Lock/Unlock Edit</string>
             </property>
             <property name="text">
              <string/>
@@ -883,6 +892,9 @@
             <height>30</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Copy values from a column to another</string>
+          </property>
           <property name="text">
            <string>Copy values from a column</string>
           </property>
@@ -912,6 +924,9 @@
             <height>30</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Refresh DB to load most recent changes</string>
+          </property>
           <property name="text">
            <string>Refresh DB</string>
           </property>
@@ -937,6 +952,9 @@
             <width>16777215</width>
             <height>30</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Alter data table (add field, delete field, rename field)</string>
           </property>
           <property name="text">
            <string>Alter DB</string>
@@ -964,6 +982,9 @@
             <height>30</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Lock/Unlock Edit</string>
+          </property>
           <property name="text">
            <string>Edit Lock: Locked</string>
           </property>
@@ -989,6 +1010,9 @@
             <width>16777215</width>
             <height>30</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Stat of values of selected field</string>
           </property>
           <property name="text">
            <string>Stat/Update</string>
@@ -3679,6 +3703,9 @@
              <height>26</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Report Type</string>
+           </property>
            <item>
             <property name="text">
              <string>FASTA Nucleotide file</string>
@@ -3739,6 +3766,9 @@
              <height>20</height>
             </rect>
            </property>
+           <property name="toolTip">
+            <string>Display</string>
+           </property>
            <property name="text">
             <string>Display</string>
            </property>
@@ -3754,6 +3784,9 @@
              <width>51</width>
              <height>20</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>Text format report</string>
            </property>
            <property name="text">
             <string>Text</string>
@@ -3773,6 +3806,9 @@
              <width>51</width>
              <height>20</height>
             </rect>
+           </property>
+           <property name="toolTip">
+            <string>CSV format report</string>
            </property>
            <property name="text">
             <string>CSV</string>
@@ -3856,7 +3892,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Enable/Disable record edit</string>
+            <string>Save change</string>
            </property>
            <property name="text">
             <string>Save</string>
@@ -3919,7 +3955,7 @@
             </size>
            </property>
            <property name="toolTip">
-            <string>Enable/Disable record edit</string>
+            <string>Make a copy of current DB</string>
            </property>
            <property name="text">
             <string>Save as</string>
@@ -7114,6 +7150,9 @@ If the J-end is off the J gene end may need adjusted</string>
             </item>
             <item row="0" column="5">
              <widget class="QCheckBox" name="checkBoxStack">
+              <property name="toolTip">
+               <string>Generate stacked bar plot</string>
+              </property>
               <property name="text">
                <string>Stacked Bar</string>
               </property>
@@ -7609,7 +7648,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <item row="1" column="0">
            <widget class="QCheckBox" name="checkBoxSelection">
             <property name="toolTip">
-             <string extracomment="Generate figure only based on current selection">Generate figure only based on current selection</string>
+             <string extracomment="Generate figure only based on current selection">Generate figure only based on current selected records</string>
             </property>
             <property name="statusTip">
              <string extracomment="Generate figure only based on current selection"/>
@@ -7635,6 +7674,9 @@ If the J-end is off the J gene end may need adjusted</string>
               <width>130</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Download figure as a svg file</string>
             </property>
             <property name="text">
              <string>Download</string>
@@ -7667,6 +7709,9 @@ If the J-end is off the J gene end may need adjusted</string>
               <width>130</width>
               <height>16777215</height>
              </size>
+            </property>
+            <property name="toolTip">
+             <string>Generate figure based on current selection</string>
             </property>
             <property name="text">
              <string>Draw</string>
@@ -7720,6 +7765,9 @@ If the J-end is off the J gene end may need adjusted</string>
             <height>0</height>
            </size>
           </property>
+          <property name="toolTip">
+           <string>Generate peptide sequence logo</string>
+          </property>
           <property name="text">
            <string>Peptide logo</string>
           </property>
@@ -7745,6 +7793,9 @@ If the J-end is off the J gene end may need adjusted</string>
             <width>100</width>
             <height>0</height>
            </size>
+          </property>
+          <property name="toolTip">
+           <string>Generate nucleotide sequence logo</string>
           </property>
           <property name="text">
            <string>Nucleotide logo</string>
@@ -7901,7 +7952,7 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>454</width>
+                <width>486</width>
                 <height>20</height>
                </size>
               </property>
