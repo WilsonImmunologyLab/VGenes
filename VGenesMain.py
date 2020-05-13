@@ -11282,18 +11282,51 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		buttons = 'OKC'
 		answer = informationMessage(self, 'Any work done since opening this instance of VGenes will be lost.', buttons)
-
 		if answer == 'Cancel':
 			return
 
 		Backfilename = os.path.join(working_prefix, 'BackUP.vdb')
-		global DBFilename
 
-		# DBFilename = filename
 		self.GOOpen(False)
 		shutil.move(Backfilename, DBFilename)
-
 		self.GOOpen(False)
+
+		self.refreshDB()
+		Msg = 'VGene Database resumed!'
+		QMessageBox.information(self, 'information', Msg, QMessageBox.Ok,
+		                        QMessageBox.Ok)
+
+	@pyqtSlot()
+	def on_actionExport_triggered(self):
+		buttons = 'OKC'
+		answer = informationMessage(self, 'This function will only export FASTA format sequences\nFor more formats, please use Generate report function.\nContinue?', buttons)
+		if answer == 'Cancel':
+			return
+
+		selected = self.getTreeCheckedChild()
+		selected = selected[3]
+
+		if len(selected) == 0:
+			Msg = 'Please select at least one sequence!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+			                        QMessageBox.Ok)
+			return
+
+		SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected) + '")'
+		
+		filename = saveFile(self, 'Nucleotide')
+		if filename == '' or filename == 'none':
+			return
+
+		f = open(filename, 'w')
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		for record in DataIn:
+			f.write('>' + record[0] + '\n' + record[1] + '\n')
+		f.close()
+
+		Msg = 'Sequences exported!'
+		QMessageBox.information(self, 'information', Msg, QMessageBox.Ok,
+		                        QMessageBox.Ok)
 
 	@pyqtSlot()
 	def on_btnExtractRecords_clicked(self):

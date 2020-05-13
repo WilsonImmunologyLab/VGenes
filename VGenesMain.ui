@@ -8588,8 +8588,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionSave_As"/>
     <addaction name="actionRevert_to_previous"/>
     <addaction name="separator"/>
-    <addaction name="actionPreferences"/>
-    <addaction name="separator"/>
     <addaction name="actionPrint"/>
    </widget>
    <widget class="QMenu" name="menuSequences">
@@ -8972,7 +8970,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/top.png</normaloff>:/PNG-Icons/top.png</iconset>
    </property>
    <property name="text">
-    <string>Move &amp;Up</string>
+    <string>Top</string>
    </property>
    <property name="toolTip">
     <string>First record</string>
@@ -8987,7 +8985,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/buttom.png</normaloff>:/PNG-Icons/buttom.png</iconset>
    </property>
    <property name="text">
-    <string>Move &amp;Down</string>
+    <string>Bottom</string>
    </property>
    <property name="toolTip">
     <string>Last record</string>
@@ -9002,7 +9000,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/up.png</normaloff>:/PNG-Icons/up.png</iconset>
    </property>
    <property name="text">
-    <string>Top</string>
+    <string>Move up</string>
    </property>
    <property name="toolTip">
     <string>Previous record</string>
@@ -9017,7 +9015,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/down.png</normaloff>:/PNG-Icons/down.png</iconset>
    </property>
    <property name="text">
-    <string>Bottom</string>
+    <string>Move down</string>
    </property>
    <property name="toolTip">
     <string>Next record</string>
