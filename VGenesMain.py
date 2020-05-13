@@ -7296,25 +7296,86 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.on_actionDelete_record_triggered()
 
 	@pyqtSlot()
+	def on_actionDuplicate_current_triggered(self):
+		SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + data[0] + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		copy_data = list(DataIn[0])
+		new_name = copy_data[0] + '_copy'
+		copy_data[0] = new_name
+
+		SQLStatement = 'SELECT ID FROM vgenesDB'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		id_list = [int(i[0]) for i in DataIn]
+		copy_data[119] = str(max(id_list) + 1)
+		my_list = ['?']*len(FieldList)
+
+		CMD = 'INSERT INTO vgenesDB(' + ','.join(FieldList) + ') VALUES(' + ','.join(my_list) + ')'
+		conn = db.connect(DBFilename)
+		cursor = conn.cursor()
+		try:
+			cursor.execute(CMD, copy_data)
+			conn.commit()  # saves data into file
+
+			self.refreshDB()
+			self.on_btnUpdateTree_clicked()
+
+			found = self.ui.treeWidget.findItems(new_name, Qt.MatchRecursive, 0)
+			if len(found) > 0:
+				found = found[0]
+				from_table = True
+				self.ui.treeWidget.setCurrentItem(found)
+				from_table = False
+				self.tree_to_table_selection()
+		except:
+			QMessageBox.warning(self, 'Warning', 'Failed to make a copy of current record!\nMost likely you already have a copy of current record!\nTo make a new copy, please rename the old copy first!',
+			                        QMessageBox.Ok, QMessageBox.Ok)
+
+		conn.close()
+		
+		# focus on the copy
+
+	@pyqtSlot()
 	def on_actionDelete_record_triggered(self):
 		fields = ['SeqName', 'ID']
 
 		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
 		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-		if SQLStatement == 'None':
-			question = 'Check sequences to be deleted'
-			buttons = 'OK'
-			answer = informationMessage(self, question, buttons)
-		else:
-			question = 'Are you certain you want to delete the checked sequences?'
+
+		sel_names = self.getTreeCheckedChild()
+		sel_names = sel_names[3]
+
+		if len(sel_names) == 0:
+			question = 'You did not check any sequences, do you want delete current selected sequence?\n' + data[0]
 			buttons = 'YN'
 			answer = questionMessage(self, question, buttons)
 
-		if answer == 'Yes':
-			VGenesSQL.deleterecords(DBFilename, SQLStatement)
-			if DBFilename != None:
-				if os.path.isfile(DBFilename):
-					self.LoadDB(DBFilename)
+			if answer == 'Yes':
+				SQLStatement = ' FROM vgenesDB WHERE SeqName = "' + data[0] + '"'
+				VGenesSQL.deleterecords(DBFilename, SQLStatement)
+
+				QMessageBox.information(self, 'Information', 'The selected record has been deleted!',
+				                        QMessageBox.Ok, QMessageBox.Ok)
+				if DBFilename != None:
+					if os.path.isfile(DBFilename):
+						self.LoadDB(DBFilename)
+		else:
+			question = 'Do you want delete current selected sequences?\n' + '\n'.join(sel_names)
+			buttons = 'YN'
+			answer = questionMessage(self, question, buttons)
+
+			if answer == 'Yes':
+				SQLStatement = ' FROM vgenesDB WHERE SeqName IN ("' + '","'.join(sel_names) + '")'
+				VGenesSQL.deleterecords(DBFilename, SQLStatement)
+
+				QMessageBox.information(self, 'Information', 'The selected record has been deleted!',
+				                        QMessageBox.Ok, QMessageBox.Ok)
+				if DBFilename != None:
+					if os.path.isfile(DBFilename):
+						self.LoadDB(DBFilename)
+						self.on_btnUpdateTree_clicked()
+						
+
 
 	def RemoveDuplicates(self, DataList):
 		from operator import itemgetter

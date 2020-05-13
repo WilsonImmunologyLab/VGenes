@@ -8655,7 +8655,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionMove_Down"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_record"/>
-    <addaction name="actionAdd_record"/>
     <addaction name="actionDuplicate_current"/>
     <addaction name="menuQuery"/>
     <addaction name="actionImport_Vgenes_database"/>

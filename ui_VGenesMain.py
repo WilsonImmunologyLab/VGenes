@@ -3714,7 +3714,6 @@ class Ui_MainWindow(object):
         self.menuDatabase.addAction(self.actionMove_Down)
         self.menuDatabase.addSeparator()
         self.menuDatabase.addAction(self.actionDelete_record)
-        self.menuDatabase.addAction(self.actionAdd_record)
         self.menuDatabase.addAction(self.actionDuplicate_current)
         self.menuDatabase.addAction(self.menuQuery.menuAction())
         self.menuDatabase.addAction(self.actionImport_Vgenes_database)
