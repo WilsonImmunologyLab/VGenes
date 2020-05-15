@@ -838,7 +838,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>9</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -8376,7 +8376,7 @@ If the J-end is off the J gene end may need adjusted</string>
                    <widget class="QComboBox" name="comboBoxCol1Clone">
                     <property name="minimumSize">
                      <size>
-                      <width>200</width>
+                      <width>0</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -8386,7 +8386,7 @@ If the J-end is off the J gene end may need adjusted</string>
                    <widget class="QComboBox" name="comboBoxCol2Clone">
                     <property name="minimumSize">
                      <size>
-                      <width>200</width>
+                      <width>0</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -8394,6 +8394,12 @@ If the J-end is off the J gene end may need adjusted</string>
                   </item>
                   <item row="1" column="2">
                    <widget class="QCheckBox" name="checkBoxStackClone">
+                    <property name="maximumSize">
+                     <size>
+                      <width>100</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
                     <property name="text">
                      <string>Stacked Bar</string>
                     </property>
@@ -8434,7 +8440,7 @@ If the J-end is off the J gene end may need adjusted</string>
                    <widget class="QComboBox" name="comboBoxBoxDataClone">
                     <property name="minimumSize">
                      <size>
-                      <width>150</width>
+                      <width>0</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -8444,7 +8450,7 @@ If the J-end is off the J gene end may need adjusted</string>
                    <widget class="QComboBox" name="comboBoxBox1Clone">
                     <property name="minimumSize">
                      <size>
-                      <width>150</width>
+                      <width>0</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -8454,7 +8460,7 @@ If the J-end is off the J gene end may need adjusted</string>
                    <widget class="QComboBox" name="comboBoxBox2Clone">
                     <property name="minimumSize">
                      <size>
-                      <width>150</width>
+                      <width>0</width>
                       <height>0</height>
                      </size>
                     </property>
@@ -8609,8 +8615,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionIMGT"/>
-    <addaction name="actionIgBlast"/>
     <addaction name="actionAnalyze_Mutations"/>
     <addaction name="actionMap_hotspots"/>
     <addaction name="actionMultiple_Alignement"/>
@@ -8642,13 +8646,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <property name="title">
      <string>Database</string>
     </property>
-    <widget class="QMenu" name="menuQuery">
-     <property name="title">
-      <string>Query</string>
-     </property>
-     <addaction name="actionView_subset"/>
-     <addaction name="actionReport"/>
-    </widget>
     <addaction name="actionTop"/>
     <addaction name="actionBottom"/>
     <addaction name="actionMove_Up"/>
@@ -8656,9 +8653,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="separator"/>
     <addaction name="actionDelete_record"/>
     <addaction name="actionDuplicate_current"/>
-    <addaction name="menuQuery"/>
-    <addaction name="actionImport_Vgenes_database"/>
-    <addaction name="actionCreateAnalysisDB"/>
    </widget>
    <widget class="QMenu" name="menuView">
     <property name="title">
@@ -8667,15 +8661,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionAlignment_4"/>
     <addaction name="actionIncrease_font_size"/>
     <addaction name="actionDecrease_font_size"/>
-   </widget>
-   <widget class="QMenu" name="menuHighThroughput">
-    <property name="title">
-     <string>HighThroughput</string>
-    </property>
-    <addaction name="actionMergeMySeq"/>
-    <addaction name="actionImportCluster"/>
-    <addaction name="actionRename10x"/>
-    <addaction name="actionFixNames"/>
    </widget>
    <widget class="QMenu" name="menuAnnotate">
     <property name="title">
@@ -8690,7 +8675,6 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="menuTools"/>
    <addaction name="menuView"/>
    <addaction name="menuHelp"/>
-   <addaction name="menuHighThroughput"/>
    <addaction name="menuAnnotate"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>

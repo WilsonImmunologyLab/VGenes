@@ -241,6 +241,8 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 
 		self.ui.Cancel.clicked.connect(self.reject)
 		self.ui.OK.clicked.connect(self.accept)
+		self.ui.comboBoxFrom.currentTextChanged.connect(self.StatFig)
+		self.ui.radioButton.clicked.connect(self.StatFig)
 
 	def accept(self):
 		field_from = self.ui.comboBoxFrom.currentText()
@@ -257,6 +259,91 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 		else:
 			self.NewFieldSignal.emit(field_from, new_field)
 			self.close()
+
+	def StatFig(self):
+		if DontFindTwice == True:
+			print('skip')
+			return
+
+		if self.ui.gridLayoutFig.count() > 0:
+			for i in range(self.ui.gridLayoutFig.count()):
+				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+		else:
+			self.resize(800, 600)
+		# numeric value
+		try:
+			if self.ui.radioButton.isChecked():
+				field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
+				if field == '':
+					return
+
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				value_list = []
+				char_list = []
+				non_number_count = 0
+				for row in DataIn:
+					try:
+						value_list.append(float(row[0]))
+					except:
+						char_list.append(row[0])
+						non_number_count += 1
+
+				if len(value_list) == 0:
+					Msg = 'No value can be converted to number!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					self.ui.radioButton.setChecked(False)
+					self.StatFig()
+					return
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.hist(value_list, bins=30)
+
+				F.axes.tick_params(labelsize=7)
+				F.fig.subplots_adjust(bottom=0.1)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+			# character value
+			else:
+				field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
+				if field == '':
+					return
+
+				SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				value_list = [row[0] for row in DataIn]
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+				result = Counter(data)
+				labels = result.keys()
+				values = result.values()
+				colors = sns.color_palette("hls", len(values))
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.bar(labels, values, color=colors)
+				F.axes.set_xticklabels(labels, rotation=-90)
+				F.axes.tick_params(labelsize=7)
+
+				# determine spacing
+				lens = [len(lab) for lab in labels]
+				max_len = max(lens)
+				my_adjust = 0.1 + max_len / 50
+				F.fig.subplots_adjust(bottom=my_adjust)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+		except:
+			print('error')
+			return
 
 class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 	CopySignal = pyqtSignal(str, str)
@@ -417,136 +504,136 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			self.ui.LineEditCutoff.setHidden(True)
 
 	def StatFig(self):
-		# numeric value
-		if self.ui.radioButton.isChecked():
-			try:
-				sender = self.sender()
-				if sender.objectName() == 'comboBox':
-					self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
-				elif sender.objectName() == 'radioButton':
-					self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
-			except:
-				pass
-
-			self.ui.LineEditCutoff.setHidden(False)
-			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			value_list = []
-			char_list = []
-			non_number_count = 0
-			for row in DataIn:
+		if self.ui.gridLayoutFig.count() > 0:
+			for i in range(self.ui.gridLayoutFig.count()):
+				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+		try:
+			# numeric value
+			if self.ui.radioButton.isChecked():
 				try:
-					value_list.append(float(row[0]))
+					sender = self.sender()
+					if sender.objectName() == 'comboBox':
+						self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
+					elif sender.objectName() == 'radioButton':
+						self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
 				except:
-					char_list.append(row[0])
-					non_number_count += 1
-			
-			if len(value_list) == 0:
-				Msg = 'No value can be converted to number!'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-				self.ui.radioButton.setChecked(False)
-				self.StatFig()
-				return
+					pass
 
-			# do it later
-			## number list
-			self.ui.LineEditCutoff.min = min(value_list)
-			self.ui.LineEditCutoff.max = max(value_list)
-			self.updateNum()
-
-			## char list
-			char_list = list(set(char_list))
-			self.load_data_char(char_list)
-
-			num_list = []
-			error = False
-			if self.ui.LineEditCutoff.text() != '':
-				temp_data = self.ui.LineEditCutoff.text().split(',')
-				if len(temp_data) > 0:
-					for ele in temp_data:
-						try:
-							num = float(ele)
-							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
-								num_list.append(num)
-						except:
-							error = True
-					# remove redudant and sort
-					num_list = list(set(num_list))
-					num_list.sort()
-
-			# update figure
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-			F = MyFigure(width=3, height=3, dpi=160)
-			F.axes.hist(value_list, bins=30)
-
-			if error == False:
-				ymin, ymax = F.axes.get_ylim()
-				for num in num_list:
-					F.axes.plot([num,num], [ymin, ymax], color='r', linewidth = 1, label="Cutoff")
-
-			F.axes.tick_params(labelsize=7)
-			F.fig.subplots_adjust(bottom=0.1)
-
-			if self.ui.gridLayoutFig.count() > 0:
-				for i in range(self.ui.gridLayoutFig.count()):
-					self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
-			self.ui.gridLayoutFig.addWidget(F, 0, 1)
-		# character value
-		else:
-			self.ui.LineEditCutoff.setHidden(True)
-			if self.initial == 0:
-				return
-			elif self.initial == 1:
+				self.ui.LineEditCutoff.setHidden(False)
 				field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-				SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-				value_list = [row[0] for row in DataIn]
-			elif self.initial == 2:
-				field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-				SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+				value_list = []
+				char_list = []
+				non_number_count = 0
+				for row in DataIn:
+					try:
+						value_list.append(float(row[0]))
+					except:
+						char_list.append(row[0])
+						non_number_count += 1
+
+				if len(value_list) == 0:
+					Msg = 'No value can be converted to number!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					self.ui.radioButton.setChecked(False)
+					self.StatFig()
+					return
+
+				# do it later
+				## number list
+				self.ui.LineEditCutoff.min = min(value_list)
+				self.ui.LineEditCutoff.max = max(value_list)
+				self.updateNum()
+
+				## char list
+				char_list = list(set(char_list))
+				self.load_data_char(char_list)
+
+				num_list = []
+				error = False
+				if self.ui.LineEditCutoff.text() != '':
+					temp_data = self.ui.LineEditCutoff.text().split(',')
+					if len(temp_data) > 0:
+						for ele in temp_data:
+							try:
+								num = float(ele)
+								if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+									num_list.append(num)
+							except:
+								error = True
+						# remove redudant and sort
+						num_list = list(set(num_list))
+						num_list.sort()
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-				value_list = [row[0] for row in DataIn]
 
-				if len(value_list) > 30:
-					question = 'Distinct values of this field seems too many (number =  ' + str(
-						len(value_list)) + ')\nAre you sure?'
-					buttons = 'YN'
-					answer = questionMessage(self, question, buttons)
-					if answer == 'No':
-						return
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.hist(value_list, bins=30)
 
-			self.load_data(value_list)
+				if error == False:
+					ymin, ymax = F.axes.get_ylim()
+					for num in num_list:
+						F.axes.plot([num,num], [ymin, ymax], color='r', linewidth = 1, label="Cutoff")
 
-			# update figure
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				F.axes.tick_params(labelsize=7)
+				F.fig.subplots_adjust(bottom=0.1)
 
-			data = []
-			for element in DataIn:
-				data.append(element[0])
-			result = Counter(data)
-			labels = result.keys()
-			values = result.values()
-			colors = sns.color_palette("hls", len(values))
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+			# character value
+			else:
+				self.ui.LineEditCutoff.setHidden(True)
+				if self.initial == 0:
+					return
+				elif self.initial == 1:
+					field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+					SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					value_list = [row[0] for row in DataIn]
+				elif self.initial == 2:
+					field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+					SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					value_list = [row[0] for row in DataIn]
 
-			F = MyFigure(width=3, height=3, dpi=160)
-			F.axes.bar(labels, values, color=colors)
-			F.axes.set_xticklabels(labels, rotation=-90)
-			F.axes.tick_params(labelsize=7)
+					if len(value_list) > 30:
+						question = 'Distinct values of this field seems too many (number =  ' + str(
+							len(value_list)) + ')\nAre you sure?'
+						buttons = 'YN'
+						answer = questionMessage(self, question, buttons)
+						if answer == 'No':
+							return
 
-			# determine spacing
-			lens = [len(lab) for lab in labels]
-			max_len = max(lens)
-			my_adjust = 0.1 + max_len/50
-			F.fig.subplots_adjust(bottom=my_adjust)
+				self.load_data(value_list)
 
-			if self.ui.gridLayoutFig.count() > 0:
-				for i in range(self.ui.gridLayoutFig.count()):
-					self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
-			self.ui.gridLayoutFig.addWidget(F, 0, 1)
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+				result = Counter(data)
+				labels = result.keys()
+				values = result.values()
+				colors = sns.color_palette("hls", len(values))
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.bar(labels, values, color=colors)
+				F.axes.set_xticklabels(labels, rotation=-90)
+				F.axes.tick_params(labelsize=7)
+
+				# determine spacing
+				lens = [len(lab) for lab in labels]
+				max_len = max(lens)
+				my_adjust = 0.1 + max_len/50
+				F.fig.subplots_adjust(bottom=my_adjust)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+		except:
+			return
 
 	def accept(self):
 		global DontFindTwice
@@ -1252,11 +1339,15 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.refreshDBSignal.emit()
 
 	def addField(self):
+		global DontFindTwice
 		self.newFieldDialog = NewFieldDialog()
 		field_list = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		DontFindTwice = True
 		self.newFieldDialog.ui.comboBoxFrom.addItems(field_list)
+		DontFindTwice = False
 		self.newFieldDialog.NewFieldSignal.connect(self.addFieldAndCopy)
 		self.newFieldDialog.exec_()
+
 
 	def addFieldAndCopy(self, field_from, new_field):
 		print(field_from)
@@ -3941,8 +4032,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.titleClone.setText(msg)
 
 		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
-			fields_name = VGenesSQL.ColName(DBFilename)
-			fields_name = [""] + fields_name
+			fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
 			self.ui.comboBoxPieClone.clear()
 			self.ui.comboBoxPieClone.addItems(fields_name)
 			self.ui.comboBoxCol1Clone.clear()
@@ -4994,7 +5084,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# pie chart
 		if self.ui.tabWidgetClone.currentIndex() == 0:
 			# get data
-			field = self.ui.comboBoxPieClone.currentText()
+			field = re.sub(r'\(.+', '', self.ui.comboBoxPieClone.currentText())
 			if field == "":
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5027,8 +5117,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# Bar chart
 		elif self.ui.tabWidgetClone.currentIndex() == 1:
 			# get data
-			field1 = self.ui.comboBoxCol1Clone.currentText()
-			field2 = self.ui.comboBoxCol2Clone.currentText()
+			field1 = re.sub(r'\(.+', '', self.ui.comboBoxCol1Clone.currentText())
+			field2 = re.sub(r'\(.+', '', self.ui.comboBoxCol2Clone.currentText())
 			if field1 == "":
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -5121,9 +5211,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# Box plot
 		elif self.ui.tabWidgetClone.currentIndex() == 2:
 			# get data
-			data_field = self.ui.comboBoxBoxDataClone.currentText()
-			field1 = self.ui.comboBoxBox1Clone.currentText()
-			field2 = self.ui.comboBoxBox2Clone.currentText()
+			data_field = re.sub(r'\(.+', '', self.ui.comboBoxBoxDataClone.currentText())
+			field1 = re.sub(r'\(.+', '', self.ui.comboBoxBox1Clone.currentText())
+			field2 = re.sub(r'\(.+', '', self.ui.comboBoxBox2Clone.currentText())
 			if field1 == "":
 				QMessageBox.warning(self, 'Warning', 'Your Field1 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
@@ -7839,6 +7929,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# ClonalPools.append(DataIn)
 
 		f = saveFile(self, 'CSV')
+		if f == '' or f == None:
+			return
+
 		with open(f, 'w') as currentfile:
 			doc = 'Comparison, Project, Subject, Strain, Clonotype, Sequence 1, Sequence 2, Activity, Differences, R-Differences, S-Differences, \
 					Begin, End, Length,  Matches, Adjusted Matches,  \
@@ -9996,7 +10089,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				NewName = SeqName[:4] + SeqName[6:]
 				VGenesSQL.UpdateField(ID, NewName, 'SeqName', DBFilename)
 
-		self.model.refresh()
+		#self.model.refresh()
 
 
 
