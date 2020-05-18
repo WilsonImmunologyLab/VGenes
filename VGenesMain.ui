@@ -691,36 +691,6 @@
        <string>Tree navigation order (choose then update):</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_11">
-       <item row="3" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp1">
-         <property name="minimumSize">
-          <size>
-           <width>180</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp3">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="1">
         <widget class="QPushButton" name="btnUpdateTree">
          <property name="text">
@@ -732,8 +702,8 @@
          </property>
          <property name="iconSize">
           <size>
-           <width>25</width>
-           <height>25</height>
+           <width>18</width>
+           <height>18</height>
           </size>
          </property>
          <property name="flat">
@@ -741,10 +711,54 @@
          </property>
         </widget>
        </item>
+       <item row="6" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp3">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0">
         <widget class="QCheckBox" name="checkBoxAll1">
          <property name="text">
           <string>Check All</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp1">
+         <property name="minimumSize">
+          <size>
+           <width>180</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp2">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" colspan="2">
+        <widget class="QPushButton" name="pushButtonClear">
+         <property name="text">
+          <string>Clear Check</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>

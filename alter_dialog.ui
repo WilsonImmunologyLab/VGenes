@@ -201,6 +201,31 @@
       <enum>QFrame::Raised</enum>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <item row="2" column="1" colspan="2">
+       <widget class="QLineEdit" name="lineEditNickName">
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>30</height>
+         </size>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="2">
+       <widget class="QRadioButton" name="radioButton">
+        <property name="text">
+         <string>numerical</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="3">
+       <layout class="QGridLayout" name="gridLayoutFig"/>
+      </item>
       <item row="0" column="0">
        <widget class="QLabel" name="label_6">
         <property name="font">
@@ -231,6 +256,18 @@
         </property>
        </widget>
       </item>
+      <item row="3" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <pointsize>14</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Note:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="label_3">
         <property name="font">
@@ -240,24 +277,6 @@
         </property>
         <property name="text">
          <string>Field Type:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="1" colspan="2">
-       <widget class="QLineEdit" name="lineEditType">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-        <property name="readOnly">
-         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -273,33 +292,6 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="1" colspan="2">
-       <widget class="QLineEdit" name="lineEditNickName">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>30</height>
-         </size>
-        </property>
-        <property name="font">
-         <font>
-          <pointsize>15</pointsize>
-         </font>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="0">
-       <widget class="QLabel" name="label_5">
-        <property name="font">
-         <font>
-          <pointsize>14</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Note:</string>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="1" rowspan="2">
        <widget class="QTextEdit" name="textEditNote">
         <property name="maximumSize">
@@ -312,13 +304,6 @@
          <font>
           <pointsize>14</pointsize>
          </font>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2">
-       <widget class="QRadioButton" name="radioButton">
-        <property name="text">
-         <string>numerical</string>
         </property>
        </widget>
       </item>
@@ -348,21 +333,37 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="3">
-       <layout class="QGridLayout" name="gridLayoutFig"/>
-      </item>
-      <item row="6" column="1">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
+      <item row="1" column="1" colspan="2">
+       <widget class="QLineEdit" name="lineEditType">
+        <property name="minimumSize">
          <size>
-          <width>20</width>
-          <height>40</height>
+          <width>0</width>
+          <height>30</height>
          </size>
         </property>
-       </spacer>
+        <property name="font">
+         <font>
+          <pointsize>15</pointsize>
+         </font>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="2">
+       <widget class="QPushButton" name="DisplayTip">
+        <property name="text">
+         <string>Display anyway</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0" colspan="2">
+       <widget class="QLabel" name="labelTip">
+        <property name="text">
+         <string>Current field has more than 30 distint values! Hide figure by default!</string>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>

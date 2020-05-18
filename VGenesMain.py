@@ -27,6 +27,7 @@ from itertools import chain, groupby, zip_longest
 import threading as thd
 import seaborn as sns
 import matplotlib
+import random
 matplotlib.use("Qt5Agg")
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
@@ -239,10 +240,14 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 		self.ui = Ui_NewFieldDialog()
 		self.ui.setupUi(self)
 
+		self.ui.labelTip.setHidden(True)
+		self.ui.DisplayTip.setHidden(True)
+
 		self.ui.Cancel.clicked.connect(self.reject)
 		self.ui.OK.clicked.connect(self.accept)
 		self.ui.comboBoxFrom.currentTextChanged.connect(self.StatFig)
 		self.ui.radioButton.clicked.connect(self.StatFig)
+		self.ui.DisplayTip.clicked.connect(self.StatFig)
 
 	def accept(self):
 		field_from = self.ui.comboBoxFrom.currentText()
@@ -265,11 +270,13 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 			print('skip')
 			return
 
+		sender_widget = self.sender()
+
 		if self.ui.gridLayoutFig.count() > 0:
 			for i in range(self.ui.gridLayoutFig.count()):
 				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
 		else:
-			self.resize(800, 600)
+			self.resize(800 + random.randint(0,9), 600 + random.randint(0,9))
 		# numeric value
 		try:
 			if self.ui.radioButton.isChecked():
@@ -307,6 +314,8 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 				F.fig.subplots_adjust(bottom=0.1)
 
 				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
 			# character value
 			else:
 				field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
@@ -316,6 +325,18 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 				SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 				value_list = [row[0] for row in DataIn]
+
+				if sender_widget.objectName() == 'DisplayTip':
+					pass
+				else:
+					if len(value_list) > 30:
+						if self.ui.gridLayoutFig.count() > 0:
+							for i in range(self.ui.gridLayoutFig.count()):
+								self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+
+						self.ui.labelTip.setHidden(False)
+						self.ui.DisplayTip.setHidden(False)
+						return
 
 				# update figure
 				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
@@ -341,6 +362,8 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 				F.fig.subplots_adjust(bottom=my_adjust)
 
 				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
 		except:
 			print('error')
 			return
@@ -352,11 +375,14 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 		super(CopyDialog, self).__init__()
 		self.ui = Ui_CopyDialog()
 		self.ui.setupUi(self)
+		self.ui.labelTip.setHidden(True)
+		self.ui.DisplayTip.setHidden(True)
 
 		self.ui.Cancel.clicked.connect(self.reject)
 		self.ui.OK.clicked.connect(self.accept)
 		self.ui.comboBoxFrom.currentTextChanged.connect(self.StatFig)
 		self.ui.radioButton.clicked.connect(self.StatFig)
+		self.ui.DisplayTip.clicked.connect(self.StatFig)
 
 	def accept(self):
 		field_from = self.ui.comboBoxFrom.currentText()
@@ -375,6 +401,7 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 			self.close()
 
 	def StatFig(self):
+		sender_widget = self.sender()
 		# numeric value
 		if self.ui.radioButton.isChecked():
 			field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
@@ -414,8 +441,10 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 				for i in range(self.ui.gridLayoutFig.count()):
 					self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
 			else:
-				self.resize(1200, 700)
+				self.resize(1200 + random.randint(0,9), 700 + random.randint(0,9))
 			self.ui.gridLayoutFig.addWidget(F, 0, 1)
+			self.ui.labelTip.setHidden(True)
+			self.ui.DisplayTip.setHidden(True)
 		# character value
 		else:
 			field = re.sub(r'\(.+', '', self.ui.comboBoxFrom.currentText())
@@ -425,6 +454,18 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 			SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			value_list = [row[0] for row in DataIn]
+
+			if sender_widget.objectName() == 'DisplayTip':
+				pass
+			else:
+				if len(value_list) > 30:
+					if self.ui.gridLayoutFig.count() > 0:
+						for i in range(self.ui.gridLayoutFig.count()):
+							self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+
+					self.ui.labelTip.setHidden(False)
+					self.ui.DisplayTip.setHidden(False)
+					return
 
 			# update figure
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
@@ -453,8 +494,10 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 				for i in range(self.ui.gridLayoutFig.count()):
 					self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
 			else:
-				self.resize(1200, 700)
+				self.resize(1200 + random.randint(0,9), 700 + random.randint(0,9))
 			self.ui.gridLayoutFig.addWidget(F, 0, 1)
+			self.ui.labelTip.setHidden(True)
+			self.ui.DisplayTip.setHidden(True)
 
 class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 	BatchSignal = pyqtSignal(int, str, dict)
@@ -465,6 +508,8 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		self.ui.setupUi(self)
 		self.initial = 0
 		self.ui.LineEditCutoff.setHidden(True)
+		self.ui.labelTip.setHidden(True)
+		self.ui.DisplayTip.setHidden(True)
 		self.ui.LineEditCutoff.min = 0
 		self.ui.LineEditCutoff.max = 0
 		self.ui.gridLayout.num_widget = 0
@@ -476,6 +521,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		self.ui.comboBox.currentTextChanged.connect(self.StatFig)
 		self.ui.radioButton.clicked.connect(self.StatFig)
 		self.ui.LineEditCutoff.textChanged.connect(self.StatFig)
+		self.ui.DisplayTip.clicked.connect(self.StatFig)
 
 	def updateNum(self):
 		if self.ui.radioButton.isChecked():
@@ -504,6 +550,8 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			self.ui.LineEditCutoff.setHidden(True)
 
 	def StatFig(self):
+		sender_widget = self.sender()
+
 		if self.ui.gridLayoutFig.count() > 0:
 			for i in range(self.ui.gridLayoutFig.count()):
 				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
@@ -582,6 +630,9 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 				F.fig.subplots_adjust(bottom=0.1)
 
 				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
 			# character value
 			else:
 				self.ui.LineEditCutoff.setHidden(True)
@@ -598,13 +649,18 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 					value_list = [row[0] for row in DataIn]
 
-					if len(value_list) > 30:
-						question = 'Distinct values of this field seems too many (number =  ' + str(
-							len(value_list)) + ')\nAre you sure?'
-						buttons = 'YN'
-						answer = questionMessage(self, question, buttons)
-						if answer == 'No':
-							return
+					if sender_widget.objectName() == 'DisplayTip':
+						pass
+					else:
+						if len(value_list) > 30:
+							question = 'Distinct values of this field seems too many (number =  ' + str(
+								len(value_list)) + ')\nAre you sure?'
+							buttons = 'YN'
+							answer = questionMessage(self, question, buttons)
+							if answer == 'No':
+								self.ui.labelTip.setHidden(False)
+								self.ui.DisplayTip.setHidden(False)
+								return
 
 				self.load_data(value_list)
 
@@ -632,6 +688,9 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 				F.fig.subplots_adjust(bottom=my_adjust)
 
 				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
 		except:
 			return
 
@@ -1196,6 +1255,9 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui = Ui_AlterDialog()
 		self.ui.setupUi(self)
 
+		self.ui.labelTip.setHidden(True)
+		self.ui.DisplayTip.setHidden(True)
+
 		self.ui.pushButton.clicked.connect(self.reject)
 		self.ui.pushButtonSave.clicked.connect(self.saveRecord)
 		self.ui.lineEditNickName.textChanged.connect(self.valueChange)
@@ -1207,8 +1269,10 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 		self.ui.pushButtonSave.setEnabled(False)
 		self.ui.lineEditName.textChanged.connect(self.StatFig)
 		self.ui.radioButton.clicked.connect(self.StatFig)
+		self.ui.DisplayTip.clicked.connect(self.StatFig)
 
 	def StatFig(self):
+		sender_widget = self.sender()
 		if self.ui.gridLayoutFig.count() > 0:
 			for i in range(self.ui.gridLayoutFig.count()):
 				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
@@ -1249,6 +1313,8 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 				F.fig.subplots_adjust(bottom=0.1)
 
 				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
 			# character value
 			else:
 				field = re.sub(r'\(.+', '', self.ui.lineEditName.text())
@@ -1258,6 +1324,18 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 				SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 				value_list = [row[0] for row in DataIn]
+
+				if sender_widget.objectName() == 'DisplayTip':
+					pass
+				else:
+					if len(value_list) > 30:
+						if self.ui.gridLayoutFig.count() > 0:
+							for i in range(self.ui.gridLayoutFig.count()):
+								self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+
+						self.ui.labelTip.setHidden(False)
+						self.ui.DisplayTip.setHidden(False)
+						return
 
 				# update figure
 				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
@@ -1283,6 +1361,8 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 				F.fig.subplots_adjust(bottom=my_adjust)
 
 				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
 		except:
 			return
 
@@ -3891,6 +3971,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonNewickTree.clicked.connect(self.loadNewickTree)
 		self.ui.listWidgetAll.itemDoubleClicked.connect(self.addFieldsHeatmap)
 		self.ui.listWidgetSelected.itemDoubleClicked.connect(self.delFieldsHeatmap)
+		self.ui.pushButtonClear.clicked.connect(self.clearCheck)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -4870,6 +4951,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# connect sort indicator to slot function
 			self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
 			self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
+
+	def clearCheck(self):
+		self.ui.checkBoxAll1.setChecked(False)
+		self.ui.checkBoxAll.setChecked(False)
+
+		self.checkAll()
 
 	def checkAll(self):
 		global MoveNotChange
@@ -6894,19 +6981,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def table_to_tree_selection(self):
 		global from_table
+		try:
+			items = self.ui.SeqTable.selectedItems()
+			item = items[-1]
+			name = self.ui.SeqTable.item(self.ui.SeqTable.indexFromItem(item).row(), 1).text()
 
-		items = self.ui.SeqTable.selectedItems()
-		item = items[-1]
-		name = self.ui.SeqTable.item(self.ui.SeqTable.indexFromItem(item).row(), 1).text()
+			print(name)
 
-		print(name)
-
-		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
-		if len(found) > 0:
-			found = found[0]
-			from_table = True
-			self.ui.treeWidget.setCurrentItem(found)
-			from_table = False
+			found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+			if len(found) > 0:
+				found = found[0]
+				from_table = True
+				self.ui.treeWidget.setCurrentItem(found)
+				from_table = False
+		except:
+			return
 
 	def select_tree_by_name(self, name):
 		found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
