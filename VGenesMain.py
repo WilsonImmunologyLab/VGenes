@@ -10936,7 +10936,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global wasClicked
 		search = self.ui.txtFieldSearch.text()
 		field = self.ui.cboFindField.currentText()
-		fieldsearch = self.TransLateFieldtoReal(field, True)
+		fieldsearch = re.sub(r'\(.+', '', field)
 
 		#     if search != '':
 		#         SQLstatement = 'select * from vgenesdb WHERE ' + fieldsearch + ' LIKE ' + search + ' ORDER BY ' + fieldsearch + ', Project, Grouping, SubGroup, SeqName'
@@ -11169,9 +11169,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 		)
 
-
 		self.initializeTreeView(SQLFields)
 		self.ui.treeWidget.expandAll()
+		self.refreshDB()
 
 	@pyqtSlot()
 	def on_btnEditLock_clicked(self):
