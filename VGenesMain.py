@@ -4088,6 +4088,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.match_table_to_tree()
 
 	def initial_Clone(self):
+		self.ui.listWidgetClone.clear()
+		self.ui.listWidgetCloneMember.clear()
+		self.ui.comboBoxPieClone.clear()
+		self.ui.comboBoxCol1Clone.clear()
+		self.ui.comboBoxCol2Clone.clear()
+		self.ui.comboBoxBoxDataClone.clear()
+		self.ui.comboBoxBox1Clone.clear()
+		self.ui.comboBoxBox2Clone.clear()
+
+		self.ui.lineEditCloneName.clear()
+		self.ui.lineEditCloneType.clear()
+		self.ui.lineEditCloneNum.clear()
+		self.ui.lineEditCloneV.clear()
+		self.ui.lineEditCloneD.clear()
+		self.ui.lineEditCloneJ.clear()
+		self.ui.lineEditCloneCDR3len.clear()
+
 		# identify if clones exist
 		SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -4107,28 +4124,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 		list_unique.sort()
 		list_unique = ['Clone' + str(i) for i in list_unique]
 
-		self.ui.listWidgetClone.clear()
 		self.ui.listWidgetClone.addItems(list_unique)
 		msg = 'Total ' + str(len(list_unique)) + ' Clones identified'
 		self.ui.titleClone.setText(msg)
 
 		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
 			fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
-			self.ui.comboBoxPieClone.clear()
 			self.ui.comboBoxPieClone.addItems(fields_name)
-			self.ui.comboBoxCol1Clone.clear()
 			self.ui.comboBoxCol1Clone.addItems(fields_name)
-			self.ui.comboBoxCol2Clone.clear()
 			self.ui.comboBoxCol2Clone.addItems(fields_name)
-			self.ui.comboBoxBoxDataClone.clear()
 			self.ui.comboBoxBoxDataClone.addItems(fields_name)
-			self.ui.comboBoxBox1Clone.clear()
 			self.ui.comboBoxBox1Clone.addItems(fields_name)
-			self.ui.comboBoxBox2Clone.clear()
 			self.ui.comboBoxBox2Clone.addItems(fields_name)
+
+	@pyqtSlot()
+	def on_RefreshClone_clicked(self):
+		print('refresh clone')
+		self.initial_Clone()
 
 	def selectClone(self):
 		items = self.ui.listWidgetClone.selectedItems()
+		clone_id = ''
 		for item in items:
 			clone_id = item.text()
 		clone_id = re.sub('Clone','',clone_id)
@@ -13192,6 +13208,337 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.SeqButton('c')
 
 	@pyqtSlot()
+	def SeqButton_test(self, button):
+		global JustMoved
+		JustMoved = True
+		cursor = self.ui.txtDNASeq.textCursor()
+		AAcursor = self.ui.txtAASeq.textCursor()
+
+		format = QTextCharFormat()
+		format.setBackground(QBrush(QColor("white")))
+		format.setForeground(QBrush(QColor("black")))
+
+		cursor.setPosition(0)
+		cursor.setPosition(len(self.ui.txtDNASeq.toPlainText()), QTextCursor.KeepAnchor)
+		cursor.mergeCharFormat(format)
+		AAcursor.setPosition(0)
+		AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+		AAcursor.mergeCharFormat(format)
+		JustMoved = False
+
+		StartSel = 0
+		EndSel = 0
+		if button == 'v' or button == 'd' or button == 'j':
+			# clear check first
+			self.ui.btnFW_1.setChecked(False)
+			self.ui.btnCW_1.setChecked(False)
+			self.ui.btnFW_2.setChecked(False)
+			self.ui.btnCW_2.setChecked(False)
+			self.ui.btnFW_3.setChecked(False)
+			self.ui.btnCW_3.setChecked(False)
+			self.ui.btnFW_4.setChecked(False)
+			self.ui.btnVDJ.setChecked(False)
+			self.ui.btnC.setChecked(False)
+
+			if self.ui.btnV.isChecked() and self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
+				self.ui.btnVDJ.setChecked(True)
+				self.ui.btnFW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+				self.ui.btnFW_4.setChecked(True)
+
+				StartSel = int(data[67]) - 1
+				EndSel = int(data[74])
+			elif self.ui.btnV.isChecked() and self.ui.btnJ.isChecked():
+				self.ui.btnD.setChecked(True)
+				self.ui.btnVDJ.setChecked(True)
+				self.ui.btnFW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+				self.ui.btnFW_4.setChecked(True)
+
+				StartSel = int(data[67]) - 1
+				EndSel = int(data[74])
+			elif self.ui.btnV.isChecked() and self.ui.btnD.isChecked():
+				StartSel = int(data[67]) - 1
+				EndSel = int(data[70])
+			elif self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
+				StartSel = int(data[69]) - 1
+				EndSel = int(data[74])
+			else:  # then not a combination
+				if self.ui.btnV.isChecked():
+					StartSel = int(data[67]) - 1
+					EndSel = int(data[68])
+				if self.ui.btnD.isChecked():
+					StartSel = int(data[69]) - 1
+					EndSel = int(data[70])
+				if self.ui.btnJ.isChecked():
+					StartSel = int(data[73]) - 1
+					EndSel = int(data[74])
+				else:
+					cursor.setPosition(0)
+
+					JustMoved = True
+					self.ui.txtDNASeq.setTextCursor(cursor)
+					self.ui.txtAASeq.setTextCursor(AAcursor)
+					AAcursor.setPosition(0)
+					AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+					format = QTextCharFormat()
+					format.setBackground(QBrush(QColor("white")))
+					format.setForeground(QBrush(QColor("black")))
+					AAcursor.mergeCharFormat(format)
+					AAcursor.setPosition(0)
+					JustMoved = False
+		elif button == 'f1' or button == 'c1' or button == 'f2' or button == 'c2' or button == 'f3' or button == 'c3' or button == 'f4':
+			self.ui.btnV.setChecked(False)
+			self.ui.btnD.setChecked(False)
+			self.ui.btnJ.setChecked(False)
+			self.ui.btnC.setChecked(False)
+			self.ui.btnVDJ.setChecked(False)
+
+			if self.ui.btnFW_1.isChecked() and self.ui.btnFW_4.isChecked():
+				StartSel = int(data[23]) - 1
+				EndSel = int(data[74])
+				self.ui.btnV.setChecked(True)
+				self.ui.btnD.setChecked(True)
+				self.ui.btnJ.setChecked(True)
+				self.ui.btnVDJ.setChecked(True)
+
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+			# todo need fix this after cdr3 works
+			elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_3.isChecked():
+				StartSel = int(data[22]) - 1
+				EndSel = int(data[85])
+				self.ui.btnV.setChecked(True)
+				self.ui.btnD.setChecked(True)
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+			elif self.ui.btnFW_1.isChecked() and self.ui.btnFW_3.isChecked():
+				StartSel = int(data[22]) - 1
+				EndSel = int(data[51])
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+			elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_2.isChecked():
+				StartSel = int(data[22]) - 1
+				EndSel = int(data[44])
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+			elif self.ui.btnFW_1.isChecked() and self.ui.btnFW_2.isChecked():
+				StartSel = int(data[22]) - 1
+				EndSel = int(data[37])
+				self.ui.btnCW_1.setChecked(True)
+			elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_1.isChecked():
+				StartSel = int(data[22]) - 1
+				EndSel = int(data[30])
+			elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_4.isChecked():
+				StartSel = int(data[29]) - 1
+				EndSel = int(data[74])
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+			elif self.ui.btnCW_1.isChecked() and self.ui.btnCW_3.isChecked():
+				StartSel = int(data[29]) - 1
+				EndSel = int(data[85])
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+			elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_3.isChecked():
+				StartSel = int(data[29]) - 1
+				EndSel = int(data[51])
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+			elif self.ui.btnCW_1.isChecked() and self.ui.btnCW_2.isChecked():
+				StartSel = int(data[29]) - 1
+				EndSel = int(data[44])
+				self.ui.btnFW_2.setChecked(True)
+			elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_2.isChecked():
+				StartSel = int(data[29]) - 1
+				EndSel = int(data[37])
+			elif self.ui.btnFW_2.isChecked() and self.ui.btnFW_4.isChecked():
+				StartSel = int(data[36]) - 1
+				EndSel = int(data[74])
+
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+			elif self.ui.btnFW_2.isChecked() and self.ui.btnCW_3.isChecked():
+				StartSel = int(data[36]) - 1
+				EndSel = int(data[85])
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+			elif self.ui.btnFW_2.isChecked() and self.ui.btnFW_3.isChecked():
+				StartSel = int(data[36]) - 1
+				EndSel = int(data[51])
+				self.ui.btnCW_2.setChecked(True)
+			elif self.ui.btnFW_2.isChecked() and self.ui.btnCW_2.isChecked():
+				StartSel = int(data[36]) - 1
+				EndSel = int(data[44])
+			elif self.ui.btnCW_2.isChecked() and self.ui.btnFW_4.isChecked():
+				StartSel = int(data[43]) - 1
+				EndSel = int(data[74])
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+			elif self.ui.btnCW_2.isChecked() and self.ui.btnCW_3.isChecked():
+				StartSel = int(data[43]) - 1
+				EndSel = int(data[85])
+				self.ui.btnFW_3.setChecked(True)
+			elif self.ui.btnCW_2.isChecked() and self.ui.btnFW_3.isChecked():
+				StartSel = int(data[43]) - 1
+				EndSel = int(data[51])
+			elif self.ui.btnFW_3.isChecked() and self.ui.btnFW_4.isChecked():
+				StartSel = int(data[50]) - 1
+				EndSel = int(data[74])
+
+				self.ui.btnCW_3.setChecked(True)
+			elif self.ui.btnFW_3.isChecked() and self.ui.btnCW_3.isChecked():
+				StartSel = int(data[50]) - 1
+				EndSel = int(data[85])
+			elif self.ui.btnCW_3.isChecked() and self.ui.btnFW_4.isChecked():
+				StartSel = int(data[84]) - 1
+				EndSel = int(data[74])
+			else:
+				if self.ui.btnFW_1.isChecked():
+					StartSel = int(data[22]) - 1
+					EndSel = int(data[23])
+				if self.ui.btnCW_1.isChecked():
+					StartSel = int(data[29]) - 1
+					EndSel = int(data[30])
+				if self.ui.btnFW_2.isChecked():
+					StartSel = int(data[36]) - 1
+					EndSel = int(data[37])
+				if self.ui.btnCW_2.isChecked():
+					StartSel = int(data[43]) - 1
+					EndSel = int(data[44])
+				if self.ui.btnFW_3.isChecked():
+					StartSel = int(data[50]) - 1
+					EndSel = int(data[51])
+				if self.ui.btnCW_3.isChecked():
+					StartSel = int(data[84]) - 1
+					EndSel = int(data[85])
+				if self.ui.btnFW_4.isChecked():
+					StartSel = int(data[85]) - 1
+					EndSel = int(data[74])
+				else:
+					cursor.setPosition(0)
+					AAcursor.setPosition(0)
+
+					JustMoved = True
+					self.ui.txtDNASeq.setTextCursor(cursor)
+					self.ui.txtAASeq.setTextCursor(AAcursor)
+					AAcursor.setPosition(0)
+					AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+					format = QTextCharFormat()
+					format.setBackground(QBrush(QColor("white")))
+					format.setForeground(QBrush(QColor("black")))
+					AAcursor.mergeCharFormat(format)
+					AAcursor.setPosition(0)
+					JustMoved = False
+		elif button == 'c':
+			self.ui.btnFW_1.setChecked(False)
+			self.ui.btnCW_1.setChecked(False)
+			self.ui.btnFW_2.setChecked(False)
+			self.ui.btnCW_2.setChecked(False)
+			self.ui.btnFW_3.setChecked(False)
+			self.ui.btnCW_3.setChecked(False)
+			self.ui.btnFW_4.setChecked(False)
+			self.ui.btnV.setChecked(False)
+			self.ui.btnD.setChecked(False)
+			self.ui.btnJ.setChecked(False)
+			self.ui.btnVDJ.setChecked(False)
+			if int(data[1]) > int(data[74]):
+				StartSel = int(data[74]) + 1
+				EndSel = len(data[79])
+		elif button == 'vdj':
+			if self.ui.btnVDJ.isChecked():
+				self.ui.btnFW_1.setChecked(True)
+				self.ui.btnCW_1.setChecked(True)
+				self.ui.btnFW_2.setChecked(True)
+				self.ui.btnCW_2.setChecked(True)
+				self.ui.btnFW_3.setChecked(True)
+				self.ui.btnCW_3.setChecked(True)
+				self.ui.btnFW_4.setChecked(True)
+				self.ui.btnV.setChecked(True)
+				self.ui.btnD.setChecked(True)
+				self.ui.btnJ.setChecked(True)
+				self.ui.btnC.setChecked(False)
+				StartSel = int(data[67]) - 1
+				EndSel = int(data[74])
+			else:
+				self.ui.btnFW_1.setChecked(False)
+				self.ui.btnCW_1.setChecked(False)
+				self.ui.btnFW_2.setChecked(False)
+				self.ui.btnCW_2.setChecked(False)
+				self.ui.btnFW_3.setChecked(False)
+				self.ui.btnCW_3.setChecked(False)
+				self.ui.btnFW_4.setChecked(False)
+				self.ui.btnV.setChecked(False)
+				self.ui.btnD.setChecked(False)
+				self.ui.btnJ.setChecked(False)
+				self.ui.btnC.setChecked(False)
+				cursor.setPosition(0)
+				AAcursor.setPosition(0)
+				self.ui.txtDNASeq.setTextCursor(cursor)
+				self.ui.txtAASeq.setTextCursor(AAcursor)
+				AAcursor.setPosition(0)
+				AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+				format = QTextCharFormat()
+				format.setBackground(QBrush(QColor("white")))
+				format.setForeground(QBrush(QColor("black")))
+				AAcursor.mergeCharFormat(format)
+				AAcursor.setPosition(0)
+
+		JustMoved = True
+
+		cursor.setPosition(StartSel)
+		cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
+		format = QTextCharFormat()
+		format.setBackground(QBrush(QColor("white")))
+		format.setForeground(QBrush(QColor("red")))
+		cursor.mergeCharFormat(format)
+
+		AAStartSel = math.floor(StartSel / 3)
+		AAEndSel = math.floor(EndSel / 3)
+		print(str(StartSel) + ',' + str(EndSel) + ',' + str(AAStartSel) + ',' + str(AAEndSel))
+
+		AAcursor.setPosition(AAStartSel)
+		AAcursor.setPosition(AAEndSel, QTextCursor.KeepAnchor)
+		format = QTextCharFormat()
+		format.setBackground(QBrush(QColor("white")))
+		format.setForeground(QBrush(QColor("red")))
+		AAcursor.mergeCharFormat(format)
+		AAcursor.setPosition(0)
+
+		'''
+		self.ui.txtDNASeq.setTextCursor(cursor)
+		if self.ui.cboDecorate.currentText() == 'None':
+			self.ui.txtAASeq.setTextCursor(AAcursor)
+		else:
+			# if AAEndSel>0:
+			self.ui.txtAASeq.setTextCursor(AAcursor)
+			format = QTextCharFormat()
+			format.setBackground(QBrush(QColor("white")))
+			format.setForeground(QBrush(QColor("red")))
+			AAcursor.mergeCharFormat(format)
+			AAcursor.setPosition(0)
+			self.ui.txtAASeq.setTextCursor(AAcursor)
+		'''
+		JustMoved = False
+
+	@pyqtSlot()
 	def SeqButton(self, button):
 		global JustMoved
 		cursor = self.ui.txtDNASeq.textCursor()
@@ -13495,6 +13842,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtAASeq.setTextCursor(AAcursor)
 
 		JustMoved = False
+
+		# slightly resize window to display the selection, i don't know why the winodw can not display the changes automatically
+		size_w = self.size().width()
+		size_h = self.size().height()
+		self.resize(size_w + 1, size_h + 1)
 
 	@pyqtSlot()
 	def SeqButtonold(self, button):
