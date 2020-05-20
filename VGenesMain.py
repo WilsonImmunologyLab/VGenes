@@ -13846,7 +13846,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# slightly resize window to display the selection, i don't know why the winodw can not display the changes automatically
 		size_w = self.size().width()
 		size_h = self.size().height()
-		self.resize(size_w + 1, size_h + 1)
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
 
 	@pyqtSlot()
 	def SeqButtonold(self, button):
