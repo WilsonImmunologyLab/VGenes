@@ -6983,7 +6983,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		try:
 			Selected = Selected[-1]
 		except:
-			Selected = Selected[0]
+			return
 		name = Selected.text(0)
 
 		print(name)
@@ -12754,8 +12754,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if field3 == '': field1 = 'None'
 		'''
 
-		# fields = self.ui.cboTreeOp1.currentText()
-		# field1 = self.TransLateFieldtoReal(fields, True)
 		field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 		i = 0
 		for item in FieldList:
@@ -12763,8 +12761,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 				field1Value = data[i]
 			i += 1
 
-		# fields = self.ui.cboTreeOp2.currentText()
-		# field2 = self.TransLateFieldtoReal(fields, True)
 		field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 		i = 0
 		for item in FieldList:
@@ -12772,8 +12768,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 				field2Value = data[i]
 			i += 1
 
-		# fields = self.ui.cboTreeOp3.currentText()
-		# field3 = self.TransLateFieldtoReal(fields, True)
 		field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 		i = 0
 		for item in FieldList:
@@ -12819,6 +12813,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global DontFindTwice
 		DontFindTwice = True
 		self.findTreeItem(currentitemIs)
+		self.tree_to_table_selection()
 		# self.ui.treeWidget.
 		DontFindTwice = False
 
@@ -12995,9 +12990,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				#self.ui.cboTreeOp1.setCurrentText(data[75])
 				#self.ui.cboTreeOp2.setCurrentText(data[76])
 				#self.ui.cboTreeOp3.setCurrentText(data[77])
-				self.ui.cboTreeOp1.setCurrentText(FieldList[75] + '(' + RealNameList[75] + ')')
-				self.ui.cboTreeOp2.setCurrentText(FieldList[76] + '(' + RealNameList[76] + ')')
-				self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
+				#self.ui.cboTreeOp1.setCurrentText(FieldList[75] + '(' + RealNameList[75] + ')')
+				#self.ui.cboTreeOp2.setCurrentText(FieldList[76] + '(' + RealNameList[76] + ')')
+				#self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
 
 				self.ui.txtSubGroup.setText(data[77])
 				self.ui.txtSubGroup_2.setText(data[77])
