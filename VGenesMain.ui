@@ -7071,7 +7071,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>7</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -7536,6 +7536,9 @@ If the J-end is off the J gene end may need adjusted</string>
              <widget class="QCheckBox" name="checkBoxHideNull">
               <property name="text">
                <string>Hide all-null records</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
               </property>
              </widget>
             </item>

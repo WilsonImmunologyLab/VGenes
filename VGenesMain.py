@@ -3947,6 +3947,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.radioButtonOriginal.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog10.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog2.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonScale.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxHideNull.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonDownload.clicked.connect(self.downloadFig)
 		self.ui.radioButtonTreeMap.clicked.connect(self.GenerateFigure)
@@ -6382,8 +6383,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			xaxis_data = [Data[i][-1] for i in range(num_row)]
 
 			if self.ui.radioButtonScale.isChecked():
-				min_value = -2
-				max_value = 2
+				#min_value = -2
+				max_value = min_value * (-1)
 
 			if self.ui.radioButtonLog10.isChecked():
 				if min_value >= 0:

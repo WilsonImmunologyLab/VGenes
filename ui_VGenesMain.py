@@ -3017,6 +3017,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.addWidget(self.comboBoxSortField)
         self.gridLayout_54.addLayout(self.verticalLayout_5, 0, 3, 1, 1)
         self.checkBoxHideNull = QtWidgets.QCheckBox(self.tabHeat)
+        self.checkBoxHideNull.setChecked(True)
         self.checkBoxHideNull.setObjectName("checkBoxHideNull")
         self.gridLayout_54.addWidget(self.checkBoxHideNull, 1, 3, 1, 1)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
@@ -3784,7 +3785,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(1)
-        self.tabWidgetFig.setCurrentIndex(7)
+        self.tabWidgetFig.setCurrentIndex(0)
         self.tabWidgetTree.setCurrentIndex(2)
         self.tabWidgetClone.setCurrentIndex(0)
         self.cboTreeOp1.currentTextChanged['QString'].connect(self.btnUpdateTree.setFocus)
