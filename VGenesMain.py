@@ -22,6 +22,7 @@ from pyecharts.charts import *
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType
 from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_formatter, svg_formatter
+import statistics
 import itertools
 from itertools import chain, groupby, zip_longest
 import threading as thd
@@ -6296,7 +6297,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					not_null = False
 					for value in values:
 						try:
-							int(value)
+							float(value)
 							not_null = True
 							break
 						except:
@@ -6320,6 +6321,38 @@ class VGenesForm(QtWidgets.QMainWindow):
 				Msg = 'No record fetched!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
+
+			Data = []
+			# scale data (centralize)
+			if self.ui.radioButtonScale.isChecked():
+				for feature in range(num_col):
+					values = []
+					for i in range(num_row):
+						try:
+							value = float(DataIn[i][feature])
+							values.append(value)
+						except:
+							pass
+
+					mean = statistics.mean(values)
+					std = statistics.stdev(values)
+
+					for i in range(num_row):
+						try:
+							value = float(DataIn[i][feature])
+							value = (value - mean)/std
+						except:
+							value = DataIn[i][feature]
+
+						if feature == 0:
+							Data.append([value])
+						else:
+							Data[i].append(value)
+
+				for i in range(num_row):
+					Data[i].append(DataIn[i][-1])
+			else:
+				Data = DataIn
 			'''
 			try:
 				value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
@@ -6339,14 +6372,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for i in range(num_row):
 				for j in range(num_col):
 					try:
-						value.append([i, j, int(DataIn[i][j])])
-						if int(DataIn[i][j]) < min_value:
-							min_value = int(DataIn[i][j])
-						if int(DataIn[i][j]) > max_value:
-							max_value = int(DataIn[i][j])
+						value.append([i, j, float(Data[i][j])])
+						if float(Data[i][j]) < min_value:
+							min_value = float(Data[i][j])
+						if float(Data[i][j]) > max_value:
+							max_value = float(Data[i][j])
 					except:
 						value.append([i, j, 'null'])
-			xaxis_data = [DataIn[i][-1] for i in range(num_row)]
+			xaxis_data = [Data[i][-1] for i in range(num_row)]
+
+			if self.ui.radioButtonScale.isChecked():
+				min_value = -2
+				max_value = 2
 
 			if self.ui.radioButtonLog10.isChecked():
 				if min_value >= 0:
@@ -6356,7 +6393,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						except:
 							pass
 
-					min_value = numpy.log1p(min_value)/numpy.log(10)
+					min_value = numpy.log1p(min_value) / numpy.log(10)
 					max_value = numpy.log1p(max_value) / numpy.log(10)
 				else:
 					Msg = 'Negative values detected in your data! Log scale is not appliable!'
