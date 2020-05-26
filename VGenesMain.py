@@ -15409,7 +15409,16 @@ def IgBlastParserFast(FASTAFile, datalist):
 					this_data[77] = subgroup
 
 				this_data[78] = species
-				this_data[79] = record[10]
+				# sequence
+				vdj_seq = re.sub('-','',record[10])
+				seq_parts = record[1].split(vdj_seq)
+				try:
+					this_data[79] = record[10] + seq_parts[1]
+				except:
+					print('sequence potential error')
+					print(record[1])
+					print(record[10])
+					this_data[79] = record[10]
 				this_data[80] = record[11]
 
 				this_data[86] = "Specificity"
