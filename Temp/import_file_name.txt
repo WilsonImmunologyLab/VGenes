@@ -1,1 +1,1 @@
-/Users/leil/Documents/Projects/VGene/HA7-VDJ/outs/consensus.fasta
+/Users/leil/Documents/Projects/scRNAseq/COVID/VDJ/COVID_may28_2020_S609_VDJ/consensus.fasta

@@ -6567,19 +6567,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				return
 
-			# update the selection
-			self.clearTreeChecks()
-			NumFound = len(DataIn)
-			i = 0
-			for item in DataIn:
-				Seqname = item[0]
-				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-				i += 1
-				for record in found:
-					if i == NumFound - 1:
-						wasClicked = True
-					record.setCheckState(0, Qt.Checked)
+			# already checked some records?
+			checked_names = self.getTreeCheckedChild()
+			checked_names = checked_names[3]
+			num_checked = 0
+			if len(checked_names) == 0:
+				# update the selection
+				self.clearTreeChecks()
+				NumFound = len(DataIn)
+				i = 0
+				for item in DataIn:
+					Seqname = item[0]
+					found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+					i += 1
+					for record in found:
+						if i == NumFound - 1:
+							wasClicked = True
+						record.setCheckState(0, Qt.Checked)
+						num_checked += 1
+			else:
+				# update the selection
+				self.clearTreeChecks()
+				NumFound = len(DataIn)
+				i = 0
+				for item in DataIn:
+					Seqname = item[0]
+					if Seqname in checked_names:
+						found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+						i += 1
+						for record in found:
+							if i == NumFound - 1:
+								wasClicked = True
+							record.setCheckState(0, Qt.Checked)
+							num_checked += 1
 
+			NewLbl = str(num_checked) + ' records checked'
+			self.ui.label_Name.setText(NewLbl)
 			self.match_tree_to_table()
 
 	def downloadSVG(self, msg):
@@ -10909,9 +10932,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for item in value:
 			currentitemIs = item.text(0)
 
+		# already checked some records?
+		checked_names = self.getTreeCheckedChild()
+		checked_names = checked_names[3]
+
 		self.clearTreeChecks()
 		if LastSelected:
-
 			fieldsearch = LastSelected[0]
 		else:
 			answer = informationMessage(self,
@@ -10964,20 +10990,34 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"' # AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
 		foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-		NumFound = len(foundRecs)
-		i = 0
-		for item in foundRecs:
-			Seqname = item[0]
-			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-			i += 1
-			for record in found:
-				if i == NumFound - 1:
-					wasClicked = True
-				# global wasClicked
-				# wasClicked = True
-				record.setCheckState(0, Qt.Checked)
-		NewLbl = self.ui.label_Name.text()
-		NewLbl += ', ' + str(NumFound) + ' selected'
+		num_checked = 0
+		if len(checked_names) == 0:
+			NumFound = len(foundRecs)
+			i = 0
+			for item in foundRecs:
+				Seqname = item[0]
+				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+				i += 1
+				for record in found:
+					if i == NumFound - 1:
+						wasClicked = True
+					record.setCheckState(0, Qt.Checked)
+					num_checked += 1
+		else:
+			NumFound = len(foundRecs)
+			i = 0
+			for item in foundRecs:
+				Seqname = item[0]
+				if Seqname in checked_names:
+					found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+					i += 1
+					for record in found:
+						if i == NumFound - 1:
+							wasClicked = True
+						record.setCheckState(0, Qt.Checked)
+						num_checked += 1
+
+		NewLbl = str(num_checked) + ' records checked'
 		self.ui.label_Name.setText(NewLbl)
 
 		self.findTreeItem(currentitemIs)
