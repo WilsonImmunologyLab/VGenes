@@ -1,1 +1,3 @@
-/Users/leil/Documents/Projects/VGene/HA5-vdj/outs/consensus.fasta
+/Users/leil/Documents/Projects/VGene/VGenes/Temp/S346Cloning.fasta
+/Users/leil/Documents/Projects/VGene/VGenes/Temp/S319Cloning.fasta
+/Users/leil/Documents/Projects/VGene/VGenes/Temp/S266Cloning.fasta

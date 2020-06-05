@@ -1606,6 +1606,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.browseVDB.clicked.connect(self.browseVDB)
 		self.ui.browseIgBlast.clicked.connect(self.browseIgBlast)
 		self.ui.browseIMGT.clicked.connect(self.browseIMGT)
+		self.ui.browseSEQ.clicked.connect(self.browseSEQ)
 		self.ui.radioButtonChain.clicked.connect(self.ChainClicked)
 		self.ui.lineEditRep1.textChanged.connect(self.updateName)
 		self.ui.lineEditRep2.textChanged.connect(self.updateName)
@@ -1614,20 +1615,26 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.rdoFunction.clicked.connect(self.updateGroupSetting)
 		self.ui.checkBoxFileStruc.clicked.connect(self.updateGroupSetting)
 		self.ui.toolButtonIgFasta.clicked.connect(self.browseIgBlastFasta)
+		self.ui.listWidgetVDB.itemDoubleClicked.connect(self.removeSel)
+		self.ui.listWidgetCSV.itemDoubleClicked.connect(self.removeSel)
+		self.ui.listWidgetFasta.itemDoubleClicked.connect(self.removeSel)
+		self.ui.listWidgetSEQ.itemDoubleClicked.connect(self.removeSel)
 		#self.ui.radioButtonAllcontig.clicked.connect(self.update10x)
 		#self.ui.radioButtonConsensus.clicked.connect(self.update10x)
 		#self.ui.radioButtonFiltercontig.clicked.connect(self.update10x)
 
 		self.path10x = ''
-		self.pathFasta = ''
 		self.pathIMGT = ''
 		self.pathIgBlast = ''
-		self.pathCSV = ''
-		self.pathVDB = ''
-		self.pathSEQ =[]
 
 		global answer3
 		answer3 = 'No'
+
+	def removeSel(self):
+		sender = self.sender()
+		listRow = sender.currentRow()
+		if listRow > -1:
+			sender.takeItem(listRow)
 
 	def update10x(self, directory):
 		if isinstance(directory, str):
@@ -1909,7 +1916,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		else:
 			self.ui.listWidgetVDB.addItems(files)
-			self.pathVDB = files
 
 	def browse10x(self):
 		directory = QtWidgets.QFileDialog.getExistingDirectory(self, "getExistingDirectory", "～/Documents")
@@ -1921,12 +1927,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def browseFasta(self):
 		files, filetype = QtWidgets.QFileDialog.getOpenFileNames(self, "getOpenFileNames", "~/Documents",
-		                                                   "Fasta Files (*.fasta);Fasta Files (*.fas);Fasta Files (*.fa);All Files (*)")
+		                                                   "Fasta Files (*.fasta *.fas *.fa);;All Files (*)")
 		if len(files) == 0:
 			return
 		else:
 			self.ui.listWidgetFasta.addItems(files)
-			self.pathFasta = files
 			self.updateGroupSetting()
 
 	def browseSEQ(self):
@@ -1934,8 +1939,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if directory == None or directory == '':
 			return
 		else:
-			self.ui.listWidgetSEQ.addItems(directory)
-			self.pathSEQ.append(directory)
+			self.ui.listWidgetSEQ.addItem(directory)
 			self.updateGroupSetting()
 
 	def browseCSV(self):
@@ -1945,7 +1949,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			return
 		else:
 			self.ui.listWidgetCSV.addItems(files)
-			self.pathCSV = files
 
 	def browseIgBlast(self):
 		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
@@ -2304,8 +2307,12 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		global StopCheckProgress
 
 		# need to transfer species grouping to IgBlaster
-		if self.pathFasta == "":
+		if self.ui.listWidgetFasta.count() == 0:
 			return
+		else:
+			fasta_files = []
+			for index in range(self.ui.listWidgetFasta.count()):
+				fasta_files.append(self.ui.listWidgetFasta.item(index).text())
 		answer = ''
 		thetype = 'FASTA'
 		species = ''
@@ -2322,7 +2329,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		time_stamp = str(int(time.time() * 100)) + '.fasta'
 		seq_pathname = os.path.join(temp_folder,time_stamp)
 		fout = open(seq_pathname,'w')
-		fasta_files = self.pathFasta
+
 		for fasta_file in fasta_files:
 			file_name = fasta_file.split('/')[-1]
 			file_name = re.sub(r'\..+','',file_name)
@@ -2495,7 +2502,12 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		global RealNameList
 
 		self.calling = 3
-		files = self.pathCSV
+		if self.ui.listWidgetCSV.count() == 0:
+			return
+		else:
+			files = []
+			for index in range(self.ui.listWidgetCSV.count()):
+				files.append(self.ui.listWidgetCSV.item(index).text())
 
 		if os.path.isfile(DBFilename):
 			# collect information, alter the DB structure
@@ -2612,7 +2624,12 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		b = RealNameList
 
 		self.calling = 4
-		files = self.pathVDB
+		if self.ui.listWidgetVDB.count() == 0:
+			return
+		else:
+			files = []
+			for index in range(self.ui.listWidgetVDB.count()):
+				files.append(self.ui.listWidgetVDB.item(index).text())
 
 		if os.path.isfile(DBFilename):
 			# collect information, alter the DB structure
@@ -2627,6 +2644,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				cur_field_comment = [i[2] for i in DataIn]
 				cur_field_type = [i[3] for i in DataIn]
 
+				new_cols = []
 				new_cols = [i for i in cur_field if i not in FieldList]
 
 				if len(new_cols) > 0:
@@ -2656,14 +2674,17 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 							                    QMessageBox.Ok)
 							return
 
-						RealNameList.append(new_col)
+						RealNameList.append(new_col_name)
 						FieldCommentList.append(new_col_comment)
 						FieldTypeList.append('Customized')
-						FieldList.append(new_col_name)
+						FieldList.append(new_col)
 
 						Msg = Msg + new_col + ' from    ' + vdb_file + '\n'
 
-			QMessageBox.information(self, 'Information', Msg,QMessageBox.Ok, QMessageBox.Ok)
+			if Msg == 'We added new fileds from the follow VDBs:\n':
+				pass
+			else:
+				QMessageBox.information(self, 'Information', Msg,QMessageBox.Ok, QMessageBox.Ok)
 
 			# import data from VDBs
 			print('import data from VDBs')
@@ -2934,8 +2955,25 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		global StopCheckProgress
 
 		# need to transfer species grouping to IgBlaster
-		if self.pathSEQ == "":
+
+		if self.ui.listWidgetSEQ.count() == 0:
 			return
+		else:
+			fasta_files = []
+			for index in range(self.ui.listWidgetSEQ.count()):
+				path = self.ui.listWidgetSEQ.item(index).text()
+				cur_files = os.listdir(path)
+				cur_name = path.split('/')[-1]
+				cur_fasta = os.path.join(temp_folder, cur_name +'.fasta')
+				out_handle = open(cur_fasta, 'w')
+				for cur_file in cur_files:
+					if cur_file[-4:] == '.seq':
+						out_handle.write('>' + cur_file[:-4] + '\n')
+						f = open(os.path.join(path, cur_file), 'r')
+						seq = f.read()
+						f.close()
+						out_handle.write(seq + '\n')
+				fasta_files.append(cur_fasta)
 		answer = ''
 		thetype = 'FASTA'
 		species = ''
@@ -2952,7 +2990,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		time_stamp = str(int(time.time() * 100)) + '.fasta'
 		seq_pathname = os.path.join(temp_folder,time_stamp)
 		fout = open(seq_pathname,'w')
-		fasta_files = self.pathFasta
 		for fasta_file in fasta_files:
 			file_name = fasta_file.split('/')[-1]
 			file_name = re.sub(r'\..+','',file_name)
