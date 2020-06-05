@@ -439,7 +439,7 @@ class Ui_ImportDataDialog(object):
         self.browseIMGT.setText(_translate("ImportDataDialog", "Browse"))
         self.label_23.setText(_translate("ImportDataDialog", "Click to choose IMGT output file:(could be a zip file or folder)"))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_6), _translate("ImportDataDialog", "IMGT"))
-        self.label_24.setText(_translate("ImportDataDialog", "Click to choose your Fasta files:"))
+        self.label_24.setText(_translate("ImportDataDialog", "Click to choose folder path for your SEQ files:"))
         self.browseSEQ.setText(_translate("ImportDataDialog", "Browse"))
         self.label_22.setText(_translate("ImportDataDialog", "Sequences from the following files will be processed and imported:"))
         self.radioButtonFast3.setText(_translate("ImportDataDialog", "Fast mode"))
