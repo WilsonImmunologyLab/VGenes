@@ -6802,7 +6802,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		             '<input id="update" type="button" value="" style="display:none;"/>'
 		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
 
-		if self.ui.tabWidgetFig.currentIndex() in [0,1,2,6]:
+		if self.ui.tabWidgetFig.currentIndex() in [0,1,2,6,8]:
 			# insert click response function
 			echart_init_line = lines[13]
 			matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
@@ -6853,6 +6853,31 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.HTMLview.info = ['Scatter', re.sub(r'\(.+', '', self.ui.comboBoxScatterX.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxScatterY.currentText()) ,re.sub(r'\(.+', '', self.ui.comboBoxScatterGroup.currentText())]
 		elif self.ui.tabWidgetFig.currentIndex() == 7:
 			pass
+		elif self.ui.tabWidgetFig.currentIndex() == 8:
+			record = ['VDJ']
+			if self.ui.checkBoxLocus.isChecked():
+				if self.ui.radioButtonDJ.isChecked():
+					record.append('DLocus')
+					record.append('JLocus')
+				elif self.ui.radioButtonVD.isChecked():
+					record.append('VLocus')
+					record.append('DLocus')
+				else:
+					record.append('VLocus')
+					record.append('JLocus')
+			else:
+				if self.ui.radioButtonDJ.isChecked():
+					record.append('D1')
+					record.append('J1')
+				elif self.ui.radioButtonVD.isChecked():
+					record.append('V1')
+					record.append('D1')
+				else:
+					record.append('V1')
+					record.append('J1')
+			record.append(xaxis_data)
+			record.append(yaxis_data)
+			self.ui.HTMLview.info = record
 
 	def resizeHTML(self):
 		if self.ui.HTMLview.html == '':
@@ -6906,6 +6931,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 					where_statement = 'WHERE ' + fieldx + " = '" + messages[2] + "'" + \
 					                  ' AND ' + fieldy + " = '" + messages[3] + "'" + \
 					                  ' AND ' + field + " = '" + messages[1] + "'"
+				SQLStatement = 'SELECT SeqName FROM vgenesDB ' + where_statement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			elif info[0] == "VDJ":
+				print(messages)
+				fieldx = info[1]
+				fieldy = info[2]
+				
+				valuex = messages[0]
+				valuey = info[4][int(messages[3])]
+
+				where_statement = 'WHERE ' + fieldx + " = '" + valuex + "'" + \
+				                  ' AND ' + fieldy + " = '" + valuey + "'"
 				SQLStatement = 'SELECT SeqName FROM vgenesDB ' + where_statement
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			else:
