@@ -7,6 +7,7 @@ import re
 import shutil
 import math
 import numpy
+import pandas as pd
 
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
 from PyQt5 import QtWidgets
@@ -4207,6 +4208,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonDownload.clicked.connect(self.downloadFig)
 		self.ui.radioButtonTreeMap.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonTree.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonDJ.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonVJ.clicked.connect(self.GenerateFigure)
+		self.ui.radioButtonVD.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxLocus.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxGene.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonNT.clicked.connect(self.makeNTLogo)
 		self.ui.pushButtonAA.clicked.connect(self.makeAALogo)
 		self.ui.toolButtonIgphyml.clicked.connect(self.loadIgphyml)
@@ -6684,6 +6690,89 @@ class VGenesForm(QtWidgets.QMainWindow):
 					visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value),
 				)
 			)
+		# v(d)j heatmap
+		elif self.ui.tabWidgetFig.currentIndex() == 8:
+			# fetch data
+			if self.ui.checkBoxLocus.isChecked():
+				if self.ui.radioButtonDJ.isChecked():
+					SQLStatement = 'SELECT DLocus,JLocus FROM vgenesDB '
+				elif self.ui.radioButtonVD.isChecked():
+					SQLStatement = 'SELECT VLocus,DLocus FROM vgenesDB '
+				else:
+					SQLStatement = 'SELECT VLocus,JLocus FROM vgenesDB '
+			else:
+				if self.ui.radioButtonDJ.isChecked():
+					SQLStatement = 'SELECT D1,J1 FROM vgenesDB '
+				elif self.ui.radioButtonVD.isChecked():
+					SQLStatement = 'SELECT V1,D1 FROM vgenesDB '
+				else:
+					SQLStatement = 'SELECT V1,J1 FROM vgenesDB '
+
+			SQLStatement = SQLStatement + where_statement
+
+			try:
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			except:
+				Msg = 'SQL error! Current SQL statemernt is:\n' + SQLStatement
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			# stat
+			df = pd.DataFrame(DataIn,columns=['A','B'])
+			gp = df.groupby(by=['A', 'B'])
+			newdf = gp.size()
+			newdf = newdf.reset_index(name='times')
+			
+			# make data
+			xaxis_data = []
+			yaxis_data = []
+			my_dict = dict()
+
+			for index in range(len(newdf)):
+				cur_a = newdf['A'][index]
+				cur_b = newdf['B'][index]
+				cur_count = newdf['times'][index]
+				if cur_a not in xaxis_data:
+					xaxis_data.append(cur_a)
+				if cur_b not in yaxis_data:
+					yaxis_data.append(cur_b)
+				
+				index_a = xaxis_data.index(cur_a)
+				index_b = yaxis_data.index(cur_b)
+				name = str(index_a) + '|' + str(index_b)
+				my_dict[name] = cur_count
+
+			data = []
+			min_value = 0
+			max_value = 0
+			for i in range(len(xaxis_data)):
+				for j in range(len(yaxis_data)):
+					name = str(i) + '|' + str(j)
+					if name in my_dict.keys():
+						num = int(my_dict[name].astype(numpy.int32))
+						unit = [i, j, num]
+						if num > max_value:
+							max_value = num
+					else:
+						unit = [i, j, 0]
+					data.append(unit)
+
+			# draw figure
+			my_pyecharts = (
+				HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+				.add_xaxis(xaxis_data)
+				.add_yaxis(
+					"My data selection",
+					yaxis_data,
+					data,
+					label_opts=opts.LabelOpts(is_show=False, position="inside"),
+				)
+				.set_global_opts(
+					title_opts=opts.TitleOpts(title="HeatMap"),
+					visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc','#006699']),
+				)
+			)
+
 		# load figure
 		html_path = os.path.join(temp_folder,'figure.html')
 		my_pyecharts.render(path=html_path)
