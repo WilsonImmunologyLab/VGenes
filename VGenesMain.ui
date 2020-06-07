@@ -8794,6 +8794,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <string>Annotate</string>
     </property>
     <addaction name="actionImport_Annotate"/>
+    <addaction name="actionModify_Barcodes"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
@@ -9405,6 +9406,11 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="toolTip">
     <string>Import Annotation from CSV</string>
+   </property>
+  </action>
+  <action name="actionModify_Barcodes">
+   <property name="text">
+    <string>Modify Barcodes</string>
    </property>
   </action>
  </widget>

@@ -3733,6 +3733,8 @@ class Ui_MainWindow(object):
         self.actionImport_Annotate = QtWidgets.QAction(MainWindow)
         self.actionImport_Annotate.setIcon(icon1)
         self.actionImport_Annotate.setObjectName("actionImport_Annotate")
+        self.actionModify_Barcodes = QtWidgets.QAction(MainWindow)
+        self.actionModify_Barcodes.setObjectName("actionModify_Barcodes")
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.action_Open)
         self.menuFile.addAction(self.action_Save)
@@ -3769,6 +3771,7 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionIncrease_font_size)
         self.menuView.addAction(self.actionDecrease_font_size)
         self.menuAnnotate.addAction(self.actionImport_Annotate)
+        self.menuAnnotate.addAction(self.actionModify_Barcodes)
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuEdit.menuAction())
         self.menubar.addAction(self.menuSequences.menuAction())
@@ -4275,4 +4278,5 @@ class Ui_MainWindow(object):
         self.actionclearTrash.setText(_translate("MainWindow", "clearTrash"))
         self.actionImport_Annotate.setText(_translate("MainWindow", "Import Annotate"))
         self.actionImport_Annotate.setToolTip(_translate("MainWindow", "Import Annotation from CSV"))
+        self.actionModify_Barcodes.setText(_translate("MainWindow", "Modify Barcodes"))
 import VgenesResources_rc

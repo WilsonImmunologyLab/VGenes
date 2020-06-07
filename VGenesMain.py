@@ -67,6 +67,7 @@ from ui_annotatedialog import Ui_AnnoDialog
 from ui_batch_dialog import Ui_BatchDialog
 from ui_copydialog import Ui_CopyDialog
 from ui_newfielddialog import Ui_NewFieldDialog
+from ui_barcode_dialog import Ui_BarcodeDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -233,6 +234,104 @@ class MyFigure(FigureCanvas):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super(MyFigure,self).__init__(self.fig)
         self.axes = self.fig.add_subplot(111)
+
+class BarcodeDialog(QtWidgets.QDialog):
+	def __init__(self):
+		super(BarcodeDialog, self).__init__()
+		self.ui = Ui_BarcodeDialog()
+		self.ui.setupUi(self)
+
+		self.ui.radioButton.clicked.connect(self.enableFunction)
+		self.ui.pushButtonConfirm.clicked.connect(self.accept)
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+	def enableFunction(self):
+		if self.ui.radioButton.isChecked():
+			self.ui.label_8.setEnabled(True)
+			self.ui.lineEditSplit.setEnabled(True)
+			self.ui.label_9.setEnabled(True)
+			self.ui.spinBox.setEnabled(True)
+			self.ui.label_10.setEnabled(True)
+		else:
+			self.ui.label_8.setEnabled(False)
+			self.ui.lineEditSplit.setEnabled(False)
+			self.ui.label_9.setEnabled(False)
+			self.ui.spinBox.setEnabled(False)
+			self.ui.label_10.setEnabled(False)
+
+	def load_data(self, data_list):
+		self.ui.comboBoxBarcode.clear()
+		self.ui.comboBoxSample.clear()
+		self.ui.comboBoxBarcode.addItems(data_list)
+		self.ui.comboBoxSample.addItems(data_list)
+
+	def accept(self):
+		barcode_field_name = self.ui.comboBoxBarcode.currentText()
+		if barcode_field_name == '':
+			QMessageBox.warning(self, 'Warning', 'Please select barcode field!',
+			                    QMessageBox.Ok, QMessageBox.Ok)
+			return
+		else:
+			barcode_field_name = re.sub(r'\(.+', '', barcode_field_name)
+		
+		del_str = self.ui.lineEditDel.text()
+		rep_str = self.ui.lineEditRep.text()
+
+		sample_field_name = self.ui.comboBoxSample.currentText()
+		if sample_field_name == '':
+			if del_str != '':
+				SQLStatement = 'SELECT ID,' + barcode_field_name + ' FROM vgenesDB'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				for record in DataIn:
+					id = record[0]
+					barcode = record[1]
+					barcode = re.sub(del_str, rep_str, barcode)
+					if barcode != record[0]:
+						SQLStatement = 'UPDATE vgenesDB SET `' + barcode_field_name + '`="' + barcode + '" WHERE `ID` = ' + str(id)
+						VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+			else:
+				QMessageBox.warning(self, 'Warning', 'you did not do any change!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+				return
+		else:
+			sample_field_name = re.sub(r'\(.+', '', sample_field_name)
+			if self.ui.radioButton.isChecked():
+				split_text = self.ui.lineEditSplit.text()
+				split_index = int(self.ui.spinBox.text()) - 1
+
+			SQLStatement = 'SELECT ID,' + barcode_field_name + ',' + sample_field_name + ' FROM vgenesDB'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			for record in DataIn:
+				id = record[0]
+				barcode = record[1]
+				sample = record[2]
+				if del_str != '':
+					barcode = re.sub(del_str, rep_str, barcode)
+
+				if self.ui.radioButton.isChecked():
+					add_str = sample.split(split_text)[split_index]
+				else:
+					add_str = sample
+
+				if self.ui.comboBoxPosition.currentText() == 'Front':
+					barcode = add_str + '_' + barcode
+				else:
+					barcode = barcode + '_' + add_str
+
+				if barcode != record[0]:
+					SQLStatement = 'UPDATE vgenesDB SET `' + barcode_field_name + '`="' + barcode + '" WHERE `ID` = ' + str(
+						id)
+					VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+		QMessageBox.information(self, 'Information', 'Update barcodes succeffully!',
+		                    QMessageBox.Ok, QMessageBox.Ok)
+		Vgenes.refreshDB()
+		self.hide()
+
+	def reject(self):
+		self.hide()
+
+
 
 class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 	NewFieldSignal = pyqtSignal(str, str)
@@ -4591,6 +4690,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
 		else:
 			self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+	@pyqtSlot()
+	def on_actionModify_Barcodes_triggered(self):
+		self.barcodeDislog = BarcodeDialog()
+		field_list = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.barcodeDislog.load_data(field_list)
+		self.barcodeDislog.show()
 
 	@pyqtSlot()
 	def on_actionAlignmentHTML_triggered(self):
