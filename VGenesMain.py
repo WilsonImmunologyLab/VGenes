@@ -4375,7 +4375,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.HeatmapList = []
 
 	def disablePNG(self):
-		if self.ui.tabWidgetFig.currentIndex() in [0, 2, 6, 7, 8]:
+		if self.ui.tabWidgetFig.currentIndex() in [0, 1, 2, 6, 7, 8]:
 			self.ui.radioButtonPNG.setChecked(False)
 			self.ui.radioButtonPNG.setEnabled(True)
 		else:
@@ -5933,7 +5933,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 	def setupPNG(self):
-		if self.ui.tabWidgetFig.currentIndex() in [0,2,6,7,8]:
+		if self.ui.tabWidgetFig.currentIndex() in [0,1, 2,6,7,8]:
 			pass
 		else:
 			QMessageBox.warning(self, 'Warning', 'This figure type does not have matplotlib version!',
@@ -6076,7 +6076,77 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.radioButtonPNG.isChecked():
 				PNG = True
 				if multi_factor == True:
-					pass
+					if self.ui.checkBoxStack.isChecked():
+						stack = "stack1"
+					else:
+						stack = None
+
+					label_data = []
+					for element in DataIn:
+						label_data.append(element[0])
+
+					result = Counter(label_data)
+					labels = list(result.keys())
+					values = list(result.values())
+
+					data = {}
+					for element in DataIn:
+						if data.__contains__(element[1]):
+							data[element[1]] = data[element[1]] + [element[0]]
+						else:
+							data[element[1]] = [element[0]]
+
+					dic_keys = list(data.keys())
+
+					# for each sub group
+					font_size = 80 / len(dic_keys)
+					if font_size > 8:
+						font_size = 8
+					elif font_size < 4:
+						font_size = 4
+					else:
+						font_size = int(font_size)
+
+					col_num = int(len(labels) / 15)
+					if col_num == 0:
+						col_num = 1
+
+					lab_size = 30/len(labels)
+					if lab_size > 8:
+						lab_size = 8
+					elif lab_size < 4:
+						lab_size = 4
+					else:
+						lab_size = int(lab_size)
+
+					self.ui.figure.ax.remove()
+					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+					x = numpy.arange(len(labels))
+					if stack == None:
+						width = 0.9 / len(dic_keys)
+						i = 0
+						for sub_label in dic_keys:
+							sub_data = []
+							for label in labels:
+								sub_data.append(data[sub_label].count(label))
+							self.ui.figure.ax.bar(x - width*(len(dic_keys)-1)/2 + i*width, sub_data, width, label=sub_label)
+							i += 1
+					else:
+						width = 0.8
+						bottom_list = [0] * len(labels)
+						for sub_label in dic_keys:
+							sub_data = []
+							for label in labels:
+								sub_data.append(data[sub_label].count(label))
+							self.ui.figure.ax.bar(x , sub_data, width, bottom=bottom_list, label=sub_label)
+							for i in range(len(sub_data)):
+								bottom_list[i] = bottom_list[i] + sub_data[i]
+					self.ui.figure.ax.legend(prop={'size': font_size}, ncol = col_num)
+					self.ui.figure.ax.set_xticks(x)
+					self.ui.figure.ax.set_xticklabels(labels)
+					self.ui.figure.ax.tick_params(labelsize=lab_size)
+					self.ui.figure.ax.set_ylabel('Count')
+					self.ui.F.draw()
 				else:
 					data = []
 					for element in DataIn:
