@@ -4,6 +4,7 @@ import sys
 import sqlite3 as db
 import time
 import re
+import sip
 import shutil
 import math
 import numpy
@@ -31,6 +32,7 @@ import seaborn as sns
 import matplotlib
 import random
 matplotlib.use("Qt5Agg")
+import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 
@@ -330,8 +332,6 @@ class BarcodeDialog(QtWidgets.QDialog):
 
 	def reject(self):
 		self.hide()
-
-
 
 class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
 	NewFieldSignal = pyqtSignal(str, str)
@@ -4334,6 +4334,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.listWidgetAll.itemDoubleClicked.connect(self.addFieldsHeatmap)
 		self.ui.listWidgetSelected.itemDoubleClicked.connect(self.delFieldsHeatmap)
 		self.ui.pushButtonClear.clicked.connect(self.clearCheck)
+		self.ui.radioButtonPNG.clicked.connect(self.setupPNG)
+		self.ui.tabWidgetFig.currentChanged['int'].connect(self.disablePNG)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -4354,8 +4356,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.AlterWindow.ui.pushButtonSave.setEnabled(False)
 
 		self.ui.HTMLview = ResizeWidget(self)
-		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 2, 0, 10, 0)
+		self.ui.gridLayoutStat.addWidget(self.ui.HTMLview, 0, 0)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+
+		#self.ui.F = MyFigure(width=3, height=3, dpi=160)
+		self.ui.figure = plt.figure()
+		self.ui.F = FigureCanvas(self.ui.figure)
+		self.ui.gridLayoutStat1.addWidget(self.ui.F, 0, 1)
+		self.ui.F.setVisible(False)
+		self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
 
 		self.ui.HTMLviewClone = ResizeWidget(self)
 		self.ui.gridLayoutClone.addWidget(self.ui.HTMLviewClone)
@@ -4364,6 +4373,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 
 		self.HeatmapList = []
+
+	def disablePNG(self):
+		if self.ui.tabWidgetFig.currentIndex() in [0, 2, 6, 7, 8]:
+			self.ui.radioButtonPNG.setChecked(False)
+			self.ui.radioButtonPNG.setEnabled(True)
+		else:
+			self.ui.radioButtonPNG.setChecked(False)
+			self.ui.radioButtonPNG.setEnabled(False)
+
+		self.ui.F.setVisible(False)
+		self.ui.HTMLview.setVisible(True)
+		self.ui.checkBoxUpdateSelection.setEnabled(True)
+		self.ui.checkBoxFigLegend.setEnabled(True)
+		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
 	@pyqtSlot()
 	def on_actionSave_As_triggered(self):
@@ -5909,9 +5932,38 @@ class VGenesForm(QtWidgets.QMainWindow):
 		except:
 			return
 
+	def setupPNG(self):
+		if self.ui.tabWidgetFig.currentIndex() in [0,2,6,7,8]:
+			pass
+		else:
+			QMessageBox.warning(self, 'Warning', 'This figure type does not have matplotlib version!',
+			                    QMessageBox.Ok, QMessageBox.Ok)
+			self.ui.radioButtonPNG.setChecked(False)
+			return
+
+		sender = self.sender()
+		if sender.isChecked():
+			if self.ui.tabWidgetFig.currentIndex() == 2:
+				self.ui.comboBoxBox2.setEnabled(False)
+			self.ui.F.setVisible(True)
+			self.ui.HTMLview.setVisible(False)
+			self.ui.checkBoxUpdateSelection.setEnabled(False)
+			self.ui.checkBoxFigLegend.setEnabled(False)
+			self.ui.HTMLview.resizeSignal.disconnect()
+			self.GenerateFigure()
+		else:
+			if self.ui.tabWidgetFig.currentIndex() == 2:
+				self.ui.comboBoxBox2.setEnabled(True)
+			self.ui.F.setVisible(False)
+			self.ui.HTMLview.setVisible(True)
+			self.ui.checkBoxUpdateSelection.setEnabled(True)
+			self.ui.checkBoxFigLegend.setEnabled(True)
+			self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+
 	def GenerateFigure(self):
 		global DBFilename
 		#global data
+		print('GenerateFigure called!')
 
 		# select data or not
 		if self.ui.checkBoxSelection.isChecked():
@@ -5927,6 +5979,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				where_statement = where_statement + "('" + selected + "')"
 		else:
 			where_statement = 'WHERE 1'
+
+		PNG = False
 
 		# pie chart
 		if self.ui.tabWidgetFig.currentIndex() == 0:
@@ -5944,24 +5998,55 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
-			data = []
-			for element in DataIn:
-				data.append(element[0])
-			result = Counter(data)
-			labels = result.keys()
-			values = result.values()
+			if self.ui.radioButtonPNG.isChecked():
+				PNG = True
 
-			my_pyecharts = (
-				Pie(init_opts=opts.InitOpts(width= str(self.ui.HTMLview.w) + "px", height= str(self.ui.HTMLview.h) + "px", renderer='svg'))
-				.add('', [list(z) for z in zip(labels, values)], radius=["40%", "75%"])
-				.set_global_opts(
-					title_opts=opts.TitleOpts(title=""),
-					legend_opts=opts.LegendOpts(
-						is_show = self.ui.checkBoxFigLegend.isChecked()
-					),
-				)
-				.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c} ({d}%)"))
-			)   #
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+				result = Counter(data)
+				labels = result.keys()
+				values = result.values()
+				colors = sns.color_palette("hls", len(values))
+
+				font_size = 30/len(labels)
+				if font_size > 8:
+					font_size = 8
+				elif font_size < 4:
+					font_size = 4
+				else:
+					font_size = int(font_size)
+
+				col_num = int(len(labels)/25)
+				if col_num == 0:
+					col_num = 1
+
+				self.ui.figure.ax.remove()
+				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
+				self.ui.figure.ax.pie(values, colors=colors, radius=1.0, pctdistance=0.8, autopct='%1.1f%%', startangle=90)
+				self.ui.figure.ax.legend(labels,loc="center left",bbox_to_anchor=(1, 0, 0.5, 1),prop={'size': font_size}, ncol = col_num)
+				x = [1, 0, 0, 0]
+				self.ui.figure.ax.pie(x, colors='w', radius=0.5)
+				self.ui.F.draw()
+			else:
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+				result = Counter(data)
+				labels = result.keys()
+				values = result.values()
+	
+				my_pyecharts = (
+					Pie(init_opts=opts.InitOpts(width= str(self.ui.HTMLview.w) + "px", height= str(self.ui.HTMLview.h) + "px", renderer='svg'))
+					.add('', [list(z) for z in zip(labels, values)], radius=["40%", "75%"])
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title=""),
+						legend_opts=opts.LegendOpts(
+							is_show = self.ui.checkBoxFigLegend.isChecked()
+						),
+					)
+					.set_series_opts(label_opts=opts.LabelOpts(formatter=" {b}: {c} ({d}%)"))
+				)   #
 		# Bar chart
 		elif self.ui.tabWidgetFig.currentIndex() == 1:
 			# get data
@@ -5987,78 +6072,112 @@ class VGenesForm(QtWidgets.QMainWindow):
 				multi_factor = True
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			if multi_factor == True:
-				if self.ui.checkBoxStack.isChecked():
-					stack = "stack1"
+
+			if self.ui.radioButtonPNG.isChecked():
+				PNG = True
+				if multi_factor == True:
+					pass
 				else:
-					stack = None
+					data = []
+					for element in DataIn:
+						data.append(element[0])
 
-				label_data = []
-				for element in DataIn:
-					label_data.append(element[0])
+					result = Counter(data)
+					labels = list(result.keys())
+					values = list(result.values())
+					colors = sns.color_palette("hls", len(values))
 
-				result = Counter(label_data)
-				labels = list(result.keys())
-				values = list(result.values())
-
-				data = {}
-				for element in DataIn:
-					if data.__contains__(element[1]):
-						data[element[1]] = data[element[1]] + [element[0]]
+					font_size = 30/len(labels)
+					if font_size > 8:
+						font_size = 8
+					elif font_size < 4:
+						font_size = 4
 					else:
-						data[element[1]] = [element[0]]
+						font_size = int(font_size)
 
-				dic_keys = list(data.keys())
+					col_num = int(len(labels)/25)
+					if col_num == 0:
+						col_num = 1
 
-				my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
-					.add_xaxis(labels)\
-					.set_global_opts(
-						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
-						xaxis_opts=opts.AxisOpts(
-							name=field1,
-							name_location='center',
-							name_gap=30,
-						),
-						yaxis_opts=opts.AxisOpts(
-							name='Count',
-							name_location='center',
-							name_gap=30,
-						),
-					)
-
-				for group in dic_keys:
-					cur_data = data[group]
-					group_data = []
-					for ele in labels:
-						group_data.append(cur_data.count(ele))
-					my_bar.add_yaxis(group, group_data,stack=stack)
-				my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
-
-				my_pyecharts = (
-					my_bar
-				)
+					self.ui.figure.ax.remove()
+					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
+					self.ui.figure.ax.bar(labels, values, color=colors)
+					self.ui.figure.ax.set_xticklabels(labels, rotation=-90)
+					self.ui.figure.ax.tick_params(labelsize=5)
+					self.ui.F.draw()
 			else:
-				data = []
-				for element in DataIn:
-					data.append(element[0])
+				if multi_factor == True:
+					if self.ui.checkBoxStack.isChecked():
+						stack = "stack1"
+					else:
+						stack = None
 
-				result = Counter(data)
-				labels = list(result.keys())
-				values = list(result.values())
+					label_data = []
+					for element in DataIn:
+						label_data.append(element[0])
 
-				my_pyecharts = (
-					Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-						.add_xaxis(labels)
-						.add_yaxis(field1, values)
+					result = Counter(label_data)
+					labels = list(result.keys())
+					values = list(result.values())
+
+					data = {}
+					for element in DataIn:
+						if data.__contains__(element[1]):
+							data[element[1]] = data[element[1]] + [element[0]]
+						else:
+							data[element[1]] = [element[0]]
+
+					dic_keys = list(data.keys())
+
+					my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+						.add_xaxis(labels)\
 						.set_global_opts(
-						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(
-							is_show=self.ui.checkBoxFigLegend.isChecked()
-						),
+							title_opts=opts.TitleOpts(title=""),
+							legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+							xaxis_opts=opts.AxisOpts(
+								name=field1,
+								name_location='center',
+								name_gap=30,
+							),
+							yaxis_opts=opts.AxisOpts(
+								name='Count',
+								name_location='center',
+								name_gap=30,
+							),
+						)
+
+					for group in dic_keys:
+						cur_data = data[group]
+						group_data = []
+						for ele in labels:
+							group_data.append(cur_data.count(ele))
+						my_bar.add_yaxis(group, group_data,stack=stack)
+					my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+
+					my_pyecharts = (
+						my_bar
 					)
-					.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
-				)
+				else:
+					data = []
+					for element in DataIn:
+						data.append(element[0])
+
+					result = Counter(data)
+					labels = list(result.keys())
+					values = list(result.values())
+
+					my_pyecharts = (
+						Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+							.add_xaxis(labels)
+							.add_yaxis(field1, values)
+							.set_global_opts(
+							title_opts=opts.TitleOpts(title=""),
+							legend_opts=opts.LegendOpts(
+								is_show=self.ui.checkBoxFigLegend.isChecked()
+							),
+						)
+						.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+					)
 		# Box plot
 		elif self.ui.tabWidgetFig.currentIndex() == 2:
 			# get data
@@ -6086,135 +6205,182 @@ class VGenesForm(QtWidgets.QMainWindow):
 				multi_factor = True
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			box_data = [i[0] for i in DataIn]
-			try:
-				box_data = list(map(float, box_data))
-			except:
-				QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
-				                    QMessageBox.Ok, QMessageBox.Ok)
-				return
-
-			if min(box_data) >= 0:
-				null_data = [0,0,0,0,0]
-			else:
-				null_data = [min(box_data), min(box_data), min(box_data), min(box_data), min(box_data)]
-
-			if multi_factor == True:
-				label_data = []
-				g2_label = []
+			if self.ui.radioButtonPNG.isChecked():
+				PNG = True
+				data_value = []
+				data_group = []
 				for element in DataIn:
-					label_data.append(element[1])
-					g2_label.append(element[2])
+					try:
+						cur_val = float(element[0])
+						data_value.append(cur_val)
+						data_group.append(element[1])
+					except:
+						pass
 
-				result = Counter(label_data)
-				labels = list(result.keys())
+				if len(data_value) == 0:
+					QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
+					                    QMessageBox.Ok, QMessageBox.Ok)
+					return
 
-				g2_dict = {}
-				i = 0
-				for ele in g2_label:
-					if g2_dict.__contains__(ele):
-						g2_dict[ele] = g2_dict[ele] + [i]
-					else:
-						g2_dict[ele] = [i]
-					i += 1
-				g2_dict_keys = list(g2_dict.keys())
+				df = pd.DataFrame({'data': data_value, 'group': data_group})
+				group = 'group'
+				column = 'data'
+				grouped = df.groupby(group)
 
-				my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
-					.add_xaxis(labels)\
-					.set_global_opts(
-						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
-						xaxis_opts=opts.AxisOpts(
-							name=field1,
-							name_location='center',
-							name_gap=30,
-						),
-						yaxis_opts=opts.AxisOpts(
-							name='Count',
-							name_location='center',
-							name_gap=30,
-						),
-						#toolbox_opts = opts.ToolboxOpts()
-					)
+				names, vals, xs = [], [], []
+				for i, (name, subdf) in enumerate(grouped):
+					names.append(name)
+					vals.append(subdf[column].tolist())
+					xs.append(numpy.random.normal(i + 1, 0.04, subdf.shape[0]))
+				ngroup = len(vals)
+				clevels = numpy.linspace(0., 1., ngroup)
 
-				# for each group in field 2
-				for group in g2_dict_keys:
-					cur_box_data = []
-					cur_label_data = []
-					for i in g2_dict[group]:
-						cur_box_data.append(box_data[i])
-						cur_label_data.append(label_data[i])
+				font_size = 80 / len(names)
+				if font_size > 8:
+					font_size = 8
+				elif font_size < 4:
+					font_size = 4
+				else:
+					font_size = int(font_size)
 
-					sub_dict = {}
+				self.ui.figure.ax.remove()
+				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
+				self.ui.figure.ax.boxplot(vals, labels=names, showfliers=False)
+				for x, val, clevel in zip(xs, vals, clevels):
+					self.ui.figure.ax.scatter(x, val, c=matplotlib.cm.prism(clevel), alpha=0.4)
+				#self.ui.figure.ax.set_xticklabels(labels, rotation=-90)
+				self.ui.figure.ax.tick_params(labelsize=font_size)
+				self.ui.F.draw()
+			else:
+				box_data = [i[0] for i in DataIn]
+				try:
+					box_data = list(map(float, box_data))
+				except:
+					QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
+					                    QMessageBox.Ok, QMessageBox.Ok)
+					return
+
+				if min(box_data) >= 0:
+					null_data = [0,0,0,0,0]
+				else:
+					null_data = [min(box_data), min(box_data), min(box_data), min(box_data), min(box_data)]
+
+				if multi_factor == True:
+					label_data = []
+					g2_label = []
+					for element in DataIn:
+						label_data.append(element[1])
+						g2_label.append(element[2])
+
+					result = Counter(label_data)
+					labels = list(result.keys())
+
+					g2_dict = {}
 					i = 0
-					for ele in cur_label_data:
-						if sub_dict.__contains__(ele):
-							sub_dict[ele] = sub_dict[ele] + [i]
+					for ele in g2_label:
+						if g2_dict.__contains__(ele):
+							g2_dict[ele] = g2_dict[ele] + [i]
 						else:
-							sub_dict[ele] = [i]
+							g2_dict[ele] = [i]
+						i += 1
+					g2_dict_keys = list(g2_dict.keys())
+
+					my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+						.add_xaxis(labels)\
+						.set_global_opts(
+							title_opts=opts.TitleOpts(title=""),
+							legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+							xaxis_opts=opts.AxisOpts(
+								name=field1,
+								name_location='center',
+								name_gap=30,
+							),
+							yaxis_opts=opts.AxisOpts(
+								name='Count',
+								name_location='center',
+								name_gap=30,
+							),
+							#toolbox_opts = opts.ToolboxOpts()
+						)
+
+					# for each group in field 2
+					for group in g2_dict_keys:
+						cur_box_data = []
+						cur_label_data = []
+						for i in g2_dict[group]:
+							cur_box_data.append(box_data[i])
+							cur_label_data.append(label_data[i])
+
+						sub_dict = {}
+						i = 0
+						for ele in cur_label_data:
+							if sub_dict.__contains__(ele):
+								sub_dict[ele] = sub_dict[ele] + [i]
+							else:
+								sub_dict[ele] = [i]
+							i += 1
+
+						data_v1 = []
+						for ele in labels:
+							if sub_dict.__contains__(ele):
+								cur_data = []
+								for i in sub_dict[ele]:
+									cur_data.append(cur_box_data[i])
+								data_v1.append(cur_data)
+							else:
+								data_v1.append(null_data)
+
+						my_bar.add_yaxis(group, Boxplot.prepare_data(data_v1))
+
+					my_pyecharts = (
+						my_bar
+					)
+				else:
+					data = []
+					for element in DataIn:
+						data.append(element[1])
+
+					result = Counter(data)
+					labels = list(result.keys())
+
+					my_dict = {}
+					i = 0
+					for ele in data:
+						if my_dict.__contains__(ele):
+							my_dict[ele] = my_dict[ele] + [i]
+						else:
+							my_dict[ele] = [i]
 						i += 1
 
 					data_v1 = []
 					for ele in labels:
-						if sub_dict.__contains__(ele):
-							cur_data = []
-							for i in sub_dict[ele]:
-								cur_data.append(cur_box_data[i])
+						if my_dict.__contains__(ele):
+							cur_data  = []
+							for i in my_dict[ele]:
+								cur_data.append(box_data[i])
 							data_v1.append(cur_data)
 						else:
 							data_v1.append(null_data)
 
-					my_bar.add_yaxis(group, Boxplot.prepare_data(data_v1))
-
-				my_pyecharts = (
-					my_bar
-				)
-			else:
-				data = []
-				for element in DataIn:
-					data.append(element[1])
-
-				result = Counter(data)
-				labels = list(result.keys())
-
-				my_dict = {}
-				i = 0
-				for ele in data:
-					if my_dict.__contains__(ele):
-						my_dict[ele] = my_dict[ele] + [i]
-					else:
-						my_dict[ele] = [i]
-					i += 1
-
-				data_v1 = []
-				for ele in labels:
-					if my_dict.__contains__(ele):
-						cur_data  = []
-						for i in my_dict[ele]:
-							cur_data.append(box_data[i])
-						data_v1.append(cur_data)
-					else:
-						data_v1.append(null_data)
-
-				my_pyecharts = (
-					Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-						.add_xaxis(labels)
-						.add_yaxis(field1, Boxplot.prepare_data(data_v1))
-						.set_global_opts(
-						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
-						xaxis_opts=opts.AxisOpts(
-							name=field1,
-							name_location='center',
-							name_gap=30,
-						),
-						yaxis_opts=opts.AxisOpts(
-							name='Count',
-							name_location='center',
-							name_gap=30,
-						),
+					my_pyecharts = (
+						Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+							.add_xaxis(labels)
+							.add_yaxis(field1, Boxplot.prepare_data(data_v1))
+							.set_global_opts(
+							title_opts=opts.TitleOpts(title=""),
+							legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+							xaxis_opts=opts.AxisOpts(
+								name=field1,
+								name_location='center',
+								name_gap=30,
+							),
+							yaxis_opts=opts.AxisOpts(
+								name='Count',
+								name_location='center',
+								name_gap=30,
+							),
+						)
 					)
-				)
 		# Word Cloud
 		elif self.ui.tabWidgetFig.currentIndex() == 3:
 			# get data
@@ -6879,111 +7045,114 @@ class VGenesForm(QtWidgets.QMainWindow):
 				)
 			)
 
-		# load figure
-		html_path = os.path.join(temp_folder,'figure.html')
-		my_pyecharts.render(path=html_path)
-		# adjust the window size seting
-		file_handle = open(html_path, 'r')
-		lines = file_handle.readlines()
-		file_handle.close()
-		# edit js line
-		js_line = '<script type="text/javascript" src="' + \
-		          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
-		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
-		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
-		lines[5] = js_line
-		# edit style line
-		style_line = lines[9]
-		style_pos = style_line.find('style')
-		style_line = style_line[
-		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
-			self.ui.HTMLview.h - 20) + 'px;"></div>'
-		lines[9] = style_line
-		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
-		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
-		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
-		            'my_object.download(text);});$("#update").click(function(){' \
-		            'my_object.updateSelection(text);});});});</script>'
-		insert_btn = '<input id="download" type="button" value="" style="display:none;"/>' \
-		             '<input id="update" type="button" value="" style="display:none;"/>'
-		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
+		if PNG == True:
+			print(self.ui.F.size())
+		else:
+			# load figure
+			html_path = os.path.join(temp_folder,'figure.html')
+			my_pyecharts.render(path=html_path)
+			# adjust the window size seting
+			file_handle = open(html_path, 'r')
+			lines = file_handle.readlines()
+			file_handle.close()
+			# edit js line
+			js_line = '<script type="text/javascript" src="' + \
+			          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
+			          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
+			          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
+			lines[5] = js_line
+			# edit style line
+			style_line = lines[9]
+			style_pos = style_line.find('style')
+			style_line = style_line[
+			             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
+				self.ui.HTMLview.h - 20) + 'px;"></div>'
+			lines[9] = style_line
+			insert_js = '<script type="text/javascript">$(document).ready(function() {' \
+			            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
+			            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+			            'my_object.download(text);});$("#update").click(function(){' \
+			            'my_object.updateSelection(text);});});});</script>'
+			insert_btn = '<input id="download" type="button" value="" style="display:none;"/>' \
+			             '<input id="update" type="button" value="" style="display:none;"/>'
+			lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
 
-		if self.ui.tabWidgetFig.currentIndex() in [0,1,2,6,8]:
-			# insert click response function
-			echart_init_line = lines[13]
-			matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
-			chart_id = matchObj.group(1)
-			js_cmd = chart_id + ".on('click', function (params) {" \
-			                    "if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}" \
-			                    "else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}" \
-			                    "$('#update').click();});"
-			lines = lines[:-3] + [js_cmd] + lines[-3:]
+			if self.ui.tabWidgetFig.currentIndex() in [0,1,2,6,8]:
+				# insert click response function
+				echart_init_line = lines[13]
+				matchObj = re.match(r'.+var\s(\S+)\s=', echart_init_line)
+				chart_id = matchObj.group(1)
+				js_cmd = chart_id + ".on('click', function (params) {" \
+				                    "if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}" \
+				                    "else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}" \
+				                    "$('#update').click();});"
+				lines = lines[:-3] + [js_cmd] + lines[-3:]
 
-		content = '\n'.join(lines)
-		file_handle = open(html_path, 'w')
-		file_handle.write(content)
-		file_handle.close()
-		# show local HTML
-		self.ui.HTMLview.load(QUrl('file://' + html_path))
-		self.ui.HTMLview.show()
-		self.ui.HTMLview.html = "loaded"
-		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+			content = '\n'.join(lines)
+			file_handle = open(html_path, 'w')
+			file_handle.write(content)
+			file_handle.close()
+			# show local HTML
+			self.ui.HTMLview.load(QUrl('file://' + html_path))
+			self.ui.HTMLview.show()
+			self.ui.HTMLview.html = "loaded"
+			self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 
-		# try to export figures
-		#make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
-		#self.ui.HTMLview.page().view().toPlainText(self.ui.HTMLview._callable)
-		#print(self.ui.HTMLview.html)
+			# try to export figures
+			#make_snapshot(snapshot, my_pyecharts.render(), "/Users/leil/Documents/Projects/VGenes/test.png")
+			#self.ui.HTMLview.page().view().toPlainText(self.ui.HTMLview._callable)
+			#print(self.ui.HTMLview.html)
 
-		# build qweb channel
-		channel = QWebChannel(self.ui.HTMLview.page())
-		my_object = MyObjectCls(self.ui.HTMLview)
-		channel.registerObject('connection', my_object)
-		self.ui.HTMLview.page().setWebChannel(channel)
-		my_object.downloadFigSignal.connect(self.downloadSVG)
-		my_object.updateSelectionSignal.connect(self.updateSelection)
+			# build qweb channel
+			channel = QWebChannel(self.ui.HTMLview.page())
+			my_object = MyObjectCls(self.ui.HTMLview)
+			channel.registerObject('connection', my_object)
+			self.ui.HTMLview.page().setWebChannel(channel)
+			my_object.downloadFigSignal.connect(self.downloadSVG)
+			my_object.updateSelectionSignal.connect(self.updateSelection)
 
-		# this section will add information for latest figure. The information will be used to update element selections on the left
-		if self.ui.tabWidgetFig.currentIndex() == 0:
-			self.ui.HTMLview.info = ['Pie', re.sub(r'\(.+', '', self.ui.comboBoxPie.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 1:
-			self.ui.HTMLview.info = ['Bar', re.sub(r'\(.+', '', self.ui.comboBoxCol1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxCol2.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 2:
-			self.ui.HTMLview.info = ['Box', re.sub(r'\(.+', '', self.ui.comboBoxBoxData.currentText()), re.sub(r'\(.+', '',self.ui.comboBoxBox1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxBox2.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 3:
-			self.ui.HTMLview.info = ['Word', re.sub(r'\(.+', '', self.ui.comboBoxWord.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 4:
-			self.ui.HTMLview.info = ['River', re.sub(r'\(.+', '', self.ui.comboBoxRiver1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxRiver2.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 5:
-			self.ui.HTMLview.info = ['Tree', re.sub(r'\(.+', '', self.ui.comboBoxTree1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxTree2.currentText()) , re.sub(r'\(.+', '', self.ui.comboBoxTree3.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 6:
-			self.ui.HTMLview.info = ['Scatter', re.sub(r'\(.+', '', self.ui.comboBoxScatterX.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxScatterY.currentText()) ,re.sub(r'\(.+', '', self.ui.comboBoxScatterGroup.currentText())]
-		elif self.ui.tabWidgetFig.currentIndex() == 7:
-			pass
-		elif self.ui.tabWidgetFig.currentIndex() == 8:
-			record = ['VDJ']
-			if self.ui.checkBoxLocus.isChecked():
-				if self.ui.radioButtonDJ.isChecked():
-					record.append('DLocus')
-					record.append('JLocus')
-				elif self.ui.radioButtonVD.isChecked():
-					record.append('VLocus')
-					record.append('DLocus')
+			# this section will add information for latest figure. The information will be used to update element selections on the left
+			if self.ui.tabWidgetFig.currentIndex() == 0:
+				self.ui.HTMLview.info = ['Pie', re.sub(r'\(.+', '', self.ui.comboBoxPie.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 1:
+				self.ui.HTMLview.info = ['Bar', re.sub(r'\(.+', '', self.ui.comboBoxCol1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxCol2.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 2:
+				self.ui.HTMLview.info = ['Box', re.sub(r'\(.+', '', self.ui.comboBoxBoxData.currentText()), re.sub(r'\(.+', '',self.ui.comboBoxBox1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxBox2.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 3:
+				self.ui.HTMLview.info = ['Word', re.sub(r'\(.+', '', self.ui.comboBoxWord.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 4:
+				self.ui.HTMLview.info = ['River', re.sub(r'\(.+', '', self.ui.comboBoxRiver1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxRiver2.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 5:
+				self.ui.HTMLview.info = ['Tree', re.sub(r'\(.+', '', self.ui.comboBoxTree1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxTree2.currentText()) , re.sub(r'\(.+', '', self.ui.comboBoxTree3.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 6:
+				self.ui.HTMLview.info = ['Scatter', re.sub(r'\(.+', '', self.ui.comboBoxScatterX.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxScatterY.currentText()) ,re.sub(r'\(.+', '', self.ui.comboBoxScatterGroup.currentText())]
+			elif self.ui.tabWidgetFig.currentIndex() == 7:
+				pass
+			elif self.ui.tabWidgetFig.currentIndex() == 8:
+				record = ['VDJ']
+				if self.ui.checkBoxLocus.isChecked():
+					if self.ui.radioButtonDJ.isChecked():
+						record.append('DLocus')
+						record.append('JLocus')
+					elif self.ui.radioButtonVD.isChecked():
+						record.append('VLocus')
+						record.append('DLocus')
+					else:
+						record.append('VLocus')
+						record.append('JLocus')
 				else:
-					record.append('VLocus')
-					record.append('JLocus')
-			else:
-				if self.ui.radioButtonDJ.isChecked():
-					record.append('D1')
-					record.append('J1')
-				elif self.ui.radioButtonVD.isChecked():
-					record.append('V1')
-					record.append('D1')
-				else:
-					record.append('V1')
-					record.append('J1')
-			record.append(xaxis_data)
-			record.append(yaxis_data)
-			self.ui.HTMLview.info = record
+					if self.ui.radioButtonDJ.isChecked():
+						record.append('D1')
+						record.append('J1')
+					elif self.ui.radioButtonVD.isChecked():
+						record.append('V1')
+						record.append('D1')
+					else:
+						record.append('V1')
+						record.append('J1')
+				record.append(xaxis_data)
+				record.append(yaxis_data)
+				self.ui.HTMLview.info = record
 
 	def resizeHTML(self):
 		if self.ui.HTMLview.html == '':
