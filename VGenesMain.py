@@ -6031,8 +6031,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				if col_num == 0:
 					col_num = 1
 
-				self.ui.figure.ax.remove()
-				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
+				self.ui.figure.clf()
+				# self.ui.figure.ax.remove()
+				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
 				self.ui.figure.ax.pie(values, colors=colors, radius=1.0, pctdistance=0.8, autopct='%1.1f%%', startangle=90)
 				self.ui.figure.ax.legend(labels,loc="center left",bbox_to_anchor=(1, 0, 0.5, 1),prop={'size': font_size}, ncol = col_num)
 				x = [1, 0, 0, 0]
@@ -6129,7 +6130,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					else:
 						lab_size = int(lab_size)
 
-					self.ui.figure.ax.remove()
+					self.ui.figure.clf()
+					# self.ui.figure.ax.remove()
 					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
 					x = numpy.arange(len(labels))
 					if stack == None:
@@ -6179,7 +6181,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					if col_num == 0:
 						col_num = 1
 
-					self.ui.figure.ax.remove()
+					self.ui.figure.clf()
+					# self.ui.figure.ax.remove()
 					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
 					self.ui.figure.ax.bar(labels, values, color=colors)
 					self.ui.figure.ax.set_xticklabels(labels, rotation=-90)
@@ -6323,7 +6326,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				else:
 					font_size = int(font_size)
 
-				self.ui.figure.ax.remove()
+				self.ui.figure.clf()
+				# self.ui.figure.ax.remove()
 				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
 				self.ui.figure.ax.boxplot(vals, labels=names, showfliers=False)
 				for x, val, clevel in zip(xs, vals, clevels):
@@ -6784,7 +6788,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 						                    QMessageBox.Ok, QMessageBox.Ok)
 						return
 
-					self.ui.figure.ax.remove()
+					self.ui.figure.clf()
+					# self.ui.figure.ax.remove()
 					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
 					self.ui.figure.ax.scatter(x_data, y_data, c='red', s = 15, alpha=0.5, edgecolors='black')
 					self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
@@ -6826,7 +6831,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					groups = list(result.keys())
 					colors = sns.color_palette("hls", len(groups))
 
-					self.ui.figure.ax.remove()
+					self.ui.figure.clf()
+					# self.ui.figure.ax.remove()
 					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
 					index = 0
 					for group in groups:
@@ -7173,62 +7179,112 @@ class VGenesForm(QtWidgets.QMainWindow):
 				Msg = 'SQL error! Current SQL statemernt is:\n' + SQLStatement
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
-
-			# stat
-			df = pd.DataFrame(DataIn,columns=['A','B'])
-			gp = df.groupby(by=['A', 'B'])
-			newdf = gp.size()
-			newdf = newdf.reset_index(name='times')
 			
-			# make data
-			xaxis_data = []
-			yaxis_data = []
-			my_dict = dict()
-
-			for index in range(len(newdf)):
-				cur_a = newdf['A'][index]
-				cur_b = newdf['B'][index]
-				cur_count = newdf['times'][index]
-				if cur_a not in xaxis_data:
-					xaxis_data.append(cur_a)
-				if cur_b not in yaxis_data:
-					yaxis_data.append(cur_b)
+			if self.ui.radioButtonPNG.isChecked():
+				PNG = True
 				
-				index_a = xaxis_data.index(cur_a)
-				index_b = yaxis_data.index(cur_b)
-				name = str(index_a) + '|' + str(index_b)
-				my_dict[name] = cur_count
+				all_x = [i[0] for i in DataIn]
+				all_y = [i[1] for i in DataIn]
 
-			data = []
-			min_value = 0
-			max_value = 0
-			for i in range(len(xaxis_data)):
-				for j in range(len(yaxis_data)):
-					name = str(i) + '|' + str(j)
-					if name in my_dict.keys():
-						num = int(my_dict[name].astype(numpy.int32))
-						unit = [i, j, num]
-						if num > max_value:
-							max_value = num
-					else:
-						unit = [i, j, 0]
-					data.append(unit)
+				x_result = Counter(all_x)
+				x_labels = list(x_result.keys())
+				y_result = Counter(all_y)
+				y_labels = list(y_result.keys())
+				x_labels.sort()
+				y_labels.sort()
 
-			# draw figure
-			my_pyecharts = (
-				HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-				.add_xaxis(xaxis_data)
-				.add_yaxis(
-					"My data selection",
-					yaxis_data,
-					data,
-					label_opts=opts.LabelOpts(is_show=False, position="inside"),
+				data = []
+				for x in x_labels:
+					cur_data_list = []
+					y_for_cur_x = [i[1] for i in DataIn if i[0] == x]
+					for y in y_labels:
+						cur_data_list.append(y_for_cur_x.count(y))
+					data.append(cur_data_list)
+				
+				data = numpy.array(data)
+
+				'''
+				lab_size = 200 / max(len(x_labels), len(y_labels))
+				if lab_size > 6:
+					lab_size = 6
+				elif lab_size < 3:
+					lab_size = 3
+				else:
+					lab_size = int(lab_size)
+				#print(str(lab_size))
+				'''
+				lab_size = 4
+
+				self.ui.figure.clf()
+				#self.ui.figure.ax.remove()
+				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+				if len(x_labels) > len(y_labels):
+					data = numpy.transpose(data)
+					im, cbar = heatmap(data,y_labels, x_labels, ax=self.ui.figure.ax,
+					                   cmap="YlGn", cbarlabel="Count", lab_size = lab_size)
+					texts = annotate_heatmap(im, valfmt="{x}",fontsize=lab_size)
+				else:
+					im, cbar = heatmap(data, x_labels, y_labels, ax=self.ui.figure.ax,
+					                   cmap="YlGn", cbarlabel="Count", lab_size = lab_size)
+					texts = annotate_heatmap(im, valfmt="{x}",fontsize=lab_size)
+				self.ui.figure.ax.tick_params(labelsize=5)
+				self.ui.F.draw()
+			else:
+				# stat
+				df = pd.DataFrame(DataIn,columns=['A','B'])
+				gp = df.groupby(by=['A', 'B'])
+				newdf = gp.size()
+				newdf = newdf.reset_index(name='times')
+				
+				# make data
+				xaxis_data = []
+				yaxis_data = []
+				my_dict = dict()
+	
+				for index in range(len(newdf)):
+					cur_a = newdf['A'][index]
+					cur_b = newdf['B'][index]
+					cur_count = newdf['times'][index]
+					if cur_a not in xaxis_data:
+						xaxis_data.append(cur_a)
+					if cur_b not in yaxis_data:
+						yaxis_data.append(cur_b)
+					
+					index_a = xaxis_data.index(cur_a)
+					index_b = yaxis_data.index(cur_b)
+					name = str(index_a) + '|' + str(index_b)
+					my_dict[name] = cur_count
+	
+				data = []
+				min_value = 0
+				max_value = 0
+				for i in range(len(xaxis_data)):
+					for j in range(len(yaxis_data)):
+						name = str(i) + '|' + str(j)
+						if name in my_dict.keys():
+							num = int(my_dict[name].astype(numpy.int32))
+							unit = [i, j, num]
+							if num > max_value:
+								max_value = num
+						else:
+							unit = [i, j, 0]
+						data.append(unit)
+	
+				# draw figure
+				my_pyecharts = (
+					HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+					.add_xaxis(xaxis_data)
+					.add_yaxis(
+						"My data selection",
+						yaxis_data,
+						data,
+						label_opts=opts.LabelOpts(is_show=False, position="inside"),
+					)
+					.set_global_opts(
+						title_opts=opts.TitleOpts(title="HeatMap"),
+						visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc','#006699']),
+					)
 				)
-				.set_global_opts(
-					title_opts=opts.TitleOpts(title="HeatMap"),
-					visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc','#006699']),
-				)
-			)
 
 		if PNG == True:
 			print(self.ui.F.size())
@@ -17822,6 +17878,130 @@ def MakeSeqWithInseetion(class_name,id,AAseq,info):
 	div_seq += '</div>'
 
 	return div_seq
+
+def heatmap(data, row_labels, col_labels, ax=None,
+            cbar_kw={}, cbarlabel="",lab_size=4, **kwargs):
+    """
+    This function is adopted from matplotlib website
+    Create a heatmap from a numpy array and two lists of labels.
+
+    Parameters
+    ----------
+    data
+        A 2D numpy array of shape (N, M).
+    row_labels
+        A list or array of length N with the labels for the rows.
+    col_labels
+        A list or array of length M with the labels for the columns.
+    ax
+        A `matplotlib.axes.Axes` instance to which the heatmap is plotted.  If
+        not provided, use current axes or create a new one.  Optional.
+    cbar_kw
+        A dictionary with arguments to `matplotlib.Figure.colorbar`.  Optional.
+    cbarlabel
+        The label for the colorbar.  Optional.
+    **kwargs
+        All other arguments are forwarded to `imshow`.
+    """
+
+    if not ax:
+        ax = plt.gca()
+
+    # Plot the heatmap
+    im = ax.imshow(data, **kwargs)
+
+    # Create colorbar
+    cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
+    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom",size=lab_size)
+    cbar.ax.tick_params(labelsize=lab_size)
+
+    # We want to show all ticks...
+    ax.set_xticks(numpy.arange(data.shape[1]))
+    ax.set_yticks(numpy.arange(data.shape[0]))
+    # ... and label them with the respective list entries.
+    ax.set_xticklabels(col_labels)
+    ax.set_yticklabels(row_labels)
+
+    # Let the horizontal axes labeling appear on top.
+    ax.tick_params(top=True, bottom=False,
+                   labeltop=True, labelbottom=False,labelsize=lab_size)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=-90, ha="right",va='center',
+             rotation_mode="anchor", fontsize=lab_size)
+    plt.setp(ax.get_yticklabels(),  fontsize=lab_size)
+
+    # Turn spines off and create white grid.
+    #for edge, spine in ax.spines.items():
+    #   spine.set_visible(False)
+
+    ax.set_xticks(numpy.arange(data.shape[1]+1)-.5, minor=True)
+    ax.set_yticks(numpy.arange(data.shape[0]+1)-.5, minor=True)
+    ax.grid(which="minor", color="k", linestyle='-', linewidth=0.1)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    return im, cbar
+
+
+def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
+                     textcolors=["black", "white"],
+                     threshold=None, value2show=0, **textkw):
+    """
+    This function is adopted from matplotlib website
+    A function to annotate a heatmap.
+
+    Parameters
+    ----------
+    im
+        The AxesImage to be labeled.
+    data
+        Data used to annotate.  If None, the image's data is used.  Optional.
+    valfmt
+        The format of the annotations inside the heatmap.  This should either
+        use the string format method, e.g. "$ {x:.2f}", or be a
+        `matplotlib.ticker.Formatter`.  Optional.
+    textcolors
+        A list or array of two color specifications.  The first is used for
+        values below a threshold, the second for those above.  Optional.
+    threshold
+        Value in data units according to which the colors from textcolors are
+        applied.  If None (the default) uses the middle of the colormap as
+        separation.  Optional.
+    **kwargs
+        All other arguments are forwarded to each call to `text` used to create
+        the text labels.
+    """
+
+    if not isinstance(data, (list, numpy.ndarray)):
+        data = im.get_array()
+
+    # Normalize the threshold to the images color range.
+    if threshold is not None:
+        threshold = im.norm(threshold)
+    else:
+        threshold = im.norm(data.max())/2.
+
+    # Set default alignment to center, but allow it to be
+    # overwritten by textkw.
+    kw = dict(horizontalalignment="center",
+              verticalalignment="center")
+    kw.update(textkw)
+
+    # Get the formatter in case a string is supplied
+    if isinstance(valfmt, str):
+        valfmt = matplotlib.ticker.StrMethodFormatter(valfmt)
+
+    # Loop over the data and create a `Text` for each "pixel".
+    # Change the text's color depending on the data.
+    texts = []
+    for i in range(data.shape[0]):
+        for j in range(data.shape[1]):
+	        if data[i,j] > value2show:
+	            kw.update(color=textcolors[int(im.norm(data[i, j]) > threshold)])
+	            text = im.axes.text(j, i, valfmt(data[i, j], None), **kw)
+	            texts.append(text)
+
+    return texts
 
 CodonDict={'ATT':'I',   'ATC':'I',  'ATA':'I',  'CTT':'L',  'CTC':'L',
 'CTA':'L',  'CTG':'L',  'TTA':'L',  'TTG':'L',  'GTT':'V',  'GTC':'V',
