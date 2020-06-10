@@ -852,7 +852,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>6</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -7203,7 +7203,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -7545,7 +7545,45 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>Scatter Chart</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_32">
-            <item row="0" column="6">
+            <item row="0" column="4">
+             <widget class="QLabel" name="label_57">
+              <property name="text">
+               <string>Group factor:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="5">
+             <widget class="QComboBox" name="comboBoxScatterGroup">
+              <property name="minimumSize">
+               <size>
+                <width>150</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_49">
+              <property name="text">
+               <string>Y axis:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0" colspan="5">
+             <widget class="QLabel" name="label_80">
+              <property name="text">
+               <string>Non-numerical valuies/records will be automatically removed!</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_50">
+              <property name="text">
+               <string>X axis :</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="7">
              <spacer name="horizontalSpacer_16">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -7558,22 +7596,8 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </spacer>
             </item>
-            <item row="0" column="4">
-             <widget class="QLabel" name="label_57">
-              <property name="text">
-               <string>Group factor:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_50">
-              <property name="text">
-               <string>X axis :</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="5">
-             <widget class="QComboBox" name="comboBoxScatterGroup">
+            <item row="0" column="1">
+             <widget class="QComboBox" name="comboBoxScatterX">
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -7592,29 +7616,85 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
-             <widget class="QComboBox" name="comboBoxScatterX">
-              <property name="minimumSize">
-               <size>
-                <width>150</width>
-                <height>0</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QLabel" name="label_49">
-              <property name="text">
-               <string>Y axis:</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0" colspan="6">
-             <widget class="QLabel" name="label_80">
-              <property name="text">
-               <string>Non-numerical valuies/records will be automatically removed!</string>
-              </property>
-             </widget>
+            <item row="1" column="5" colspan="3">
+             <layout class="QHBoxLayout" name="horizontalLayout_11">
+              <item>
+               <widget class="QLabel" name="label_81">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>X scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBoxXscale">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>linear</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>symlog</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>log</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_82">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>50</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Y scale</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QComboBox" name="comboBoxYscale">
+                <property name="enabled">
+                 <bool>false</bool>
+                </property>
+                <item>
+                 <property name="text">
+                  <string>linear</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>symlog</string>
+                 </property>
+                </item>
+                <item>
+                 <property name="text">
+                  <string>log</string>
+                 </property>
+                </item>
+               </widget>
+              </item>
+             </layout>
             </item>
            </layout>
           </widget>

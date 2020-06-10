@@ -5945,6 +5945,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if sender.isChecked():
 			if self.ui.tabWidgetFig.currentIndex() == 2:
 				self.ui.comboBoxBox2.setEnabled(False)
+			elif self.ui.tabWidgetFig.currentIndex() == 6:
+				self.ui.label_81.setEnabled(True)
+				self.ui.label_82.setEnabled(True)
+				self.ui.comboBoxXscale.setEnabled(True)
+				self.ui.comboBoxYscale.setEnabled(True)
 			self.ui.F.setVisible(True)
 			self.ui.HTMLview.setVisible(False)
 			self.ui.checkBoxUpdateSelection.setEnabled(False)
@@ -5954,6 +5959,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			if self.ui.tabWidgetFig.currentIndex() == 2:
 				self.ui.comboBoxBox2.setEnabled(True)
+			elif self.ui.tabWidgetFig.currentIndex() == 6:
+				self.ui.label_81.setEnabled(False)
+				self.ui.label_82.setEnabled(False)
+				self.ui.comboBoxXscale.setEnabled(False)
+				self.ui.comboBoxYscale.setEnabled(False)
 			self.ui.F.setVisible(False)
 			self.ui.HTMLview.setVisible(True)
 			self.ui.checkBoxUpdateSelection.setEnabled(True)
@@ -6748,124 +6758,229 @@ class VGenesForm(QtWidgets.QMainWindow):
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 
-			# create figure
-			my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
-				.set_series_opts(label_opts=opts.LabelOpts(is_show=False))\
-				.set_global_opts(
-					xaxis_opts=opts.AxisOpts(
-						type_="value",
-						splitline_opts=opts.SplitLineOpts(is_show=False),
-						name=dim1,
-						name_location='center',
-						name_gap=30,
-					),
-					yaxis_opts=opts.AxisOpts(
-						type_="value",
-						name=dim2,
-						name_location='center',
-						name_gap=30,
-						axistick_opts=opts.AxisTickOpts(is_show=True),
-						splitline_opts=opts.SplitLineOpts(is_show=False),
-					),
-					tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
-					legend_opts=opts.LegendOpts(
-						is_show=self.ui.checkBoxFigLegend.isChecked()
-					),
-				)
+			if self.ui.radioButtonPNG.isChecked():
+				PNG = True
+				if group == "":
+					field = dim1 + "," + dim2
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-			# load data
-			if group == "":
-				field = dim1 + "," + dim2
-				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
-				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					x_data = []
+					y_data = []
+					err = False
+					for d in DataIn:
+						try:
+							x = float(d[0])
+							y = float(d[1])
+							x_data.append(x)
+							y_data.append(y)
+						except:
+							err = True
+					if err == True:
+						pass
 
-				x_data = []
-				y_data = []
-				err = False
-				for d in DataIn:
-					try:
-						x = float(d[0])
-						y = float(d[1])
-						x_data.append(x)
-						y_data.append(y)
-					except:
-						err = True
-				if err == True:
-					pass
-					#QMessageBox.information(self, 'Information', 'Non-numerical values/records have been removed from this figure!',
-					#                    QMessageBox.Ok, QMessageBox.Ok)
+					if len(x_data) == 0:
+						QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
 
-				'''
-				x_data = [d[0] for d in DataIn]
-				y_data = [d[1] for d in DataIn]
-				
-				try:
-					x_data = list(map(float,x_data))
-					y_data = list(map(float, y_data))
-				except:
-					QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
-					                    QMessageBox.Ok, QMessageBox.Ok)
-					return
-				'''
+					self.ui.figure.ax.remove()
+					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+					self.ui.figure.ax.scatter(x_data, y_data, c='red', s = 15, alpha=0.5, edgecolors='black')
+					self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
+					self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
+					self.ui.figure.ax.set_ylim(min(y_data),max(y_data))
+					self.ui.figure.ax.set_xlim(min(x_data),max(x_data))
+					self.ui.figure.ax.set_xlabel(self.ui.comboBoxScatterX.currentText(), size = 6)
+					self.ui.figure.ax.set_ylabel(self.ui.comboBoxScatterY.currentText(), size = 6)
+					self.ui.figure.ax.tick_params(labelsize=6)
+					self.ui.figure.ax.grid(True)
+					self.ui.F.draw()
+				else:
+					field = dim1 + "," + dim2 + "," + group
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-				# attach data
-				my_scatter.add_xaxis(xaxis_data=x_data)
-				my_scatter.add_yaxis(series_name="Data", y_axis=y_data, label_opts=opts.LabelOpts(is_show=False))
+					x_data = []
+					y_data = []
+					group_data = []
+					err = False
+					for d in DataIn:
+						try:
+							x = float(d[0])
+							y = float(d[1])
+							x_data.append(x)
+							y_data.append(y)
+							group_data.append(d[2])
+						except:
+							err = True
+					if err == True:
+						pass
 
+					if len(group_data) == 0:
+						QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+					result = Counter(group_data)
+					groups = list(result.keys())
+					colors = sns.color_palette("hls", len(groups))
+
+					self.ui.figure.ax.remove()
+					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+					index = 0
+					for group in groups:
+						cur_x = []
+						cur_y = []
+						for i in range(len(group_data)):
+							if group_data[i] == group:
+								cur_x.append(x_data[i])
+								cur_y.append(y_data[i])
+						self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=15, alpha=0.5, edgecolors='black', label=group)
+						index += 1
+
+					font_size = 30 / len(groups)
+					if font_size > 8:
+						font_size = 8
+					elif font_size < 4:
+						font_size = 4
+					else:
+						font_size = int(font_size)
+
+					col_num = int(len(groups) / 20)
+					if col_num == 0:
+						col_num = 1
+
+					self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
+					self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
+					self.ui.figure.ax.set_ylim(min(y_data), max(y_data))
+					self.ui.figure.ax.set_xlim(min(x_data), max(x_data))
+					self.ui.figure.ax.legend(groups, loc="center left", bbox_to_anchor=(1, 0, 0.5, 1),
+					                        prop={'size': font_size}, ncol=col_num)
+					self.ui.figure.ax.set_xlabel(self.ui.comboBoxScatterX.currentText(), size=6)
+					self.ui.figure.ax.set_ylabel(self.ui.comboBoxScatterY.currentText(), size=6)
+					self.ui.figure.ax.tick_params(labelsize=6)
+					self.ui.figure.ax.grid(True)
+					self.ui.F.draw()
 			else:
-				field = dim1 + "," + dim2 + "," + group
-				SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
-				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				# create figure
+				my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+					.set_series_opts(label_opts=opts.LabelOpts(is_show=False))\
+					.set_global_opts(
+						xaxis_opts=opts.AxisOpts(
+							type_="value",
+							splitline_opts=opts.SplitLineOpts(is_show=False),
+							name=dim1,
+							name_location='center',
+							name_gap=30,
+						),
+						yaxis_opts=opts.AxisOpts(
+							type_="value",
+							name=dim2,
+							name_location='center',
+							name_gap=30,
+							axistick_opts=opts.AxisTickOpts(is_show=True),
+							splitline_opts=opts.SplitLineOpts(is_show=False),
+						),
+						tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+						legend_opts=opts.LegendOpts(
+							is_show=self.ui.checkBoxFigLegend.isChecked()
+						),
+					)
 
-				x_data = []
-				y_data = []
-				group_data = []
-				err = False
-				for d in DataIn:
+				# load data
+				if group == "":
+					field = dim1 + "," + dim2
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+					x_data = []
+					y_data = []
+					err = False
+					for d in DataIn:
+						try:
+							x = float(d[0])
+							y = float(d[1])
+							x_data.append(x)
+							y_data.append(y)
+						except:
+							err = True
+					if err == True:
+						pass
+						#QMessageBox.information(self, 'Information', 'Non-numerical values/records have been removed from this figure!',
+						#                    QMessageBox.Ok, QMessageBox.Ok)
+
+					'''
+					x_data = [d[0] for d in DataIn]
+					y_data = [d[1] for d in DataIn]
+					
 					try:
-						x = float(d[0])
-						y = float(d[1])
-						x_data.append(x)
-						y_data.append(y)
-						group_data.append(d[2])
+						x_data = list(map(float,x_data))
+						y_data = list(map(float, y_data))
 					except:
-						err = True
-				if err == True:
-					pass
-					#QMessageBox.information(self, 'Information',
-					#                    'Non-numerical values/records have been removed from this figure!',
-					#                    QMessageBox.Ok, QMessageBox.Ok)
-
-				'''
-				x_data = [d[0] for d in DataIn]
-				y_data = [d[1] for d in DataIn]
-				group_data = [d[2] for d in DataIn]
-				try:
-					x_data = list(map(float, x_data))
-					y_data = list(map(float, y_data))
-				except:
-					QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
-					                    QMessageBox.Ok, QMessageBox.Ok)
-					return
-				'''
-				group_result = Counter(group_data)
-				groups = list(group_result.keys())
-
-				for group in groups:
-					sub_x_data = []
-					sub_y_data = []
-					for i in range(0, len(group_data)):
-						if group_data[i] == group:
-							sub_x_data.append(x_data[i])
-							sub_y_data.append(y_data[i])
+						QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
+					'''
 
 					# attach data
-					my_scatter.add_xaxis(xaxis_data=sub_x_data)
-					my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data,label_opts=opts.LabelOpts(is_show=False))
+					my_scatter.add_xaxis(xaxis_data=x_data)
+					my_scatter.add_yaxis(series_name="Data", y_axis=y_data, label_opts=opts.LabelOpts(is_show=False))
 
-			my_pyecharts = (
-				my_scatter
-			)
+				else:
+					field = dim1 + "," + dim2 + "," + group
+					SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+					x_data = []
+					y_data = []
+					group_data = []
+					err = False
+					for d in DataIn:
+						try:
+							x = float(d[0])
+							y = float(d[1])
+							x_data.append(x)
+							y_data.append(y)
+							group_data.append(d[2])
+						except:
+							err = True
+					if err == True:
+						pass
+						#QMessageBox.information(self, 'Information',
+						#                    'Non-numerical values/records have been removed from this figure!',
+						#                    QMessageBox.Ok, QMessageBox.Ok)
+
+					'''
+					x_data = [d[0] for d in DataIn]
+					y_data = [d[1] for d in DataIn]
+					group_data = [d[2] for d in DataIn]
+					try:
+						x_data = list(map(float, x_data))
+						y_data = list(map(float, y_data))
+					except:
+						QMessageBox.warning(self, 'Warning', 'The dim1 or dim2 field is not numerical! Check your input!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
+					'''
+					group_result = Counter(group_data)
+					groups = list(group_result.keys())
+
+					for group in groups:
+						sub_x_data = []
+						sub_y_data = []
+						for i in range(0, len(group_data)):
+							if group_data[i] == group:
+								sub_x_data.append(x_data[i])
+								sub_y_data.append(y_data[i])
+
+						# attach data
+						my_scatter.add_xaxis(xaxis_data=sub_x_data)
+						my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data,label_opts=opts.LabelOpts(is_show=False))
+
+				my_pyecharts = (
+					my_scatter
+				)
 		# Heatmap
 		elif self.ui.tabWidgetFig.currentIndex() == 7:
 			if len(self.HeatmapList) == 0:
