@@ -7096,6 +7096,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 							new_reord.append(value)
 						Data.append(new_reord)
 
+				if min_value < -2:
+					min_value = -2
+					max_value = 2
+				elif min_value > -1.5:
+					min_value = -1.5
+					max_value = 1.5
+				else:
+					min_value = min_value
+					max_value = max_value * -1
+
 				cbarlabel = 'Count'
 				if self.ui.radioButtonScale.isChecked():
 					cbarlabel = 'Scaled value'
@@ -7123,8 +7133,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.figure.clf()
 				# self.ui.figure.ax.remove()
 				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-				im = heatmapNox(Data, field_list, '', ax=self.ui.figure.ax,aspect='auto',
-					                   cmap="YlGn", cbarlabel=cbarlabel, lab_size=5)
+				if self.ui.radioButtonScale.isChecked():
+					im = heatmapNox(Data, field_list, '', ax=self.ui.figure.ax, aspect='auto',
+					                cmap="bwr", cbarlabel=cbarlabel, lab_size=5, vmax = 1.5, vmin=-1.5)
+				else:
+					im = heatmapNox(Data, field_list, '', ax=self.ui.figure.ax,aspect='auto',
+				                    cmap="YlGn", cbarlabel=cbarlabel, lab_size=5)
 
 				self.ui.figure.ax.tick_params(labelsize=5)
 				self.ui.F.draw()

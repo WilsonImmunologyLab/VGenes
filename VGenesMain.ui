@@ -7199,7 +7199,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="maximumSize">
            <size>
             <width>16777215</width>
-            <height>120</height>
+            <height>150</height>
            </size>
           </property>
           <property name="currentIndex">
@@ -7703,26 +7703,6 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>HeatMap</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_54">
-            <item row="0" column="0">
-             <widget class="QListWidget" name="listWidgetAll">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>70</height>
-               </size>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="2">
-             <widget class="QListWidget" name="listWidgetSelected">
-              <property name="minimumSize">
-               <size>
-                <width>0</width>
-                <height>70</height>
-               </size>
-              </property>
-             </widget>
-            </item>
             <item row="0" column="3">
              <layout class="QVBoxLayout" name="verticalLayout_5">
               <item>
@@ -7842,6 +7822,26 @@ If the J-end is off the J gene end may need adjusted</string>
                </widget>
               </item>
              </layout>
+            </item>
+            <item row="0" column="0" rowspan="2">
+             <widget class="QListWidget" name="listWidgetAll">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>70</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2" rowspan="2">
+             <widget class="QListWidget" name="listWidgetSelected">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>70</height>
+               </size>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
