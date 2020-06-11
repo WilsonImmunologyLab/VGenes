@@ -7013,146 +7013,262 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
-			# parse out record with all null value
-			if self.ui.checkBoxHideNull.isChecked():
-				index_remove = []
-				index = 0
-				for record in DataIn:
-					values = record[:len(record)-1]
-					not_null = False
-					for value in values:
-						try:
-							float(value)
-							not_null = True
-							break
-						except:
-							pass
+			if self.ui.radioButtonPNG.isChecked():
+				PNG = True
 
-					if not_null == False:
-						index_remove.append(index)
+				# parse out record with all null value
+				if self.ui.checkBoxHideNull.isChecked():
+					index_remove = []
+					index = 0
+					for record in DataIn:
+						values = record[:len(record) - 1]
+						not_null = False
+						for value in values:
+							try:
+								float(value)
+								not_null = True
+								break
+							except:
+								pass
 
-					index += 1
+						if not_null == False:
+							index_remove.append(index)
+						index += 1
 
-				# delete all null record
-				cnt = 0
-				for index in index_remove:
-					del DataIn[index - cnt]
-					cnt += 1
+					# delete all null record
+					cnt = 0
+					for index in index_remove:
+						del DataIn[index - cnt]
+						cnt += 1
 
-			num_row = len(DataIn)
-			num_col = len(self.HeatmapList)
+				num_row = len(DataIn)
+				num_col = len(self.HeatmapList)
 
-			if num_row == 0:
-				Msg = 'No record fetched!'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-				return
+				if num_row == 0:
+					Msg = 'No record fetched!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
 
-			Data = []
-			# scale data (centralize)
-			if self.ui.radioButtonScale.isChecked():
-				for feature in range(num_col):
-					values = []
-					for i in range(num_row):
-						try:
-							value = float(DataIn[i][feature])
-							values.append(value)
-						except:
-							pass
+				Data = []
+				# scale data (centralize)
+				min_value = 9999
+				max_value = 0
+				if self.ui.radioButtonScale.isChecked():
+					for feature in range(num_col):
+						values = []
+						for i in range(num_row):
+							try:
+								value = float(DataIn[i][feature])
+								values.append(value)
+							except:
+								pass
 
-					mean = statistics.mean(values)
-					std = statistics.stdev(values)
+						mean = statistics.mean(values)
+						std = statistics.stdev(values)
 
-					for i in range(num_row):
-						try:
-							value = float(DataIn[i][feature])
-							value = (value - mean)/std
-						except:
-							value = DataIn[i][feature]
+						for i in range(num_row):
+							try:
+								value = float(DataIn[i][feature])
+								value = (value - mean) / std
+								if value < min_value:
+									min_value = value
+								if value > max_value:
+									max_value = value
+							except:
+								value = numpy.nan
 
-						if feature == 0:
-							Data.append([value])
-						else:
-							Data[i].append(value)
+							if feature == 0:
+								Data.append([value])
+							else:
+								Data[i].append(value)
+				else:
+					for record in DataIn:
+						new_reord = []
+						for i in range(num_col):
+							try:
+								value = float(record[i])
+								if value < min_value:
+									min_value = value
+								if value > max_value:
+									max_value = value
+							except:
+								value = numpy.nan
+							new_reord.append(value)
+						Data.append(new_reord)
 
-				for i in range(num_row):
-					Data[i].append(DataIn[i][-1])
+				cbarlabel = 'Count'
+				if self.ui.radioButtonScale.isChecked():
+					cbarlabel = 'Scaled value'
+				if self.ui.radioButtonLog10.isChecked():
+					if min_value >= 0:
+						cbarlabel = 'Log10 Value'
+						Data = numpy.log10(Data)
+					else:
+						Msg = 'Negative values detected in your data! Log scale is not appliable!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+				elif self.ui.radioButtonLog2.isChecked():
+					if min_value >= 0:
+						cbarlabel = 'Log2 Value'
+						Data = numpy.log2(Data)
+					else:
+						Msg = 'Negative values detected in your data! Log scale is not appliable!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+				Data = numpy.array(Data)
+				if num_row > num_col:
+					Data = numpy.transpose(Data)
+
+				self.ui.figure.clf()
+				# self.ui.figure.ax.remove()
+				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+				im = heatmapNox(Data, field_list, '', ax=self.ui.figure.ax,aspect='auto',
+					                   cmap="YlGn", cbarlabel=cbarlabel, lab_size=5)
+
+				self.ui.figure.ax.tick_params(labelsize=5)
+				self.ui.F.draw()
 			else:
-				Data = DataIn
-			'''
-			try:
-				value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
-				xaxis_data = [DataIn[i][-1] for i in range(num_row)]
-			except:
-				Msg = 'Some values of your selected field/record are not numbers!'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-				return
-				
-			min_value = min(row[2] for row in value)
-			max_value = max(row[2] for row in value)
-			'''
-			# replace all missing values by null
-			value = []
-			min_value = 9999
-			max_value = 0
-			for i in range(num_row):
-				for j in range(num_col):
-					try:
-						value.append([i, j, float(Data[i][j])])
-						if float(Data[i][j]) < min_value:
-							min_value = float(Data[i][j])
-						if float(Data[i][j]) > max_value:
-							max_value = float(Data[i][j])
-					except:
-						value.append([i, j, 'null'])
-			xaxis_data = [Data[i][-1] for i in range(num_row)]
+				# parse out record with all null value
+				if self.ui.checkBoxHideNull.isChecked():
+					index_remove = []
+					index = 0
+					for record in DataIn:
+						values = record[:len(record)-1]
+						not_null = False
+						for value in values:
+							try:
+								float(value)
+								not_null = True
+								break
+							except:
+								pass
 
-			if self.ui.radioButtonScale.isChecked():
-				#min_value = -2
-				max_value = min_value * (-1)
+						if not_null == False:
+							index_remove.append(index)
 
-			if self.ui.radioButtonLog10.isChecked():
-				if min_value >= 0:
-					for i in range(len(value)):
-						try:
-							value[i][2] = numpy.log1p(value[i][2])/numpy.log(10)
-						except:
-							pass
+						index += 1
 
-					min_value = numpy.log1p(min_value) / numpy.log(10)
-					max_value = numpy.log1p(max_value) / numpy.log(10)
-				else:
-					Msg = 'Negative values detected in your data! Log scale is not appliable!'
-					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-					return
-			elif self.ui.radioButtonLog2.isChecked():
-				if min_value >= 0:
-					for i in range(len(value)):
-						try:
-							value[i][2] = numpy.log1p(value[i][2])/numpy.log(2)
-						except:
-							pass
+					# delete all null record
+					cnt = 0
+					for index in index_remove:
+						del DataIn[index - cnt]
+						cnt += 1
 
-					min_value = numpy.log1p(min_value) / numpy.log(2)
-					max_value = numpy.log1p(max_value) / numpy.log(2)
-				else:
-					Msg = 'Negative values detected in your data! Log scale is not appliable!'
+				num_row = len(DataIn)
+				num_col = len(self.HeatmapList)
+
+				if num_row == 0:
+					Msg = 'No record fetched!'
 					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 					return
 
-			my_pyecharts = (
-				HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-					.add_xaxis(xaxis_data)
-					.add_yaxis(
-					"My data selection",
-					self.HeatmapList,
-					value,
-					label_opts=opts.LabelOpts(is_show=False, position="inside"),
+				Data = []
+				# scale data (centralize)
+				if self.ui.radioButtonScale.isChecked():
+					for feature in range(num_col):
+						values = []
+						for i in range(num_row):
+							try:
+								value = float(DataIn[i][feature])
+								values.append(value)
+							except:
+								pass
+
+						mean = statistics.mean(values)
+						std = statistics.stdev(values)
+
+						for i in range(num_row):
+							try:
+								value = float(DataIn[i][feature])
+								value = (value - mean)/std
+							except:
+								value = DataIn[i][feature]
+
+							if feature == 0:
+								Data.append([value])
+							else:
+								Data[i].append(value)
+
+					for i in range(num_row):
+						Data[i].append(DataIn[i][-1])
+				else:
+					Data = DataIn
+				'''
+				try:
+					value = [[i, j, int(DataIn[i][j])] for i in range(num_row) for j in range(num_col)]
+					xaxis_data = [DataIn[i][-1] for i in range(num_row)]
+				except:
+					Msg = 'Some values of your selected field/record are not numbers!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+					
+				min_value = min(row[2] for row in value)
+				max_value = max(row[2] for row in value)
+				'''
+				# replace all missing values by null
+				value = []
+				min_value = 9999
+				max_value = 0
+				for i in range(num_row):
+					for j in range(num_col):
+						try:
+							value.append([i, j, float(Data[i][j])])
+							if float(Data[i][j]) < min_value:
+								min_value = float(Data[i][j])
+							if float(Data[i][j]) > max_value:
+								max_value = float(Data[i][j])
+						except:
+							value.append([i, j, 'null'])
+				xaxis_data = [Data[i][-1] for i in range(num_row)]
+
+				if self.ui.radioButtonScale.isChecked():
+					#min_value = -2
+					max_value = min_value * (-1)
+
+				if self.ui.radioButtonLog10.isChecked():
+					if min_value >= 0:
+						for i in range(len(value)):
+							try:
+								value[i][2] = numpy.log1p(value[i][2])/numpy.log(10)
+							except:
+								pass
+
+						min_value = numpy.log1p(min_value) / numpy.log(10)
+						max_value = numpy.log1p(max_value) / numpy.log(10)
+					else:
+						Msg = 'Negative values detected in your data! Log scale is not appliable!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+				elif self.ui.radioButtonLog2.isChecked():
+					if min_value >= 0:
+						for i in range(len(value)):
+							try:
+								value[i][2] = numpy.log1p(value[i][2])/numpy.log(2)
+							except:
+								pass
+
+						min_value = numpy.log1p(min_value) / numpy.log(2)
+						max_value = numpy.log1p(max_value) / numpy.log(2)
+					else:
+						Msg = 'Negative values detected in your data! Log scale is not appliable!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+				my_pyecharts = (
+					HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+						.add_xaxis(xaxis_data)
+						.add_yaxis(
+						"My data selection",
+						self.HeatmapList,
+						value,
+						label_opts=opts.LabelOpts(is_show=False, position="inside"),
+					)
+						.set_global_opts(
+						title_opts=opts.TitleOpts(title="HeatMap"),
+						visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value),
+					)
 				)
-					.set_global_opts(
-					title_opts=opts.TitleOpts(title="HeatMap"),
-					visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value),
-				)
-			)
 		# v(d)j heatmap
 		elif self.ui.tabWidgetFig.currentIndex() == 8:
 			# fetch data
@@ -7217,16 +7333,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				self.ui.figure.clf()
 				#self.ui.figure.ax.remove()
-				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+				self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.03, 0.8, 0.8])
 				if len(x_labels) > len(y_labels):
 					data = numpy.transpose(data)
-					im, cbar = heatmap(data,y_labels, x_labels, ax=self.ui.figure.ax,
+					im, cbar = heatmap(data,y_labels, x_labels, ax=self.ui.figure.ax,aspect='auto',
 					                   cmap="YlGn", cbarlabel="Count", lab_size = lab_size)
-					texts = annotate_heatmap(im, valfmt="{x}",fontsize=lab_size)
+					#texts = annotate_heatmap(im, valfmt="{x}",fontsize=lab_size)
 				else:
-					im, cbar = heatmap(data, x_labels, y_labels, ax=self.ui.figure.ax,
+					im, cbar = heatmap(data, x_labels, y_labels, ax=self.ui.figure.ax,aspect='auto',
 					                   cmap="YlGn", cbarlabel="Count", lab_size = lab_size)
-					texts = annotate_heatmap(im, valfmt="{x}",fontsize=lab_size)
+					#texts = annotate_heatmap(im, valfmt="{x}",fontsize=lab_size)
 				self.ui.figure.ax.tick_params(labelsize=5)
 				self.ui.F.draw()
 			else:
@@ -17942,6 +18058,66 @@ def heatmap(data, row_labels, col_labels, ax=None,
 
     return im, cbar
 
+def heatmapNox(data, row_labels, col_labels, ax=None,
+            cbar_kw={}, cbarlabel="",lab_size=4, **kwargs):
+    """
+    This function is adopted from matplotlib website
+    Create a heatmap from a numpy array and two lists of labels.
+
+    Parameters
+    ----------
+    data
+        A 2D numpy array of shape (N, M).
+    row_labels
+        A list or array of length N with the labels for the rows.
+    col_labels
+        A list or array of length M with the labels for the columns.
+    ax
+        A `matplotlib.axes.Axes` instance to which the heatmap is plotted.  If
+        not provided, use current axes or create a new one.  Optional.
+    cbar_kw
+        A dictionary with arguments to `matplotlib.Figure.colorbar`.  Optional.
+    cbarlabel
+        The label for the colorbar.  Optional.
+    **kwargs
+        All other arguments are forwarded to `imshow`.
+    """
+
+    if not ax:
+        ax = plt.gca()
+
+    # Plot the heatmap
+    im = ax.imshow(data, **kwargs)
+
+    # Create colorbar
+    cbar = ax.figure.colorbar(im, ax=ax, **cbar_kw)
+    cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom",size=lab_size)
+    cbar.ax.tick_params(labelsize=lab_size)
+
+    # We want to show all ticks...
+    ax.set_yticks(numpy.arange(data.shape[0]))
+    # ... and label them with the respective list entries.
+    ax.set_yticklabels(row_labels)
+
+    # Let the horizontal axes labeling appear on top.
+    ax.tick_params(top=True, bottom=False,
+                   labeltop=True, labelbottom=False,labelsize=lab_size)
+
+    # Rotate the tick labels and set their alignment.
+    plt.setp(ax.get_xticklabels(), rotation=-90, ha="right",va='center',
+             rotation_mode="anchor", fontsize=lab_size)
+    plt.setp(ax.get_yticklabels(),  fontsize=lab_size)
+
+    # Turn spines off and create white grid.
+    #for edge, spine in ax.spines.items():
+    #   spine.set_visible(False)
+
+    ax.set_xticks(numpy.arange(data.shape[1]+1)-.5, minor=True)
+    ax.set_yticks(numpy.arange(data.shape[0]+1)-.5, minor=True)
+    #ax.grid(which="minor", color="k", linestyle='-', linewidth=0.1)
+    ax.tick_params(which="minor", bottom=False, left=False)
+
+    return im, cbar
 
 def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
                      textcolors=["black", "white"],
