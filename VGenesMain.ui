@@ -8172,32 +8172,10 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>Build Ig phylogeny for each clone</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_40">
-            <item row="0" column="1">
-             <widget class="QLabel" name="label_59">
-              <property name="font">
-               <font>
-                <pointsize>14</pointsize>
-               </font>
-              </property>
-              <property name="text">
-               <string>Choose clone:</string>
-              </property>
-             </widget>
+            <item row="0" column="2">
+             <widget class="QComboBox" name="comboBoxTree"/>
             </item>
-            <item row="0" column="0">
-             <spacer name="horizontalSpacer_19">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>209</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
-            <item row="0" column="3">
+            <item row="0" column="5">
              <widget class="QPushButton" name="toolButtonCloneRaxml">
               <property name="text">
                <string>Build clone phylogeny with RAxML</string>
@@ -8217,8 +8195,47 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="2">
-             <widget class="QComboBox" name="comboBoxTree"/>
+            <item row="0" column="0">
+             <spacer name="horizontalSpacer_19">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>209</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_59">
+              <property name="font">
+               <font>
+                <pointsize>14</pointsize>
+               </font>
+              </property>
+              <property name="text">
+               <string>Choose clone:</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_83">
+              <property name="text">
+               <string>No. of Seq</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QLineEdit" name="lineEditNumSeq">
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>

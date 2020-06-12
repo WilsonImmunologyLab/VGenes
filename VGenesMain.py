@@ -4336,6 +4336,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonClear.clicked.connect(self.clearCheck)
 		self.ui.radioButtonPNG.clicked.connect(self.setupPNG)
 		self.ui.tabWidgetFig.currentChanged['int'].connect(self.disablePNG)
+		self.ui.comboBoxTree.currentTextChanged.connect(self.updateCloneTreeInfo)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -4373,6 +4374,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 
 		self.HeatmapList = []
+
+	def updateCloneTreeInfo(self):
+		clone_id = self.ui.comboBoxTree.currentText()
+		clone_id = re.sub('Clone', '', clone_id)
+
+		SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ClonalPool = "' + clone_id + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		seq_num = len(DataIn)
+		self.ui.lineEditNumSeq.setText(str(seq_num))
+		if seq_num < 3:
+			self.ui.toolButtonCloneRaxml.setText('This Clone has too less sequences for a tree')
+			self.ui.toolButtonCloneRaxml.setEnabled(False)
+		else:
+			self.ui.toolButtonCloneRaxml.setText('Build clone phylogeny with RAxML')
+			self.ui.toolButtonCloneRaxml.setEnabled(True)
 
 	def disablePNG(self):
 		if self.ui.tabWidgetFig.currentIndex() in [0, 1, 2, 6, 7, 8]:
@@ -4586,9 +4602,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboTreeOp2.addItem('None')
 		self.ui.cboTreeOp3.addItem('None')
 
-		index = FieldList.index(f_txt)
+		index = 2
 		self.ui.cboFindField.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
-		index = FieldList.index(f_txt1)
 		self.ui.cboFindField1.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
 
 		if tree_txt1 == 'None':
@@ -5127,12 +5142,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 		else:
-			i = 1
-			for item in listItems:
-				WhereState += 'SeqName = "' + item + '"'
-				if NumSeqs > i:
-					WhereState += ' OR '
-				i += 1
+			WhereState = 'SeqName IN ("' + '","'.join(listItems) + '")'
+			#i = 1
+			#for item in listItems:
+			#	WhereState += 'SeqName = "' + item + '"'
+			#	if NumSeqs > i:
+			#		WhereState += ' OR '
+			#	i += 1
 
 			field = self.ui.comboBoxFieldLogo.currentText()
 			SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
@@ -10796,6 +10812,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboTreeOp2.addItems(field_list)
 		self.ui.cboTreeOp3.addItems(field_list)
 
+		index = 2
+		self.ui.cboFindField.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+		self.ui.cboFindField1.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
+
 		self.ui.cboTreeOp1.addItem('None')
 		self.ui.cboTreeOp2.addItem('None')
 		self.ui.cboTreeOp3.addItem('None')
@@ -12226,7 +12246,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.myBatchDialog.ui.comboBox.addItems(field_list)
 		self.myBatchDialog.initial = 1
 		self.myBatchDialog.StatFig()
-		self.myBatchDialog.ui.comboBox.setCurrentText(self.ui.cboFindField1.currentText())
+		self.myBatchDialog.ui.comboBox.setCurrentText(field_list[2])
 		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
 		self.myBatchDialog.show()
 		self.myBatchDialog.initial = 2
