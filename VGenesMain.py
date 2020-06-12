@@ -7648,11 +7648,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 	def downloadFig(self):
-		js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
+		if self.ui.radioButtonPNG.isChecked():
+			options = QtWidgets.QFileDialog.Options()
+			save_file_name, _ = QtWidgets.QFileDialog.getSaveFileName(self, "My_Fig", "My_Fig",
+			                                                          "Portable Document Format (*.pdf);;"
+			                                                          "Portable Network Graphics (*.png);;"
+			                                                          "Earnings per share (*.eps);;"
+			                                                          "Scalable Vector Graphics (*.svg);;"
+			                                                          "All Files (*)",
+			                                                          options=options)
+			self.ui.figure.savefig(save_file_name, dpi=300, )
+		else:
+			js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
 
-		#js_cmd= 'svg=document.getElementsByTagName("svg")[0];var a = document.createElement("a");a.href = svg.src;' \
-		#        'a.download = "~/Downloads/test.svg";a.click();'
-		self.ui.HTMLview.page().runJavaScript(js_cmd)
+			#js_cmd= 'svg=document.getElementsByTagName("svg")[0];var a = document.createElement("a");a.href = svg.src;' \
+			#        'a.download = "~/Downloads/test.svg";a.click();'
+			self.ui.HTMLview.page().runJavaScript(js_cmd)
 
 	def downloadFigClone(self):
 		js_cmd= 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
@@ -8751,8 +8762,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		elif item[:3] == 'Sha':
 			self.SharedClones()
 			return
-
-
 		else:
 			Duplicates = False
 
@@ -8764,17 +8773,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if answer == 'Yes':
 			#field = self.ui.cboFindField.currentText()
 			#fieldsearch = self.TransLateFieldtoReal(field, True)
-			fieldsearch = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
+			fieldsearch = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 		elif answer == 'No':
 			fieldsearch = 'None'
 		elif answer == 'Cancel':
 			return
+
 		if fieldsearch == 'None':
 			fields = ['SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence',
 			          'ID', 'GVend', 'GJbeg', 'GD1beg', 'GD1end']
 		else:
 			fields = ['SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence',
 			          'ID','GVend', 'GJbeg', 'GD1beg', 'GD1end', fieldsearch]
+
+		a = data
 
 		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
 		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
@@ -8785,6 +8797,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		ErLog = 'Clonal analysis for ' + ProjName + '\n'
 		Errs = 0
+		'''
 		for item in DataIs:
 			SeqName = item[0]
 			self.findTreeItem(SeqName)
@@ -8799,6 +8812,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				ErLog += SeqName + '\n'
 				Errs += 1
+		'''
+		for item in DataIs:
+			if int(item[6]) > 0:  # has CDR3 scored
+				DataIs2.append(item)
+			else:
+				ErLog += item[0] + '\n'
+				Errs += 1
+		seq_name_list = [i[0] for i in DataIs]
+		WhereStatement = '","'.join(seq_name_list)
+		SQLStatement = 'UPDATE vgenesDB SET `ClonalPool` = "0" WHERE SeqName in ("' + WhereStatement + '")'
+		VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
 		TotSeqs = len(DataIs2)
 		# if fieldsearch == 'None':
@@ -8828,11 +8852,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		CPseqs = 0
 		CPs = 0
-
+		# initial clone ID
+		i = 1
 		for pool in ClonalPools:
 			Pool = list(pool)
+			start = time.time()
 			CPList = VGenesCloneCaller.CloneCaller(Pool, Duplicates)
-			i = 1
+			end = time.time()
+			print('Run time for VGenesCloneCaller: ' + str(end - start))
 
 			for record in CPList:
 				CPs += 1
@@ -8883,15 +8910,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#model = self.ui.tableView.model()
 		#model.refresh()
 
+		'''
 		if answer == 'Yes':
 			if DBFilename != None:
 				if os.path.isfile(DBFilename):
 					self.LoadDB(DBFilename)
 		else:
-			if re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()) == 'Clonal Pool' \
-					or re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()) == 'Clonal Pool' \
-					or re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText()) == 'Clonal Pool':
-				self.on_btnUpdateTree_clicked()
+		'''
+		if re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()) == 'Clonal Pool' \
+				or re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()) == 'Clonal Pool' \
+				or re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText()) == 'Clonal Pool':
+			self.on_btnUpdateTree_clicked()
 
 		self.findTreeItem(Currentrecord)
 		ErLog2 = str(CPs) + ' clonal pools containing ' + str(CPseqs) + ' sequences were identified from ' + str(
