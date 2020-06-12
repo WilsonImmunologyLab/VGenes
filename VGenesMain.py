@@ -8852,8 +8852,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		CPseqs = 0
 		CPs = 0
+		# identify all existing Clone IDs
+		SQLStatement = 'SELECT DISTINCT(ClonalPool) FROM vgenesdb'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		existing_clone_list = [row[0] for row in DataIn]
+
 		# initial clone ID
 		i = 1
+		while str(i) in existing_clone_list:
+			i += 1
+
 		for pool in ClonalPools:
 			Pool = list(pool)
 			start = time.time()
@@ -8871,6 +8879,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					if Duplicates == False:
 						try:
 							VGenesSQL.UpdateField(data[119], str(i), 'ClonalPool', DBFilename)
+							existing_clone_list.append(str(i))
 						except:
 							print(item + ' caused error in finding clones at line 1798 and so was not annotated as a clone')
 
@@ -8905,7 +8914,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					VGenesSQL.UpdateField(FirstOne, DupList, 'Comments', DBFilename)
 					VGenesSQL.UpdateField(FirstOne, depth, 'Quality', DBFilename)
-				i += 1
+				
+				while str(i) in existing_clone_list:
+					i += 1
 
 		#model = self.ui.tableView.model()
 		#model.refresh()
