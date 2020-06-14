@@ -4391,6 +4391,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.toolButtonCloneRaxml.setEnabled(True)
 
 	def disablePNG(self):
+		global DontFindTwice
+		DontFindTwice = True
 		if self.ui.tabWidgetFig.currentIndex() in [0, 1, 2, 6, 7, 8]:
 			self.ui.radioButtonPNG.setChecked(False)
 			self.ui.radioButtonPNG.setEnabled(True)
@@ -4403,6 +4405,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxUpdateSelection.setEnabled(True)
 		self.ui.checkBoxFigLegend.setEnabled(True)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+		DontFindTwice = False
 
 	@pyqtSlot()
 	def on_actionSave_As_triggered(self):
@@ -4746,17 +4749,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		WhereState = ''
 		NumSeqs = len(listItems)
-		i = 1
+
 		if len(listItems) == 0:
 			QMessageBox.warning(self, 'Warning', 'Please select sequence from active sequence panel!',
 			                    QMessageBox.Ok,
 			                    QMessageBox.Ok)
 			return
-		for item in listItems:
-			WhereState += 'SeqName = "' + item + '"'
-			if NumSeqs > i:
-				WhereState += ' OR '
-			i += 1
+		WhereState = 'SeqName IN ("' + '","'.join(listItems) + '")'
+		#i = 1
+		#for item in listItems:
+		#	WhereState += 'SeqName = "' + item + '"'
+		#	if NumSeqs > i:
+		#		WhereState += ' OR '
+		#	i += 1
 
 		SQLStatement = 'SELECT SeqName, Sequence FROM vgenesDB WHERE ' + WhereState
 		DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -5036,12 +5041,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 		else:
-			i = 1
-			for item in listItems:
-				WhereState += 'SeqName = "' + item + '"'
-				if NumSeqs > i:
-					WhereState += ' OR '
-				i += 1
+			WhereState = 'SeqName IN ("' + '","'.join(listItems) + '")'
+			#i = 1
+			#for item in listItems:
+			#	WhereState += 'SeqName = "' + item + '"'
+			#	if NumSeqs > i:
+			#		WhereState += ' OR '
+			#	i += 1
 
 			field = self.ui.comboBoxFieldLogo.currentText()
 			SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
@@ -5991,6 +5997,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#global data
 		print('GenerateFigure called!')
 
+		if DontFindTwice:
+			return
 		# select data or not
 		if self.ui.checkBoxSelection.isChecked():
 			where_statement = 'WHERE SeqName IN '
