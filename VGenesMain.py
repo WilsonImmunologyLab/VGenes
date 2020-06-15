@@ -4740,6 +4740,40 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.barcodeDislog.show()
 
 	@pyqtSlot()
+	def on_btnMatchHL_clicked(self):
+		cur_seq_name = self.ui.txtName.toPlainText()
+		SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + cur_seq_name + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		barcode = DataIn[0][1]
+		if barcode == 'Blank10' or barcode == '':
+			QMessageBox.warning(self, 'Warning', 'Your barcode information is empty!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		i = len(DataIn) - 1
+		if i == 0:
+			QMessageBox.warning(self, 'Warning', 'Did not find any Heavy/Light chain using same barcode!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+		else:
+			for record in DataIn:
+				Seqname = record[0]
+				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+				for record in found:
+					wasClicked = True
+					record.setCheckState(0, Qt.Checked)
+
+			self.match_tree_to_table()
+
+			QMessageBox.warning(self, 'Warning', 'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+
+	@pyqtSlot()
 	def on_actionAlignmentHTML_triggered(self):
 		global VGenesTextWindows
 		# load data
@@ -4764,7 +4798,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#	i += 1
 
 		SQLStatement = 'SELECT SeqName, Sequence FROM vgenesDB WHERE ' + WhereState
-		DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 		for item in DataIn:
 			SeqName = item[0]
@@ -6866,7 +6900,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							if group_data[i] == group:
 								cur_x.append(x_data[i])
 								cur_y.append(y_data[i])
-						self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=15, alpha=0.5, edgecolors='black', label=group)
+						self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=15, alpha=0.8, edgecolors='black', label=group)
 						index += 1
 
 					font_size = 30 / len(groups)

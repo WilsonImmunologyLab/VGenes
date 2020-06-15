@@ -69,7 +69,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
             currentfile.write(FASTAFile)
 
         self.ShowVGenesText(Pathname)
-
     elif option == 'FASTA Nucleotide Rename file':
         ProjDict = {}
         i = 1
@@ -116,8 +115,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
             currentfile.write(FASTAFile)
 
         self.ShowVGenesText(Pathname)
-
-
     elif option == 'FASTA Amino Acid file':
 
         fields = ['SeqName', 'Sequence']
@@ -139,7 +136,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
             currentfile.write(FASTAFile)
 
         self.ShowVGenesText(Pathname)
-
     elif option == 'FASTA Germline Nucleotide file':
 
         fields = ['SeqName', 'GermlineSequence']
@@ -159,7 +155,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
             currentfile.write(FASTAFile)
 
         self.ShowVGenesText(Pathname)
-
     elif option == 'FASTA Germline Amino Acid file':
 
         fields = ['SeqName', 'GermlineSequence']
@@ -181,7 +176,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
             currentfile.write(FASTAFile)
 
         self.ShowVGenesText(Pathname)
-
     elif option == 'AbVec cloning PCR':
         CloningReport = ''
         CloningReportCSV = ''
@@ -476,10 +470,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
             with open(Pathname, 'w') as currentfile:
                 currentfile.write(CloningReportCSV)
-
     elif option == 'HT-AbVec Cloning report':
-
-
         fields = ['SeqName', 'GeneType', 'V1', 'J1', 'productive', 'Sequence', 'Vbeg', 'Jend', 'Blank10']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         SQLStatement += ' ORDER BY Blank10'
@@ -698,9 +689,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
-
-
-
     elif option == 'Sequence summary':
         fields = ['SeqName', 'Project', 'V1', 'D1', 'J1', 'VLocus', 'JLocus', 'productive', 'TotMut', 'CDR3DNA', 'CDR3AA',
                   'CDR3Length', 'CDR3pI', 'ClonalPool', 'Isotype', 'Sequence', 'Blank7']
@@ -776,12 +764,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
         #
         #     with open(Pathname, 'w') as currentfile:
         #         currentfile.write(SeqSumm)
-
-
-
-
-
-
     elif option == 'Comma seperated values (.csv)':
 
         fields = 'All'
@@ -833,7 +815,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
-
     elif option == 'CSV format Entire VDB':
 
         SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
@@ -861,7 +842,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
-
     elif option == 'Clonal Analysis (.csv)':
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
@@ -892,9 +872,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
-
+    elif option == 'Heavy/Light Chain pairs (.csv)':
+        
     elif option == 'Custom report':
-
         print('custom report generator')
 
     print('done')
