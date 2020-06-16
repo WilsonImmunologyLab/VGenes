@@ -2,7 +2,9 @@
 import VGenesSQL
 import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
-	setText
+    setText
+from PyQt5.QtWidgets import QMessageBox
+
 import re
 import time
 global FieldList
@@ -873,7 +875,60 @@ def StandardReports(self, option, SequenceName, DBFilename):
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
     elif option == 'Heavy/Light Chain pairs (.csv)':
-        
+        SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        if len(DataIn) < 2:
+            Msg = 'Your VGene DB do not have any barcode information!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+                                    QMessageBox.Ok)
+            return
+
+        CSVOut = ''
+        # make CSV header
+        SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
+        DataInHeader = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+        field_names = ['HC_' + i[1] for i in DataInHeader] + ['LC_' + i[1] for i in DataInHeader]
+        CSVOut += ','.join(field_names) + '\n'
+
+        seq_num = 0
+        for record in DataIn:
+            barcode = record[0]
+            if barcode == 'Blank10' or barcode == '':
+                pass
+            else:
+                SQLStatement1 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType = "Heavy"'
+                DataIn1 = VGenesSQL.RunSQL(DBFilename, SQLStatement1)
+
+                SQLStatement2 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
+                DataIn2 = VGenesSQL.RunSQL(DBFilename, SQLStatement2)
+
+                if len(DataIn1) == 1 and len(DataIn2) == 1:
+                    data_hc = [str(x) for x in DataIn1[0]]
+                    data_hc[58] = re.sub(r'\n', '#', data_hc[58])
+                    data_hc[97] = re.sub(',', '|', data_hc[97])
+                    data_lc = [str(x) for x in DataIn2[0]]
+                    data_lc[58] = re.sub(r'\n', '#', data_lc[58])
+                    data_lc[97] = re.sub(',', '|', data_lc[97])
+
+                    CSVOut += ','.join(data_hc) + ',' + ','.join(data_lc) + '\n'
+                    seq_num += 1
+
+        if seq_num > 0:
+            Pathname = saveFile(self, 'csv')
+            if Pathname == None:
+                return
+            with open(Pathname, 'w') as currentfile:
+                currentfile.write(CSVOut)
+
+            Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
+            QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,
+                                QMessageBox.Ok)
+        else:
+            Msg = 'Did not find any HC/LC pair in your current DB!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+                                QMessageBox.Ok)
+            return
+
     elif option == 'Custom report':
         print('custom report generator')
 
