@@ -231,6 +231,172 @@ def reName(ori_name, rep1, rep2, prefix):
 		my_name = prefix + '_' + my_name
 	return my_name
 
+class Clone_thread(QThread):
+    Clone_progress = pyqtSignal(int, int, int)
+    Clone_finish = pyqtSignal(list)
+
+    def __int__(self, parent=None):
+        super(Clone_thread, self).__init__(parent)
+        self.ClonalPools = []
+        self.Duplicates = ''
+        self.remove = ''
+        self.TotSeqs = ''
+        self.ErLog = ''
+        self.Errs = ''
+
+    def run(self):
+        ClonalPools = self.ClonalPools
+        Duplicates = self.Duplicates
+        remove = self.remove
+        TotSeqs = self.TotSeqs
+        ErLog = self.ErLog
+        Errs = self.Errs
+
+        Currentrecord = Vgenes.ui.txtName.toPlainText()
+
+        CPseqs = 0
+        CPs = 0
+        # identify all existing Clone IDs
+        SQLStatement = 'SELECT DISTINCT(ClonalPool) FROM vgenesdb'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        existing_clone_list = [row[0] for row in DataIn]
+
+        # initial clone ID
+        i = 1
+        while str(i) in existing_clone_list:
+            i += 1
+        progress = 1
+        for pool in ClonalPools:
+            self.Clone_progress.emit(progress, len(ClonalPools), int(progress / len(ClonalPools) * 100))
+            progress += 1
+
+            Pool = list(pool)
+            start = time.time()
+            CPList = VGenesCloneCaller.CloneCaller(Pool, Duplicates)
+            end = time.time()
+            print('Run time for VGenesCloneCaller: ' + str(end - start))
+
+            for record in CPList:
+                CPs += 1
+                j = 1
+                DupList = 'Sequences identical: '
+                for item in record:
+                    #Vgenes.findTreeItem(item)
+                    if Duplicates == False:
+                        try:
+	                        SQLStatement = 'UPDATE vgenesDB SET `ClonalPool` = "' + \
+	                                       str(i) + '" WHERE SeqName = "' + item + '"'
+	                        VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+	                        existing_clone_list.append(str(i))
+                        except:
+                            print(
+                                item + ' caused error in finding clones at line 1798 and so was not annotated as a clone')
+
+                    else:
+                        if j == 1:
+                            SeqName = 'Duplicate of:  ' + item
+                            FirstOne = data[119]
+                        else:
+                            try:
+                                if remove == False:
+	                                SQLStatement = 'UPDATE vgenesDB SET `Quality` = "' + \
+	                                               SeqName + '" WHERE SeqName = "' + item + '"'
+	                                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                                    #VGenesSQL.UpdateField(data[119], SeqName, 'Quality', DBFilename)
+                                else:
+	                                SQLStatement = 'UPDATE vgenesDB SET `Quality` = "' + \
+	                                               'Duplicate' + '" WHERE SeqName = "' + item + '"'
+	                                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+	                                SQLStatement = 'UPDATE vgenesDB SET `Project` = "' + \
+	                                               'Delete' + '" WHERE SeqName = "' + item + '"'
+	                                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                                    #VGenesSQL.UpdateField(data[119], 'Duplicate', 'Quality', DBFilename)
+                                    #VGenesSQL.UpdateField(data[119], 'Delete', 'Project', DBFilename)
+                                DupList += (item + ', ')
+                            except:
+                                print('problem line 1810 with: ' + item)
+
+                        j += 1
+                    CPseqs += 1
+                depth = 'Depth = ' + str(j - 1)
+                if Duplicates == True:
+                    Vgenes.findTreeItem(FirstOne)
+                    if DupList[(len(DupList) - 2):] == ', ':
+                        DupList = DupList[:(len(DupList) - 2)]
+                    if data[94] != ' ' or data[94] != 'Comments':
+                        DupList = DupList + ', ' + data[94]
+
+                    if data[95] != ' ' or data[95] != 'Quality':
+                        depth = depth + '  ' + data[95]
+
+                    VGenesSQL.UpdateField(FirstOne, DupList, 'Comments', DBFilename)
+                    VGenesSQL.UpdateField(FirstOne, depth, 'Quality', DBFilename)
+
+                while str(i) in existing_clone_list:
+                    i += 1
+
+        # model = self.ui.tableView.model()
+        # model.refresh()
+
+        if re.sub(r'\(.+', '', Vgenes.ui.cboTreeOp1.currentText()) == 'Clonal Pool' \
+                or re.sub(r'\(.+', '', Vgenes.ui.cboTreeOp2.currentText()) == 'Clonal Pool' \
+                or re.sub(r'\(.+', '', Vgenes.ui.cboTreeOp3.currentText()) == 'Clonal Pool':
+            Vgenes.on_btnUpdateTree_clicked()
+
+        Vgenes.findTreeItem(Currentrecord)
+        ErLog2 = str(CPs) + ' clonal pools containing ' + str(CPseqs) + ' sequences were identified from ' + str(
+            TotSeqs) + ' total sequences analyzed.\n'
+
+        SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        list1 = []
+        for ele in DataIn:
+            list1.append(ele[0])
+        list_unique = list(set(list1))
+        try:
+            list_unique.remove('0')
+        except:
+            pass
+
+        list_unique = [int(i) for i in list_unique]
+        list_unique.sort()
+        list_unique = ['Clone' + str(i) for i in list_unique]
+
+        Vgenes.ui.comboBoxTree.clear()
+        Vgenes.ui.comboBoxTree.addItems(list_unique)
+
+        if remove == True:
+            Vgenes.LoadDB(DBFilename)
+            Vgenes.ui.txtFieldSearch.setText('Duplicate')
+            Vgenes.ui.cboFindField.setCurrentText('Quality')
+            done = Vgenes.on_btnFieldSearch_clicked()
+            done = Vgenes.on_actionDelete_record_triggered()
+            Vgenes.on_btnUpdateTree_clicked()
+
+        if len(ErLog2) > 0:
+            Erlog2 = ErLog2 + 'The following ' + str(
+                Errs) + ' sequences could not be anaylzed for\nclonality because no CDR3s are indicated:\n' + ErLog
+            ErlogFile = os.path.join(temp_folder,
+                                     'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
+
+            with open(ErlogFile, 'w') as currentFile:
+                currentFile.write(Erlog2)
+
+            #Vgenes.ShowVGenesText(ErlogFile)
+
+        if Vgenes.ui.tabWidget.currentIndex() == 0:
+            Vgenes.load_table()
+            Vgenes.match_tree_to_table()
+            Vgenes.tree_to_table_selection()
+        else:
+            updateMarker == True
+
+        Vgenes.initial_Clone()
+
+        sign = 0
+        Msg = 'Success!'
+        self.Clone_finish.emit([sign, Msg])
+
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -4274,6 +4440,51 @@ class WorkThreadIMGTparser(QThread):
 		a = IMGTAnalysis
 		self.trigger.emit(self.item)
 
+class ProgressBar(QtWidgets.QDialog):
+	def __init__(self, parent=None):
+		super(ProgressBar, self).__init__(parent)
+
+		self.resize(350, 100)
+		self.setWindowTitle(self.tr("Processing progress"))
+
+		self.TipLabel = QLabel(self.tr("Processing:"))
+
+		self.FeatProgressBar = QtWidgets.QProgressBar(self)
+		self.FeatProgressBar.setMinimum(0)
+		self.FeatProgressBar.setMaximum(100)
+		self.FeatProgressBar.setValue(0)
+
+		TipLayout = QtWidgets.QHBoxLayout()
+		TipLayout.addWidget(self.TipLabel)
+
+		FeatLayout = QtWidgets.QHBoxLayout()
+		FeatLayout.addWidget(self.FeatProgressBar)
+
+		self.cancelButton = QtWidgets.QPushButton('cancel', self)
+
+		buttonlayout = QtWidgets.QHBoxLayout()
+		buttonlayout.addStretch(1)
+		buttonlayout.addWidget(self.cancelButton)
+
+		layout = QtWidgets.QVBoxLayout()
+		# layout = QGridLayout()
+		layout.addLayout(FeatLayout)
+		layout.addLayout(TipLayout)
+		layout.addLayout(buttonlayout)
+		self.setLayout(layout)
+		self.show()
+
+		self.cancelButton.clicked.connect(self.onCancel)
+
+	def setValue(self, value):
+		self.FeatProgressBar.setValue(value)
+
+	def setLabel(self, label):
+		self.TipLabel.setText(label)
+
+	def onCancel(self, event):
+		self.close()
+
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
 		super(VGenesForm, self).__init__()  # parent)
@@ -4374,6 +4585,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 
 		self.HeatmapList = []
+
+	def ShowMessageBox(self, data):
+		try:
+			self.progress.close()
+		except:
+			pass
+
+		if data[0] == 0:
+			QMessageBox.information(self, 'Information', data[1], QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			QMessageBox.warning(self, 'Warning', data[1], QMessageBox.Ok, QMessageBox.Ok)
+
+	def result_display(self, cur, total, pct):
+		try:
+			self.progress.setValue(pct)
+			label = "Processing:" + "   " + str(cur) + "/" + str(total)
+			self.progress.setLabel(label)
+		except:
+			pass
 
 	def updateCloneTreeInfo(self):
 		clone_id = self.ui.comboBoxTree.currentText()
@@ -8794,9 +9024,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		print("Finished Shared analysis")
 
 	@pyqtSlot()
-	def on_actionFind_Clonal_triggered(self):
+	def on_actionFind_Clonal_triggered_old(self):
 		global updateMarker
-		# self.ShowProgressBar()
 		from operator import itemgetter
 		import itertools
 		remove = False
@@ -9041,7 +9270,115 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.initial_Clone()
 
+	@pyqtSlot()
+	def on_actionFind_Clonal_triggered(self):
+		global updateMarker
+		from operator import itemgetter
+		import itertools
+		remove = False
+		items = ('Clonal Pools', 'Annotate Duplicates', 'Remove Duplicates', 'Shared Clones')
+		title = 'Choose analysis:'
+		item = setItem(Vgenes, items, title)
+		if item == 'Cancel':
+			return
+		elif item[:3] == 'Ann':
+			Duplicates = True
+		elif item[:3] == 'Rem':
+			Duplicates = True
+			query = 'This function will delete all but one duplicated sequences, annotating ' \
+			        'the remaining with depth (in the "Quality" field) and the names of ' \
+			        'duplicated sequences (in the "Comments" field), \nProceed with delete (Yes), or just annotate (No)'
+			answer = questionMessage(Vgenes, query, 'YNC')
+			if answer == 'Yes':
+				remove = True
+			elif answer == 'Cancel':
+				return
+		elif item[:3] == 'Sha':
+			self.SharedClones()
+			return
+		else:
+			Duplicates = False
 
+		if self.ui.cboFindField.currentText() == 'Name': Vgenes.ui.cboFindField.setCurrentText('Project')
+		# SeqName, Sequence, ClonalPool, GermlineSequence, Mutations
+		answer = questionMessage(Vgenes,
+		                         'Use a field to delineate multiple subjects (default = "Project")?\n\n '
+		                         '"No" will process all selected as one subject.\n\n '
+		                         'Press "Cancel" to choose field in the search panel before running analysis.',
+		                         'YNC')
+		if answer == 'Yes':
+			# field = self.ui.cboFindField.currentText()
+			# fieldsearch = self.TransLateFieldtoReal(field, True)
+			fieldsearch = re.sub(r'\(.+', '', Vgenes.ui.cboTreeOp1.currentText())
+		elif answer == 'No':
+			fieldsearch = 'None'
+		elif answer == 'Cancel':
+			return
+
+		if fieldsearch == 'None':
+			fields = ['SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence',
+			          'ID', 'GVend', 'GJbeg', 'GD1beg', 'GD1end']
+		else:
+			fields = ['SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence',
+			          'ID', 'GVend', 'GJbeg', 'GD1beg', 'GD1end', fieldsearch]
+
+		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
+		SQLStatement = VGenesSQL.MakeSQLStatement(Vgenes, fields, data[0])
+		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
+		DataIs2 = []
+
+		ProjName = data[75]
+
+		ErLog = 'Clonal analysis for ' + ProjName + '\n'
+		Errs = 0
+		for item in DataIs:
+			if int(item[6]) > 0:  # has CDR3 scored
+				DataIs2.append(item)
+			else:
+				ErLog += item[0] + '\n'
+				Errs += 1
+		seq_name_list = [i[0] for i in DataIs]
+		WhereStatement = '","'.join(seq_name_list)
+		SQLStatement = 'UPDATE vgenesDB SET `ClonalPool` = "0" WHERE SeqName in ("' + WhereStatement + '")'
+		VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+		TotSeqs = len(DataIs2)
+		# if fieldsearch == 'None':
+		#     DataIs2.sort(key=itemgetter(3))
+		# else:
+		#     DataIs2.sort(key=itemgetter(17))
+		ClonalPool = []
+		ClonalPools = []
+
+		# fields = ['SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence', 'ID', fieldsearch]
+
+		if answer == 'Yes':
+			DataIs2.sort(key=itemgetter(14))
+			for k, v in itertools.groupby(DataIs2, key=itemgetter(14)):  # first split out seperate clonal pools
+				# i = int(k)
+
+				if len(k) != 0:
+					for item in v:
+						ClonalPool.append(item)
+					CurrentPool = tuple(ClonalPool)
+					ClonalPools.append(CurrentPool)
+					ClonalPool.clear()
+		else:
+			ClonalPools.append(DataIs2)
+
+		self.clone_Thread = Clone_thread(self)
+		self.clone_Thread.ClonalPools = ClonalPools
+		self.clone_Thread.Duplicates = Duplicates
+		self.clone_Thread.remove = remove
+		self.clone_Thread.TotSeqs = TotSeqs
+		self.clone_Thread.Errs = Errs
+		self.clone_Thread.ErLog = ErLog
+		self.clone_Thread.Clone_progress.connect(self.result_display)
+		self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
+		self.clone_Thread.start()
+
+		self.progress = ProgressBar(self)
+		self.progress.show()
 
 	@pyqtSlot()
 	def on_actionAnalyze_Mutations_triggered(self):

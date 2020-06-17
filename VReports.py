@@ -3,7 +3,9 @@ import VGenesSQL
 import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
     setText
+from VGenesMain import ProgressBar
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtCore import QThread, pyqtSignal
 
 import re
 import time
@@ -46,6 +48,70 @@ RealNameList = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene
                 "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
                 "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster", "10xBarCode", "Population",
                 "Blank12", "Blank13", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
+
+class HCLC_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list)
+
+    def __int__(self):
+        super(HCLC_thread, self).__init__()
+        self.DBFilename = ''
+        self.Pathname = ''
+
+    def run(self):
+        Msg = ''
+        sign = ''
+        SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE GeneType = "Heavy"'
+        DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+        if len(DataIn) < 2:
+            Msg = 'Your VGene DB do not have any barcode information!'
+            sign = 1
+        else:
+            CSVOut = ''
+            # make CSV header
+            SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
+            DataInHeader = VGenesSQL.RunSQL(self.DBFilename, SQLSTATEMENT)
+            field_names = ['HC_' + i[1] for i in DataInHeader] + ['LC_' + i[1] for i in DataInHeader]
+            CSVOut += ','.join(field_names) + '\n'
+
+            seq_num = 0
+            progress = 0
+            for record in DataIn:
+                barcode = record[0]
+                if barcode == 'Blank10' or barcode == '':
+                    pass
+                else:
+                    SQLStatement1 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType = "Heavy"'
+                    DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
+
+                    SQLStatement2 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
+                    DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
+
+                    if len(DataIn1) == 1 and len(DataIn2) == 1:
+                        data_hc = [str(x) for x in DataIn1[0]]
+                        data_hc[58] = re.sub(r'\n', '#', data_hc[58])
+                        data_hc[97] = re.sub(',', '|', data_hc[97])
+                        data_lc = [str(x) for x in DataIn2[0]]
+                        data_lc[58] = re.sub(r'\n', '#', data_lc[58])
+                        data_lc[97] = re.sub(',', '|', data_lc[97])
+
+                        CSVOut += ','.join(data_hc) + ',' + ','.join(data_lc) + '\n'
+                        seq_num += 1
+
+                self.HCLC_progress.emit(progress, len(DataIn), int(progress/len(DataIn)*100))
+                progress += 1
+
+            if seq_num > 0:
+                with open(self.Pathname, 'w') as currentfile:
+                    currentfile.write(CSVOut)
+
+                Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
+                sign = 0
+            else:
+                Msg = 'Did not find any HC/LC pair in your current DB!'
+                sign = 1
+
+        self.HCLC_finish.emit([sign, Msg])
 
 
 def StandardReports(self, option, SequenceName, DBFilename):
@@ -472,6 +538,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
             with open(Pathname, 'w') as currentfile:
                 currentfile.write(CloningReportCSV)
+
+            Msg = 'AbVec Cloning Report generated!'
+            self.ShowMessageBox([0, Msg])
     elif option == 'HT-AbVec Cloning report':
         fields = ['SeqName', 'GeneType', 'V1', 'J1', 'productive', 'Sequence', 'Vbeg', 'Jend', 'Blank10']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
@@ -593,7 +662,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
-        #
+
+        Msg = 'HT-AbVec Cloning Report generated!'
+        self.ShowMessageBox([0, Msg])
     elif option == '10x Synthesis report':
 
         fields = ['SeqName', 'GeneType', 'V1', 'J1', 'productive', 'Sequence', 'Vbeg', 'Jend', 'Blank10']
@@ -691,6 +762,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
+
+        Msg = '10x Synthesis Report generated!'
+        self.ShowMessageBox([0, Msg])
     elif option == 'Sequence summary':
         fields = ['SeqName', 'Project', 'V1', 'D1', 'J1', 'VLocus', 'JLocus', 'productive', 'TotMut', 'CDR3DNA', 'CDR3AA',
                   'CDR3Length', 'CDR3pI', 'ClonalPool', 'Isotype', 'Sequence', 'Blank7']
@@ -728,6 +802,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
+
+        Msg = 'Sequence summary Report generated!'
+        self.ShowMessageBox([0, Msg])
         #
         # SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         # DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -767,7 +844,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
         #     with open(Pathname, 'w') as currentfile:
         #         currentfile.write(SeqSumm)
     elif option == 'Comma seperated values (.csv)':
-
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         (dirname, filename) = os.path.split(DBFilename)
@@ -817,8 +893,10 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
-    elif option == 'CSV format Entire VDB':
 
+        Msg = 'Comma seperated values Report generated!'
+        self.ShowMessageBox([0, Msg])
+    elif option == 'CSV format Entire VDB':
         SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
         fields = [i[0] for i in DataIn]
@@ -844,6 +922,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
+
+        Msg = 'CSV format Entire VDB Report generated!'
+        self.ShowMessageBox([0, Msg])
     elif option == 'Clonal Analysis (.csv)':
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
@@ -874,8 +955,26 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         with open(Pathname, 'w') as currentfile:
             currentfile.write(CSVOut)
+
+        Msg = 'Clonal Analysis Report generated!'
+        self.ShowMessageBox([0,Msg])
     elif option == 'Heavy/Light Chain pairs (.csv)':
-        SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb'
+        Pathname = saveFile(self.parent(), 'csv')
+        if Pathname == None:
+            return
+
+        self.HCLC_Thread = HCLC_thread(self)
+        self.HCLC_Thread.DBFilename = DBFilename
+        self.HCLC_Thread.Pathname = Pathname
+        self.HCLC_Thread.HCLC_progress.connect(self.result_display)
+        self.HCLC_Thread.HCLC_finish.connect(self.ShowMessageBox)
+        self.HCLC_Thread.start()  ##启动多线程
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
+        '''
+        SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE GeneType = "Heavy"'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         if len(DataIn) < 2:
             Msg = 'Your VGene DB do not have any barcode information!'
@@ -928,8 +1027,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
                                 QMessageBox.Ok)
             return
-
+        '''
     elif option == 'Custom report':
         print('custom report generator')
 
     print('done')
+
