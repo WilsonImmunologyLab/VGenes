@@ -117,7 +117,7 @@ def TimeCheck(listname):
 				countim = 0
 	return countim
 
-def IgBLASTit(FASTAFile, datalist):
+def IgBLASTit(FASTAFile, datalist, signal):
 	import os
 	#todo change to app folder
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -1004,6 +1004,10 @@ def IgBLASTit(FASTAFile, datalist):
 			file_handle.write(progress)
 			file_handle.write(',' + str(current_seq) + '/' + str(totel_seq))
 			file_handle.close()
+
+			pct = int(current_seq*100/totel_seq)
+			label = 'Processing: ' + str(current_seq) + '/' + str(totel_seq)
+			signal.emit(pct, label)
 			#print('Current Progress: ' + progress)
 			current_seq += 1
 
@@ -1592,10 +1596,10 @@ def IgBLASTit(FASTAFile, datalist):
 	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
 
-def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
+def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist, signal):
 	import os
 	#todo change to app folder
-	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+	#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 	ErlogFile = os.path.join(working_prefix, 'IgBlast', 'ErLog.txt')  # '/Applications/IgBlast/database/ErLog.txt'  # NoErrors  NoGoodSeqs
 	ErLog  = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
 	with open(ErlogFile, 'w') as currentFile:  #using with for this automatically closes the file even if you crash
@@ -2401,11 +2405,17 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist):
 
 		if IgLine[0:7] == 'Query= ':
 			# write current progress to file
+			'''
 			file_handle = open(progressBarFile,'w')
 			progress = str(int(current_seq*100/totel_seq))
 			file_handle.write(progress)
 			file_handle.write(',' + str(current_seq) + '/' + str(totel_seq))
 			file_handle.close()
+			'''
+
+			pct = int(current_seq * 100 / totel_seq)
+			label = 'Processing: ' + str(current_seq) + '/' + str(totel_seq)
+			signal.emit(pct, label)
 			#print('Current Progress: ' + progress)
 			current_seq += 1
 

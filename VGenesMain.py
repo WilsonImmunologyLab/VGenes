@@ -208,8 +208,6 @@ FieldCommentList = ["", "", "", "", "", "", "", "", "", "", "","", "", "", "", "
                     "", "", "", "", "", "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", "",
                     "", "", "", "", "", "", "", "","", "", "", "", "", "", "", "", "", "", "", ""]
 
-global StopCheckProgress
-StopCheckProgress = True
 global NameIndex
 NameIndex = {}
 global FieldsChanged
@@ -1896,6 +1894,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		global answer3
 		answer3 = 'No'
 
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
+			pass
+
 	def removeSel(self):
 		sender = self.sender()
 		listRow = sender.currentRow()
@@ -2347,8 +2352,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 	def accept(self):
 		num = self.ui.tabWidget.currentIndex()
 
-		self.ui.progressBar.setValue(1)
-		self.ui.labelpct.setText('Start processing and loading...')
+		#self.ui.progressBar.setValue(1)
+		#self.ui.labelpct.setText('Start processing and loading...')
 
 		if num == 0:
 			self.InitiateImportFrom10X('none', 0)
@@ -2434,7 +2439,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		return barcode_dict
 
 	def InitiateImportFrom10X(self, Filenamed, MaxNum):
-		global StopCheckProgress
 		self.calling = 1
 
 		# need to transfer species grouping to IgBlaster
@@ -2503,10 +2507,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(MaxNum)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -2516,6 +2520,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -2523,8 +2532,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
 			project = 'ByFunction'
@@ -2544,10 +2551,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(multiProject)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -2557,6 +2564,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -2564,13 +2576,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			#self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 
 	def InitiateImportFromFasta(self, Filenamed, MaxNum):
 		self.calling = 2
-		global StopCheckProgress
 
 		# need to transfer species grouping to IgBlaster
 		if self.ui.listWidgetFasta.count() == 0:
@@ -2644,10 +2653,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(MaxNum)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -2657,6 +2666,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -2665,8 +2679,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoChoose.isChecked():
 			(dirname, filename) = os.path.split(seq_pathname)
@@ -2694,10 +2706,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(MaxNum)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -2707,6 +2719,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -2715,8 +2732,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
 			project = 'ByFunction'
@@ -2736,10 +2751,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(multiProject)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -2749,6 +2764,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -2757,8 +2777,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			#self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 
 	def InitiateImportFromCSV(self, Filenamed, MaxNu):
@@ -3066,16 +3084,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(MaxNum)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread1(self)
 			workThread.igOut = igOut
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -3083,8 +3106,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
 			project = 'ByFunction'
@@ -3104,16 +3125,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(multiProject)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread1(self)
 			workThread.igOut = igOut
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -3121,8 +3147,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			# self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 
 	def InitiateImportFromIMGT(self):
@@ -3163,10 +3187,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(subgroup)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThreadIMGTparser(self)
 			workThread.item = IMGT_out
 			workThread.datalist = datalist
@@ -3179,8 +3203,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
 			project = 'ByFunction'
@@ -3196,10 +3218,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(subgroup)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThreadIMGTparser(self)
 			workThread.item = IMGT_out
 			workThread.datalist = datalist
@@ -3212,13 +3234,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			# self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 
 	def InitiateImportFromSEQ(self, Filenamed, MaxNum):
 		self.calling = 6
-		global StopCheckProgress
 
 		# need to transfer species grouping to IgBlaster
 
@@ -3304,10 +3323,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(MaxNum)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -3317,6 +3336,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -3325,8 +3349,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoChoose.isChecked():
 			(dirname, filename) = os.path.split(seq_pathname)
@@ -3354,10 +3376,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(MaxNum)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -3367,6 +3389,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -3375,8 +3402,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 		elif self.ui.rdoFunction.isChecked():
 			project = 'ByFunction'
@@ -3396,10 +3421,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			datalist.append(multiProject)
 
 			# try multi-thread
-			progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-			file_handle = open(progressBarFile, 'w')
-			file_handle.write('0')
-			file_handle.close()
+			#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+			#file_handle = open(progressBarFile, 'w')
+			#file_handle.write('0')
+			#file_handle.close()
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
@@ -3409,6 +3434,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'slow'
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Running IgBlast...')
+			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
 			f = open(import_file, 'w')
@@ -3417,16 +3447,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			f.close()
 
 			#self.disableWidgets()
-			StopCheckProgress = False
-			self.checkProgress()
 			return
 
 	@pyqtSlot()
 	def multi_callback(self):
 		global IgBLASTAnalysis
-		global StopCheckProgress
-
-		StopCheckProgress = True
 
 		Startprocessed = 0
 		try:
@@ -3494,12 +3519,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ShowVGenesText(ErlogFile2)
 		self.hide()
 
+		try:
+			self.progress.close()
+		except:
+			pass
+
 	@pyqtSlot()
 	def multiIMGT_callback(self):
 		global IMGTAnalysis
-		global StopCheckProgress
-
-		StopCheckProgress = True
 
 		Startprocessed = 0
 		try:
@@ -3889,10 +3916,10 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(MaxNum)
 
 				# try multi-thread
-				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-				file_handle = open(progressBarFile, 'w')
-				file_handle.write('0')
-				file_handle.close()
+				#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				#file_handle = open(progressBarFile, 'w')
+				#file_handle.write('0')
+				#file_handle.close()
 				workThread = WorkThread(self)
 				workThread.item = item
 				workThread.datalist = datalist
@@ -3905,7 +3932,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				f.close()
 
 				self.disableWidgets()
-				self.checkProgress()
 				return
 
 				'''
@@ -3973,10 +3999,10 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(MaxNum)
 
 				# try multi-thread
-				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-				file_handle = open(progressBarFile, 'w')
-				file_handle.write('0')
-				file_handle.close()
+				#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				#file_handle = open(progressBarFile, 'w')
+				#file_handle.write('0')
+				#file_handle.close()
 				workThread = WorkThread(self)
 				workThread.item = item
 				workThread.datalist = datalist
@@ -3989,7 +4015,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				f.close()
 
 				self.disableWidgets()
-				self.checkProgress()
 				return
 
 				'''
@@ -4048,10 +4073,10 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				datalist.append(multiProject)
 
 				# try multi-thread
-				progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
-				file_handle = open(progressBarFile, 'w')
-				file_handle.write('0')
-				file_handle.close()
+				#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+				#file_handle = open(progressBarFile, 'w')
+				#file_handle.write('0')
+				#file_handle.close()
 				workThread = WorkThread(self)
 				workThread.item = item
 				workThread.datalist = datalist
@@ -4064,7 +4089,6 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				f.close()
 
 				self.disableWidgets()
-				self.checkProgress()
 				return
 
 				'''				
@@ -4392,6 +4416,7 @@ class MyObjectCls(QObject):
 		self.downloadFigSignal.emit(msg)
 
 class WorkThread(QThread):
+	loadProgress =  pyqtSignal(int, str)
 	trigger = pyqtSignal(str)
 
 	def __int__(self):
@@ -4404,13 +4429,14 @@ class WorkThread(QThread):
 	def run(self):
 		global IgBLASTAnalysis
 		if self.method == 'fast':
-			IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist)
+			IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist, self.loadProgress)
 		else:
-			IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist)
+			IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist, self.loadProgress)
 
 		self.trigger.emit(self.item)
 
 class WorkThread1(QThread):
+	loadProgress = pyqtSignal(int, str)
 	trigger = pyqtSignal(str)
 
 	def __int__(self):
@@ -4422,27 +4448,31 @@ class WorkThread1(QThread):
 
 	def run(self):
 		global IgBLASTAnalysis
-		IgBLASTAnalysis = IgBLASTer.IgBLASTitResults(self.item, self.igOut, self.datalist)
+		IgBLASTAnalysis = IgBLASTer.IgBLASTitResults(self.item, self.igOut, self.datalist, self.loadProgress)
 		self.trigger.emit(self.item)
 
 class WorkThreadIMGTparser(QThread):
+	loadProgress = pyqtSignal(int, str)
 	trigger = pyqtSignal(str)
 
 	def __int__(self):
-		super(WorkThread1, self).__init__()
+		super(WorkThreadIMGTparser, self).__init__()
 		self.parent = parent
 		self.item = ''
 		self.datalist = ''
 
 	def run(self):
 		global IMGTAnalysis
-		IMGTAnalysis = IMGTparser(self.item, self.datalist)
+		IMGTAnalysis = IMGTparser(self.item, self.datalist, self.loadProgress)
 		a = IMGTAnalysis
 		self.trigger.emit(self.item)
 
 class ProgressBar(QtWidgets.QDialog):
 	def __init__(self, parent=None):
 		super(ProgressBar, self).__init__(parent)
+
+		#self.setWindowFlags(Qt.WindowStaysOnTopHint | Qt.FramelessWindowHint)
+		#self.setWindowFlags(Qt.WindowCloseButtonHint)
 
 		self.resize(350, 100)
 		self.setWindowTitle(self.tr("Processing progress"))
@@ -4460,21 +4490,12 @@ class ProgressBar(QtWidgets.QDialog):
 		FeatLayout = QtWidgets.QHBoxLayout()
 		FeatLayout.addWidget(self.FeatProgressBar)
 
-		self.cancelButton = QtWidgets.QPushButton('cancel', self)
-
-		buttonlayout = QtWidgets.QHBoxLayout()
-		buttonlayout.addStretch(1)
-		buttonlayout.addWidget(self.cancelButton)
-
 		layout = QtWidgets.QVBoxLayout()
 		# layout = QGridLayout()
 		layout.addLayout(FeatLayout)
 		layout.addLayout(TipLayout)
-		layout.addLayout(buttonlayout)
 		self.setLayout(layout)
 		self.show()
-
-		self.cancelButton.clicked.connect(self.onCancel)
 
 	def setValue(self, value):
 		self.FeatProgressBar.setValue(value)
@@ -16782,10 +16803,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.updateF(data[119])
 
-def IgBlastParserFast(FASTAFile, datalist):
+def IgBlastParserFast(FASTAFile, datalist, signal):
 	import os
 	# todo change to app folder
-	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+	#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 	ErlogFile = os.path.join(temp_folder,  'ErLog.txt')
 	ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
 	ErLog = 'VGenes input beginning at: ' + time.strftime('%c') + '\n'
@@ -16873,11 +16894,17 @@ def IgBlastParserFast(FASTAFile, datalist):
 			if line_id == 0:
 				pass
 			else:
+				'''
 				file_handle = open(progressBarFile, 'w')
 				progress = str(int((line_id + 1) * 50 / totel_seq))
 				file_handle.write(progress)
 				file_handle.write(',Step1:' + str(line_id + 1) + '/' + str(totel_seq))
 				file_handle.close()
+				'''
+
+				pct = int((line_id + 1) * 100 / totel_seq)
+				label = 'Step1:' + str(line_id + 1) + '/' + str(totel_seq)
+				signal.emit(pct, label)
 
 				this_data = [''] * 119
 
@@ -17037,11 +17064,17 @@ def IgBlastParserFast(FASTAFile, datalist):
 			read_tag = True
 
 			if cur_block != '':
+				'''
 				file_handle = open(progressBarFile, 'w')
 				progress = str(50 + int((block_id + 1) * 50 / totel_seq))
 				file_handle.write(progress)
 				file_handle.write(',Step2:' + str(block_id + 1) + '/' + str(totel_seq))
 				file_handle.close()
+				'''
+
+				pct = int((block_id + 1) * 100 / totel_seq)
+				label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
+				signal.emit(pct, label)
 
 				# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
 				ig_match = re.findall('\nIG[^\n]+', cur_block)
@@ -17184,11 +17217,16 @@ def IgBlastParserFast(FASTAFile, datalist):
 			cur_block += IgLine
 
 	if cur_block != '':
+		'''
 		file_handle = open(progressBarFile, 'w')
 		progress = str(50 + int((block_id + 1) * 50 / totel_seq))
 		file_handle.write(progress)
 		file_handle.write(',Step2:' + str(block_id + 1) + '/' + str(totel_seq))
 		file_handle.close()
+		'''
+		pct = int((block_id + 1) * 100 / totel_seq)
+		label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
+		signal.emit(pct, label)
 
 		# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
 		ig_match = re.findall('\nIG[^\n]+', cur_block)
@@ -17371,8 +17409,8 @@ def IgBlastParserFast(FASTAFile, datalist):
 
 	return DATA
 
-def IMGTparser(IMGT_out, data_list):
-	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+def IMGTparser(IMGT_out, data_list, signal):
+	#progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 
 	DBpathname = os.path.join(working_prefix, 'Data', 'VDJGenes.db')
 	conn = db.connect(DBpathname)
@@ -17528,11 +17566,17 @@ def IMGTparser(IMGT_out, data_list):
 				raw_seq.append(record[24].upper())
 			line_id += 1
 
+		'''
 		file_handle = open(progressBarFile, 'w')
 		progress = str(int(20))
 		file_handle.write(progress)
 		file_handle.write(',Summary file processed')
 		file_handle.close()
+		'''
+
+		pct = 20
+		label = 'Summary file processed:' + str(1) + '/' + str(5)
+		signal.emit(pct, label)
 
 		# read records from junction file
 		result = csv.reader(junction, delimiter="\t")
@@ -17662,12 +17706,16 @@ def IMGTparser(IMGT_out, data_list):
 							DATA[line_id - 1][65] = str(Germline_Jbeg)
 							DATA[line_id - 1][66] = str(Germline_Jend)
 			line_id += 1
-
+		'''
 		file_handle = open(progressBarFile, 'w')
 		progress = str(int(40))
 		file_handle.write(progress)
 		file_handle.write(',Junction file processed')
 		file_handle.close()
+		'''
+		pct = 40
+		label = 'Junction file processed:' + str(2) + '/' + str(5)
+		signal.emit(pct, label)
 
 		# read records from ntseq file
 		result = csv.reader(ntseq, delimiter="\t")
@@ -17753,12 +17801,17 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id - 1][101] = Isotype
 
 			line_id += 1
-
+		'''
 		file_handle = open(progressBarFile, 'w')
 		progress = str(int(60))
 		file_handle.write(progress)
 		file_handle.write(',NT-sequence file processed')
 		file_handle.close()
+		'''
+
+		pct = 60
+		label = 'NT-sequence file processed:' + str(3) + '/' + str(5)
+		signal.emit(pct, label)
 
 		# read records from 8-v-mutattion file
 		result = csv.reader(vmut, delimiter="\t")
@@ -17807,11 +17860,17 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id-1][96] = re.sub('\s.+','',record[7])
 			line_id += 1
 
+		'''
 		file_handle = open(progressBarFile, 'w')
 		progress = str(int(80))
 		file_handle.write(progress)
 		file_handle.write(',Mutation file processed')
 		file_handle.close()
+		'''
+
+		pct = 80
+		label = 'NT-sequence file processed:' + str(4) + '/' + str(5)
+		signal.emit(pct, label)
 
 		# read records from aa-seq file
 		result = csv.reader(aaseq, delimiter="\t")
@@ -17824,11 +17883,17 @@ def IMGTparser(IMGT_out, data_list):
 				DATA[line_id-1][83] = str(len(record[14]))
 			line_id += 1
 
+		'''
 		file_handle = open(progressBarFile, 'w')
 		progress = str(int(100))
 		file_handle.write(progress)
 		file_handle.write(',AA-sequence file processed')
 		file_handle.close()
+		'''
+
+		pct = 100
+		label = 'AA-sequence file processed:' + str(5) + '/' + str(5)
+		signal.emit(pct, label)
 	#result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
 		#for record in result:
 		#	#print(record)
