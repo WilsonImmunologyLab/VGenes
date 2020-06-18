@@ -7025,8 +7025,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 					.add(
 						series_name="MyData",
 						data=data,
+						levels=[
+							opts.TreeMapLevelsOpts(
+								treemap_itemstyle_opts=opts.TreeMapItemStyleOpts(
+									border_color="#555", border_width=4, gap_width=4
+								)
+							),
+							opts.TreeMapLevelsOpts(
+								color_saturation=[0.3, 0.6],
+								treemap_itemstyle_opts=opts.TreeMapItemStyleOpts(
+									border_color_saturation=0.7, gap_width=2, border_width=2
+								),
+							),
+							opts.TreeMapLevelsOpts(
+								color_saturation=[0.3, 0.5],
+								treemap_itemstyle_opts=opts.TreeMapItemStyleOpts(
+									border_color_saturation=0.6, gap_width=1
+								),
+							),
+							opts.TreeMapLevelsOpts(color_saturation=[0.3, 0.5]),
+						],
 						visual_min=300,
-						leaf_depth=1,
 						label_opts=opts.LabelOpts(position="inside"),
 					)
 					.set_global_opts(
