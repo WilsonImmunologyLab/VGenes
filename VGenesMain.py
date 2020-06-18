@@ -232,7 +232,7 @@ def reName(ori_name, rep1, rep2, prefix):
 	return my_name
 
 class Clone_thread(QThread):
-    Clone_progress = pyqtSignal(int, int, int)
+    Clone_progress = pyqtSignal(int, str)
     Clone_finish = pyqtSignal(list)
 
     def __int__(self, parent=None):
@@ -243,6 +243,7 @@ class Clone_thread(QThread):
         self.TotSeqs = ''
         self.ErLog = ''
         self.Errs = ''
+        self.PoolNames = []
 
     def run(self):
         ClonalPools = self.ClonalPools
@@ -251,7 +252,8 @@ class Clone_thread(QThread):
         TotSeqs = self.TotSeqs
         ErLog = self.ErLog
         Errs = self.Errs
-
+        PoolNames = self.PoolNames
+		
         Currentrecord = Vgenes.ui.txtName.toPlainText()
 
         CPseqs = 0
@@ -265,16 +267,14 @@ class Clone_thread(QThread):
         i = 1
         while str(i) in existing_clone_list:
             i += 1
-        progress = 1
+        PoolID = 0
         for pool in ClonalPools:
-            self.Clone_progress.emit(progress, len(ClonalPools), int(progress / len(ClonalPools) * 100))
-            progress += 1
-
             Pool = list(pool)
             start = time.time()
-            CPList = VGenesCloneCaller.CloneCaller(Pool, Duplicates)
+            CPList = VGenesCloneCaller.CloneCaller(Pool, Duplicates, self.Clone_progress, PoolNames[PoolID])
             end = time.time()
             print('Run time for VGenesCloneCaller: ' + str(end - start))
+            PoolID += 1
 
             for record in CPList:
                 CPs += 1
@@ -4585,6 +4585,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 
 		self.HeatmapList = []
+
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
+			pass
 
 	def ShowMessageBox(self, data):
 		try:
@@ -9368,15 +9375,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#     DataIs2.sort(key=itemgetter(17))
 		ClonalPool = []
 		ClonalPools = []
-
+		PoolNames = []
 		# fields = ['SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence', 'ID', fieldsearch]
 
 		if answer == 'Yes':
 			DataIs2.sort(key=itemgetter(14))
 			for k, v in itertools.groupby(DataIs2, key=itemgetter(14)):  # first split out seperate clonal pools
 				# i = int(k)
-
 				if len(k) != 0:
+					PoolNames.append(k)
 					for item in v:
 						ClonalPool.append(item)
 					CurrentPool = tuple(ClonalPool)
@@ -9392,7 +9399,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.clone_Thread.TotSeqs = TotSeqs
 		self.clone_Thread.Errs = Errs
 		self.clone_Thread.ErLog = ErLog
-		self.clone_Thread.Clone_progress.connect(self.result_display)
+		self.clone_Thread.PoolNames = PoolNames
+		self.clone_Thread.Clone_progress.connect(self.progressLabel)
 		self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
 		self.clone_Thread.start()
 

@@ -3,7 +3,7 @@ import VGenesSeq
 from operator import itemgetter
 from math import ceil
 import os
-def CloneCaller(DataList, Duplicates):
+def CloneCaller(DataList, Duplicates, signal, poolID):
 
 
     # 'SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence', 'ID', 'GVend', 'GJbeg', 'GD1beg', 'GD1end'
@@ -63,8 +63,13 @@ def CloneCaller(DataList, Duplicates):
 
     # 'SeqName', 'VLocus', 'JLocus', 'CDR3Length', 'CDR3DNA', 'Mutations', 'Vbeg', 'Vend', 'Sequence', 'ID'
     # 0             1        2            3           4          5           6       7         8        9
-
+    progress = 1
     for pool in PrePools:
+        label = "Processing " + str(poolID) + " group: " + str(progress) + '/' + str(len(PrePools))
+        pct = int(progress / len(PrePools) * 100)
+        signal.emit(pct, label)
+        progress += 1
+
         SeqDict.clear()
         NearPool = []
         for record in pool:
