@@ -10,6 +10,9 @@ import math
 import numpy
 import pandas as pd
 
+#import asyncio
+#from aiohttp import TCPConnector, ClientSession
+
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
@@ -5579,6 +5582,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.listWidgetAll.addItems(fields_name[1:])
 					self.ui.comboBoxSortField.clear()
 					self.ui.comboBoxSortField.addItems(fields_name)
+					self.ui.comboBoxSankey1.clear()
+					self.ui.comboBoxSankey2.clear()
+					self.ui.comboBoxSankey3.clear()
+					self.ui.comboBoxSankey4.clear()
+					self.ui.comboBoxSankey1.addItems(fields_name)
+					self.ui.comboBoxSankey2.addItems(fields_name)
+					self.ui.comboBoxSankey3.addItems(fields_name)
+					self.ui.comboBoxSankey4.addItems(fields_name)
 			elif self.ui.tabWidget.currentIndex() == 8:
 				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -7750,6 +7761,74 @@ class VGenesForm(QtWidgets.QMainWindow):
 						visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc','#006699']),
 					)
 				)
+		# Sankey Diagram
+		elif self.ui.tabWidgetFig.currentIndex() == 9:
+			'''
+			data = asyncio.run(
+				get_json_data(url="https://echarts.baidu.com/examples/data/asset/data/energy.json")
+			)
+			'''
+			# fetch data
+			f1 = self.ui.comboBoxSankey1.currentText()
+			f2 = self.ui.comboBoxSankey2.currentText()
+			f3 = self.ui.comboBoxSankey3.currentText()
+			f4 = self.ui.comboBoxSankey4.currentText()
+			
+			f1 = re.sub(r'\(.+', '', f1)
+			f2 = re.sub(r'\(.+', '', f2)
+			f3 = re.sub(r'\(.+', '', f3)
+			f4 = re.sub(r'\(.+', '', f4)
+
+			fields = list(set([f1, f2, f3, f4]))
+			if '' in fields:
+				fields.remove('')
+			if len(fields) < 2:
+				Msg = 'Need at least two fields for Sankey Diagram!\n'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			
+			field_str = ''
+			sankey_nodes = []
+			for ele in [f1, f2, f3, f4]:
+				if ele != '':
+					field_str += ele + ','
+					SQLStatement = 'SELECT distinct(' + ele + ') FROM vgenesDB '
+					SQLStatement = SQLStatement + where_statement
+					Data = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					for record in Data:
+						if isinstance(record[0], str):
+							name = ele + '_' + record[0]
+							sankey_nodes.append({'name':name})
+
+			field_str = field_str[:-1]
+
+			SQLStatement = 'SELECT ' + field_str + ' FROM vgenesDB '
+			SQLStatement = SQLStatement + where_statement
+
+			try:
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			except:
+				Msg = 'SQL error! Current SQL statemernt is:\n' + SQLStatement
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			
+			# List to json
+			sankey_links = MakeSankey(DataIn, field_str)
+
+			ad = 1
+			# draw figure
+			my_pyecharts = (
+				Sankey(init_opts=opts.InitOpts(width="300px", height="200px"))
+					.add(
+					series_name="",
+					nodes=sankey_nodes,
+					links=sankey_links,
+					itemstyle_opts=opts.ItemStyleOpts(border_width=1, border_color="#aaa"),
+					linestyle_opt=opts.LineStyleOpts(color="source", curve=0.5, opacity=0.5),
+					tooltip_opts=opts.TooltipOpts(trigger_on="mousemove"),
+				)
+					.set_global_opts(title_opts=opts.TitleOpts(title="Sankey Diagram"))
+			)
 
 		if PNG == True:
 			print(self.ui.F.size())
@@ -18723,6 +18802,34 @@ def annotate_heatmap(im, data=None, valfmt="{x:.2f}",
 	            texts.append(text)
 
     return texts
+
+def MakeSankey(DataIn, field_str):
+	fields = field_str.split(',')
+	sankey_links = []
+	for i in range(len(fields)-1):
+		field1 = fields[i]
+		field2 = fields[i+1]
+		
+		cur_data = [record[i:i+2] for record in DataIn]
+
+		df = pd.DataFrame(cur_data, columns=['A', 'B'])
+		gp = df.groupby(by=['A', 'B'])
+		newdf = gp.size()
+		newdf = newdf.reset_index(name='times')
+
+		for index in range(len(newdf)):
+			cur_a = field1 + '_' + newdf['A'][index]
+			cur_b = field2 + '_' + newdf['B'][index]
+			cur_count = int(newdf['times'][index].astype(numpy.int32))
+			sankey_links.append({"source": cur_a, "target": cur_b,  "value": cur_count})
+	
+	return sankey_links
+
+async def get_json_data(url: str) -> dict:
+    async with ClientSession(connector=TCPConnector(ssl=False)) as session:
+        async with session.get(url=url) as response:
+            return await response.json()
+
 
 CodonDict={'ATT':'I',   'ATC':'I',  'ATA':'I',  'CTT':'L',  'CTC':'L',
 'CTA':'L',  'CTG':'L',  'TTA':'L',  'TTG':'L',  'GTT':'V',  'GTC':'V',

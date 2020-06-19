@@ -8003,6 +8003,53 @@ If the J-end is off the J gene end may need adjusted</string>
             </item>
            </layout>
           </widget>
+          <widget class="QWidget" name="tab_13">
+           <attribute name="title">
+            <string>Sankey diagram</string>
+           </attribute>
+           <layout class="QGridLayout" name="gridLayout_36">
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_84">
+              <property name="text">
+               <string>Field 1</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="1">
+             <widget class="QLabel" name="label_85">
+              <property name="text">
+               <string>Field 2</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="2">
+             <widget class="QLabel" name="label_86">
+              <property name="text">
+               <string>Field 3</string>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_87">
+              <property name="text">
+               <string>Field 4</string>
+              </property>
+             </widget>
+            </item>
+            <item row="1" column="0">
+             <widget class="QComboBox" name="comboBoxSankey1"/>
+            </item>
+            <item row="1" column="1">
+             <widget class="QComboBox" name="comboBoxSankey2"/>
+            </item>
+            <item row="1" column="2">
+             <widget class="QComboBox" name="comboBoxSankey3"/>
+            </item>
+            <item row="1" column="3">
+             <widget class="QComboBox" name="comboBoxSankey4"/>
+            </item>
+           </layout>
+          </widget>
          </widget>
         </item>
         <item row="2" column="0" colspan="3">
