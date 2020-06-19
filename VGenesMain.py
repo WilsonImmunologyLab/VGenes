@@ -7830,6 +7830,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					.set_global_opts(title_opts=opts.TitleOpts(title="Sankey Diagram"))
 			)
 
+		# render figures
 		if PNG == True:
 			print(self.ui.F.size())
 		else:
@@ -7938,6 +7939,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				record.append(xaxis_data)
 				record.append(yaxis_data)
 				self.ui.HTMLview.info = record
+			elif self.ui.tabWidgetFig.currentIndex() == 9:
+				self.ui.HTMLview.info = ['Sankey', re.sub(r'\(.+', '', self.ui.comboBoxSankey1.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxSankey2.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxSankey3.currentText()), re.sub(r'\(.+', '', self.ui.comboBoxSankey4.currentText())]
 
 	def resizeHTML(self):
 		if self.ui.HTMLview.html == '':
