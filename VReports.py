@@ -8,6 +8,7 @@ from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtCore import QThread, pyqtSignal
 
 import re
+import os
 import time
 global FieldList
 global RealNameList
@@ -48,6 +49,142 @@ RealNameList = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene
                 "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
                 "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster", "10xBarCode", "Population",
                 "Blank12", "Blank13", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
+
+
+class CSVRep_thread(QThread):
+    loadProgress = pyqtSignal(int, str)
+    trigger = pyqtSignal(list)
+
+    def __int__(self):
+        super(CSVRep_thread, self).__init__()
+        self.DBFilename = ''
+        self.SequenceName = ''
+        self.Pathname = ''
+        self.vgene = ''
+
+    def run(self):
+        DBFilename = self.DBFilename
+        SequenceName = self.SequenceName
+        Pathname = self.Pathname
+        Vgenes = self.vgene
+
+        pct = 0
+        label = "Fetching records from DB: " + DBFilename
+        self.loadProgress.emit(pct, label)
+
+        fields = 'All'
+        SQLStatement = VGenesSQL.MakeSQLStatement(Vgenes, fields, SequenceName)
+        (dirname, filename) = os.path.split(DBFilename)
+        filename = filename[:(len(filename) - 4)]
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        CSVOut = ''
+        Vfam = ''
+        i = 0
+        for item in RealNameList:
+            if i != 58:
+                if str(item) == 'Blank8':
+                    item = 'Cluster'
+                if str(item) == 'Blank9':
+                    item = 'Seuret Cluster'
+                if str(item) == 'Blank10':
+                    item = 'Barcode'
+                if str(item) == 'Blank11':
+                    item = 'Population'
+
+                CSVOut += str(item)
+                CSVOut += ','
+            i += 1
+        CSVOut += 'V-family'
+        CSVOut += ',Subject'
+
+        CSVOut += '\n'
+        process = 1
+        for Record in DataIs:
+            i = 0
+            for item in Record:
+                if i != 58:
+                    if i == 90:
+                        Vfam = item[:3]
+
+                    StringItem = str(item)
+                    if i == 97:
+                        StringItem = StringItem.replace(',', '/').replace('\n', 'linefeed')
+                    CSVOut += str(StringItem)
+                    CSVOut += ','
+                i += 1
+            CSVOut += Vfam
+            CSVOut += ',' + filename
+            CSVOut += '\n'
+
+            pct = int(process / len(DataIs) * 100)
+            label = "Fetching records: " + str(process) + '/' + str(len(DataIs))
+            self.loadProgress.emit(pct, label)
+            process += 1
+
+        pct = 100
+        label = "Writing to file: " + Pathname
+        self.loadProgress.emit(pct, label)
+        with open(Pathname, 'w') as currentfile:
+            currentfile.write(CSVOut)
+
+        Msg = 'Comma seperated values Report generated!'
+        self.trigger.emit([0, Msg])
+
+class CSVRepAll_thread(QThread):
+    loadProgress = pyqtSignal(int, str)
+    trigger = pyqtSignal(list)
+
+    def __int__(self):
+        super(CSVRepAll_thread, self).__init__()
+        self.DBFilename = ''
+        self.SequenceName = ''
+        self.Pathname = ''
+        self.vgene = ''
+
+    def run(self):
+        DBFilename = self.DBFilename
+        SequenceName = self.SequenceName
+        Pathname = self.Pathname
+        Vgenes = self.vgene
+
+        pct = 0
+        label = "Fetching records from DB: " + DBFilename
+        self.loadProgress.emit(pct, label)
+
+        SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+        fields = [i[0] for i in DataIn]
+        field_names = [i[1] for i in DataIn]
+
+        SQLStatement = VGenesSQL.MakeSQLStatement(Vgenes, fields, SequenceName)
+        (dirname, filename) = os.path.split(DBFilename)
+        filename = filename[:(len(filename) - 4)]
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        CSVOut = ''
+
+        CSVOut += ','.join(fields) + '\n'
+        CSVOut += ','.join(field_names) + '\n'
+        process = 1
+        for record in DataIs:
+            record_new = [str(x) for x in record]
+            record_new[58] = re.sub(r'\n', '#', record_new[58])
+            record_new[97] = re.sub(',', '|', record_new[97])
+            CSVOut += ','.join(record_new) + '\n'
+
+            pct = int(process / len(DataIs) * 100)
+            label = "Fetching records: " + str(process) + '/' + str(len(DataIs))
+            self.loadProgress.emit(pct, label)
+            process += 1
+
+        pct = 100
+        label = "Writing to file: " + Pathname
+        self.loadProgress.emit(pct, label)
+
+        with open(Pathname, 'w') as currentfile:
+            currentfile.write(CSVOut)
+
+        Msg = 'Comma seperated values Report generated!'
+        self.trigger.emit([0, Msg])
 
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
@@ -844,6 +981,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         #     with open(Pathname, 'w') as currentfile:
         #         currentfile.write(SeqSumm)
     elif option == 'Comma seperated values (.csv)':
+        '''
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         (dirname, filename) = os.path.split(DBFilename)
@@ -896,7 +1034,26 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         Msg = 'Comma seperated values Report generated!'
         self.ShowMessageBox([0, Msg])
+        '''
+        Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
+
+        # try multi-thread
+        self.workThread = CSVRep_thread(self)
+        self.workThread.DBFilename = DBFilename
+        self.workThread.SequenceName = SequenceName
+        self.workThread.Pathname = Pathname
+        self.workThread.vgene = self
+        self.workThread.start()
+        self.workThread.trigger.connect(self.ShowMessageBox)
+        self.workThread.loadProgress.connect(self.progressLabel)
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
     elif option == 'CSV format Entire VDB':
+        '''
         SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
         fields = [i[0] for i in DataIn]
@@ -925,6 +1082,25 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         Msg = 'CSV format Entire VDB Report generated!'
         self.ShowMessageBox([0, Msg])
+        '''
+
+        Pathname = saveFile(self, 'csv')
+        if Pathname == None:
+            return
+
+        # try multi-thread
+        self.workThread = CSVRepAll_thread(self)
+        self.workThread.DBFilename = DBFilename
+        self.workThread.SequenceName = SequenceName
+        self.workThread.Pathname = Pathname
+        self.workThread.vgene = self
+        self.workThread.start()
+        self.workThread.trigger.connect(self.ShowMessageBox)
+        self.workThread.loadProgress.connect(self.progressLabel)
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
     elif option == 'Clonal Analysis (.csv)':
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)

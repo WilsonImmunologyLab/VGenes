@@ -398,6 +398,95 @@ class Clone_thread(QThread):
         Msg = 'Success!'
         self.Clone_finish.emit([sign, Msg])
 
+class barcode_thread(QThread):
+    loadProgress =  pyqtSignal(int, str)
+    trigger = pyqtSignal(list)
+
+    def __int__(self):
+        super(barcode_thread, self).__init__()
+        self.DBFilename = ''
+        self.sample_field_name = ''
+        self.barcode_field_name = ''
+        self.del_str = ''
+        self.rep_str = ''
+        self.split_text = ''
+        self.split_index = ''
+        self.extract = False
+        self.insert_pos = 'Front'
+
+    def run(self):
+	    DBFilename = self.DBFilename
+	    sample_field_name = self.sample_field_name
+	    barcode_field_name = self.barcode_field_name
+	    del_str = self.del_str
+	    rep_str = self.rep_str
+	    split_text = self.split_text
+	    split_index = self.split_index
+	    extract = self.extract
+	    insert_pos = self.insert_pos
+
+	    process = 1
+	    if sample_field_name == '':
+		    if del_str != '':
+			    SQLStatement = 'SELECT ID,' + barcode_field_name + ' FROM vgenesDB'
+			    DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			    for record in DataIn:
+				    id = record[0]
+				    barcode = record[1]
+				    barcode = re.sub(del_str, rep_str, barcode)
+				    if barcode != record[0]:
+					    SQLStatement = 'UPDATE vgenesDB SET `' + barcode_field_name + '`="' + barcode + '" WHERE `ID` = ' + str(
+						    id)
+					    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+					    pct = int(process / len(DataIn) * 100)
+					    label = "Updating records: " + str(process) + '/' + str(len(DataIn))
+					    self.loadProgress.emit(pct, label)
+					    process += 1
+
+			    msg = 'Update barcodes succeffully!'
+			    sign = 0
+		    else:
+			    msg = 'you did not do any change!'
+			    sign = 1
+	    else:
+		    sample_field_name = re.sub(r'\(.+', '', sample_field_name)
+
+		    SQLStatement = 'SELECT ID,' + barcode_field_name + ',' + sample_field_name + ' FROM vgenesDB'
+		    DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		    for record in DataIn:
+			    id = record[0]
+			    barcode = record[1]
+			    sample = record[2]
+			    if del_str != '':
+				    barcode = re.sub(del_str, rep_str, barcode)
+
+			    if extract == True:
+				    add_str = sample.split(split_text)[split_index]
+			    else:
+				    add_str = sample
+
+			    if insert_pos == 'Front':
+				    barcode = add_str + '_' + barcode
+			    else:
+				    barcode = barcode + '_' + add_str
+
+			    if barcode != record[0]:
+				    SQLStatement = 'UPDATE vgenesDB SET `' + barcode_field_name + '`="' + barcode + '" WHERE `ID` = ' + str(
+					    id)
+				    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+				    #print(SQLStatement)
+
+				    pct = int(process / len(DataIn) * 100)
+				    label = "Updating records: " + str(process) + '/' + str(len(DataIn))
+				    self.loadProgress.emit(pct, label)
+				    process += 1
+
+		    msg = 'Update barcodes succeffully!'
+		    sign = 0
+
+	    self.trigger.emit([sign, msg])
+
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -434,6 +523,26 @@ class BarcodeDialog(QtWidgets.QDialog):
 		self.ui.comboBoxBarcode.addItems(data_list)
 		self.ui.comboBoxSample.addItems(data_list)
 
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
+			pass
+
+	def ShowMessageBox(self, data):
+		try:
+			self.progress.close()
+		except:
+			pass
+
+		if data[0] == 0:
+			QMessageBox.information(self, 'Information', data[1], QMessageBox.Ok, QMessageBox.Ok)
+			Vgenes.refreshDB()
+			self.hide()
+		else:
+			QMessageBox.warning(self, 'Warning', data[1], QMessageBox.Ok, QMessageBox.Ok)
+
 	def accept(self):
 		barcode_field_name = self.ui.comboBoxBarcode.currentText()
 		if barcode_field_name == '':
@@ -447,6 +556,29 @@ class BarcodeDialog(QtWidgets.QDialog):
 		rep_str = self.ui.lineEditRep.text()
 
 		sample_field_name = self.ui.comboBoxSample.currentText()
+		split_text = self.ui.lineEditSplit.text()
+		split_index = int(self.ui.spinBox.text()) - 1
+
+		# try multi-thread
+		self.workThread = barcode_thread(self)
+		self.workThread.DBFilename = DBFilename
+		self.workThread.sample_field_name = sample_field_name
+		self.workThread.barcode_field_name = barcode_field_name
+		self.workThread.del_str = del_str
+		self.workThread.rep_str = rep_str
+		self.workThread.split_text = split_text
+		self.workThread.split_index = split_index
+		self.workThread.extract = self.ui.radioButton.isChecked()
+		self.workThread.insert_pos = self.ui.comboBoxPosition.currentText()
+
+		self.workThread.start()
+		self.workThread.trigger.connect(self.ShowMessageBox)
+		self.workThread.loadProgress.connect(self.progressLabel)
+
+		self.progress = ProgressBar(self)
+		self.progress.setLabel('Modifying barcodes ...')
+		self.progress.show()
+		'''
 		if sample_field_name == '':
 			if del_str != '':
 				SQLStatement = 'SELECT ID,' + barcode_field_name + ' FROM vgenesDB'
@@ -496,7 +628,7 @@ class BarcodeDialog(QtWidgets.QDialog):
 		                    QMessageBox.Ok, QMessageBox.Ok)
 		Vgenes.refreshDB()
 		self.hide()
-
+		'''
 	def reject(self):
 		self.hide()
 
@@ -4611,6 +4743,7 @@ class CSV_thread(QThread):
 			    cur_line[119] = str(int(records[119]) + Count)
 			    cur_line[58] = re.sub('#', '\n', records[58])
 			    cur_line[97] = re.sub('|', ',', records[97])
+			    cur_line[119] = int(cur_line[119])
 			    InputData.append(cur_line)
 
 		    # insert into DB
