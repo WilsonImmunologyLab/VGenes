@@ -2851,6 +2851,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
+			'''
 			# import data from VDBs
 			print('import data from VDBs')
 			for csv_file in files:
@@ -2900,7 +2901,19 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			Vgenes.LoadDB(DBFilename)
 			self.hide()
+			'''
+			# try multi-thread
+			workThread = CSV_thread(self)
+			workThread.DBFilename = DBFilename
+			workThread.files = files
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
 
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Merging CSV...')
+			self.progress.show()
+			
 	def InitiateImportFromVDB(self, Filenamed, MaxNu):
 		global FieldList
 		global FieldCommentList
@@ -2973,6 +2986,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			else:
 				QMessageBox.information(self, 'Information', Msg,QMessageBox.Ok, QMessageBox.Ok)
 
+			'''
 			# import data from VDBs
 			print('import data from VDBs')
 			for vdb_file in files:
@@ -3014,6 +3028,19 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 			Vgenes.LoadDB(DBFilename)
 			self.hide()
+			'''
+
+			# try multi-thread
+			workThread = VDB_thread(self)
+			workThread.DBFilename = DBFilename
+			workThread.files = files
+			workThread.start()
+			workThread.trigger.connect(self.multi_callback)
+			workThread.loadProgress.connect(self.progressLabel)
+
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Merging VDB...')
+			self.progress.show()
 		else:
 			return
 
@@ -3494,6 +3521,30 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					if record[77][0] == '$':
 						record[77] = sampleName
 						continue
+		elif self.calling == 3:
+			Vgenes.LoadDB(DBFilename)
+
+			try:
+				self.progress.close()
+			except:
+				pass
+
+			Msg = 'Data import finished!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			self.hide()
+			return
+		elif self.calling == 4:
+			Vgenes.LoadDB(DBFilename)
+
+			try:
+				self.progress.close()
+			except:
+				pass
+
+			Msg = 'Data import finished!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			self.hide()
+			return
 		#a = IgBLASTAnalysis
 
 		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
@@ -4453,6 +4504,127 @@ class WorkThread1(QThread):
 		global IgBLASTAnalysis
 		IgBLASTAnalysis = IgBLASTer.IgBLASTitResults(self.item, self.igOut, self.datalist, self.loadProgress)
 		self.trigger.emit(self.item)
+
+class VDB_thread(QThread):
+    loadProgress =  pyqtSignal(int, str)
+    trigger = pyqtSignal(str)
+
+    def __int__(self):
+        super(VDB_thread, self).__init__()
+        self.DBFilename = ''
+        self.files = []
+
+    def run(self):
+	    DBFilename = self.DBFilename
+	    files = self.files
+
+	    # import data from VDBs
+	    print('import data from VDBs')
+	    conn = db.connect(DBFilename)
+	    cursor = conn.cursor()
+	    process = 1
+	    for vdb_file in files:
+		    SQLSTATEMENT = 'SELECT Field FROM fieldsname'
+		    DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
+		    field_str = ''
+		    question_str = ''
+		    for item in DataIn:
+			    field_str = field_str + item[0] + ','
+			    question_str = question_str + '?,'
+		    field_str = field_str.rstrip(',')
+		    question_str = question_str.rstrip(',')
+
+		    SQLSTATEMENT = 'SELECT ' + field_str + ' FROM vgenesDB'
+		    DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
+
+		    # update ID (ID should be unique)
+		    SQLSTATEMENT = 'SELECT COUNT(ID) FROM vgenesDB'
+		    Count = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+		    Count = Count[0][0]
+
+		    InputData = []
+		    for records in DataIn:
+			    cur_line = list(records)
+			    cur_line[119] = int(records[119]) + Count
+			    InputData.append(cur_line)
+
+		    # insert into DB
+		    #print('insert into DB')
+		    SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
+		    cursor.executemany(SQLSTATEMENT, InputData)
+		    conn.commit()
+
+		    pct = int(process/len(files)*100)
+		    label = "Processing VDB file: " + vdb_file
+		    self.loadProgress.emit(pct, label)
+		    process += 1
+		    #print(vdb_file)
+	    conn.close()
+	    self.trigger.emit('Data import finished!')
+
+class CSV_thread(QThread):
+    loadProgress =  pyqtSignal(int, str)
+    trigger = pyqtSignal(str)
+
+    def __int__(self):
+        super(CSV_thread, self).__init__()
+        self.DBFilename = ''
+        self.files = []
+
+    def run(self):
+	    DBFilename = self.DBFilename
+	    files = self.files
+
+	    # import data from VDBs
+	    print('import data from VDBs')
+	    conn = db.connect(DBFilename)
+	    cursor = conn.cursor()
+	    process = 1
+	    for csv_file in files:
+
+		    csvFile = open(csv_file, "r")
+		    reader = csv.reader(csvFile)
+		    line = 0
+		    DataIn = []
+		    for item in reader:
+			    if line == 0:
+				    cur_field = item
+			    elif line == 1:
+				    cur_field_name = item
+			    else:
+				    DataIn.append(item)
+			    line += 1
+		    csvFile.close()
+
+		    question_list = ['?' for n in range(len(cur_field))]
+		    field_str = ','.join(cur_field)
+		    question_str = ','.join(question_list)
+
+		    # update ID (ID should be unique)
+		    SQLSTATEMENT = 'SELECT COUNT(ID) FROM vgenesDB'
+		    Count = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+		    Count = Count[0][0]
+
+		    InputData = []
+		    for records in DataIn:
+			    cur_line = list(records)
+			    cur_line[119] = str(int(records[119]) + Count)
+			    cur_line[58] = re.sub('#', '\n', records[58])
+			    cur_line[97] = re.sub('|', ',', records[97])
+			    InputData.append(cur_line)
+
+		    # insert into DB
+		    SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
+		    cursor.executemany(SQLSTATEMENT, InputData)
+		    conn.commit()
+
+		    pct = int(process/len(files)*100)
+		    label = "Processing CSV file: " + csv_file
+		    self.loadProgress.emit(pct, label)
+		    process += 1
+		    #print(vdb_file)
+	    conn.close()
+	    self.trigger.emit('Data import finished!')
 
 class WorkThreadIMGTparser(QThread):
 	loadProgress = pyqtSignal(int, str)
