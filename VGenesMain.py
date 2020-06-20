@@ -487,6 +487,128 @@ class barcode_thread(QThread):
 
 	    self.trigger.emit([sign, msg])
 
+class annotate_thread(QThread):
+    loadProgress =  pyqtSignal(int, str)
+    trigger = pyqtSignal(list)
+
+    def __int__(self):
+        super(annotate_thread, self).__init__()
+        self.DBFilename = ''
+        self.dialog = ''
+
+    def run(self):
+        global RealNameList
+        global FieldCommentList
+        global FieldTypeList
+        global FieldList
+
+        DBFilename = self.DBFilename
+
+        col_index = []
+        col_fields = []
+
+        header = self.dialog.header
+        anchor_field = self.dialog.ui.comboBox.currentText()
+        target_field = self.dialog.ui.comboBox2.currentText()
+        target_field = re.sub(r'\s.+', '', target_field)
+        anchor_col_index = header.index(anchor_field)
+
+        num_col = self.dialog.ui.tableWidget.columnCount()
+        num_row = self.dialog.ui.tableWidget.rowCount()
+
+        pct = 1
+        label = "Resolving annotation file ..."
+        self.loadProgress.emit(pct, label)
+
+        for col in range(num_col):
+            if col == anchor_col_index:
+                continue
+            my_widget = self.dialog.ui.tableWidget.cellWidget(0, col)
+            if my_widget.currentText() != "":
+                col_index.append(col)
+                col_fields.append(my_widget.currentText())
+
+                # add new column if field name not exit in current col
+                tmp_field_name = re.sub(r'\s.+', '', my_widget.currentText())
+                if tmp_field_name in FieldList:
+                    if self.dialog.ui.radioButtonUpdateName.isChecked():
+                        VGenesSQL.UpdateFieldTable(tmp_field_name, header[col], 'FieldNickName', DBFilename)
+                        RealNameList[FieldList.index(tmp_field_name)] = header[col]
+                else:
+                    # check if the new field name can be used:
+                    HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+                    HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
+                    ALL_Fields = [i[1] for i in HeaderIn]
+
+                    if tmp_field_name in ALL_Fields:
+                        pass
+                    else:
+                        # update vgene table
+                        SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + tmp_field_name + " text"
+
+                        try:
+                            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+                        except:
+                            Msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+                            sign = 1
+                            self.trigger.emit([sign, Msg])
+                            return
+                    # update field name table
+                    SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+                                    'VALUES(' + str(len(FieldList) + 1) + ',"' + tmp_field_name + '", "' + \
+                                    header[col] + '", "Customized", "")'
+                    try:
+                        VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+                    except:
+                        Msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+                        sign = 1
+                        self.trigger.emit([sign, Msg])
+                        return
+
+                    RealNameList.append(header[col])
+                    FieldCommentList.append('')
+                    FieldTypeList.append('Customized')
+                    FieldList.append(tmp_field_name)
+
+        count = 0
+        process = 1
+        for row in range(num_row):
+            if row == 0:
+                continue
+            else:
+                SQLSTATEMENT = "UPDATE vgenesdb SET "
+                for i in range(len(col_index)):
+                    col = col_index[i]
+                    field = col_fields[i]
+                    field = re.sub(r'\s.+', '', field)
+                    value = self.dialog.ui.tableWidget.item(row, col).text()
+                    SQLSTATEMENT = SQLSTATEMENT + field + ' = "' + value + '",'
+
+                current_anchor = self.dialog.ui.tableWidget.item(row, anchor_col_index).text()
+                SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
+                SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
+
+                try:
+                    count += VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
+                except:
+                    Msg = 'SQL error! Current SQL statement is:\n' + SQLSTATEMENT
+                    sign = 1
+                    self.trigger.emit([sign, Msg])
+                    return
+
+                pct = int(process / num_row * 100)
+                label = "Updating records: " + str(process) + '/' + str(num_row)
+                self.loadProgress.emit(pct, label)
+                process += 1
+
+        if count == 0:
+            Msg = "Total " + str(count) + ' records affected! Maybe check if you anchor column is correct?'
+            sign = 1
+        else:
+            Msg = "Update successfully!\nTotal " + str(count) + ' records affected!'
+            sign = 0
+        self.trigger.emit([sign, Msg])
+
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
@@ -1472,7 +1594,29 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 		self.ui.radioButton.clicked.connect(self.switchHeader)
 		self.ui.pushButtonOK.clicked.connect(self.accept)
 
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
+			pass
+
+	def ShowMessageBox(self, data):
+		try:
+			self.refreshDBSignal.emit()
+			self.hide()
+			self.progress.setLabel('Refreshing DB ...')
+			self.progress.close()
+		except:
+			pass
+
+		if data[0] == 0:
+			QMessageBox.information(self, 'Information', data[1], QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			QMessageBox.warning(self, 'Warning', data[1], QMessageBox.Ok, QMessageBox.Ok)
+
 	def accept(self):
+		'''
 		global RealNameList
 		global FieldCommentList
 		global FieldTypeList
@@ -1574,6 +1718,19 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 
 			self.refreshDBSignal.emit()
 			self.hide()
+		'''
+		# try multi-thread
+		self.workThread = annotate_thread(self)
+		self.workThread.dialog = self
+		self.workThread.DBFilename = DBFilename
+
+		self.workThread.start()
+		self.workThread.trigger.connect(self.ShowMessageBox)
+		self.workThread.loadProgress.connect(self.progressLabel)
+
+		self.progress = ProgressBar(self)
+		self.progress.setLabel('Updating records ...')
+		self.progress.show()
 
 
 	def reject(self):
