@@ -762,6 +762,7 @@ class BarcodeDialog(QtWidgets.QDialog):
 
 	def ShowMessageBox(self, data):
 		try:
+			self.progress.FeatProgressBar.setValue(100)
 			self.progress.close()
 		except:
 			pass
@@ -1333,6 +1334,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 	def ShowMessageBox(self, data):
 		global DontFindTwice
 		try:
+			self.progress.FeatProgressBar.setValue(100)
 			self.progress.close()
 		except:
 			pass
@@ -1754,6 +1756,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 			self.refreshDBSignal.emit()
 			self.hide()
 			self.progress.setLabel('Refreshing DB ...')
+			self.progress.FeatProgressBar.setValue(100)
 			self.progress.close()
 		except:
 			pass
@@ -3962,6 +3965,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			Vgenes.LoadDB(DBFilename)
 
 			try:
+				self.progress.FeatProgressBar.setValue(100)
 				self.progress.close()
 			except:
 				pass
@@ -3974,6 +3978,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			Vgenes.LoadDB(DBFilename)
 
 			try:
+				self.progress.FeatProgressBar.setValue(100)
 				self.progress.close()
 			except:
 				pass
@@ -4011,6 +4016,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.hide()
 
 		try:
+			self.progress.FeatProgressBar.setValue(100)
 			self.progress.close()
 		except:
 			pass
@@ -5119,6 +5125,17 @@ class ProgressBar(QtWidgets.QDialog):
 	def onCancel(self, event):
 		self.close()
 
+	def closeEvent(self, event):
+		if self.FeatProgressBar.value() < 100:
+			reply = QMessageBox.question(self, u'Close progress bar',u'Are you sure to close the progress bar?\n'
+			                                                         u'You will not able to monitor the progress and'
+			                                                         u' the program will keep running anyway.',
+			                             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+			if reply == QMessageBox.No:
+				event.ignore()
+			else:
+				event.accept()
+
 class VGenesForm(QtWidgets.QMainWindow):
 	def __init__(self):  # , parent=None):
 		super(VGenesForm, self).__init__()  # parent)
@@ -5229,6 +5246,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def ShowMessageBox(self, data):
 		try:
+			self.progress.FeatProgressBar.setValue(100)
 			self.progress.close()
 		except:
 			pass
@@ -8428,7 +8446,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			ad = 1
 			# draw figure
 			my_pyecharts = (
-				Sankey(init_opts=opts.InitOpts(width="300px", height="200px"))
+				Sankey(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 					.add(
 					series_name="",
 					nodes=sankey_nodes,
