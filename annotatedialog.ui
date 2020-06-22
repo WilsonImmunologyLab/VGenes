@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>583</width>
+    <width>600</width>
     <height>652</height>
    </rect>
   </property>
@@ -122,6 +122,9 @@
      <property name="text">
       <string>Update Field Nick name</string>
      </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item row="3" column="0" colspan="2">
@@ -131,6 +134,9 @@
      </property>
      <property name="checked">
       <bool>true</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
      </property>
     </widget>
    </item>

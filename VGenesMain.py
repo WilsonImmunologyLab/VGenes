@@ -232,6 +232,114 @@ def reName(ori_name, rep1, rep2, prefix):
 		my_name = prefix + '_' + my_name
 	return my_name
 
+class Batch_thread(QThread):
+	loadProgress = pyqtSignal(int, str)
+	trigger = pyqtSignal(list)
+
+	def __int__(self, parent=None):
+		super(Clone_thread, self).__init__(parent)
+		self.dialog = ''
+		self.DBFilename = DBFilename
+
+	def run(self):
+		DBFilename = self.DBFilename
+
+		if self.dialog.ui.radioButton.isChecked():
+			pct = 1
+			label = "Solving records ..."
+			self.loadProgress.emit(pct, label)
+
+			new_values = []
+			# process num part
+			layout = self.dialog.ui.gridLayout
+			i = 1
+			#print('row count = ' + str(layout.rowCount()))
+			while i < layout.num_widget:
+				str2 = layout.itemAtPosition(i, 1).widget().text()
+				new_values.append(str2)
+				i += 1
+
+			num_list = [self.dialog.ui.LineEditCutoff.min, self.dialog.ui.LineEditCutoff.max]
+			if self.dialog.ui.LineEditCutoff.text() == '':
+				pass
+			else:
+				temp_data = self.dialog.ui.LineEditCutoff.text().split(',')
+				if len(temp_data) > 0:
+					for ele in temp_data:
+						try:
+							num = float(ele)
+							if num > self.dialog.ui.LineEditCutoff.min and num < self.dialog.ui.LineEditCutoff.max:
+								num_list.append(num)
+						except:
+							return
+					# remove redudant and sort
+					num_list = list(set(num_list))
+					num_list.sort()
+			# max value + 1 so that the original max values can be processed correctly
+			num_list[-1] = num_list[-1] + 1
+
+			# start update records
+			field = re.sub(r'\(.+', '', self.dialog.ui.comboBox.currentText())
+			SQLStatement = 'SELECT ' + field + ',ID FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			
+			process = 1
+			for ele in DataIn:
+				try:
+					cur_value = float(ele[0])
+					cur_id = str(ele[1])
+					for i in range(len(num_list)-1):
+						if cur_value >= num_list[i] and cur_value < num_list[i+1]:
+							new_value = new_values[i]
+							SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
+							VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+							pct = int(process / len(DataIn) * 100)
+							label = "Updating records: " + str(process) + '/' + str(len(DataIn))
+							self.loadProgress.emit(pct, label)
+							process += 1
+				except:
+					pass
+
+			msg = 'Total ' + str(process) + ' records updated!'
+			self.trigger.emit([0, msg])
+		else:
+			pct = 1
+			label = "Solving records ..."
+			self.loadProgress.emit(pct, label)
+
+			Dict = {}
+			layout = self.dialog.ui.gridLayout
+			i = 1
+			while i < layout.num_widget:
+				str1 = layout.itemAtPosition(i, 0).widget().text()
+				str2 = layout.itemAtPosition(i, 1).widget().text()
+				if str2 == '':
+					pass
+				else:
+					Dict[str1] = str2
+				i += 1
+
+			if len(Dict) > 0:
+				field = re.sub(r'\(.+', '', self.dialog.ui.comboBox.currentText())
+				process = 0
+				step = 1
+				for key in Dict:
+					SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
+					#print(SQLStatement)
+					process += VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+					pct = int(step / len(Dict) * 100)
+					label = "Updating records: " + str(process)
+					self.loadProgress.emit(pct, label)
+					step += 1
+
+				msg = 'Total ' + str(process) + ' records updated!'
+				self.trigger.emit([0, msg])
+			else:
+				msg = 'You did not specific any value! Do nothing!'
+				self.trigger.emit([1, msg])
+
 class Clone_thread(QThread):
     Clone_progress = pyqtSignal(int, str)
     Clone_finish = pyqtSignal(list)
@@ -1037,7 +1145,6 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		self.ui.gridLayout.num_widget = 0
 		self.ui.gridLayoutChar.num_widget = 0
 
-
 		self.ui.pushButtonCancel.clicked.connect(self.reject)
 		self.ui.pushButtonOK.clicked.connect(self.accept)
 		self.ui.comboBox.currentTextChanged.connect(self.StatFig)
@@ -1216,7 +1323,47 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 		except:
 			return
 
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
+			pass
+
+	def ShowMessageBox(self, data):
+		global DontFindTwice
+		try:
+			self.progress.close()
+		except:
+			pass
+
+		if data[0] == 0:
+			DontFindTwice = True
+			Vgenes.refreshDB()
+			value = Vgenes.ui.dial.value()
+			Vgenes.updateF(value)
+			DontFindTwice = False
+
+			self.ui.radioButton.setChecked(False)
+			self.StatFig()
+
+			QMessageBox.information(self, 'Information', data[1], QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			QMessageBox.warning(self, 'Warning', data[1], QMessageBox.Ok, QMessageBox.Ok)
+
 	def accept(self):
+
+		self.batch_thread = Batch_thread(self)
+		self.batch_thread.DBFilename = DBFilename
+		self.batch_thread.dialog = self
+		self.batch_thread.trigger.connect(self.ShowMessageBox)
+		self.batch_thread.loadProgress.connect(self.progressLabel)
+		self.batch_thread.start()
+
+		self.progress = ProgressBar(self)
+		self.progress.setLabel('Modifying barcodes ...')
+		self.progress.show()
+		'''
 		global DontFindTwice
 
 		if self.ui.radioButton.isChecked():
@@ -1308,6 +1455,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 				self.BatchSignal.emit(1, '', Dict)
 
 		self.close()
+		'''
 
 	def load_data(self, list):
 		layout = self.ui.gridLayout

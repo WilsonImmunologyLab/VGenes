@@ -13,7 +13,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_AnnoDialog(object):
     def setupUi(self, AnnoDialog):
         AnnoDialog.setObjectName("AnnoDialog")
-        AnnoDialog.resize(583, 652)
+        AnnoDialog.resize(600, 652)
         self.gridLayout_2 = QtWidgets.QGridLayout(AnnoDialog)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.tableWidget = QtWidgets.QTableWidget(AnnoDialog)
@@ -60,10 +60,12 @@ class Ui_AnnoDialog(object):
         self.label_4.setObjectName("label_4")
         self.gridLayout_2.addWidget(self.label_4, 2, 0, 1, 2)
         self.radioButtonUpdateName = QtWidgets.QRadioButton(AnnoDialog)
+        self.radioButtonUpdateName.setAutoExclusive(False)
         self.radioButtonUpdateName.setObjectName("radioButtonUpdateName")
         self.gridLayout_2.addWidget(self.radioButtonUpdateName, 3, 2, 1, 2)
         self.radioButton = QtWidgets.QRadioButton(AnnoDialog)
         self.radioButton.setChecked(True)
+        self.radioButton.setAutoExclusive(False)
         self.radioButton.setObjectName("radioButton")
         self.gridLayout_2.addWidget(self.radioButton, 3, 0, 1, 2)
 

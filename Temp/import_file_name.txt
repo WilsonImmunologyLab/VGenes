@@ -1,3 +1,1 @@
-/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA7.fasta
-/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA6.fasta
-/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA5.fasta
+/Users/leil/Documents/Projects/VGene/HA6-vdj/outs/consensus.fasta
