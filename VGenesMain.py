@@ -17,7 +17,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
@@ -736,19 +736,26 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
 		self.ui.pushButtonClose.clicked.connect(self.reject)
 		self.ui.pushButtonSave.clicked.connect(self.saveChange)
 		self.ui.checkBoxAll.clicked.connect(self.checkAll)
+		self.ui.checkBoxRow.clicked.connect(self.rowSelection)
 
 		self.changeNotSave = False
 		self.loadTable()
+
+	def rowSelection(self):
+		if self.ui.checkBoxRow.isChecked():
+			self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+		else:
+			self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
 
 	def changeStatus(self):
 		self.changeNotSave = True
 
 	def loadTable(self):
 		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
-			SQLStatement = 'SELECT display,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
+			SQLStatement = 'SELECT display,display_priority,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			header_list = ['Display','Field','Field nickname','Field type','Field comment', 'ID']
+			header_list = ['Display', 'Display Priority','Field','Field nickname','Field type','Field comment', 'ID']
 			num_row = len(DataIn)
 			num_col = len(header_list)
 			self.ui.tableWidget.setRowCount(num_row)
@@ -757,14 +764,20 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
 			self.ui.tableWidget.setHorizontalHeaderLabels(header_list)
 			# re-size column size
 			self.ui.tableWidget.horizontalHeader().resizeSection(0, 50)
-			self.ui.tableWidget.horizontalHeader().resizeSection(1, 150)
-			self.ui.tableWidget.horizontalHeader().resizeSection(2, 250)
-			self.ui.tableWidget.horizontalHeader().resizeSection(3, 70)
-			self.ui.tableWidget.horizontalHeader().resizeSection(4, 250)
+			self.ui.tableWidget.horizontalHeader().resizeSection(1, 100)
+			self.ui.tableWidget.horizontalHeader().resizeSection(2, 150)
+			self.ui.tableWidget.horizontalHeader().resizeSection(3, 250)
+			self.ui.tableWidget.horizontalHeader().resizeSection(4, 70)
+			self.ui.tableWidget.horizontalHeader().resizeSection(5, 250)
 			self.ui.tableWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
 			self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
+			if self.ui.checkBoxRow.isChecked():
+				self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+			else:
+				self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
 
 			for row_index in range(num_row):
+				# col 0
 				cell_checkBox = QCheckBox()
 				if DataIn[row_index][0] == 'yes':
 					cell_checkBox.setChecked(True)
@@ -775,7 +788,21 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
 				cell_checkBox.stateChanged.connect(self.changeStatus)
 				self.ui.tableWidget.setCellWidget(row_index, 0, cell_checkBox)
 
-				for col_index in range(1,num_col):
+				# col 1
+				item_list = ['0','1','2','3','4','5','6','7','8','9']
+				cell_combo = QComboBox()
+				cell_combo.addItems(item_list)
+				if str(DataIn[row_index][1]) in item_list:
+					cell_combo.setCurrentText(str(DataIn[row_index][1]))
+				else:
+					cell_combo.setCurrentText('9')
+				if row_index == 0:
+					cell_combo.setEnabled(False)
+				cell_combo.currentTextChanged.connect(self.changeStatus)
+				self.ui.tableWidget.setCellWidget(row_index, 1, cell_combo)
+
+				# col 2:
+				for col_index in range(2,num_col):
 					unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
 					self.ui.tableWidget.setItem(row_index, col_index, unit)
 
@@ -795,13 +822,16 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
 		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
 			rows = self.ui.tableWidget.rowCount()
 			for row in range(1, rows):
-				name = self.ui.tableWidget.item(row, 1).text()
+				name = self.ui.tableWidget.item(row, 2).text()
 				if self.ui.tableWidget.cellWidget(row, 0).isChecked():
 					value = 'yes'
 				else:
 					value = 'no'
+				order = self.ui.tableWidget.cellWidget(row, 1).currentText()
 
 				SQLStatement = 'UPDATE fieldsname SET display = "' + value + '" WHERE Field = "' + name + '"'
+				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+				SQLStatement = 'UPDATE fieldsname SET display_priority = ' + order + ' WHERE Field = "' + name + '"'
 				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
 			self.refreshDBSignal.emit()
@@ -6375,7 +6405,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 
-			SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY ID'
+			SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID'
 			HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			current_field_list = [i[0] for i in HeaderIn]
 			current_nickname_list = [i[1] for i in HeaderIn]
@@ -6407,7 +6437,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
 
 				for col_index in range(num_col):
-					unit = QTableWidgetItem(DataIn[row_index][col_index])
+					unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
 					unit.last_name = DataIn[row_index][col_index]
 					self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
 

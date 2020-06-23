@@ -177,12 +177,24 @@ def checkFieldTable(DBpathname):
             cursor.execute(SQLStatement)
             SQLStatement = 'UPDATE fieldsname SET display = "yes" WHERE ID in (' + yes_str + ')'
             cursor.execute(SQLStatement)
-            SQLStatement = 'UPDATE fieldsname SET display = "yes" WHERE ID > 120'
+            SQLStatement = 'UPDATE fieldsname SET display = "yes" WHERE ID > 110'
+            cursor.execute(SQLStatement)
+            conn.commit()
+
+        if 'display_priority' in header_list:
+            pass
+        else:
+            SQLStatement = "ALTER TABLE fieldsname ADD display_priority text"
+            cursor.execute(SQLStatement)
+            conn.commit()
+            SQLStatement = 'UPDATE fieldsname SET display_priority = 9 WHERE 1'
+            cursor.execute(SQLStatement)
+            SQLStatement = 'UPDATE fieldsname SET display_priority = 0 WHERE ID = 1'
             cursor.execute(SQLStatement)
             conn.commit()
     except:
         #cursor.execute('drop table if exists fieldsname')
-        cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text)")
+        cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text, display_priority text)")
 
         HEADERStatement = 'PRAGMA table_info(vgenesDB);'
         HeaderIn = RunSQL(DBpathname, HEADERStatement)
@@ -244,7 +256,10 @@ def checkFieldTable(DBpathname):
                 ele.append('yes')
             else:
                 ele.append('no')
-
+            if i == 1:
+                ele.append(0)
+            else:
+                ele.append(9)
             FieldList.append(ele)
             i += 1
 
