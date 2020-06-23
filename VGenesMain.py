@@ -73,6 +73,7 @@ from ui_batch_dialog import Ui_BatchDialog
 from ui_copydialog import Ui_CopyDialog
 from ui_newfielddialog import Ui_NewFieldDialog
 from ui_barcode_dialog import Ui_BarcodeDialog
+from ui_table_dialog import Ui_TableDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -722,6 +723,102 @@ class MyFigure(FigureCanvas):
         self.fig = Figure(figsize=(width, height), dpi=dpi)
         super(MyFigure,self).__init__(self.fig)
         self.axes = self.fig.add_subplot(111)
+
+class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
+	refreshDBSignal = pyqtSignal()
+
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		#super(ImportDataDialogue, self).__init__()
+		self.ui = Ui_TableDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButtonClose.clicked.connect(self.reject)
+		self.ui.pushButtonSave.clicked.connect(self.saveChange)
+		self.ui.checkBoxAll.clicked.connect(self.checkAll)
+
+		self.changeNotSave = False
+		self.loadTable()
+
+	def changeStatus(self):
+		self.changeNotSave = True
+
+	def loadTable(self):
+		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
+			SQLStatement = 'SELECT display,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			header_list = ['Display','Field','Field nickname','Field type','Field comment', 'ID']
+			num_row = len(DataIn)
+			num_col = len(header_list)
+			self.ui.tableWidget.setRowCount(num_row)
+			self.ui.tableWidget.setColumnCount(num_col)
+
+			self.ui.tableWidget.setHorizontalHeaderLabels(header_list)
+			# re-size column size
+			self.ui.tableWidget.horizontalHeader().resizeSection(0, 50)
+			self.ui.tableWidget.horizontalHeader().resizeSection(1, 150)
+			self.ui.tableWidget.horizontalHeader().resizeSection(2, 250)
+			self.ui.tableWidget.horizontalHeader().resizeSection(3, 70)
+			self.ui.tableWidget.horizontalHeader().resizeSection(4, 250)
+			self.ui.tableWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
+			self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+			for row_index in range(num_row):
+				cell_checkBox = QCheckBox()
+				if DataIn[row_index][0] == 'yes':
+					cell_checkBox.setChecked(True)
+				else:
+					cell_checkBox.setChecked(False)
+				if row_index == 0:
+					cell_checkBox.setEnabled(False)
+				cell_checkBox.stateChanged.connect(self.changeStatus)
+				self.ui.tableWidget.setCellWidget(row_index, 0, cell_checkBox)
+
+				for col_index in range(1,num_col):
+					unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
+					self.ui.tableWidget.setItem(row_index, col_index, unit)
+
+			# disable edit
+			self.ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
+	def checkAll(self):
+		rows = self.ui.tableWidget.rowCount()
+		if self.ui.checkBoxAll.isChecked():
+			for row in range(1,rows):
+				self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
+		else:
+			for row in range(1,rows):
+				self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
+
+	def saveChange(self):
+		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
+			rows = self.ui.tableWidget.rowCount()
+			for row in range(1, rows):
+				name = self.ui.tableWidget.item(row, 1).text()
+				if self.ui.tableWidget.cellWidget(row, 0).isChecked():
+					value = 'yes'
+				else:
+					value = 'no'
+
+				SQLStatement = 'UPDATE fieldsname SET display = "' + value + '" WHERE Field = "' + name + '"'
+				VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+			self.refreshDBSignal.emit()
+			self.changeNotSave = False
+			msg = 'Changes saved!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+
+	def reject(self):
+		if self.changeNotSave:
+			reply = QMessageBox.question(self, u'Close progress bar', u'Your changes have not been saved, close anyway?',
+			                             QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+			if reply == QMessageBox.No:
+				pass
+			else:
+				self.hide()
+		else:
+			self.hide()
 
 class BarcodeDialog(QtWidgets.QDialog):
 	def __init__(self):
@@ -2157,9 +2254,9 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			return
 
 		# update field name table
-		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display) ' \
 		                'VALUES(' + str(
-			self.ui.listWidget.count() + 1) + ',"' + new_field + '", "' + new_field + '", "Customized", "")'
+			self.ui.listWidget.count() + 1) + ',"' + new_field + '", "' + new_field + '", "Customized", "", "yes")'
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
 		except:
@@ -2231,9 +2328,9 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 				return
 
 		# update field name table
-		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display) ' \
 		                'VALUES(' + str(
-			self.ui.listWidget.count() + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "")'
+			self.ui.listWidget.count() + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "", "yes")'
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
 		except:
@@ -3263,9 +3360,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 						# update table
 						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
-						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display) ' \
 						                'VALUES(' + str(len(FieldList) + 1) + ',"' + new_col + '", "' + new_col_name + \
-						                '", "Customized", "' + new_col_comment + '")'
+						                '", "Customized", "' + new_col_comment + '", "yes")'
 						try:
 							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
 						except:
@@ -3395,9 +3492,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 						# update table
 						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
-						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) ' \
+						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display) ' \
 						                'VALUES(' + str(len(FieldList) + 1) + ',"' + new_col + '", "' + new_col_name + \
-						                '", "Customized", "' + new_col_comment + '")'
+						                '", "Customized", "' + new_col_comment + '", "")'
 						try:
 							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
 						except:
@@ -5185,6 +5282,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
 		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
 		self.ui.pushButtonAlter.clicked.connect(self.openAlter)
+		self.ui.pushButtonTable.clicked.connect(self.openTableDialog)
 		self.ui.listWidgetClone.itemSelectionChanged.connect(self.selectClone)
 		self.ui.pushButtonDrawClone.clicked.connect(self.GenerateFigureClone)
 		self.ui.checkBoxFigLegendClone.clicked.connect(self.GenerateFigureClone)
@@ -5236,6 +5334,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 
 		self.HeatmapList = []
+
+	def openTableDialog(self):
+		self.tableDialog = TableDialog()
+		self.tableDialog.refreshDBSignal.connect(self.refreshDB)
+		self.tableDialog.show()
 
 	def progressLabel(self, pct, label):
 		try:
@@ -6272,17 +6375,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 
-			fields = ','.join(FieldList)
+			SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY ID'
+			HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			current_field_list = [i[0] for i in HeaderIn]
+			current_nickname_list = [i[1] for i in HeaderIn]
+			fields = ','.join(current_field_list)
 			SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-
 			num_row = len(DataIn)
-			num_col = len(RealNameList)
+			num_col = len(current_field_list)
 			self.ui.SeqTable.setRowCount(num_row)
 			self.ui.SeqTable.setColumnCount(num_col + 1)
 
-			horizontalHeader = [''] + RealNameList
+			horizontalHeader = [''] + current_nickname_list
 			self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
 			self.ui.SeqTable.fields = horizontalHeader
 			# re-size column size
