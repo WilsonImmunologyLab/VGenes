@@ -292,7 +292,10 @@ class Batch_thread(QThread):
 					for i in range(len(num_list)-1):
 						if cur_value >= num_list[i] and cur_value < num_list[i+1]:
 							new_value = new_values[i]
-							SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
+							if new_value == 'NULL':
+								SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
+							else:
+								SQLStatement = 'UPDATE vgenesdb SET ' + field + '= ' + new_value + ' WHERE ID=' + cur_id
 							VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
 							pct = int(process / len(DataIn) * 100)
@@ -326,7 +329,10 @@ class Batch_thread(QThread):
 				process = 0
 				step = 1
 				for key in Dict:
-					SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
+					if new_value == 'NULL':
+						SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
+					else:
+						SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = ' + key
 					#print(SQLStatement)
 					process += VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
@@ -1307,6 +1313,8 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 			self.ui.LineEditCutoff.setHidden(True)
 
 	def StatFig(self):
+		if self.initial == 0:
+			return
 		sender_widget = self.sender()
 
 		if self.ui.gridLayoutFig.count() > 0:
@@ -1353,6 +1361,9 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
 				## char list
 				char_list = list(set(char_list))
+				for i in range(len(char_list)):
+					if char_list[i] == None:
+						char_list[i] = 'NULL'
 				self.load_data_char(char_list)
 
 				num_list = []
@@ -1419,6 +1430,9 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 								self.ui.DisplayTip.setHidden(False)
 								return
 
+				for i in range(len(value_list)):
+					if value_list[i] == None:
+						value_list[i] = 'NULL'
 				self.load_data(value_list)
 
 				# update figure
@@ -1432,6 +1446,13 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 				labels = result.keys()
 				values = result.values()
 				colors = sns.color_palette("hls", len(values))
+
+				# replace None by 'No record'
+				labels = list(labels)
+				values = list(values)
+				for i in range(len(labels)):
+					if labels[i] == None:
+						labels[i] = 'NULL'
 
 				F = MyFigure(width=3, height=3, dpi=160)
 				F.axes.bar(labels, values, color=colors)
@@ -6374,11 +6395,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			elif self.ui.tabWidget.currentIndex() == 0:
 				# if old table exists, clear table
 				if self.ui.SeqTable.columnCount() > 0:
-					if updateMarker == True:
-						self.load_table()
-						self.match_tree_to_table()
-						self.tree_to_table_selection()
-						updateMarker = False
+					pass
+					#if updateMarker == True:
+					#	self.load_table()
+					#	self.match_tree_to_table()
+					#	self.tree_to_table_selection()
+					#	updateMarker = False
 				else:
 					self.load_table()
 					self.match_tree_to_table()
@@ -13503,7 +13525,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
 		self.myBatchDialog.ui.comboBox.addItems(field_list)
 		self.myBatchDialog.initial = 1
-		self.myBatchDialog.StatFig()
 		self.myBatchDialog.ui.comboBox.setCurrentText(self.ui.cboFindField1.currentText())
 		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
 		self.myBatchDialog.show()
@@ -13518,7 +13539,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
 		self.myBatchDialog.ui.comboBox.addItems(field_list)
 		self.myBatchDialog.initial = 1
-		self.myBatchDialog.StatFig()
 		self.myBatchDialog.ui.comboBox.setCurrentText(field_list[2])
 		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
 		self.myBatchDialog.show()
