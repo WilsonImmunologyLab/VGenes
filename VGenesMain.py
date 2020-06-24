@@ -2657,10 +2657,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 					else:
 						pass
 			elif self.ui.tabWidget.currentIndex() == 1:
-				if self.pathFasta == '':
+				if self.ui.listWidgetFasta.count() == 0:
 					return
 				else:
-					dirs = self.pathFasta[0].split('/')
+					fasta_files = []
+					for index in range(self.ui.listWidgetFasta.count()):
+						fasta_files.append(self.ui.listWidgetFasta.item(index).text())
+
+					dirs = fasta_files[0].split('/')
 					if len(dirs) > 3:
 						dirs = dirs[-3:]
 
@@ -2751,7 +2755,41 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
 						pass
+			elif self.ui.tabWidget.currentIndex() == 6:
+				if self.ui.listWidgetSEQ.count() == 0:
+					return
+				else:
+					fasta_files = []
+					for index in range(self.ui.listWidgetSEQ.count()):
+						fasta_files.append(self.ui.listWidgetSEQ.item(index).text())
 
+					dirs = fasta_files[0].split('/')
+					if len(dirs) > 3:
+						dirs = dirs[-3:]
+
+					if len(dirs) == 3:
+						project = dirs[0]
+						group = dirs[1]
+						subgroup = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+						self.ui.comboBoxSubgroup.addItem(subgroup)
+						self.ui.comboBoxSubgroup.setCurrentText(subgroup)
+					elif len(dirs) == 2:
+						project = dirs[0]
+						group = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+						self.ui.comboBoxGroup.addItem(group)
+						self.ui.comboBoxGroup.setCurrentText(group)
+					elif len(dirs) == 1:
+						project = '$FileName'
+						self.ui.comboBoxProject.addItem(project)
+						self.ui.comboBoxProject.setCurrentText(project)
+					else:
+						pass
 	def updateName(self):
 		ori_name = 'clonotype2_consensus_1'
 		rep1 = self.ui.lineEditRep1.text()

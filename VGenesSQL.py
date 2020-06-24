@@ -18,7 +18,7 @@ def creatnewDB(DBpathname):
     cursor.execute("create table vgenesDB(SeqName text UNIQUE, SeqLen, GeneType text, V1 text, V2 text, V3 text, D1 text, D2 text, D3 text, J1 text, J2 text, J3 text, StopCodon text, ReadingFrame text, productive text, Strand text, VSeqend text, VDJunction text, Dregion text, DJJunction text, begJ text, VJunction text, FR1From text, FR1To text, FR1length text, FR1matches text, FR1mis text, FR1gaps text, FR1PercentIdentity text, CDR1From text, CDR1to text, CDR1length text, CDR1matches text, CDR1mis text, CDR1gaps text, CDR1PercentIdentity text, FR2From text, FR2To text, FR2length text, FR2matches text, FR2mis text, FR2gaps text, FR2PercentIdentity text, CDR2From text, CDR2to text, CDR2length text, CDR2matches text, CDR2mis text, CDR2gaps text, CDR2PercentIdentity text, FR3From text, FR3To text, FR3length text, FR3matches text, FR3mis text, FR3gaps text, FR3PercentIdentity text, TotMut text, SeqAlignment text, GVbeg text, GVend text, GD1beg text, GD1end text, GD2beg text, GD2end text, GJbeg text, GJend text, Vbeg text, Vend text, D1beg text, D1end text, D2beg text, D2end text, Jbeg text, Jend text, Project text, Grouping text, SubGroup text, Species text, Sequence text, GermlineSequence text, CDR3DNA text, CDR3AA text, CDR3Length text, CDR3beg text, CDR3end text, Specificity text, Subspecificity text, ClonalPool text, ClonalRank text, VLocus text, JLocus text, DLocus text, DateEntered text, Comments text, Quality text, TotalMuts text, Mutations text, IDEvent text, CDR3MW, CDR3pI, Isotype, GCDR3beg, GCDR3end, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, ID PRIMARY KEY NOT NULL)")
     # ID PRIMARY KEY,
     cursor.execute('drop table if exists fieldsname')
-    cursor.execute("create table fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text, display_priority text)")
 
     FieldList = [
         [1, "SeqName", "Name", "Fixed", ""],
@@ -143,7 +143,24 @@ def creatnewDB(DBpathname):
         [120, "ID", "ID", "Fixed", ""]
     ]
 
-    cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment) VALUES(?,?,?,?,?)''',FieldList)
+    yes_list = [1, 2, 3, 4, 7, 10, 13, 14, 15, 16, 76, 77, 78, 79, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
+                95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
+                116, 117, 118, 119, 120]
+
+    for ele in FieldList:
+        if ele[0] in yes_list:
+            ele.append('yes')
+        else:
+            ele.append('no')
+
+        if ele[0] == 1:
+            ele.append(0)
+        else:
+            ele.append(9)
+
+    cursor.executemany(
+        '''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) VALUES(?,?,?,?,?,?,?)''',
+        FieldList)
 
     conn.commit()
     conn.close()
