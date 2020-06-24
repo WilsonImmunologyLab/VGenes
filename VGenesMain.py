@@ -12049,8 +12049,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		titletext = 'VGenes - ' + DBFilename
 		self.setWindowTitle(titletext)
 
-		self.load_table()
-		self.initial_Clone()
+		#self.load_table()
+		#self.initial_Clone()
 
 	def GenerateNameIndex(self):
 		global NameIndex
