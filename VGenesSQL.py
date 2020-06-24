@@ -256,6 +256,7 @@ def checkFieldTable(DBpathname):
                 ele.append('yes')
             else:
                 ele.append('no')
+
             if i == 1:
                 ele.append(0)
             else:
@@ -263,7 +264,7 @@ def checkFieldTable(DBpathname):
             FieldList.append(ele)
             i += 1
 
-        cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment,display) VALUES(?,?,?,?,?,?)''',FieldList)
+        cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) VALUES(?,?,?,?,?,?,?)''',FieldList)
         conn.commit()
 
     conn.close()
