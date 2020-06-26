@@ -369,6 +369,8 @@ class Clone_thread(QThread):
         ErLog = self.ErLog
         Errs = self.Errs
         PoolNames = self.PoolNames
+        if len(PoolNames) == 0:
+	        PoolNames = ['Current Clone pool']
 		
         Currentrecord = Vgenes.ui.txtName.toPlainText()
 
@@ -768,13 +770,12 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
 			self.ui.tableWidget.setColumnCount(num_col)
 
 			self.ui.tableWidget.setHorizontalHeaderLabels(header_list)
-			# re-size column size
-			self.ui.tableWidget.horizontalHeader().resizeSection(0, 50)
-			self.ui.tableWidget.horizontalHeader().resizeSection(1, 100)
-			self.ui.tableWidget.horizontalHeader().resizeSection(2, 150)
-			self.ui.tableWidget.horizontalHeader().resizeSection(3, 250)
-			self.ui.tableWidget.horizontalHeader().resizeSection(4, 70)
-			self.ui.tableWidget.horizontalHeader().resizeSection(5, 250)
+			#self.ui.tableWidget.horizontalHeader().resizeSection(0, 50)
+			#self.ui.tableWidget.horizontalHeader().resizeSection(1, 100)
+			#self.ui.tableWidget.horizontalHeader().resizeSection(2, 150)
+			#self.ui.tableWidget.horizontalHeader().resizeSection(3, 250)
+			#self.ui.tableWidget.horizontalHeader().resizeSection(4, 70)
+			#self.ui.tableWidget.horizontalHeader().resizeSection(5, 250)
 			self.ui.tableWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
 			self.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
 			if self.ui.checkBoxRow.isChecked():
@@ -814,6 +815,8 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
 
 			# disable edit
 			self.ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+			# re-size column size
+			self.ui.tableWidget.resizeColumnsToContents()
 
 	def checkAll(self):
 		rows = self.ui.tableWidget.rowCount()
@@ -6029,6 +6032,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# generate html page
 		treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
+		if os.path.exists(treefile):
+			pass
+		else:
+			QMessageBox.warning(self, 'Warning', 'Fail to generate tree!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			ErlogFile = os.path.join(this_folder, 'RAxML_info.tree')
+			if os.path.exists(ErlogFile):
+				self.ShowVGenesText(ErlogFile)
+			return
 		f = open(treefile, 'r')
 		tree_str = f.readline()
 		f.close()
@@ -6443,6 +6455,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.load_table()
 					self.match_tree_to_table()
 					self.tree_to_table_selection()
+			elif self.ui.tabWidget.currentIndex() == 9:
+				self.initial_Clone()
 
 	def load_table(self):
 		if self.ui.SeqTable.columnCount() > 0:
@@ -6450,14 +6464,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.setColumnCount(0)
 		self.ui.SeqTable.setRowCount(0)
 
-		a = DBFilename
-
-		a = FieldList
-		b = RealNameList
-		c = FieldTypeList
-		d = FieldCommentList
-
-
+		#a = DBFilename
+		#a = FieldList
+		#b = RealNameList
+		#c = FieldTypeList
+		#d = FieldCommentList
 
 		# load data for new table
 		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
@@ -6470,6 +6481,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			current_field_list = [i[0] for i in HeaderIn]
 			current_nickname_list = [i[1] for i in HeaderIn]
 			fields = ','.join(current_field_list)
+			if fields == '':
+				fields = '*'
 			SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
@@ -6544,12 +6557,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.checkBoxAll.setChecked(True)
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+
+			root = self.ui.treeWidget.invisibleRootItem()
+			self.TreeChecksAll()
 		else:
 			self.ui.checkBoxAll.setChecked(False)
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+
+			root = self.ui.treeWidget.invisibleRootItem()
+			self.clearTreeChecks()
 		MoveNotChange = False
-		self.match_table_to_tree()
 
 	def multipleSelection(self, int_signal):
 		global MoveNotChange
@@ -9581,9 +9599,47 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 									Record = SubGroup.child(SGindex)  # each subgroup
 									Record.setCheckState(0,Qt.Unchecked)
+		return
+
+	def TreeChecksAll(self):
+
+		global wasClicked
+		wasClicked = False
+
+		value = self.ui.treeWidget.selectedItems()
+		# self.ui.treeWidget.selectedItems()
+		currentitemIs = ''
+		for item in value:
+			currentitemIs = item.text(0)
+
+		root = self.ui.treeWidget.invisibleRootItem()
+		for index in range(root.childCount()):
+			fileIs = root.child(index)
+			fileIs.setCheckState(0,Qt.Checked)
 
 
 
+		for index in range(fileIs.childCount()):
+			project = fileIs.child(index)  # project level
+			project.setCheckState(0,Qt.Checked)
+
+			if project.childCount() != 0:  # if project level exists
+
+				for Pindex in range(project.childCount()):  # will iterate through group level
+					Group = project.child(Pindex)  # each group
+					Group.setCheckState(0,Qt.Checked)
+
+					if Group.childCount() != 0:  # if there is a subgroup level
+						for Gindex in range(Group.childCount()):  # will iterate through subgroup level
+							SubGroup = Group.child(Gindex)  # each subgroup
+							SubGroup.setCheckState(0,Qt.Checked)
+
+							if SubGroup.childCount() != 0:  # if there is a record level
+
+								for SGindex in range(SubGroup.childCount()):  # will iterate through record level
+
+									Record = SubGroup.child(SGindex)  # each subgroup
+									Record.setCheckState(0,Qt.Checked)
 		return
 
 	def getTreePathDown(self, item):
