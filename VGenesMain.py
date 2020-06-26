@@ -13,7 +13,7 @@ import pandas as pd
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
 
-from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop
+from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
@@ -226,6 +226,76 @@ FirstupdateF = True
 global GLMsg
 GLMsg = True
 
+# code adopted from https://www.learnpyqt.com/courses/concurrent-execution/multithreading-pyqt-applications-qthreadpool/
+class WorkerSignals(QObject):
+	'''
+	Defines the signals available from a running worker thread.
+
+	Supported signals are:
+
+	finished
+		No data
+
+	error
+		`tuple` (exctype, value, traceback.format_exc() )
+
+	result
+		`object` data returned from processing, anything
+
+	progress
+		`int` indicating % progress
+
+	'''
+	finished = pyqtSignal()
+	error = pyqtSignal(tuple)
+	result = pyqtSignal(object)
+	progress = pyqtSignal(int)
+
+# code adopted from https://www.learnpyqt.com/courses/concurrent-execution/multithreading-pyqt-applications-qthreadpool/
+class Worker(QRunnable):
+	'''
+	Worker thread
+
+	Inherits from QRunnable to handler worker thread setup, signals and wrap-up.
+
+	:param callback: The function callback to run on this worker thread. Supplied args and
+					 kwargs will be passed through to the runner.
+	:type callback: function
+	:param args: Arguments to pass to the callback function
+	:param kwargs: Keywords to pass to the callback function
+
+	'''
+
+	def __init__(self, fn, *args, **kwargs):
+		super(Worker, self).__init__()
+
+		# Store constructor arguments (re-used for processing)
+		self.fn = fn
+		self.args = args
+		self.kwargs = kwargs
+		self.signals = WorkerSignals()
+
+		# Add the callback to our kwargs
+		self.kwargs['progress_callback'] = self.signals.progress
+
+	@pyqtSlot()
+	def run(self):
+		'''
+		Initialise the runner function with passed args, kwargs.
+		'''
+
+		# Retrieve args/kwargs here; and fire processing using them
+		try:
+			result = self.fn(*self.args, **self.kwargs)
+		except:
+			traceback.print_exc()
+			exctype, value = sys.exc_info()[:2]
+			self.signals.error.emit((exctype, value, traceback.format_exc()))
+		else:
+			self.signals.result.emit(result)  # Return the result of the processing
+		finally:
+			self.signals.finished.emit()  # Done
+
 def reName(ori_name, rep1, rep2, prefix):
 	my_name = re.sub('clonotype',rep1, ori_name)
 	my_name = re.sub('consensus_', rep2, my_name)
@@ -233,12 +303,96 @@ def reName(ori_name, rep1, rep2, prefix):
 		my_name = prefix + '_' + my_name
 	return my_name
 
+class LoadTable_thread(QThread):
+	loadProgress = pyqtSignal(int, str)
+	trigger = pyqtSignal(list)
+
+	def __int__(self, parent=None):
+		super(LoadTable_thread, self).__init__()
+		self.vgene = ''
+		self.DBFilename = DBFilename
+
+	def run(self):
+		DBFilename = self.DBFilename
+		vgene = self.vgene
+
+		field1 = re.sub(r'\(.+', '', vgene.ui.cboTreeOp1.currentText())
+		field2 = re.sub(r'\(.+', '', vgene.ui.cboTreeOp2.currentText())
+		field3 = re.sub(r'\(.+', '', vgene.ui.cboTreeOp3.currentText())
+
+		pct = 0
+		label = "Fetching data ..."
+		self.loadProgress.emit(pct, label)
+
+		SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID'
+		HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		current_field_list = [i[0] for i in HeaderIn]
+		current_nickname_list = [i[1] for i in HeaderIn]
+		fields = ','.join(current_field_list)
+		if fields == '':
+			fields = '*'
+		SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		pct = 0
+		label = "Initial Table ..."
+		self.loadProgress.emit(pct, label)
+
+		num_row = len(DataIn)
+		num_col = len(current_field_list)
+		vgene.ui.SeqTable.setRowCount(num_row)
+		vgene.ui.SeqTable.setColumnCount(num_col + 1)
+
+		horizontalHeader = [''] + current_nickname_list
+		vgene.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
+		vgene.ui.SeqTable.fields = horizontalHeader
+		# re-size column size
+		vgene.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
+		vgene.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
+		if vgene.ui.checkBoxRowSelection.isChecked():
+			vgene.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+		else:
+			vgene.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+		process = 1
+		for row_index in range(num_row):
+			cell_checkBox = QCheckBox()
+			# cell_checkBox.setText(DataIn[row_index][0])
+			cell_checkBox.setChecked(False)
+			cell_checkBox.stateChanged.connect(vgene.multipleSelection)
+			vgene.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
+
+			for col_index in range(num_col):
+				unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
+				unit.last_name = DataIn[row_index][col_index]
+				vgene.ui.SeqTable.setItem(row_index, col_index + 1, unit)
+
+			pct = int(process / num_row * 100)
+			label = "Loading records: " + str(process) + '/' + str(num_row)
+			self.loadProgress.emit(pct, label)
+			process += 1
+
+		pct = 100
+		label = "Finalizing Table ..."
+		self.loadProgress.emit(pct, label)
+
+		# disable edit
+		vgene.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+		# show sort indicator
+		vgene.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
+		# connect sort indicator to slot function
+		vgene.ui.SeqTable.horizontalHeader().sectionClicked.connect(vgene.sortTable)
+		vgene.ui.SeqTable.itemChanged.connect(vgene.EditTableItem)
+
+		msg = 'Table fully loaded!'
+		self.trigger.emit([0, msg])
+
 class Batch_thread(QThread):
 	loadProgress = pyqtSignal(int, str)
 	trigger = pyqtSignal(list)
 
 	def __int__(self, parent=None):
-		super(Clone_thread, self).__init__(parent)
+		super(Batch_thread, self).__init__(parent)
 		self.dialog = ''
 		self.DBFilename = DBFilename
 
@@ -329,10 +483,10 @@ class Batch_thread(QThread):
 				process = 0
 				step = 1
 				for key in Dict:
-					if new_value == 'NULL':
-						SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
-					else:
+					if key == 'NULL':
 						SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = ' + key
+					else:
+						SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
 					#print(SQLStatement)
 					process += VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
@@ -5392,6 +5546,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
+		self.threadpool = QThreadPool()
+
+		self.lastTab = 1
 		self.ui.cboTreeOp1.id = 'TreeOp1'
 		self.ui.cboTreeOp2.id = 'TreeOp2'
 		self.ui.cboTreeOp3.id = 'TreeOp3'
@@ -5562,7 +5719,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for i in range(n_member):
 			item = self.ui.listWidgetCloneMember.item(i)
 			member_names.append(item.text())
-
+		'''
 		MoveNotChange = True
 		rows = self.ui.SeqTable.rowCount()
 		for row in range(rows):
@@ -5574,6 +5731,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		MoveNotChange = False
 
 		self.match_table_to_tree()
+		'''
+
+		self.clearTreeChecks()
+		for cur_name in member_names:
+			found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+			if len(found) > 0:
+				for item in found:
+					item.setCheckState(0, Qt.Checked)
+		rows = self.ui.SeqTable.rowCount()
+		if rows > 0:
+			self.match_tree_to_table()
 
 	def initial_Clone(self):
 		self.ui.listWidgetClone.clear()
@@ -6375,6 +6543,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
 			#Msg = str(self.ui.tabWidget.currentIndex())
 			#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			# stat figure
 			if self.ui.tabWidget.currentIndex() == 6:
 				if self.ui.comboBoxPie.count() == 0:
 					# setup options for graph table
@@ -6422,6 +6591,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.comboBoxSankey2.addItems(fields_name)
 					self.ui.comboBoxSankey3.addItems(fields_name)
 					self.ui.comboBoxSankey4.addItems(fields_name)
+			# Ig phylogeny
 			elif self.ui.tabWidget.currentIndex() == 8:
 				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -6442,8 +6612,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 						self.ui.comboBoxTree.clear()
 						self.ui.comboBoxTree.addItems(list_unique)
+			# DB page
 			elif self.ui.tabWidget.currentIndex() == 0:
-				# if old table exists, clear table
+				# if old table exists, skip
 				if self.ui.SeqTable.columnCount() > 0:
 					pass
 					#if updateMarker == True:
@@ -6452,11 +6623,31 @@ class VGenesForm(QtWidgets.QMainWindow):
 					#	self.tree_to_table_selection()
 					#	updateMarker = False
 				else:
-					self.load_table()
-					self.match_tree_to_table()
-					self.tree_to_table_selection()
+					max_number = self.ui.lcdNumber_max.value()
+					if max_number > 5000:
+						question = 'Your current DB has more than 5000 records (' + str(int(max_number)) + \
+						           '), loading a table with all details could be time-consuming ' \
+						           'and cause slow UI response，continue?\n'
+						buttons = 'YN'
+						answer = questionMessage(self, question, buttons)
+
+						if answer == 'Yes':
+							self.load_table()
+							self.match_tree_to_table()
+							self.tree_to_table_selection()
+						else:
+							self.ui.tabWidget.setCurrentIndex(self.lastTab)
+					else:
+						#worker = Worker(self.load_table)
+						#self.threadpool.start(worker)
+						self.load_table()
+						self.match_tree_to_table()
+						self.tree_to_table_selection()
+			# clone page
 			elif self.ui.tabWidget.currentIndex() == 9:
 				self.initial_Clone()
+
+			self.lastTab = self.ui.tabWidget.currentIndex()
 
 	def load_table(self):
 		if self.ui.SeqTable.columnCount() > 0:
@@ -6464,14 +6655,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.setColumnCount(0)
 		self.ui.SeqTable.setRowCount(0)
 
-		#a = DBFilename
-		#a = FieldList
-		#b = RealNameList
-		#c = FieldTypeList
-		#d = FieldCommentList
-
 		# load data for new table
 		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
+			#self.progress = ProgressBar(self)
+			#self.progress.setLabel('Modifying barcodes ...')
+			#self.progress.show()
+
+			#pct = 0
+			#label = "Fetching data ..."
+			#self.progressLabel(pct, label)
+
 			field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
 			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
@@ -6485,6 +6678,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 				fields = '*'
 			SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			#pct = 0
+			#label = "Initial Table ..."
+			#self.progressLabel(pct, label)
 
 			num_row = len(DataIn)
 			num_col = len(current_field_list)
@@ -6501,7 +6698,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
 			else:
 				self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
-
+			
+			#process = 1
 			for row_index in range(num_row):
 				cell_checkBox = QCheckBox()
 				# cell_checkBox.setText(DataIn[row_index][0])
@@ -6514,6 +6712,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 					unit.last_name = DataIn[row_index][col_index]
 					self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
 
+				#pct = int(process / num_row * 100)
+				#label = "Loading records: " + str(process) + '/' + str(num_row)
+				#self.progressLabel(pct, label)
+				#process += 1
+
+
 			# disable edit
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 			# show sort indicator
@@ -6521,6 +6725,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# connect sort indicator to slot function
 			self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
 			self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
+
+			#msg = 'Table fully loaded!'
+			#self.ShowMessageBox([0, msg])
+
+		# try multi-thread
+		'''
+		if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
+			
+			self.loadTable_thread = LoadTable_thread(self)
+			self.loadTable_thread.DBFilename = DBFilename
+			self.loadTable_thread.vgene = self
+			self.loadTable_thread.trigger.connect(self.ShowMessageBox)
+			self.loadTable_thread.loadProgress.connect(self.progressLabel)
+			self.loadTable_thread.start()
+				
+			self.progress = ProgressBar(self)
+			self.progress.setLabel('Modifying barcodes ...')
+			self.progress.show()
+		'''
 
 	def clearCheck(self):
 		self.ui.checkBoxAll1.setChecked(False)
@@ -6555,16 +6778,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 		rows = self.ui.SeqTable.rowCount()
 		if self.ui.checkBoxAll1.isChecked():
 			self.ui.checkBoxAll.setChecked(True)
+			# check table
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
-
+			# check trre
 			root = self.ui.treeWidget.invisibleRootItem()
 			self.TreeChecksAll()
 		else:
 			self.ui.checkBoxAll.setChecked(False)
+			# check table
 			for row in range(rows):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
-
+			# check trre
 			root = self.ui.treeWidget.invisibleRootItem()
 			self.clearTreeChecks()
 		MoveNotChange = False
@@ -11396,29 +11621,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 		value = self.ui.treeWidget.selectedItems()
 
 		name = ''
-		# name2 = ''
 		for item in value:
 			name = item.text(0)
-		#FieldCheck = self.FieldChangeCheck()
 		try:
 			MatchingIndex = NameIndex[name]
 			self.DialScroll(MatchingIndex, False)
 		except:
 			print('wrong')
 			return
-			# self.findTableViewRecord(name)
-			# print(role)
-		SelectedItems =  self.getTreeSelected()
-		NumSelected  = len(SelectedItems)
+		SelectedItems = self.getTreeSelected()
+		NumSelected = len(SelectedItems)
 		if NumSelected > 1:
-			NewHead  = str(NumSelected) + ' items selected'
+			NewHead = str(NumSelected) + ' items selected'
 			self.ui.label_Name.setText(NewHead)
 
-		if from_table:
-			return
-		else:
-			self.tree_to_table_selection()
-			self.match_tree_to_table()
+		#if from_table:
+		#	return
+		#else:
+		#	pass
+		#	self.tree_to_table_selection()
+		#	self.match_tree_to_table()
 
 	def MatchingValue(self, IndexIs):
 		try:
