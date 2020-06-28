@@ -74,6 +74,7 @@ from ui_copydialog import Ui_CopyDialog
 from ui_newfielddialog import Ui_NewFieldDialog
 from ui_barcode_dialog import Ui_BarcodeDialog
 from ui_table_dialog import Ui_TableDialog
+from ui_statcheck_dislog import Ui_StatCheckDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -302,6 +303,430 @@ def reName(ori_name, rep1, rep2, prefix):
 	if prefix != '':
 		my_name = prefix + '_' + my_name
 	return my_name
+
+class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
+	BatchSignal = pyqtSignal(list)
+
+	def __init__(self):
+		super(StatCheckDialog, self).__init__()
+		self.ui = Ui_StatCheckDialog()
+		self.ui.setupUi(self)
+		self.initial = 0
+		self.ui.LineEditCutoff.setHidden(True)
+		self.ui.labelTip.setHidden(True)
+		self.ui.DisplayTip.setHidden(True)
+		self.ui.LineEditCutoff.min = 0
+		self.ui.LineEditCutoff.max = 0
+		self.ui.gridLayout.num_widget = 0
+		self.ui.gridLayoutChar.num_widget = 0
+		self.checkList = []
+
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+		self.ui.pushButtonOK.clicked.connect(self.accept)
+		self.ui.comboBox.currentTextChanged.connect(self.StatFig)
+		self.ui.radioButtonAll.clicked.connect(self.StatFig)
+		self.ui.radioButtonChecked.clicked.connect(self.StatFig)
+		self.ui.radioButton.clicked.connect(self.StatFig)
+		self.ui.LineEditCutoff.textChanged.connect(self.StatFig)
+		self.ui.DisplayTip.clicked.connect(self.StatFig)
+
+	def updateNum(self):
+		if self.ui.radioButton.isChecked():
+			num_list = []
+
+			if self.ui.LineEditCutoff.text() == '':
+				self.load_data_num([], self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
+			elif self.ui.LineEditCutoff.text()[0] == 'T':
+				self.load_data_num([], self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
+			else:
+				temp_data = self.ui.LineEditCutoff.text().split(',')
+				if len(temp_data) > 0:
+					for ele in temp_data:
+						try:
+							num = float(ele)
+							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+								num_list.append(num)
+						except:
+							return
+					# remove redudant and sort
+					num_list = list(set(num_list))
+					num_list.sort()
+
+					self.load_data_num(num_list, self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max)
+		else:
+			self.ui.LineEditCutoff.setHidden(True)
+
+	def StatFig(self):
+		if self.initial == 0:
+			return
+		sender_widget = self.sender()
+
+		if self.ui.gridLayoutFig.count() > 0:
+			for i in range(self.ui.gridLayoutFig.count()):
+				self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+
+		# where statement
+		if self.ui.radioButtonAll.isChecked():
+			WHEREStatement = ' WHERE 1'
+		else:
+			if len(self.checkList) > 0:
+				WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.checkList) + '")'
+			else:
+				WHEREStatement = ' WHERE 1'
+
+		try:
+			# numeric value
+			if self.ui.radioButton.isChecked():
+				try:
+					sender = self.sender()
+					if sender.objectName() == 'comboBox':
+						self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
+					elif sender.objectName() == 'radioButton':
+						self.ui.LineEditCutoff.setText('Type cutoff here, seprate by ,  (e.g.  500,600,700)')
+				except:
+					pass
+
+				self.ui.LineEditCutoff.setHidden(False)
+				field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				value_list = []
+				char_list = []
+				non_number_count = 0
+				for row in DataIn:
+					try:
+						value_list.append(float(row[0]))
+					except:
+						char_list.append(row[0])
+						non_number_count += 1
+
+				if len(value_list) == 0:
+					Msg = 'No value can be converted to number!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					self.ui.radioButton.setChecked(False)
+					self.StatFig()
+					return
+
+				# do it later
+				## number list
+				self.ui.LineEditCutoff.min = min(value_list)
+				self.ui.LineEditCutoff.max = max(value_list)
+				self.updateNum()
+
+				## char list
+				char_list = list(set(char_list))
+				for i in range(len(char_list)):
+					if char_list[i] == None:
+						char_list[i] = 'NULL'
+				self.load_data_char(char_list)
+
+				num_list = []
+				error = False
+				if self.ui.LineEditCutoff.text() != '':
+					temp_data = self.ui.LineEditCutoff.text().split(',')
+					if len(temp_data) > 0:
+						for ele in temp_data:
+							try:
+								num = float(ele)
+								if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+									num_list.append(num)
+							except:
+								error = True
+						# remove redudant and sort
+						num_list = list(set(num_list))
+						num_list.sort()
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.hist(value_list, bins=30)
+
+				if error == False:
+					ymin, ymax = F.axes.get_ylim()
+					for num in num_list:
+						F.axes.plot([num, num], [ymin, ymax], color='r', linewidth=1, label="Cutoff")
+
+				F.axes.tick_params(labelsize=7)
+				F.fig.subplots_adjust(bottom=0.1)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
+			# character value
+			else:
+				self.ui.LineEditCutoff.setHidden(True)
+				if self.initial == 0:
+					return
+				elif self.initial == 1:
+					field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+					SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					value_list = [row[0] for row in DataIn]
+				elif self.initial == 2:
+					field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+					SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					value_list = [row[0] for row in DataIn]
+
+					if sender_widget.objectName() == 'DisplayTip':
+						pass
+					else:
+						if len(value_list) > 30:
+							question = 'Distinct values of this field seems too many (number =  ' + str(
+								len(value_list)) + ')\nAre you sure?'
+							buttons = 'YN'
+							answer = questionMessage(self, question, buttons)
+							if answer == 'No':
+								self.ui.labelTip.setHidden(False)
+								self.ui.DisplayTip.setHidden(False)
+								return
+
+				for i in range(len(value_list)):
+					if value_list[i] == None:
+						value_list[i] = 'NULL'
+				self.load_data(value_list)
+
+				# update figure
+				SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				data = []
+				for element in DataIn:
+					data.append(element[0])
+				result = Counter(data)
+				labels = result.keys()
+				values = result.values()
+				colors = sns.color_palette("hls", len(values))
+
+				# replace None by 'No record'
+				labels = list(labels)
+				values = list(values)
+				for i in range(len(labels)):
+					if labels[i] == None:
+						labels[i] = 'NULL'
+
+				F = MyFigure(width=3, height=3, dpi=160)
+				F.axes.bar(labels, values, color=colors)
+				F.axes.set_xticklabels(labels, rotation=-90)
+				F.axes.tick_params(labelsize=7)
+
+				# determine spacing
+				lens = [len(lab) for lab in labels]
+				max_len = max(lens)
+				my_adjust = 0.1 + max_len / 50
+				F.fig.subplots_adjust(bottom=my_adjust)
+
+				self.ui.gridLayoutFig.addWidget(F, 0, 1)
+
+				self.ui.labelTip.setHidden(True)
+				self.ui.DisplayTip.setHidden(True)
+		except:
+			return
+
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
+			pass
+
+	def ShowMessageBox(self, data):
+		global DontFindTwice
+		try:
+			self.progress.FeatProgressBar.setValue(100)
+			self.progress.close()
+		except:
+			pass
+
+		if data[0] == 0:
+			DontFindTwice = True
+			Vgenes.refreshDB()
+			value = Vgenes.ui.dial.value()
+			Vgenes.updateF(value)
+			DontFindTwice = False
+
+			self.ui.radioButton.setChecked(False)
+			self.StatFig()
+
+			QMessageBox.information(self, 'Information', data[1], QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			QMessageBox.warning(self, 'Warning', data[1], QMessageBox.Ok, QMessageBox.Ok)
+
+	def accept(self):
+		# where statement
+		if self.ui.radioButtonAll.isChecked():
+			WHEREStatement = ' WHERE 1'
+		else:
+			if len(self.checkList) > 0:
+				WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.checkList) + '")'
+			else:
+				WHEREStatement = ' WHERE 1'
+
+		To_check_list = []
+
+		# for number fields
+		if self.ui.radioButton.isChecked():
+			# process num part
+			layout = self.ui.gridLayout
+			i = 1
+			new_values = []
+			while i < layout.num_widget:
+				if layout.itemAtPosition(i, 1).widget().isChecked():
+					new_values.append(True)
+				else:
+					new_values.append(False)
+				i += 1
+
+			num_list = [self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max]
+			if self.ui.LineEditCutoff.text() == '':
+				pass
+			else:
+				temp_data = self.ui.LineEditCutoff.text().split(',')
+				if len(temp_data) > 0:
+					for ele in temp_data:
+						try:
+							num = float(ele)
+							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+								num_list.append(num)
+						except:
+							return
+					# remove redudant and sort
+					num_list = list(set(num_list))
+					num_list.sort()
+			# max value + 1 so that the original max values can be processed correctly
+			num_list[-1] = num_list[-1] + 1
+
+			# start update records
+			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+			SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			for ele in DataIn:
+				try:
+					cur_value = float(ele[0])
+					cur_id = str(ele[1])
+					for i in range(len(num_list) - 1):
+						if cur_value >= num_list[i] and cur_value < num_list[i + 1]:
+							new_value = new_values[i]
+							if new_value == True:
+								To_check_list.append(cur_id)
+				except:
+					pass
+		# for char fields
+		else:
+			Dict = {}
+			layout = self.ui.gridLayout
+			i = 1
+			while i < layout.num_widget:
+				str1 = layout.itemAtPosition(i, 0).widget().text()
+				if layout.itemAtPosition(i, 1).widget().isChecked():
+					Dict[str1] = 'Checked'
+				i += 1
+
+			if len(Dict) > 0:
+				field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+				for key in Dict:
+					SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement + ' AND ' + field + ' = "' + key +  '"'
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					for record in DataIn:
+						To_check_list.append(record[1])
+		
+		self.checkList = To_check_list
+		self.StatFig()
+		self.BatchSignal.emit(To_check_list)
+
+	def load_data(self, list):
+		layout = self.ui.gridLayout
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
+		layout.num_widget = 0
+
+		layout.addWidget(QLabel("Original value"), 0, 0)
+		layout.addWidget(QLabel(""), 0, 1)
+		layout.num_widget += 1
+
+		i = 1
+		for item in list:
+			f = QLineEdit(item)
+			f.setReadOnly(True)
+			layout.addWidget(f, i, 0)
+			layout.addWidget(QCheckBox(''), i, 1)
+			layout.num_widget += 1
+			i += 1
+
+		# delete everything in char layout
+		layout = self.ui.gridLayoutChar
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
+
+	def load_data_num(self, list, min, max):
+		# clear old widgets
+		layout = self.ui.gridLayout
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
+		layout.num_widget = 0
+
+		if len(list) == 0:
+			layout.addWidget(QLabel("Data range:"), 0, 0)
+			layout.addWidget(QLabel(""), 0, 1)
+			layout.num_widget += 1
+
+			item = str(min) + ' <= Value <= ' + str(max)
+			f = QLineEdit(item)
+			f.setReadOnly(True)
+			layout.addWidget(f, 1, 0)
+			layout.addWidget(QCheckBox(''), i, 1)
+			layout.num_widget += 1
+		else:
+			layout.addWidget(QLabel("Data range:"), 0, 0)
+			layout.addWidget(QLabel(""), 0, 1)
+			layout.num_widget += 1
+
+			for i in range(len(list)):
+				if i == 0:
+					cur_range = str(min) + ' <= Value < ' + str(list[i])
+				else:
+					cur_range = str(list[i - 1]) + ' <= Value < ' + str(list[i])
+
+				f = QLineEdit(cur_range)
+				f.setReadOnly(True)
+				layout.addWidget(f, i + 1, 0)
+				layout.addWidget(QCheckBox(''), i + 1, 1)
+				layout.num_widget += 1
+
+			cur_range = str(list[-1]) + ' <= Value <= ' + str(max)
+			f = QLineEdit(cur_range)
+			f.setReadOnly(True)
+			layout.addWidget(f, len(list) + 1, 0)
+			layout.addWidget(QCheckBox(''), len(list) + 1, 1)
+			layout.num_widget += 1
+
+	def load_data_char(self, list):
+		layout = self.ui.gridLayoutChar
+		if layout.count() > 0:
+			for i in range(layout.count()):
+				layout.itemAt(i).widget().deleteLater()
+		layout.num_widget = 0
+
+		if len(list) > 0:
+			layout.addWidget(QLabel("Original value"), 0, 0)
+			layout.addWidget(QLabel(""), 0, 1)
+			layout.num_widget += 1
+
+			i = 1
+			for item in list:
+				f = QLineEdit(item)
+				f.setReadOnly(True)
+				layout.addWidget(f, i, 0)
+				layout.addWidget(QCheckBox(''), i, 1)
+				layout.num_widget += 1
+				i += 1
 
 class LoadTable_thread(QThread):
 	loadProgress = pyqtSignal(int, str)
@@ -2258,6 +2683,8 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
 				for col_index in range(num_col):
 					self.ui.tableWidget.setItem(row_index + 1, col_index,
 					                                       QTableWidgetItem(Content[row_index][col_index]))
+
+		self.ui.tableWidget.resizeColumnsToContents()
 
 class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 	refreshDBSignal = pyqtSignal()
@@ -5931,6 +6358,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for col_index in range(num_col):
 				self.annoDialog.ui.tableWidget.setItem(row_index + 1, col_index,
 				                                       QTableWidgetItem(Content[row_index][col_index]))
+		self.annoDialog.ui.tableWidget.resizeColumnsToContents()
 
 		self.annoDialog.show()
 
@@ -6726,6 +7154,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
 			self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
 
+			self.match_tree_to_table()
 			#msg = 'Table fully loaded!'
 			#self.ShowMessageBox([0, msg])
 
@@ -13811,6 +14240,37 @@ class VGenesForm(QtWidgets.QMainWindow):
 		NewLbl = self.ui.label_Name.text()
 		NewLbl += ', ' + str(NumFound) + ' selected'
 		self.ui.label_Name.setText(NewLbl)
+
+	@pyqtSlot()
+	def on_pushButtonStat_clicked(self):
+		self.myStatDialog = StatCheckDialog()
+		self.myStatDialog.initial = 0
+		# self.myStatDialog.load_data(value_list)
+		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.myStatDialog.ui.comboBox.addItems(field_list)
+		self.myStatDialog.initial = 1
+		self.myStatDialog.ui.comboBox.setCurrentText(field_list[2])
+		self.myStatDialog.BatchSignal.connect(self.updateSelectionFromDialog)
+		checked_names = self.getTreeCheckedChild()
+		self.myStatDialog.checkList = checked_names[3]
+		self.myStatDialog.show()
+		self.myStatDialog.initial = 2
+		self.myStatDialog.resize(1200, 700)
+
+	def updateSelectionFromDialog(self, data):
+		self.clearTreeChecks()
+		num_checked = len(data)
+
+		for item in data:
+			Seqname = item
+			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+			for record in found:
+				record.setCheckState(0, Qt.Checked)
+
+		NewLbl = str(num_checked) + ' records checked'
+		self.ui.label_Name.setText(NewLbl)
+
+		self.match_tree_to_table()
 
 	@pyqtSlot()
 	def on_pushButtonBatch_clicked(self):

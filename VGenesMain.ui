@@ -97,17 +97,7 @@
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item row="4" column="1">
-           <widget class="QLineEdit" name="txtFieldSearch">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>22</height>
-             </size>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
+          <item row="2" column="1">
            <widget class="QComboBox" name="cboFindField">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -156,28 +146,47 @@
           <item row="2" column="0">
            <widget class="QLabel" name="label_13">
             <property name="text">
-             <string>Search fields:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QRadioButton" name="rdoLocal">
-            <property name="text">
-             <string>Local</string>
+             <string>Field:</string>
             </property>
            </widget>
           </item>
           <item row="2" column="2">
-           <widget class="QRadioButton" name="rdoAll">
-            <property name="text">
-             <string>All</string>
+           <widget class="QLineEdit" name="txtFieldSearch">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>22</height>
+             </size>
             </property>
-            <property name="checked">
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QPushButton" name="pushButtonStat">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Statistics</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
              <bool>true</bool>
             </property>
            </widget>
           </item>
-          <item row="4" column="2">
+          <item row="4" column="2" colspan="2">
            <widget class="QPushButton" name="btnFieldSearch">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -209,6 +218,23 @@
             </property>
             <property name="flat">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5">
+           <widget class="QRadioButton" name="rdoAll">
+            <property name="text">
+             <string>All</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="5">
+           <widget class="QRadioButton" name="rdoLocal">
+            <property name="text">
+             <string>Local</string>
             </property>
            </widget>
           </item>
