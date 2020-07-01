@@ -1051,7 +1051,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         self.progress = ProgressBar(self)
         self.progress.show()
-
     elif option == 'CSV format Entire VDB':
         '''
         SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
@@ -1100,7 +1099,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         self.progress = ProgressBar(self)
         self.progress.show()
-
     elif option == 'Clonal Analysis (.csv)':
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
@@ -1206,6 +1204,80 @@ def StandardReports(self, option, SequenceName, DBFilename):
         '''
     elif option == 'Custom report':
         print('custom report generator')
+    elif option == 'Count AA mutations':
+        selected_list = self.getTreeCheckedChild()
+        selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        SQLStatement = 'SELECT SeqName,GeneType,SeqAlignment FROM vgenesdb' + WHEREStatement
+
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        if len(DataIn) > 0:
+
+            Pathname = saveFile(self.parent(), 'csv')
+            if Pathname == None:
+                return
+            with open(Pathname, 'w') as currentfile:
+                for records in DataIn:
+                    name = records[0]
+                    type = records[1]
+                    alignment = records[2]
+
+                    ref_aa = ''
+                    cur_aa = ''
+
+                    lines = alignment.split('\n')
+
+                    for i in range(len(lines)):
+                        cur_line = lines[i]
+                        if 'Query' in cur_line:
+                            ref_aa += lines[i - 1]
+                            try:
+                                if lines[i + 2].find('          ',0,10) != -1:
+                                    cur_aa += lines[i + 2]
+                            except:
+                                pass
+                    ref_aa = re.sub(' ', '', ref_aa)
+                    cur_aa = re.sub(' ', '', cur_aa)
+                    ref_aa = ref_aa[0:len(cur_aa)]
+
+                    num_aa_mutation_v = 0
+                    for i in range(len(ref_aa)):
+                        if ref_aa[i] != cur_aa[i]:
+                            num_aa_mutation_v += 1
+                    num_aa_mutation_j = 0
+                    if type != 'Heavy':
+                        SQLStatement = 'SELECT Jbeg,Jend,Sequence,GermlineSequence FROM vgenesdb WHERE SeqName = "' + name +'"'
+                        res = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+                        res = res[0]
+                        j_start = int(res[0]) - 1
+                        j_end = int(res[1])
+                        ref_seq = res[3]
+                        cur_seq = res[2]
+                        ref_nt = ref_seq[j_start:j_end]
+                        cur_nt = cur_seq[j_start:j_end]
+
+                        #ref_1 = VGenesSeq.Translator(ref_nt, 0)[0]
+                        #ref_2 = VGenesSeq.Translator(ref_nt, 1)[0]
+                        #ref_3 = VGenesSeq.Translator(ref_nt, 2)[0]
+
+                        orf = j_start % 3
+                        orf = orf - 1
+
+                        ref_aa, msg1 = VGenesSeq.Translator(ref_nt, orf)
+                        cur_aa, msg2 = VGenesSeq.Translator(cur_nt, orf)
+
+                        for i in range(len(ref_aa)):
+                            if ref_aa[i] != '~':
+                                if ref_aa[i] != cur_aa[i]:
+                                    num_aa_mutation_j += 1
+                    num_aa_mutation = num_aa_mutation_v + num_aa_mutation_j
+
+                    out_str = name + ',' + type + ',' + str(num_aa_mutation) + ',' + str(num_aa_mutation_v) + ',' + str(num_aa_mutation_j) + '\n'
+                    currentfile.write(out_str)
+                    #res.append((name, type, num_aa_mutation, num_aa_mutation_v, num_aa_mutation_j))
+
+        self.ShowVGenesText(Pathname)
 
     print('done')
 

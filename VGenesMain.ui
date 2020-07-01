@@ -1393,6 +1393,11 @@
              <string>CSV format Entire VDB</string>
             </property>
            </item>
+           <item>
+            <property name="text">
+             <string>Count AA mutations</string>
+            </property>
+           </item>
           </widget>
           <widget class="QCheckBox" name="ckReportDisplay">
            <property name="geometry">
