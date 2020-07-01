@@ -1257,12 +1257,38 @@ def StandardReports(self, option, SequenceName, DBFilename):
                         ref_nt = ref_seq[j_start:j_end]
                         cur_nt = cur_seq[j_start:j_end]
 
+                        # determine ORF
+                        ruler_line = lines[2]
+                        aa_line = lines[3]
+                        nt_line = lines[4]
+
+                        pos = ruler_line.find('<')
+                        aa_line = aa_line[pos:]
+                        nt_line = nt_line[pos:]
+
+                        num_space = 0
+                        while num_space < 10:
+                            if aa_line[num_space] == ' ':
+                                num_space += 1
+                            else:
+                                break
+                        orf_offset = num_space % 3
+                        orf_offset = orf_offset - 1
+                        if orf_offset < 0:
+                            orf_offset = orf_offset + 3
+
+                        orf = j_start % 3
+                        orf = orf_offset - orf
+                        if orf < 0:
+                            orf = orf + 3
+
                         #ref_1 = VGenesSeq.Translator(ref_nt, 0)[0]
                         #ref_2 = VGenesSeq.Translator(ref_nt, 1)[0]
                         #ref_3 = VGenesSeq.Translator(ref_nt, 2)[0]
 
-                        orf = j_start % 3
-                        orf = orf - 1
+                        #ref_11 = VGenesSeq.Translator(ref_seq, 0)[0]
+                        #ref_21 = VGenesSeq.Translator(ref_seq, 1)[0]
+                        #ref_31 = VGenesSeq.Translator(ref_seq, 2)[0]
 
                         ref_aa, msg1 = VGenesSeq.Translator(ref_nt, orf)
                         cur_aa, msg2 = VGenesSeq.Translator(cur_nt, orf)
