@@ -1218,6 +1218,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             if Pathname == None:
                 return
             with open(Pathname, 'w') as currentfile:
+                out_str = 'SeqName,GeneType,Num of AA mutations of V\n'
+                currentfile.write(out_str)
                 for records in DataIn:
                     name = records[0]
                     type = records[1]
@@ -1246,6 +1248,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
                         if ref_aa[i] != cur_aa[i]:
                             num_aa_mutation_v += 1
                     num_aa_mutation_j = 0
+                    '''
                     if type != 'Heavy':
                         SQLStatement = 'SELECT Jbeg,Jend,Sequence,GermlineSequence FROM vgenesdb WHERE SeqName = "' + name +'"'
                         res = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -1297,13 +1300,14 @@ def StandardReports(self, option, SequenceName, DBFilename):
                             if ref_aa[i] != '~':
                                 if ref_aa[i] != cur_aa[i]:
                                     num_aa_mutation_j += 1
+                    '''
                     num_aa_mutation = num_aa_mutation_v + num_aa_mutation_j
 
-                    out_str = name + ',' + type + ',' + str(num_aa_mutation) + ',' + str(num_aa_mutation_v) + ',' + str(num_aa_mutation_j) + '\n'
+                    #out_str = name + ',' + type + ',' + str(num_aa_mutation) + ',' + str(num_aa_mutation_v) + ',' + str(num_aa_mutation_j) + '\n'
+                    out_str = name + ',' + type + ',' + str(num_aa_mutation) + '\n'
                     currentfile.write(out_str)
                     #res.append((name, type, num_aa_mutation, num_aa_mutation_v, num_aa_mutation_j))
-
-        self.ShowVGenesText(Pathname)
+            self.ShowVGenesText(Pathname)
 
     print('done')
 
