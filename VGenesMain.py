@@ -2893,10 +2893,10 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 			return
 
 		# update field name table
-		SQLSTATEMENT = 'SELECT MIN(ID) FROM fieldsname'
+		SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
 		max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
 
-		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, ,display, display_priority) ' \
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
 		                'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_field + '", "' + new_field + '", "Customized", "", "yes", 9)'
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
@@ -2969,10 +2969,10 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
 				return
 
 		# update field name table
-		SQLSTATEMENT = 'SELECT MIN(ID) FROM fieldsname'
+		SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
 		max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
 
-		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, ,display, display_priority) ' \
+		SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
 		                'VALUES(' + str(max_id[0][0] + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "", "yes", 9)'
 		try:
 			VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
@@ -4040,13 +4040,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						new_col_comment = ''
 
 						# update table
-						SQLSTATEMENT = 'SELECT MIN(ID) FROM fieldsname'
+						SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
 						max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
 
 						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
-						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, ,display, display_priority) ' \
+						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
 						                'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_col + '", "' + new_col_name + \
-						                '", "Customized", "' + new_col_comment + '", "yes",9)'
+						                '", "Customized", "' + new_col_comment + '", "yes", 9)'
 						try:
 							VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
 						except:
@@ -4175,10 +4175,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						new_col_comment = cur_field_comment[new_col_index]
 
 						# update table
-						SQLSTATEMENT = 'SELECT MIN(ID) FROM fieldsname'
+						SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
 						max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
 						SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
-						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, ,display, display_priority) ' \
+						SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
 						                'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_col + '", "' + new_col_name + \
 						                '", "Customized", "' + new_col_comment + '", "yes", 9)'
 						try:
