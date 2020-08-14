@@ -194,60 +194,112 @@ class HCLC_thread(QThread):
         super(HCLC_thread, self).__init__()
         self.DBFilename = ''
         self.Pathname = ''
+        self.checkRecords = []
 
     def run(self):
         Msg = ''
         sign = ''
-        SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE GeneType = "Heavy"'
-        DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
-        if len(DataIn) < 2:
-            Msg = 'Your VGene DB do not have any barcode information!'
-            sign = 1
-        else:
-            CSVOut = ''
-            # make CSV header
-            SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
-            DataInHeader = VGenesSQL.RunSQL(self.DBFilename, SQLSTATEMENT)
-            field_names = ['HC_' + i[1] for i in DataInHeader] + ['LC_' + i[1] for i in DataInHeader]
-            CSVOut += ','.join(field_names) + '\n'
-
-            seq_num = 0
-            progress = 0
-            for record in DataIn:
-                barcode = record[0]
-                if barcode == 'Blank10' or barcode == '':
-                    pass
-                else:
-                    SQLStatement1 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType = "Heavy"'
-                    DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
-
-                    SQLStatement2 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
-                    DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
-
-                    if len(DataIn1) == 1 and len(DataIn2) == 1:
-                        data_hc = [str(x) for x in DataIn1[0]]
-                        data_hc[58] = re.sub(r'\n', '#', data_hc[58])
-                        data_hc[97] = re.sub(',', '|', data_hc[97])
-                        data_lc = [str(x) for x in DataIn2[0]]
-                        data_lc[58] = re.sub(r'\n', '#', data_lc[58])
-                        data_lc[97] = re.sub(',', '|', data_lc[97])
-
-                        CSVOut += ','.join(data_hc) + ',' + ','.join(data_lc) + '\n'
-                        seq_num += 1
-
-                self.HCLC_progress.emit(progress, len(DataIn), int(progress/len(DataIn)*100))
-                progress += 1
-
-            if seq_num > 0:
-                with open(self.Pathname, 'w') as currentfile:
-                    currentfile.write(CSVOut)
-
-                Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
-                sign = 0
-            else:
-                Msg = 'Did not find any HC/LC pair in your current DB!'
+        if len(self.checkRecords) == 0:
+            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE GeneType = "Heavy"'
+            DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+            if len(DataIn) < 2:
+                Msg = 'Your VGene DB do not have any barcode information!'
                 sign = 1
+            else:
+                CSVOut = ''
+                # make CSV header
+                SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
+                DataInHeader = VGenesSQL.RunSQL(self.DBFilename, SQLSTATEMENT)
+                field_names = ['HC_' + i[1] for i in DataInHeader] + ['LC_' + i[1] for i in DataInHeader]
+                CSVOut += ','.join(field_names) + '\n'
 
+                seq_num = 0
+                progress = 0
+                for record in DataIn:
+                    barcode = record[0]
+                    if barcode == 'Blank10' or barcode == '':
+                        pass
+                    else:
+                        SQLStatement1 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType = "Heavy"'
+                        DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
+
+                        SQLStatement2 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
+                        DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
+
+                        if len(DataIn1) == 1 and len(DataIn2) == 1:
+                            data_hc = [str(x) for x in DataIn1[0]]
+                            data_hc[58] = re.sub(r'\n', '#', data_hc[58])
+                            data_hc[97] = re.sub(',', '|', data_hc[97])
+                            data_lc = [str(x) for x in DataIn2[0]]
+                            data_lc[58] = re.sub(r'\n', '#', data_lc[58])
+                            data_lc[97] = re.sub(',', '|', data_lc[97])
+
+                            CSVOut += ','.join(data_hc) + ',' + ','.join(data_lc) + '\n'
+                            seq_num += 1
+
+                    self.HCLC_progress.emit(progress, len(DataIn), int(progress/len(DataIn)*100))
+                    progress += 1
+
+                if seq_num > 0:
+                    with open(self.Pathname, 'w') as currentfile:
+                        currentfile.write(CSVOut)
+
+                    Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
+                    sign = 0
+                else:
+                    Msg = 'Did not find any HC/LC pair in your current DB!'
+                    sign = 1
+        else:
+            list_str = '("' + '","'.join(self.checkRecords) + '")'
+            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE SeqName IN ' + list_str
+            DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+            if len(DataIn) < 2:
+                Msg = 'Your VGene DB do not have any barcode information!'
+                sign = 1
+            else:
+                CSVOut = ''
+                # make CSV header
+                SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
+                DataInHeader = VGenesSQL.RunSQL(self.DBFilename, SQLSTATEMENT)
+                field_names = ['HC_' + i[1] for i in DataInHeader] + ['LC_' + i[1] for i in DataInHeader]
+                CSVOut += ','.join(field_names) + '\n'
+
+                seq_num = 0
+                progress = 0
+                for record in DataIn:
+                    barcode = record[0]
+                    if barcode == 'Blank10' or barcode == '':
+                        pass
+                    else:
+                        SQLStatement1 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType = "Heavy"'
+                        DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
+
+                        SQLStatement2 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
+                        DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
+
+                        if len(DataIn1) == 1 and len(DataIn2) == 1:
+                            data_hc = [str(x) for x in DataIn1[0]]
+                            data_hc[58] = re.sub(r'\n', '#', data_hc[58])
+                            data_hc[97] = re.sub(',', '|', data_hc[97])
+                            data_lc = [str(x) for x in DataIn2[0]]
+                            data_lc[58] = re.sub(r'\n', '#', data_lc[58])
+                            data_lc[97] = re.sub(',', '|', data_lc[97])
+
+                            CSVOut += ','.join(data_hc) + ',' + ','.join(data_lc) + '\n'
+                            seq_num += 1
+
+                    self.HCLC_progress.emit(progress, len(DataIn), int(progress / len(DataIn) * 100))
+                    progress += 1
+
+                if seq_num > 0:
+                    with open(self.Pathname, 'w') as currentfile:
+                        currentfile.write(CSVOut)
+
+                    Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
+                    sign = 0
+                else:
+                    Msg = 'Did not find any HC/LC pair in your current DB!'
+                    sign = 1
         self.HCLC_finish.emit([sign, Msg])
 
 
@@ -1137,12 +1189,25 @@ def StandardReports(self, option, SequenceName, DBFilename):
         if Pathname == None:
             return
 
+        if self.ui.checkBoxAll.isChecked():
+            listItems = []
+        else:
+            listItems = self.getTreeCheckedChild()
+            listItems = listItems[3]
+            if len(listItems) == 0:
+                pass
+            else:
+                mode = 1
+                msg = 'You selected part of records, will only identify HC/LC pairs for your selected records!'
+                QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+
         self.HCLC_Thread = HCLC_thread(self)
         self.HCLC_Thread.DBFilename = DBFilename
         self.HCLC_Thread.Pathname = Pathname
+        self.HCLC_Thread.checkRecords = listItems
         self.HCLC_Thread.HCLC_progress.connect(self.result_display)
         self.HCLC_Thread.HCLC_finish.connect(self.ShowMessageBox)
-        self.HCLC_Thread.start()  ##启动多线程
+        self.HCLC_Thread.start()
 
         self.progress = ProgressBar(self)
         self.progress.show()
