@@ -7066,18 +7066,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 				else:
 					max_number = self.ui.lcdNumber_max.value()
 					if max_number > 5000:
-						question = 'Your current DB has more than 5000 records (' + str(int(max_number)) + \
+						message = 'Your current DB has more than 5000 records (' + str(int(max_number)) + \
 						           '), loading a table with all details could be time-consuming ' \
-						           'and cause slow UI response，continue?\n'
-						buttons = 'YN'
-						answer = questionMessage(self, question, buttons)
-
-						if answer == 'Yes':
-							self.load_table()
-							self.match_tree_to_table()
-							self.tree_to_table_selection()
-						else:
-							self.ui.tabWidget.setCurrentIndex(self.lastTab)
+						           'and cause slow UI response，the table will be hide by default, ' \
+						           'you can click "Table" button to display/hide the table.\n'
+						QMessageBox.information(self, 'Information', message, QMessageBox.Ok, QMessageBox.Ok)
+						#self.load_table()
+						#self.match_tree_to_table()
+						#self.tree_to_table_selection()
 					else:
 						#worker = Worker(self.load_table)
 						#self.threadpool.start(worker)
@@ -7385,13 +7381,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			unlock_icon = QIcon()
 			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.EditLock.setIcon(unlock_icon)
-			self.ui.EditLock.setText('Edit Lock: Unlock (Double click to edit)')
+			self.ui.EditLock.setText('Edit unlock')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
 		else:
 			lock_icon = QIcon()
 			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.EditLock.setIcon(lock_icon)
-			self.ui.EditLock.setText('Edit Lock: Locked')
+			self.ui.EditLock.setText('Edit locked')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 
 	def GenerateFigureClone(self):
@@ -14319,7 +14315,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.myBatchDialog.show()
 		self.myBatchDialog.initial = 2
 		self.myBatchDialog.resize(1200, 700)
-	
+
+	@pyqtSlot()
+	def on_ShowTable_clicked(self):
+		if self.ui.SeqTable.columnCount() > 0:
+			self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
+			self.ui.SeqTable.setColumnCount(0)
+			self.ui.SeqTable.setRowCount(0)
+		else:
+			self.load_table()
+			self.match_tree_to_table()
+			self.tree_to_table_selection()
+
 	@pyqtSlot()
 	def on_StatUpdate_clicked(self):
 		self.myBatchDialog = BatchDialog()
