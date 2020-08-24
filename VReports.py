@@ -1304,8 +1304,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                                     cur_aa += lines[i + 2]
                             except:
                                 pass
-                    ref_aa = re.sub(' ', '', ref_aa)
-                    cur_aa = re.sub(' ', '', cur_aa)
+
+                    cur_aa = cur_aa.rstrip()
                     ref_aa = ref_aa[0:len(cur_aa)]
 
                     num_aa_mutation_v = 0
