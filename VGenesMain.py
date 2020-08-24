@@ -3826,15 +3826,33 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		seq_pathname = os.path.join(temp_folder,time_stamp)
 		fout = open(seq_pathname,'w')
 
+		# process fasta file names
+		processed_fasta_names = []
+		path_depth = 0
+		file_id = 1
+		while len(processed_fasta_names) > len(list(set(processed_fasta_names))) or len(processed_fasta_names) == 0:
+			processed_fasta_names.clear()
+			path_depth = path_depth + 1
+			for fasta_file in fasta_files:
+				try:
+					file_name = '_'.join(fasta_file.split('/')[-path_depth:])
+				except:
+					file_name = "File" + str(file_id) + '_' + fasta_file
+					file_id += 1
+
+				file_name = re.sub(r'\..+', '', file_name)
+				file_name = re.sub(' ', '', file_name)
+				processed_fasta_names.append(file_name)
+
+		file_id = 0
 		for fasta_file in fasta_files:
-			file_name = fasta_file.split('/')[-1]
-			file_name = re.sub(r'\..+','',file_name)
 			try:
 				for record in SeqIO.parse(fasta_file, "fasta"):
 					#print(record)
-					seq_name = '>' + file_name + '_' + record.id
+					seq_name = '>' + processed_fasta_names[file_id] + '_' + record.id
 					fout.write(seq_name + '\n')
 					fout.write(record.seq._data + '\n')
+				file_id += 1
 			except:
 				Msg = 'Can not parse file\n ' + fasta_file + '\n as fasta file! Check your input!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
