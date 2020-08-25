@@ -2456,7 +2456,6 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 			# return Answer
 
 		else:
-
 			Query = 'This file ' + self.cboRecent.currentText() + ' no longer exists at this location.'
 
 			QtWidgets.QMessageBox.critical(None, "File error", Query, QtWidgets.QMessageBox.Cancel)
@@ -6039,7 +6038,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
 
 		self.enableEdit = False
-
 		self.HeatmapList = []
 
 	def openTableDialog(self):
@@ -12159,6 +12157,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def StartUpClicked(self):
 		self.show()
+
+		# adjust the window size according to current resolution
+		self.desktop = QApplication.desktop()
+		self.screenRect = self.desktop.screenGeometry()
+		self.height = self.screenRect.height()
+		self.width = self.screenRect.width()
+		if self.width > 1800:
+			self.resize(1680, 1200)
+		else:
+			self.resize(1440, 800)
+
 
 		global DBFilename
 		if StartUpAnswer == 'New':
