@@ -1251,7 +1251,7 @@ class annotate_thread(QThread):
                             return
 
                         # update field name table
-                        SQLSTATEMENT = 'SELECT MIN(ID) FROM fieldsname'
+                        SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
                         max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
 
                         SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment,display, display_priority) ' \
