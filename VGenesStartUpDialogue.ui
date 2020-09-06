@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>638</width>
-    <height>685</height>
+    <width>824</width>
+    <height>738</height>
    </rect>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>824</width>
+    <height>738</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>VGenes</string>
@@ -254,11 +260,20 @@
    </item>
    <item row="0" column="0">
     <widget class="QLabel" name="label_3">
+     <property name="maximumSize">
+      <size>
+       <width>800</width>
+       <height>500</height>
+      </size>
+     </property>
      <property name="text">
       <string/>
      </property>
      <property name="pixmap">
       <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/logo.png</pixmap>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
