@@ -13,7 +13,8 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_VGenesStartUpDialog(object):
     def setupUi(self, VGenesStartUpDialog):
         VGenesStartUpDialog.setObjectName("VGenesStartUpDialog")
-        VGenesStartUpDialog.resize(638, 685)
+        VGenesStartUpDialog.resize(824, 738)
+        VGenesStartUpDialog.setMaximumSize(QtCore.QSize(824, 738))
         self.gridLayout_3 = QtWidgets.QGridLayout(VGenesStartUpDialog)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.frame = QtWidgets.QFrame(VGenesStartUpDialog)
@@ -90,8 +91,10 @@ class Ui_VGenesStartUpDialog(object):
         self.gridLayout_4.addWidget(self.cboRecent, 0, 1, 1, 1)
         self.gridLayout_3.addWidget(self.frame_3, 2, 0, 1, 1)
         self.label_3 = QtWidgets.QLabel(VGenesStartUpDialog)
+        self.label_3.setMaximumSize(QtCore.QSize(800, 500))
         self.label_3.setText("")
         self.label_3.setPixmap(QtGui.QPixmap(":/PNG-Icons/logo.png"))
+        self.label_3.setScaledContents(True)
         self.label_3.setAlignment(QtCore.Qt.AlignCenter)
         self.label_3.setObjectName("label_3")
         self.gridLayout_3.addWidget(self.label_3, 0, 0, 1, 1)
