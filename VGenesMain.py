@@ -5713,7 +5713,7 @@ class MyObjectCls(QObject):
 		self.downloadFigSignal.emit(msg)
 
 class WorkThread(QThread):
-	loadProgress =  pyqtSignal(int, str)
+	loadProgress = pyqtSignal(int, str)
 	trigger = pyqtSignal(str)
 
 	def __int__(self):
@@ -6000,6 +6000,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.radioButtonPNG.clicked.connect(self.setupPNG)
 		self.ui.tabWidgetFig.currentChanged['int'].connect(self.disablePNG)
 		self.ui.comboBoxTree.currentTextChanged.connect(self.updateCloneTreeInfo)
+		self.ui.CopyAA.clicked.connect(self.copySelAA)
+		self.ui.CopyDNA.clicked.connect(self.copySelDNA)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -6039,6 +6041,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.enableEdit = False
 		self.HeatmapList = []
+
+	def copySelAA(self):
+		txt = self.ui.txtAASeq.textCursor().selectedText()
+		if len(txt) > 0:
+			clipboard = QtWidgets.QApplication.clipboard()
+			clipboard.clear()
+			clipboard.setText(txt)
+			self.ui.lblSeq2.setText('AA Sequence Copied!')
+		else:
+			self.ui.lblSeq2.setText('Nothing selected!')
+
+	def copySelDNA(self):
+		txt = self.ui.txtDNASeq.textCursor().selectedText()
+		if len(txt) > 0:
+			clipboard = QtWidgets.QApplication.clipboard()
+			clipboard.clear()
+			clipboard.setText(txt)
+			self.ui.lblSeq2.setText('DNA Sequence Copied!')
+		else:
+			self.ui.lblSeq2.setText('Nothing selected!')
 
 	def openTableDialog(self):
 		self.tableDialog = TableDialog()
@@ -17562,7 +17584,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# self.ui.lblSeq2.setText(msg)
 		frame = 0
-		ErMes = 'Amino acid sequence: \n\n'
+		ErMes = 'Amino acid sequence:'
 
 		AASeq, ErMessage = VGenesSeq.Translator(DNAseq, frame)
 		if len(ErMessage) > 0:
@@ -18342,7 +18364,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			with open(filename, 'r') as currentfile:
 				vv = currentfile
 		except:
-			filename = '/Volumes/Promise Pegasus/Dropbox/VGenes/UpdateRecord.nt'
+			filename = os.path.join(working_prefix, 'UpdateRecord.nt')
+			file = open(filename,'w')
+			file.close()
+
 
 		sequence = self.ui.txtDNASeq.toPlainText()
 		seqname = data[0]
@@ -18370,7 +18395,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		datalist.append(0)
 		# BlastIsDone = False
 
-		IgBLASTAnalysis = IgBLASTer.IgBLASTit(filename, datalist)
+		IgBLASTAnalysis = IgBLASTer.IgBLASTit(filename, datalist, False)
 
 		# while BlastIsDone == False:
 		#     NotDone  = False

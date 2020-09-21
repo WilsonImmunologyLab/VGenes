@@ -1,0 +1,5 @@
+VGenes input beginning at: Mon Sep 21 14:20:33 2020
+HA6_clonetype100_H3 was not a productive rearrangement
+HA6_clonetype100_H3 was not a productive rearrangement
+
+VGenes input ended at: Mon Sep 21 14:20:33 2020
