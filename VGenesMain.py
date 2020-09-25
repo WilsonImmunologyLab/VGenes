@@ -2430,7 +2430,10 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 
 		global StartUpAnswer
 		StartUpAnswer = 'New'
-		Vgenes.StartUpClicked()
+		if self.radioButtonBackDB.isChecked():
+			Vgenes.StartUpClicked(True)
+		else:
+			Vgenes.StartUpClicked(False)
 
 		self.close()
 
@@ -2439,7 +2442,10 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 
 		global StartUpAnswer
 		StartUpAnswer = 'Open'
-		Vgenes.StartUpClicked()
+		if self.radioButtonBackDB.isChecked():
+			Vgenes.StartUpClicked(True)
+		else:
+			Vgenes.StartUpClicked(False)
 
 		self.close()
 
@@ -2452,7 +2458,10 @@ class StartUpDialogue(QtWidgets.QDialog, Ui_VGenesStartUpDialog):
 		if os.path.isfile(self.cboRecent.currentText()):
 			self.close()
 			StartUpAnswer = 'Recent' + StartUpAnswer
-			Vgenes.StartUpClicked()
+			if self.radioButtonBackDB.isChecked():
+				Vgenes.StartUpClicked(True)
+			else:
+				Vgenes.StartUpClicked(False)
 			# return Answer
 
 		else:
@@ -12177,7 +12186,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		StartUpOptions.exec_()
 
 	@pyqtSlot()
-	def StartUpClicked(self):
+	def StartUpClicked(self, backup):
 		self.show()
 
 		# adjust the window size according to current resolution
@@ -12210,8 +12219,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			else:
 				VGenesSQL.creatnewDB(DBFilename)
 			self.UpdateRecentList(DBFilename, True)
-
-		self.SaveBackup()
+		if backup == True:
+			self.SaveBackup()
 
 	@pyqtSlot()
 	def on_action_New_triggered(self):  # how to activate menu and toolbar actions!!!
