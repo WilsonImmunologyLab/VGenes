@@ -3854,6 +3854,18 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		file_id = 0
 		for fasta_file in fasta_files:
+			if os.path.isfile(fasta_file):
+				fasta_seqs = ReadFasta(fasta_file)
+				for fasta in fasta_seqs:
+					seq_name = '>' + processed_fasta_names[file_id] + '_' + fasta[0]
+					fout.write(seq_name + '\n')
+					fout.write(fasta[1] + '\n')
+				file_id += 1
+			else:
+				Msg = 'Your file\n ' + fasta_file + '\n does not exist! Check your input!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			'''
 			try:
 				for record in SeqIO.parse(fasta_file, "fasta"):
 					#print(record)
@@ -3865,6 +3877,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				Msg = 'Can not parse file\n ' + fasta_file + '\n as fasta file! Check your input!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
+			'''
 		fout.close()
 
 		# settings
@@ -4538,6 +4551,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						f.close()
 						out_handle.write(seq + '\n')
 				fasta_files.append(cur_fasta)
+				out_handle.close()
 		answer = ''
 		thetype = 'FASTA'
 		species = ''
@@ -4556,7 +4570,18 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		fout = open(seq_pathname,'w')
 		for fasta_file in fasta_files:
 			file_name = fasta_file.split('/')[-1]
-			file_name = re.sub(r'\..+','',file_name)
+			file_name = re.sub(r'\..+', '', file_name)
+			if os.path.isfile(fasta_file):
+				fasta_seqs = ReadFasta(fasta_file)
+				for fasta in fasta_seqs:
+					seq_name = '>' + file_name + '_' + fasta[0]
+					fout.write(seq_name + '\n')
+					fout.write(fasta[1] + '\n')
+			else:
+				Msg = 'Your file\n ' + fasta_file + '\n does not exist! Check your input!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			'''
 			try:
 				for record in SeqIO.parse(fasta_file, "fasta"):
 					#print(record)
@@ -4567,6 +4592,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				Msg = 'Can not parse file\n ' + fasta_file + '\n as fasta file! Check your input!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
+			'''
 		fout.close()
 
 		# settings
@@ -6128,9 +6154,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.radioButtonPNG.setChecked(False)
 			self.ui.radioButtonPNG.setEnabled(False)
 
+		if self.ui.tabWidgetFig.currentIndex() in [0, 1, 2, 6, 8]:
+			self.ui.checkBoxUpdateSelection.setEnabled(True)
+		else:
+			self.ui.checkBoxUpdateSelection.setEnabled(False)
+
 		self.ui.F.setVisible(False)
 		self.ui.HTMLview.setVisible(True)
-		self.ui.checkBoxUpdateSelection.setEnabled(True)
+		#self.ui.checkBoxUpdateSelection.setEnabled(True)
 		self.ui.checkBoxFigLegend.setEnabled(True)
 		self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
 		DontFindTwice = False
@@ -20468,6 +20499,29 @@ def MakeSankey(DataIn, field_str):
 			sankey_links.append({"source": cur_a, "target": cur_b,  "value": cur_count})
 	
 	return sankey_links
+
+def ReadFasta(file):
+	res = []
+	with open(file, 'r') as currentfile:
+		seq_name = ''
+		seq_str = ''
+		for line in currentfile:
+			line = line.replace('\n', '')
+			if len(line) > 0:
+				if line[0] == '>':
+					if seq_name == '':
+						pass
+					else:
+						tup = (seq_name, seq_str)
+						res.append(tup)
+					seq_name = line = line.replace('>', '')
+					seq_str = ''
+				else:
+					seq_str += line
+		tup = (seq_name, seq_str)
+		res.append(tup)
+
+	return res
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:

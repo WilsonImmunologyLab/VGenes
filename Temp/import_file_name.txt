@@ -1,1 +1,0 @@
-/Users/leil/Documents/Projects/scRNAseq/COVID-cross/VDJ/COVID_S728_VDJ/consensus.fasta
