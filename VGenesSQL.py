@@ -880,7 +880,7 @@ def OpenDB(DBFilename):
 #     # readData(DBpathname)
 #
 #     return numberprocessed
-def enterData(self, DBpathname, IgBLASTAnalysis, answer3):
+def enterData(self, DBpathname, IgBLASTAnalysis, answer3, ErlogFile):
 
     (dirname, filename) = os.path.split(DBpathname)
 
@@ -903,7 +903,7 @@ def enterData(self, DBpathname, IgBLASTAnalysis, answer3):
     # then convert to a list of tuples for the expandall to work
     numberprocessed = 0
     FinalBLASTed = []
-    ErlogFile = '/Applications/IgBlast/database/ErLog.txt'
+    #ErlogFile = os.path.join(temp_folder,'ErLog.txt')
     ErLog = ''
     Recordlen = 0
     ToAllAnswer = 'none'
@@ -911,7 +911,7 @@ def enterData(self, DBpathname, IgBLASTAnalysis, answer3):
         ToAllAnswer = 'Yes'
     elif answer3 == 'NoAll':
         ToAllAnswer = 'No'
-
+    '''
     for item in IgBLASTAnalysis:
 
         # todo add code to check each seqname and verify not in the currently open db before adding
@@ -998,7 +998,7 @@ def enterData(self, DBpathname, IgBLASTAnalysis, answer3):
                     TopNum += 1
                     item.append(TopNum)     #append a unique seqID
 
-                    FinalBLASTed.append(tuple(item))
+                    FinalBLASTed.append(item)
                     numberprocessed +=1
 
             elif answer3 == 'Yes' or answer3  == 'YesAll':
@@ -1010,30 +1010,61 @@ def enterData(self, DBpathname, IgBLASTAnalysis, answer3):
 
                     item.append(TopNum)     #append a unique seqID
 
-                    FinalBLASTed.append(tuple(item))
+                    FinalBLASTed.append(item)
                     numberprocessed +=1
 
             else:
                 ErLog = uId + ' was problematic (line 399 VGenesSQL: record had '+ str(len(item)) + ' fields rather than 120)\n'
                 with open(ErlogFile, 'a') as currentfile:
                     currentfile.write(ErLog)
+    '''
+    for item in IgBLASTAnalysis:
+        Recordlen = len(item)
+        if Recordlen == 119:
+            TopNum += 1
+            item.append(TopNum)  # append a unique seqID
 
+            FinalBLASTed.append(item)
+            numberprocessed += 1
 
+    with open(ErlogFile, 'a') as currentfile:
+        currentfile.write("\n")
+    dup_message = ''
     if len(FinalBLASTed) > 0:
-        cursor.executemany('''INSERT INTO vgenesDB(SeqName, SeqLen, GeneType, V1, V2, V3, D1, D2, D3, J1, J2, J3, StopCodon, ReadingFrame, productive, Strand, VSeqend, VDJunction, Dregion, DJJunction, begJ, VJunction, FR1From, FR1To, FR1length, FR1matches, FR1mis, FR1gaps, FR1PercentIdentity, CDR1From, CDR1to, CDR1length, CDR1matches, CDR1mis, CDR1gaps, CDR1PercentIdentity, FR2From, FR2To, FR2length, FR2matches, FR2mis, FR2gaps, FR2PercentIdentity, CDR2From, CDR2to, CDR2length, CDR2matches, CDR2mis, CDR2gaps, CDR2PercentIdentity, FR3From, FR3To, FR3length, FR3matches, FR3mis, FR3gaps, FR3PercentIdentity, TotMut, SeqAlignment, GVbeg, GVend, GD1beg, GD1end, GD2beg, GD2end, GJbeg, GJend, Vbeg, Vend, D1beg, D1end, D2beg, D2end, Jbeg, Jend, Project, Grouping, SubGroup, Species, Sequence, GermlineSequence, CDR3DNA, CDR3AA, CDR3Length, CDR3beg, CDR3end, Specificity, Subspecificity, ClonalPool, ClonalRank, VLocus, JLocus, DLocus, DateEntered, Comments, Quality, TotalMuts, Mutations, IDEvent, CDR3MW, CDR3pI, Isotype, GCDR3beg, GCDR3end, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, ID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', FinalBLASTed)
+        cursor.execute("SELECT SeqName FROM vgenesDB")
+        rows = cursor.fetchall()
+        names = [row[0] for row in rows]
+        for item in FinalBLASTed:
+            num = 1
+            ori_name = item[0]
+            cur_name = item[0]
+            while cur_name in names:
+                cur_name = ori_name + '_Duplicate' + str(num)
+                num += 1
+            item[0] = cur_name
+            if num > 1:
+                dup_message = ori_name + "    to    " + item[0] + "\n"
+                with open(ErlogFile, 'a') as currentfile:
+                    currentfile.write(dup_message)
+            names.append(item[0])
+        try:
+            cursor.executemany('''INSERT INTO vgenesDB(SeqName, SeqLen, GeneType, V1, V2, V3, D1, D2, D3, J1, J2, J3, StopCodon, ReadingFrame, productive, Strand, VSeqend, VDJunction, Dregion, DJJunction, begJ, VJunction, FR1From, FR1To, FR1length, FR1matches, FR1mis, FR1gaps, FR1PercentIdentity, CDR1From, CDR1to, CDR1length, CDR1matches, CDR1mis, CDR1gaps, CDR1PercentIdentity, FR2From, FR2To, FR2length, FR2matches, FR2mis, FR2gaps, FR2PercentIdentity, CDR2From, CDR2to, CDR2length, CDR2matches, CDR2mis, CDR2gaps, CDR2PercentIdentity, FR3From, FR3To, FR3length, FR3matches, FR3mis, FR3gaps, FR3PercentIdentity, TotMut, SeqAlignment, GVbeg, GVend, GD1beg, GD1end, GD2beg, GD2end, GJbeg, GJend, Vbeg, Vend, D1beg, D1end, D2beg, D2end, Jbeg, Jend, Project, Grouping, SubGroup, Species, Sequence, GermlineSequence, CDR3DNA, CDR3AA, CDR3Length, CDR3beg, CDR3end, Specificity, Subspecificity, ClonalPool, ClonalRank, VLocus, JLocus, DLocus, DateEntered, Comments, Quality, TotalMuts, Mutations, IDEvent, CDR3MW, CDR3pI, Isotype, GCDR3beg, GCDR3end, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, ID) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)''', FinalBLASTed)
+            conn.commit()  # saves data into file
+            conn.close()
+            if dup_message == "":
+                return numberprocessed, answer3, ['n', dup_message]
+            else:
+                return numberprocessed, answer3, ['d', 'Please see log message for details!']
+        except:
+            dup_message = 'Importing error!'
+            conn.close()
+            return numberprocessed, answer3, ['e', dup_message]
+    else:
+        dup_message = 'No records!'
+        conn.close()
+        return numberprocessed, answer3, ['e', dup_message]
 
 
-    # cursor.execute('''SELECT * FROM vgenesDB''')
-    # rows = cursor.rowcount
-    # for row in cursor:
-    #     for column in row:
-    #         print(column)
-
-    conn.commit()  #  saves data into file
-    conn.close()
-    # readData(DBpathname)
-
-    return numberprocessed, answer3
 
 def ColName(DBpathname):
     import os

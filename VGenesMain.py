@@ -1,4 +1,4 @@
-__author__ = 'wilsonp, lei'
+__author__ = 'wilsonp, lei li'
 import os
 import sys
 import sqlite3 as db
@@ -83,7 +83,6 @@ VGenesTextWindows = {}
 
 from itertools import combinations
 from collections import Counter
-from Bio import SeqIO
 from subprocess import call, Popen, PIPE
 
 # import changeo
@@ -3857,7 +3856,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			if os.path.isfile(fasta_file):
 				fasta_seqs = ReadFasta(fasta_file)
 				for fasta in fasta_seqs:
-					seq_name = '>' + processed_fasta_names[file_id] + '_' + fasta[0]
+					if len(fasta_files) == 1:
+						seq_name = '>' + fasta[0]
+					else:
+						seq_name = '>' + processed_fasta_names[file_id] + '_' + fasta[0]
 					fout.write(seq_name + '\n')
 					fout.write(fasta[1] + '\n')
 				file_id += 1
@@ -4574,7 +4576,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			if os.path.isfile(fasta_file):
 				fasta_seqs = ReadFasta(fasta_file)
 				for fasta in fasta_seqs:
-					seq_name = '>' + file_name + '_' + fasta[0]
+					if len(fasta_files) == 1:
+						seq_name = '>' + fasta[0]
+					else:
+						seq_name = '>' + file_name + '_' + fasta[0]
 					fout.write(seq_name + '\n')
 					fout.write(fasta[1] + '\n')
 			else:
@@ -4822,9 +4827,18 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			self.hide()
 			return
-		#a = IgBLASTAnalysis
+		a = IgBLASTAnalysis
 
-		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		Processed, answer, dup_msg = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3, ErlogFile2)
+
+		if dup_msg[0] == 'd':
+			Msg = "Find some duplicated sequence names! We did some midifications:\n" + dup_msg[1]
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		if dup_msg[0] == 'e':
+			Msg = dup_msg[1]
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 		import_file = os.path.join(temp_folder, "import_file_name.txt")
 		file_handle = open(import_file, 'r')
@@ -4835,8 +4849,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		i = 0
 		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: \n' + file_name + '\n'
 
-		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
-		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+
 		with open(ErlogFile, 'r') as currentFile:  # using with for this automatically closes the file even if you crash
 			for line in currentFile:
 				if i > 0:
@@ -4870,7 +4883,16 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 		a = IMGTAnalysis
 
-		Processed, answer = VGenesSQL.enterData(self, DBFilename, IMGTAnalysis, answer3)
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		Processed, answer, dup_msg = VGenesSQL.enterData(self, DBFilename, IMGTAnalysis, answer3, ErlogFile2)
+
+		if dup_msg[0] == 'd':
+			Msg = "Find some duplicated sequence names! We did some midifications:\n" + dup_msg[1]
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		if dup_msg[0] == 'e':
+			Msg = dup_msg[1]
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 		import_file = os.path.join(temp_folder, "import_file_name.txt")
 		file_handle = open(import_file, 'r')
@@ -4881,8 +4903,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		i = 0
 		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: \n' + file_name + '\n'
 
-		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
-		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
 		with open(ErlogFile, 'r') as currentFile:  # using with for this automatically closes the file even if you crash
 			for line in currentFile:
 				if i > 0:
@@ -5468,7 +5488,16 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			if Startprocessed == 0:
 				self.close()
 
-		Processed, answer = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3)
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		Processed, answer, dup_msg = VGenesSQL.enterData(self, DBFilename, IgBLASTAnalysis, answer3, ErlogFile2)
+
+		if dup_msg[0] == 'd':
+			Msg = "Find some duplicated sequence names! We did some midifications:\n" + dup_msg[1]
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		if dup_msg[0] == 'e':
+			Msg = dup_msg[1]
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 		import_file = os.path.join(temp_folder, "import_file_name.txt")
 		file_handle = open(import_file,'r')
@@ -5478,8 +5507,7 @@ class ImportDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		i = 0
 		newErLog = '\n' + str(Processed) + ' sequences were input by IgBLAST for file: ' + file_name + '\n'
 
-		ErlogFile = os.path.join(temp_folder,'ErLog.txt')
-		ErlogFile2 = os.path.join(temp_folder,'ErLog2.txt')
+
 		with open(ErlogFile,'r') as currentFile:  # using with for this automatically closes the file even if you crash
 			for line in currentFile:
 				if i > 0:
@@ -14966,7 +14994,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if New == True:
 				VGenesSQL.creatnewDB(filename)
 
-			Processed, answer = VGenesSQL.enterData(self, filename, IgBLASTAnalysis, answer3)
+			Processed, answer, dup_msg = VGenesSQL.enterData(self, filename, IgBLASTAnalysis, answer3)
+
+			if dup_msg[0] == 'd':
+				dup_msg = "Find some duplicated sequence names! We did some midifications:\n" + dup_msg
+				QMessageBox.information(self, 'Information', dup_msg, QMessageBox.Ok, QMessageBox.Ok)
+			if dup_msg[0] == 'e':
+				QMessageBox.warning(self, 'Warning', dup_msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
 
 			# todo need code to verify a database is open before you can import sequences.
 

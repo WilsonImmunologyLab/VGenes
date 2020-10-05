@@ -7,7 +7,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1440</width>
+    <width>1598</width>
     <height>1069</height>
    </rect>
   </property>
@@ -377,7 +377,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1068</width>
+             <width>1226</width>
              <height>821</height>
             </rect>
            </property>
@@ -3223,6 +3223,35 @@
             <widget class="Line" name="line_9">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pushButtonStat">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Select records from distribution</string>
+             </property>
+             <property name="text">
+              <string>Stat</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>30</width>
+               <height>30</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -8357,69 +8386,11 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
            </widget>
           </item>
-          <item row="4" column="0">
-           <widget class="QPushButton" name="pushButtonStat">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="1">
-           <widget class="QPushButton" name="btnFieldSearch">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Search</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="4" column="4">
            <widget class="QRadioButton" name="rdoLocal">
+            <property name="toolTip">
+             <string>Search from the records that have the same value of three three grouping option with current selected record</string>
+            </property>
             <property name="text">
              <string>Local</string>
             </property>
@@ -8427,6 +8398,9 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item row="4" column="2">
            <widget class="QRadioButton" name="rdoAll">
+            <property name="toolTip">
+             <string>Search from the entire database</string>
+            </property>
             <property name="text">
              <string>All</string>
             </property>
@@ -8488,6 +8462,41 @@ If the J-end is off the J gene end may need adjusted</string>
               <width>0</width>
               <height>22</height>
              </size>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QPushButton" name="btnFieldSearch">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Search</string>
+            </property>
+            <property name="text">
+             <string>Serach</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
@@ -8920,7 +8929,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1440</width>
+     <width>1598</width>
      <height>22</height>
     </rect>
    </property>
