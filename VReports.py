@@ -156,7 +156,7 @@ class CSVRepAll_thread(QThread):
         fields = [i[0] for i in DataIn]
         field_names = [i[1] for i in DataIn]
 
-        SQLStatement = VGenesSQL.MakeSQLStatement(Vgenes, fields, SequenceName)
+        SQLStatement = VGenesSQL.MakeSQLStatementNew(Vgenes, fields, SequenceName)
         (dirname, filename) = os.path.split(DBFilename)
         filename = filename[:(len(filename) - 4)]
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -1135,6 +1135,15 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowMessageBox([0, Msg])
         '''
 
+        listItems = self.getTreeCheckedChild()
+        listItems = listItems[3]
+        if len(listItems) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'No':
+                return
+
         Pathname = saveFile(self, 'csv')
         if Pathname == None:
             return
@@ -1274,6 +1283,15 @@ def StandardReports(self, option, SequenceName, DBFilename):
         selected_list = selected_list[3]
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
         SQLStatement = 'SELECT SeqName,GeneType,SeqAlignment FROM vgenesdb' + WHEREStatement
 
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)

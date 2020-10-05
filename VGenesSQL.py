@@ -1229,11 +1229,10 @@ def deleterecords (DBFilename, SQLStatement):
 
 
 def MakeSQLStatement(self, fields, SeqName):
-
-
     checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeChecked()
 
     SQLStatement = 'SELECT '
+    SQLStatement_all = ''
 
     if fields != 'All':
         fieldCount = len(fields)
@@ -1247,7 +1246,7 @@ def MakeSQLStatement(self, fields, SeqName):
             i += 1
     else:
         SQLStatement += '* FROM vgenesDB'  # 'SELECT * FROM vgenesDB WHERE ID = '
-
+    SQLStatement_all = SQLStatement
     firstmore = False
 
     if (len(checkedProjects) + len(checkedGroups) + len(checkedSubGroups) + len(
@@ -1356,5 +1355,45 @@ def MakeSQLStatement(self, fields, SeqName):
             i += 1
         SQLStatement = SQLStatement.rstrip(',')
         SQLStatement += ')'
+    else:
+        question = 'You did not selected any records, export all?'
+        buttons = 'YN'
+        answer = questionMessage(self, question, buttons)
+        if answer == 'Yes':
+            SQLStatement = SQLStatement_all
+
+    return SQLStatement
+
+def MakeSQLStatementNew(self, fields, SeqName):
+    checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeChecked()
+
+    SQLStatement = 'SELECT '
+    SQLStatement_all = ''
+
+    if fields != 'All':
+        fieldCount = len(fields)
+        i = 1
+        for field in fields:
+            SQLStatement += field
+            if i < fieldCount:
+                SQLStatement += ', '
+            else:
+                SQLStatement += ' FROM vgenesDB'
+            i += 1
+    else:
+        SQLStatement += '* FROM vgenesDB'  # 'SELECT * FROM vgenesDB WHERE ID = '
+    SQLStatement_all = SQLStatement
+
+    i = 1
+    if len(checkedkids) > 0:
+        SQLStatement += 'WHERE SeqName IN ('
+        for item in checkedkids:
+            SQLStatement += '"' + item + '",'
+            i += 1
+        SQLStatement = SQLStatement.rstrip(',')
+        SQLStatement += ')'
+    else:
+        SQLStatement = SQLStatement_all
+
     return SQLStatement
 
