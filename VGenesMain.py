@@ -18655,17 +18655,17 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 	try:
 		start = time.time()
 		if species == 'Human':
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
 			IgBlastOut_fmt19 = os.system(BLASTCommandLine)
 			print(BLASTCommandLine)
 		elif species == 'Mouse':
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
 			IgBlastOut_fmt19 = os.system(BLASTCommandLine)
 			print(BLASTCommandLine)
 		end = time.time()

@@ -1,0 +1,48 @@
+PACKAGE_NAME: igblast
+PACKAGE_VERSION: 1.16.0
+PACKAGE_SIGNATURE: Clang_1100-ReleaseMT64--x86_64-apple-darwin18.7.0-xcoremake2
+PACKAGE_CONFIG: IntelMAC : clang : ./c++/compilers/unix/Clang.sh --with-bin-release --without-debug --without-pcre --with-mt --with-openmp --with-flat-makefile --with-ncbi-public --with-experimental=Int8GI --with-vdb=/net/traces01.be-md.ncbi.nlm.nih.gov/trace_software/vdb --with-static-vdb --without-gnutls --without-gcrypt --with-build-root-sfx=--IntelMAC-clang --with-flat-makefile --with-ncbi-public --without-ccache --without-caution --without-runpath --without-makefile-auto-update --with-projects=scripts/projects/igblast/project.lst --with-internal
+
+>>>>>  igblastp
+
+igblastp: 1.16.0
+ Package: igblast 1.16.0, build Apr 14 2020 11:09:13
+ Package-Config:  IntelMAC : clang : ./c++/compilers/unix/Clang.sh --with-bin-release --without-debug --without-pcre --with-mt --with-openmp --with-flat-makefile --with-ncbi-public --with-experimental=Int8GI --with-vdb=/net/traces01.be-md.ncbi.nlm.nih.gov/trace_software/vdb --with-static-vdb --without-gnutls --without-gcrypt --with-build-root-sfx=--IntelMAC-clang --with-flat-makefile --with-ncbi-public --without-ccache --without-caution --without-runpath --without-makefile-auto-update --with-projects=scripts/projects/igblast/project.lst --with-internal
+ Build-Signature:  Clang_1100-ReleaseMT64--x86_64-apple-darwin18.7.0-xcoremake2
+ Build-Date:  Apr 14 2020 11:35:49
+ Build-ID:  E77BEBAE-7683-433F-AFCF-CF7687BD6638
+ Subversion-Revision:  605657
+ Production-Version:  20200404
+ Built-As:  igblastp
+
+
+
+>>>>>  igblastn
+
+igblastn: 1.16.0
+ Package: igblast 1.16.0, build Apr 14 2020 11:09:13
+ Package-Config:  IntelMAC : clang : ./c++/compilers/unix/Clang.sh --with-bin-release --without-debug --without-pcre --with-mt --with-openmp --with-flat-makefile --with-ncbi-public --with-experimental=Int8GI --with-vdb=/net/traces01.be-md.ncbi.nlm.nih.gov/trace_software/vdb --with-static-vdb --without-gnutls --without-gcrypt --with-build-root-sfx=--IntelMAC-clang --with-flat-makefile --with-ncbi-public --without-ccache --without-caution --without-runpath --without-makefile-auto-update --with-projects=scripts/projects/igblast/project.lst --with-internal
+ Build-Signature:  Clang_1100-ReleaseMT64--x86_64-apple-darwin18.7.0-xcoremake2
+ Build-Date:  Apr 14 2020 11:35:37
+ Build-ID:  E77BEBAE-7683-433F-AFCF-CF7687BD6638
+ Subversion-Revision:  605657
+ Production-Version:  20200404
+ Built-As:  igblastn
+
+
+
+>>>>>  makeblastdb
+
+makeblastdb: 2.10.1+
+ Package: igblast 1.16.0, build Apr 14 2020 11:09:13
+ Package-Config:  IntelMAC : clang : ./c++/compilers/unix/Clang.sh --with-bin-release --without-debug --without-pcre --with-mt --with-openmp --with-flat-makefile --with-ncbi-public --with-experimental=Int8GI --with-vdb=/net/traces01.be-md.ncbi.nlm.nih.gov/trace_software/vdb --with-static-vdb --without-gnutls --without-gcrypt --with-build-root-sfx=--IntelMAC-clang --with-flat-makefile --with-ncbi-public --without-ccache --without-caution --without-runpath --without-makefile-auto-update --with-projects=scripts/projects/igblast/project.lst --with-internal
+ Build-Signature:  Clang_1100-ReleaseMT64--x86_64-apple-darwin18.7.0-xcoremake2
+ Build-Date:  Apr 14 2020 11:36:01
+ Build-ID:  E77BEBAE-7683-433F-AFCF-CF7687BD6638
+ Subversion-Revision:  605657
+ Production-Version:  20200404
+ Built-As:  makeblastdb
+
+
+
+
