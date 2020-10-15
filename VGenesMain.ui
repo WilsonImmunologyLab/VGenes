@@ -3099,11 +3099,6 @@
              </item>
              <item>
               <property name="text">
-               <string>Comma seperated values (.csv)</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>Custom report</string>
               </property>
              </item>

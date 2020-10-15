@@ -210,6 +210,7 @@ class HCLC_thread(QThread):
                 # make CSV header
                 SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
                 DataInHeader = VGenesSQL.RunSQL(self.DBFilename, SQLSTATEMENT)
+                fields = [i[0] for i in DataInHeader]
                 field_names = ['HC_' + i[1] for i in DataInHeader] + ['LC_' + i[1] for i in DataInHeader]
                 CSVOut += ','.join(field_names) + '\n'
 
@@ -223,7 +224,7 @@ class HCLC_thread(QThread):
                         SQLStatement1 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType = "Heavy"'
                         DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
 
-                        SQLStatement2 = 'SELECT * FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
+                        SQLStatement2 = 'SELECT ' + ",".join(fields) + ' FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Kappa","Lambda")'
                         DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
 
                         if len(DataIn1) == 1 and len(DataIn2) == 1:
