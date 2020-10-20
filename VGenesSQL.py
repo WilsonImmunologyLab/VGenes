@@ -1229,7 +1229,7 @@ def deleterecords (DBFilename, SQLStatement):
 
 
 def MakeSQLStatement(self, fields, SeqName):
-    checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeChecked()
+    checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeCheckedChild()
 
     SQLStatement = 'SELECT '
     SQLStatement_all = ''
@@ -1356,7 +1356,7 @@ def MakeSQLStatement(self, fields, SeqName):
         SQLStatement = SQLStatement.rstrip(',')
         SQLStatement += ')'
     else:
-        question = 'You did not selected any records, export all?'
+        question = 'You did not selected any records, process all?'
         buttons = 'YN'
         answer = questionMessage(self, question, buttons)
         if answer == 'Yes':
