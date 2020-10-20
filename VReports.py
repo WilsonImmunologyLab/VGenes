@@ -402,7 +402,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         FASTAFile = ''
         for item in DataIs:
             Seqname = item[0]
-            Sequence = item[1]
+            Sequence = item[1].upper()
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
 
         Pathname = saveFile(self, 'FASTA')
@@ -421,7 +421,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         FASTAFile = ''
         for item in DataIs:
             Seqname = item[0]
-            Sequence = item[1]
+            Sequence = item[1].upper()
             # Sequence  =
             AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
@@ -794,10 +794,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     SeqName  = Record[0]
                     GeneType = Record[1]
                     Productive  = Record[4]
-                    Sequence = Record[5]
-                    Sequence = Sequence.upper()
+                    Sequence = Record[5].upper()
                     Vbeg = int(Record[6])
-                    GermSeq = Record[7]
+                    GermSeq = Record[7].upper()
                     #todo Figure GL for lambda and kappas and also fix Jend in database...
                     if GermSeq[len(GermSeq)-1] == 'G':
                         Jend = len(GermSeq)-1
@@ -908,10 +907,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     SeqName = Record[0]
                     GeneType = Record[1]
                     Productive = Record[4]
-                    Sequence = Record[5]
-                    Sequence = Sequence.upper()
+                    Sequence = Record[5].upper()
                     Vbeg = int(Record[6])
-                    GermSeq = Record[7]
+                    GermSeq = Record[7].upper()
                     Jend = Record[11]
                     # todo Figure GL for lambda and kappas and also fix Jend in database...
                     # if GermSeq[len(GermSeq) - 1] == 'G':

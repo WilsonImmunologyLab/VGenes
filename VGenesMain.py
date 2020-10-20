@@ -11236,7 +11236,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Entry = (SeqNameAp, seq)
 		OutList.append(Entry)
 
-		GSeq = data[80][:end]
+		GSeq = data[80][:end].upper()
 		GseqName = SeqName + '-0'
 		Entry = (GseqName, GSeq)
 		OutList.append(Entry)
@@ -11895,13 +11895,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if len(DataIs) == 1:
 				self.ui.actionGL.setChecked(True)
 				GLMsg = True
-				GermSeq = data[80]
+				GermSeq = data[80].upper()
 				Germline = ('Germline', GermSeq)
 				DataIs.append(Germline)
 			else:
 				if self.ui.actionGL.isChecked() == True:
 					GLMsg = True
-					GermSeq = data[80]
+					GermSeq = data[80].upper()
 					Germline = ('Germline', GermSeq)
 					DataIs.append(Germline)
 		elif DataIn == 'edit':
@@ -11918,7 +11918,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				GLMsg = False
 				self.ui.actionGL.setChecked(True)
 				GLMsg = True
-				GermSeq = data[80]
+				GermSeq = data[80].upper()
 				Germline = ('Germline', GermSeq)
 				DataIs.append(Germline)
 		else:
@@ -12438,7 +12438,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Decoration = self.ui.cboDecorate.currentText()
 
 		AASeq = self.ui.txtAASeq.toPlainText()
-		GDNAseq = data[80]
+		GDNAseq = data[80].upper()
 
 		if data[98] == 'Insertion' or data[98] == 'Both':
 			mutate = data[97]
@@ -13074,8 +13074,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_radioButtonGermView_clicked(self):
-		self.ui.txtDNASeq.setText(data[80])
-		AASeq, ErMessage = VGenesSeq.Translator(data[80], 0)
+		germline_nt = data[80].upper()
+		self.ui.txtDNASeq.setText(germline_nt)
+		AASeq, ErMessage = VGenesSeq.Translator(germline_nt, 0)
 		self.ui.txtAASeq.setText(AASeq)
 		try:
 			self.SeqButton(LastPushed)
@@ -16343,7 +16344,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.txtPopulation.setText("")
 
 				VSeq = data[79]
-				GVSeq = data[80]
+				GVSeq = data[80].upper()
 				# AASeq, ErMessage = VGenesSeq.Translator(VGenesSeq, 0)
 
 				try:
