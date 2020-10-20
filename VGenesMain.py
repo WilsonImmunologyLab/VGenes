@@ -11755,6 +11755,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11', 'out.extendedFrags.fastq')
 
 			filename = saveFile(self, 'fastq')
+			if filename == '' or filename == None:
+				return
+
 			shutil.copy(WorkDir, filename)
 			filename2 = filename + 'Unmerged-1.fastq'
 			WorkDir = os.path.join(working_prefix, 'FLASH-1.2.11',
@@ -14945,7 +14948,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected) + '")'
 		
 		filename = saveFile(self, 'Nucleotide')
-		if filename == '' or filename == 'none':
+		if filename == '' or filename == None:
 			return
 
 		f = open(filename, 'w')
@@ -14986,6 +14989,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				filename = saveFile(self, 'db')
 			else:
 				filename = openFile(self, 'db')
+
+			if filename == '' or filename == None:
+				return
 
 			answer3 = 'No'
 
@@ -18225,18 +18231,29 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#
 		PreviewHTcurrent = 0
 		PreviewCurrentType = 'H'
-		self.PopulatePreviewHT('forward')
-
+		try:
+			self.PopulatePreviewHT('forward')
+		except:
+			Msg = "No more record found!"
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	@pyqtSlot()
 	def on_btn10xEditForward_clicked(self):
-		self.PopulatePreviewHT('forward')
+		try:
+			self.PopulatePreviewHT('forward')
+		except:
+			Msg = "No more record found!"
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	@pyqtSlot()
 	def on_btn10xEditBack_clicked(self):
-		self.PopulatePreviewHT('backward')
+		try:
+			self.PopulatePreviewHT('backward')
+		except:
+			Msg = "No more record found!"
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
-	def PopulatePreviewHT (self, direction):
+	def PopulatePreviewHT(self, direction):
 		global PreviewHTcurrent
 		global PreviewCurrentType
 		global PreviewHTExp
@@ -18389,9 +18406,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 		Pathname = saveFile(self, 'csv')
-
-		with open(Pathname, 'w') as currentfile:
-			currentfile.write(CSVOut)
+		if Pathname == '' or Pathname == None:
+			return
+		else:
+			with open(Pathname, 'w') as currentfile:
+				currentfile.write(CSVOut)
 
 
 	@pyqtSlot()

@@ -437,8 +437,24 @@ def StandardReports(self, option, SequenceName, DBFilename):
     elif option == 'AbVec cloning PCR':
         CloningReport = ''
         CloningReportCSV = ''
+        '''
         fields = ['SeqName', 'VLocus', 'JLocus', 'GeneType', 'Jend', 'Sequence']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        '''
+        selected_list = self.getTreeCheckedChild()
+        selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,VLocus,JLocus,GeneType,Jend,Sequence FROM vgenesdb' + WHEREStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         Heavy = []
