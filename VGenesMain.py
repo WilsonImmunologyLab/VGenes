@@ -1043,21 +1043,35 @@ class Clone_thread(QThread):
         ErLog2 = str(CPs) + ' clonal pools containing ' + str(CPseqs) + ' sequences were identified from ' + str(
             TotSeqs) + ' total sequences analyzed.\n'
 
-        SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+        SQLStatement = 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        '''
         list1 = []
         for ele in DataIn:
-            list1.append(ele[0])
+            list1.append(ele[1])
         list_unique = list(set(list1))
         try:
             list_unique.remove('0')
         except:
             pass
-
+		
         list_unique = [int(i) for i in list_unique]
         list_unique.sort()
         list_unique = ['Clone' + str(i) for i in list_unique]
+        '''
+        clone_dict = {}
+        list_unique = []
+        for ele in DataIn:
+            clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
+            if clone_dict.__contains__(clone_name):
+                clone_dict[clone_name] += 1
+            else:
+                clone_dict[clone_name] = 1
 
+        for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
+            list_unique.append(key + '|Num of seq: ' + str(value))
+
+        list_unique.sort(key=lambda x: x[0])
         Vgenes.ui.comboBoxTree.clear()
         Vgenes.ui.comboBoxTree.addItems(list_unique)
 
@@ -6158,19 +6172,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			pass
 
 	def updateCloneTreeInfo(self):
-		clone_id = self.ui.comboBoxTree.currentText()
-		clone_id = re.sub('Clone', '', clone_id)
+		try:
+			clone_id = self.ui.comboBoxTree.currentText()
+			tmp = clone_id.split('|')
+			clone_id = re.sub('Clone', '', tmp[1])
 
-		SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ClonalPool = "' + clone_id + '"'
-		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-		seq_num = len(DataIn)
-		self.ui.lineEditNumSeq.setText(str(seq_num))
-		if seq_num < 3:
-			self.ui.toolButtonCloneRaxml.setText('This Clone has too less sequences for a tree')
-			self.ui.toolButtonCloneRaxml.setEnabled(False)
-		else:
-			self.ui.toolButtonCloneRaxml.setText('Build clone phylogeny with RAxML')
-			self.ui.toolButtonCloneRaxml.setEnabled(True)
+			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ClonalPool = "' + clone_id + '"'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			seq_num = len(DataIn)
+			self.ui.lineEditNumSeq.setText(str(seq_num))
+			if seq_num < 3:
+				self.ui.toolButtonCloneRaxml.setText('This Clone has too less sequences for a tree')
+				self.ui.toolButtonCloneRaxml.setEnabled(False)
+			else:
+				self.ui.toolButtonCloneRaxml.setText('Build clone phylogeny with RAxML')
+				self.ui.toolButtonCloneRaxml.setEnabled(True)
+		except:
+			return
 
 	def disablePNG(self):
 		global DontFindTwice
@@ -6684,7 +6702,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def buildCloneTree(self):
 		clone_name = self.ui.comboBoxTree.currentText()
-		clone_name = re.sub('Clone','',clone_name)
+		tmp = clone_name.split('|')
+		clone_name = re.sub('Clone','',tmp[1])
 
 		WHEREStatement = 'WHERE ClonalPool = "' + clone_name + '"'
 		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB ' + WHEREStatement
@@ -7140,9 +7159,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.comboBoxSankey4.addItems(fields_name)
 			# Ig phylogeny
 			elif self.ui.tabWidget.currentIndex() == 8:
-				SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
+				SQLStatement = 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 				if len(DataIn) > 1:
+					'''
 					list1 = []
 					for ele in DataIn:
 						list1.append(ele[0])
@@ -7156,9 +7176,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 						list_unique = [int(i) for i in list_unique]
 						list_unique.sort()
 						list_unique = ['Clone' + str(i) for i in list_unique]
+					'''
+					clone_dict = {}
+					list_unique = []
+					for ele in DataIn:
+						clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
+						if clone_dict.__contains__(clone_name):
+							clone_dict[clone_name] += 1
+						else:
+							clone_dict[clone_name] = 1
 
-						self.ui.comboBoxTree.clear()
-						self.ui.comboBoxTree.addItems(list_unique)
+					for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
+						list_unique.append(key + '|Num of seq: ' + str(value))
+
+					list_unique.sort(key=lambda x:x[0])
+					Vgenes.ui.comboBoxTree.clear()
+					Vgenes.ui.comboBoxTree.addItems(list_unique)
 			# DB page
 			elif self.ui.tabWidget.currentIndex() == 0:
 				# if old table exists, skip
@@ -7292,8 +7325,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def clearCheck(self):
 		self.ui.checkBoxAll1.setChecked(False)
 		self.ui.checkBoxAll.setChecked(False)
-
-		self.checkAll()
+		self.checkAll1()
 
 	def checkAll(self):
 		global MoveNotChange
@@ -7302,16 +7334,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		MoveNotChange = True
 		rows = self.ui.SeqTable.rowCount()
-		if self.ui.checkBoxAll.isChecked():
-			self.ui.checkBoxAll1.setChecked(True)
-			for row in range(rows):
-				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+		if rows > 0:
+			if self.ui.checkBoxAll.isChecked():
+				self.ui.checkBoxAll1.setChecked(True)
+				for row in range(rows):
+					self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+			else:
+				self.ui.checkBoxAll1.setChecked(False)
+				for row in range(rows):
+					self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+			MoveNotChange = False
+			self.match_table_to_tree()
 		else:
-			self.ui.checkBoxAll1.setChecked(False)
-			for row in range(rows):
-				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
-		MoveNotChange = False
-		self.match_table_to_tree()
+			if self.ui.checkBoxAll.isChecked():
+				self.ui.checkBoxAll1.setChecked(True)
+			else:
+				self.ui.checkBoxAll1.setChecked(False)
+			self.checkAll1()
 
 	def checkAll1(self):
 		global MoveNotChange
@@ -7323,16 +7362,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.checkBoxAll1.isChecked():
 			self.ui.checkBoxAll.setChecked(True)
 			# check table
-			for row in range(rows):
-				self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+			if rows > 0:
+				for row in range(rows):
+					self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
 			# check trre
 			root = self.ui.treeWidget.invisibleRootItem()
 			self.TreeChecksAll()
 		else:
 			self.ui.checkBoxAll.setChecked(False)
 			# check table
-			for row in range(rows):
-				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+			if rows > 0:
+				for row in range(rows):
+					self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
 			# check trre
 			root = self.ui.treeWidget.invisibleRootItem()
 			self.clearTreeChecks()

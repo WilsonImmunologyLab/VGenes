@@ -3032,6 +3032,7 @@ class Ui_MainWindow(object):
         self.gridLayout_40 = QtWidgets.QGridLayout(self.tab_6)
         self.gridLayout_40.setObjectName("gridLayout_40")
         self.comboBoxTree = QtWidgets.QComboBox(self.tab_6)
+        self.comboBoxTree.setMinimumSize(QtCore.QSize(300, 0))
         self.comboBoxTree.setObjectName("comboBoxTree")
         self.gridLayout_40.addWidget(self.comboBoxTree, 0, 2, 1, 1)
         self.toolButtonCloneRaxml = QtWidgets.QPushButton(self.tab_6)
