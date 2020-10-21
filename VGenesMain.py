@@ -17199,9 +17199,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.btnD.setChecked(False)
 			self.ui.btnJ.setChecked(False)
 			self.ui.btnVDJ.setChecked(False)
-			if int(data[1]) > int(data[74]):
-				StartSel = int(data[74]) + 1
-				EndSel = len(data[79])
+			if self.ui.btnC.isChecked():
+				if int(data[1]) > int(data[74]):
+					StartSel = int(data[74]) + 1
+					EndSel = len(data[79])
+			else:
+				StartSel = 0
+				EndSel = 0
 		elif button == 'vdj':
 			if self.ui.btnVDJ.isChecked():
 				self.ui.btnFW_1.setChecked(True)
@@ -17242,7 +17246,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		JustMoved = True
 		cursor.setPosition(StartSel)
-		cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
+		if EndSel > len(self.ui.txtDNASeq.toPlainText()):
+			cursor.setPosition(len(self.ui.txtDNASeq.toPlainText()), QTextCursor.KeepAnchor)
+		else:
+			cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
 
 		AAStartSel = math.floor(StartSel / 3)
 		AAEndSel = math.floor(EndSel / 3)
@@ -17250,7 +17257,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		print(str(StartSel) + ',' + str(EndSel) + ',' + str(AAStartSel) + ',' + str(AAEndSel))
 
 		AAcursor.setPosition(AAStartSel)
-		AAcursor.setPosition(AAEndSel, QTextCursor.KeepAnchor)
+		if AAEndSel > len(self.ui.txtDNASeq.toPlainText()):
+			AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+		else:
+			AAcursor.setPosition(AAEndSel, QTextCursor.KeepAnchor)
 
 		self.ui.txtDNASeq.setTextCursor(cursor)
 		if self.ui.cboDecorate.currentText() == 'None':
