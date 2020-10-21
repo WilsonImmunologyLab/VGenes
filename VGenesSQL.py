@@ -1356,7 +1356,7 @@ def MakeSQLStatement(self, fields, SeqName):
         SQLStatement = SQLStatement.rstrip(',')
         SQLStatement += ')'
     else:
-        question = 'You did not selected any records, process all?'
+        question = 'You did not check any records, process all?'
         buttons = 'YN'
         answer = questionMessage(self, question, buttons)
         if answer == 'Yes':

@@ -6602,7 +6602,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		NumSeqs = len(listItems)
 
 		if len(listItems) == 0:
-			QMessageBox.warning(self, 'Warning', 'Please select sequence from active sequence panel!',
+			QMessageBox.warning(self, 'Warning', 'Please check sequence from active sequence panel!',
 			                    QMessageBox.Ok,
 			                    QMessageBox.Ok)
 			return
@@ -10600,7 +10600,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global GLMsg
 		if self.ui.actionGL.isChecked() == True:
 			if GLMsg == True:
-				question = 'Select a sequence to use for the predicted germline in a multiple alignment.'
+				#question = 'Select a sequence to use for the predicted germline in a multiple alignment.'
+				question = 'Will align predicted germline of your current selected sequence with all checked sequences.\n' \
+				           'You can click (not check) the sequence on the left panel to determine the GL seq before you click alignment button.'
 				buttons = 'OK'
 				answer = informationMessage(self, question, buttons)
 
