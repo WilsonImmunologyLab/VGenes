@@ -6614,16 +6614,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#		WhereState += ' OR '
 		#	i += 1
 
-		SQLStatement = 'SELECT SeqName, Sequence FROM vgenesDB WHERE ' + WhereState
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB WHERE ' + WhereState
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 		for item in DataIn:
 			SeqName = item[0]
-			Sequence = item[1]
+			Sequence = item[1].upper()
+			GL_Sequence = item[2].upper()
 			Sequence = Sequence.replace("-","")
-			Sequence = Sequence.upper()
 			EachIn = (SeqName, Sequence)
+			GLEachIn = ("GL_"+SeqName, GL_Sequence)
 			AlignIn.append(EachIn)
+			AlignIn.append(GLEachIn)
 		# make HTML
 		html_file = AlignSequencesHTML(AlignIn, '')
 		if html_file[0] == 'W':
@@ -19962,6 +19964,14 @@ def AlignSequencesHTML(DataSet, template):
 	div_con_nt = MakeDivNT('line con_nt', 'Template NT:', consensusDNA)
 
 	# initial and open HTML file
+	width_aa = 14 * len(compact_consensusAA)
+	width_nt = 40 * len(compact_consensusAA)
+	CSSdata = '<style type="text/css">.seq_div {width: ' + str(width_nt) + 'px;}</style>\n'
+	JSdata = '<script type="text/javascript">\n'
+	JSdata += 'var seq_width = [' + str(width_nt) + ',' + str(width_aa) + '];\n'
+	JSdata += '$( document ).ready(function() { $(".seq_div").css({"width": seq_width[0]+"px"})});\n'
+	JSdata += '</script>\n'
+
 	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
 	out_html_file = os.path.join(temp_folder, time_stamp + '.html')
 	if template == '':
@@ -19971,7 +19981,7 @@ def AlignSequencesHTML(DataSet, template):
 	shutil.copyfile(header_file, out_html_file)
 	out_file_handle = open(out_html_file, 'a')
 
-	JSdata = '<script type="text/javascript">\n'
+	JSdata += '<script type="text/javascript">\n'
 	JSdata += 'var data = {\n'
 	JSarray = []
 	JStext = '"Seq0":["Consensus","' + compact_consensusAA + '","' + consensusDNA + '"]'
@@ -20001,10 +20011,16 @@ def AlignSequencesHTML(DataSet, template):
 		con_nt = MakeConSeq(seq_nt, consensusDNA)
 		con_aa = MakeConSeq(seq_aa, compact_consensusAA)
 
-		div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
-		div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
-		div_nt = MakeDivNT('line line_nt ' + seq_nick_name, key, seq_nt)
-		div_nt_mut = MakeDivNT('line line_con_nt ' + seq_nick_name, key, con_nt)
+		if key[0:2] == "GL":
+			div_aa = MakeDivAA('line line_aa gl ' + seq_nick_name, key, seq_aa)
+			div_aa_mut = MakeDivAA('line line_con_aa gl ' + seq_nick_name, key, con_aa)
+			div_nt = MakeDivNT('line line_nt gl ' + seq_nick_name, key, seq_nt)
+			div_nt_mut = MakeDivNT('line line_con_nt gl ' + seq_nick_name, key, con_nt)
+		else:
+			div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
+			div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
+			div_nt = MakeDivNT('line line_nt ' + seq_nick_name, key, seq_nt)
+			div_nt_mut = MakeDivNT('line line_con_nt ' + seq_nick_name, key, con_nt)
 		# write sequence section
 		name_div += div_aa[0] + '\n'
 		seq_div += div_aa[1] + '\n'

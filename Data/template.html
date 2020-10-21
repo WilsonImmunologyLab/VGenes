@@ -405,10 +405,7 @@ $(document).ready(function(){
 	$("#nt").click(function(){
 		selectionChange()
 	});
-	$("#h1").click(function(){
-		selectionChange()
-	});
-	$("#h3").click(function(){
+	$("#Germline").click(function(){
 		selectionChange()
 	});
 	$("#consensus").click(function(){
@@ -431,6 +428,7 @@ $(document).ready(function(){
 		}
 		selectionChange()
 	});
+	
 	$('#option').change(function(){
 		var select_val = $("#option").val();
 		var con_aa = data[select_val][1];
@@ -461,6 +459,7 @@ $(document).ready(function(){
     	onmouseout_help(this)
   	});
 	$(".line_nt.1").find(".name").hide()
+	alert("Page 100% loaded!")
 });
 
 function onmouseover_help(ele,event){
@@ -514,18 +513,6 @@ function selectionChange() {
 		$(".line_con_aa").hide()
 	}
 
-	if($("#h1").is(':checked')){
-		$(".line_h1").show()
-	} else {
-		$(".line_h1").hide()
-	}
-
-	if($("#h3").is(':checked')){
-		$(".line_h3").show()
-	} else {
-		$(".line_h3").hide()
-	}
-
 	if($("#aa").is(':checked') && $("#nt").is(':checked')){
 		$(".line_nt.1").find(".name").hide()
 		$(".line_con_nt.1").find(".name").hide()
@@ -533,6 +520,18 @@ function selectionChange() {
 	else if($("#nt").is(':checked')){
 		$(".line_nt.1").find(".name").show()
 		$(".line_con_nt.1").find(".name").show()
+	}
+
+	if($("#Germline").is(':checked')){
+		
+	} else {
+		$(".gl").hide()
+	}
+
+	if($("#nt").is(':checked')){
+		$(".seq_div").css({'width': seq_width[0]+'px'})
+	} else {
+		$(".seq_div").css({'width': seq_width[1]+'px'})
 	}
 }
 
@@ -587,12 +586,16 @@ function MakeDivNT(data){
 	  <input id = 'nt' type="checkbox" checked="checked">
 	  <span class="checkmark"></span>
 	</label>
+	<label class="container">Show Germline sequences in Alignment:
+	  <input id = 'Germline' type="checkbox" checked="checked">
+	  <span class="checkmark"></span>
+	</label>
 </div>
 
 <div class = 'header_div' style="margin-top: 95px; height: 65px;">
 	<h3 style="margin-left:12px;margin-top:5px;margin-bottom:5px;">Display Mode:</h3>
 	<label class="container">Original:
-	  <input id = 'original' type="checkbox"  checked="checked">
+	  <input id = 'original' type="checkbox" checked="checked">
 	  <span class="checkmark"></span>
 	</label>
 	<label class="container">Template:
