@@ -256,7 +256,7 @@
            <string>Stat of values of selected field</string>
           </property>
           <property name="text">
-           <string>Stat/Update</string>
+           <string>Stat/Edit</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -3222,27 +3222,18 @@
             </widget>
            </item>
            <item>
-            <widget class="QPushButton" name="pushButtonStat">
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>30</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Select records from distribution</string>
-             </property>
+            <widget class="QPushButton" name="StatUpdate1">
              <property name="text">
-              <string>Stat</string>
+              <string>Stat/Edit</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+               <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
              </property>
              <property name="iconSize">
               <size>
-               <width>30</width>
-               <height>30</height>
+               <width>24</width>
+               <height>24</height>
               </size>
              </property>
              <property name="flat">
@@ -3285,7 +3276,7 @@
              </property>
              <property name="iconSize">
               <size>
-               <width>30</width>
+               <width>25</width>
                <height>25</height>
               </size>
              </property>
@@ -8381,36 +8372,6 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Field:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="4">
-           <widget class="QRadioButton" name="rdoLocal">
-            <property name="toolTip">
-             <string>Search from the records that have the same value of three three grouping option with current selected record</string>
-            </property>
-            <property name="text">
-             <string>Local</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QRadioButton" name="rdoAll">
-            <property name="toolTip">
-             <string>Search from the entire database</string>
-            </property>
-            <property name="text">
-             <string>All</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="1">
            <widget class="QComboBox" name="cboFindField">
             <property name="sizePolicy">
@@ -8457,13 +8418,13 @@ If the J-end is off the J gene end may need adjusted</string>
             </item>
            </widget>
           </item>
-          <item row="2" column="2" colspan="3">
-           <widget class="QLineEdit" name="txtFieldSearch">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>22</height>
-             </size>
+          <item row="4" column="4">
+           <widget class="QRadioButton" name="rdoLocal">
+            <property name="toolTip">
+             <string>Search from the records that have the same value of three three grouping option with current selected record</string>
+            </property>
+            <property name="text">
+             <string>Local</string>
             </property>
            </widget>
           </item>
@@ -8499,6 +8460,65 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
             <property name="flat">
              <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Field:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2">
+           <widget class="QRadioButton" name="rdoAll">
+            <property name="toolTip">
+             <string>Search from the entire database</string>
+            </property>
+            <property name="text">
+             <string>All</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="5">
+           <widget class="QPushButton" name="pushButtonStat">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Select records from distribution</string>
+            </property>
+            <property name="text">
+             <string>Stat/Select</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" colspan="4">
+           <widget class="QLineEdit" name="txtFieldSearch">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>22</height>
+             </size>
             </property>
            </widget>
           </item>

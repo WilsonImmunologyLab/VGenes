@@ -573,7 +573,7 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 			i = 1
 			new_values = []
 			while i < layout.num_widget:
-				if layout.itemAtPosition(i, 1).widget().isChecked():
+				if layout.itemAtPosition(i, 0).widget().isChecked():
 					new_values.append(True)
 				else:
 					new_values.append(False)
@@ -620,8 +620,8 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 			layout = self.ui.gridLayout
 			i = 1
 			while i < layout.num_widget:
-				str1 = layout.itemAtPosition(i, 0).widget().text()
-				if layout.itemAtPosition(i, 1).widget().isChecked():
+				str1 = layout.itemAtPosition(i, 1).widget().text()
+				if layout.itemAtPosition(i, 0).widget().isChecked():
 					Dict[str1] = 'Checked'
 				i += 1
 
@@ -644,16 +644,17 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 				layout.itemAt(i).widget().deleteLater()
 		layout.num_widget = 0
 
-		layout.addWidget(QLabel("Original value"), 0, 0)
-		layout.addWidget(QLabel(""), 0, 1)
+		layout.addWidget(QLabel(""), 0, 0)
+		layout.addWidget(QLabel("Original value"), 0, 1)
+
 		layout.num_widget += 1
 
 		i = 1
 		for item in list:
 			f = QLineEdit(item)
 			f.setReadOnly(True)
-			layout.addWidget(f, i, 0)
-			layout.addWidget(QCheckBox(''), i, 1)
+			layout.addWidget(QCheckBox(''), i, 0)
+			layout.addWidget(f, i, 1)
 			layout.num_widget += 1
 			i += 1
 
@@ -672,19 +673,19 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 		layout.num_widget = 0
 
 		if len(list) == 0:
-			layout.addWidget(QLabel("Data range:"), 0, 0)
-			layout.addWidget(QLabel(""), 0, 1)
+			layout.addWidget(QLabel(""), 0, 0)
+			layout.addWidget(QLabel("Data range:"), 0, 1)
 			layout.num_widget += 1
 
 			item = str(min) + ' <= Value <= ' + str(max)
 			f = QLineEdit(item)
 			f.setReadOnly(True)
-			layout.addWidget(f, 1, 0)
-			layout.addWidget(QCheckBox(''), i, 1)
+			layout.addWidget(QCheckBox(''), i, 0)
+			layout.addWidget(f, i, 1)
 			layout.num_widget += 1
 		else:
-			layout.addWidget(QLabel("Data range:"), 0, 0)
-			layout.addWidget(QLabel(""), 0, 1)
+			layout.addWidget(QLabel(""), 0, 0)
+			layout.addWidget(QLabel("Data range:"), 0, 1)
 			layout.num_widget += 1
 
 			for i in range(len(list)):
@@ -695,15 +696,15 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 
 				f = QLineEdit(cur_range)
 				f.setReadOnly(True)
-				layout.addWidget(f, i + 1, 0)
-				layout.addWidget(QCheckBox(''), i + 1, 1)
+				layout.addWidget(QCheckBox(''), i + 1, 0)
+				layout.addWidget(f, i + 1, 1)
 				layout.num_widget += 1
 
 			cur_range = str(list[-1]) + ' <= Value <= ' + str(max)
 			f = QLineEdit(cur_range)
 			f.setReadOnly(True)
-			layout.addWidget(f, len(list) + 1, 0)
-			layout.addWidget(QCheckBox(''), len(list) + 1, 1)
+			layout.addWidget(QCheckBox(''), len(list) + 1, 0)
+			layout.addWidget(f, len(list) + 1, 1)
 			layout.num_widget += 1
 
 	def load_data_char(self, list):
@@ -714,16 +715,16 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 		layout.num_widget = 0
 
 		if len(list) > 0:
-			layout.addWidget(QLabel("Original value"), 0, 0)
-			layout.addWidget(QLabel(""), 0, 1)
+			layout.addWidget(QLabel(""), 0, 0)
+			layout.addWidget(QLabel("Original value"), 0, 1)
 			layout.num_widget += 1
 
 			i = 1
 			for item in list:
 				f = QLineEdit(item)
 				f.setReadOnly(True)
-				layout.addWidget(f, i, 0)
-				layout.addWidget(QCheckBox(''), i, 1)
+				layout.addWidget(QCheckBox(''), i, 0)
+				layout.addWidget(f, i, 1)
 				layout.num_widget += 1
 				i += 1
 
@@ -14447,6 +14448,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.match_tree_to_table()
 
+		Msg = 'Update finished!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
 	@pyqtSlot()
 	def on_pushButtonBatch_clicked(self):
 		global DontFindTwice
@@ -14489,12 +14493,36 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.SeqTable.setColumnCount(0)
 			self.ui.SeqTable.setRowCount(0)
 		else:
-			self.load_table()
-			self.match_tree_to_table()
-			self.tree_to_table_selection()
+			max_number = self.ui.lcdNumber_max.value()
+			if max_number > 5000:
+				message = 'Your current DB has more than 5000 records (' + str(int(max_number)) + \
+				          '), loading a table with all details could be time-consuming ' \
+				          'and cause slow UI response，are you sure to display the table?\n'
+				buttons = 'YN'
+				answer = questionMessage(self, message, buttons)
+				if answer == 'No':
+					return
+				else:
+					self.load_table()
+					self.match_tree_to_table()
+					self.tree_to_table_selection()
 
 	@pyqtSlot()
 	def on_StatUpdate_clicked(self):
+		self.myBatchDialog = BatchDialog()
+		self.myBatchDialog.initial = 0
+		# self.myBatchDialog.load_data(value_list)
+		field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.myBatchDialog.ui.comboBox.addItems(field_list)
+		self.myBatchDialog.initial = 1
+		self.myBatchDialog.ui.comboBox.setCurrentText(field_list[2])
+		self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
+		self.myBatchDialog.show()
+		self.myBatchDialog.initial = 2
+		self.myBatchDialog.resize(1200, 700)
+
+	@pyqtSlot()
+	def on_StatUpdate1_clicked(self):
 		self.myBatchDialog = BatchDialog()
 		self.myBatchDialog.initial = 0
 		# self.myBatchDialog.load_data(value_list)
@@ -16401,13 +16429,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.txtJend_2.setText(JendDisplay)
 				except:
 					print('J error')
-				# GJendSeq = GVSeq[GJend-11:GJend]
-				# GJendAASeq, ErMessage = VGenesSeq.Translator(GJendSeq, 0)
-				# GJendDisplay = ' ' + GJendAASeq[0] + '   ' + GJendAASeq[1] + '   ' + GJendAASeq[2] + ' \n' + GJendSeq[0:3] + ' ' + GJendSeq[3:6] + ' ' + GJendSeq[6:9]
-				#
-				# self.ui.txtJExp.setText(GJendDisplay)
-				#
+				'''
+				try:
+					GJendSeq = GVSeq[GJend-11:GJend]
+					GJendAASeq, ErMessage = VGenesSeq.Translator(GJendSeq, 0)
+					GJendDisplay = ' ' + GJendAASeq[0] + '   ' + GJendAASeq[1] + '   ' + GJendAASeq[2] + ' \n' + GJendSeq[0:3] + ' ' + GJendSeq[3:6] + ' ' + GJendSeq[6:9]
 
+					self.ui.txtJExp.setText(GJendDisplay)
+				except:
+					print('GJ error')
+				'''
 
 				self.ui.txtProject.setText(data[75])
 				self.ui.textMutations.setText(data[57])

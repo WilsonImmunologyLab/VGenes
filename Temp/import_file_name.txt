@@ -1,1 +1,1 @@
-/Users/leil/Documents/Projects/VGene/HA6-vdj/outs/consensus.fasta
+/Users/leil/Desktop/PSC84C_HC.fasta
