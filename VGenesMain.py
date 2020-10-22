@@ -13491,8 +13491,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		FieldIS = 'Jend'
 		self.FieldChanger(valueTo, FieldIS)
 		Jend = int(valueTo)
+		Jbeg = int(data[73])
 		VSeq = data[79]
-		JendSeq = VSeq[Jend-11:Jend]
+		#JendSeq = VSeq[Jend-10:Jend] # J-end is difficult to determine
+		#JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
+		Jseq = VSeq[Jbeg - 1:Jend - 1]
+		Jseq = Jseq[0:len(Jseq) // 3 * 3]
+		JendSeq = Jseq[-9:]
 		JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
 		JendDisplay = ' ' + JendAASeq[0] + '   ' + JendAASeq[1] + '   ' + JendAASeq[2] + ' \n' + JendSeq[0:3] + ' ' + JendSeq[3:6] + ' ' + JendSeq[6:9]
 
@@ -16422,10 +16427,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 					GJend = int(data[66])
 					self.ui.sbJend.setValue(Jend)
 
-					JendSeq = VSeq[Jend-11:Jend]    # why last 11bp?
+					#JendSeq = VSeq[Jend-10:Jend]    # why last 11bp?
+					#JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
+					cur_orf = (3 - (Jbeg - 1)%3)%3
+					Jseq = VSeq[Jbeg -1 + cur_orf:Jend - 1]
+					Jseq = Jseq[0:len(Jseq)//3*3]
+					JendSeq = Jseq[-9:]
 					JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
 					JendDisplay = ' ' + JendAASeq[0] + '   ' + JendAASeq[1] + '   ' + JendAASeq[2] + ' \n' + JendSeq[0:3] + ' ' + JendSeq[3:6] + ' ' + JendSeq[6:9]
-
+					print(cur_orf, Jseq)
 					self.ui.txtJend_2.setText(JendDisplay)
 				except:
 					print('J error')
