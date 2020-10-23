@@ -3815,7 +3815,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread.loadProgress.connect(self.progressLabel)
 
 			self.progress = ProgressBar(self)
-			self.progress.setLabel('Running IgBlast...')
+			self.progress.setLabel('Running IgBlast, may take a few minutes ...')
 			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
