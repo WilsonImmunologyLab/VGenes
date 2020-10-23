@@ -75,6 +75,7 @@ from ui_newfielddialog import Ui_NewFieldDialog
 from ui_barcode_dialog import Ui_BarcodeDialog
 from ui_table_dialog import Ui_TableDialog
 from ui_statcheck_dislog import Ui_StatCheckDialog
+from ui_translate_dialo import Ui_Translate_Dialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -302,6 +303,54 @@ def reName(ori_name, rep1, rep2, prefix):
 	if prefix != '':
 		my_name = prefix + '_' + my_name
 	return my_name
+
+class TranslateDialog(QtWidgets.QDialog, Ui_Translate_Dialog):
+
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		super(TranslateDialog, self).__init__()
+		self.ui = Ui_Translate_Dialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButton.clicked.connect(self.accept)
+
+	def accept(self):
+		sequence = self.ui.textEditNT.toPlainText()
+		if len(sequence) > 0:
+			# check sequence
+			pattern = re.compile(r'[^ATCUG]')
+			strange_residues = re.findall(pattern, sequence)
+			if len(strange_residues) > 0:
+				Msg = ','.join(strange_residues)
+				return
+
+			# RNA to DNA
+			sequence = re.sub("U", 'T', sequence)
+			# translate
+			AA1, msg = Translator(sequence, 0)
+			AA2, msg = Translator(sequence, 1)
+			AA3, msg = Translator(sequence, 2)
+
+			self.ui.textEdit1.setText(AA1)
+			self.ui.textEdit2.setText(AA2)
+			self.ui.textEdit3.setText(AA3)
+			# reverse translate
+			sequence = ReverseDNA(sequence)
+			AA1, msg = Translator(sequence, 0)
+			AA2, msg = Translator(sequence, 1)
+			AA3, msg = Translator(sequence, 2)
+
+			self.ui.textEdit4.setText(AA1)
+			self.ui.textEdit5.setText(AA2)
+			self.ui.textEdit6.setText(AA3)
+
+			size_w = self.size().width()
+			size_h = self.size().height()
+			offset_pool = [-1, 1]
+			offset = offset_pool[random.randint(0, 1)]
+			self.resize(size_w + offset, size_h + offset)
+
+
 
 class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 	BatchSignal = pyqtSignal(list)
@@ -16592,6 +16641,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#  76 Grouping, 77 SubGroup, 78 Species, 79 Sequence, 80 GermlineSequence, 81 CDR3DNA, 82 CDR3AA,
 			#  83 CDR3Length, 84 CDR3beg, 85 CDRend, 86 Specificity, 87 Subspecificity, 88 ClonalPool, 89 ClonalRank,
 			#  90 VLocus, 91 JLocus, 92 DLocus, 93 DateEntered, 94 Comments, 95 Quality, 96 TotalMuts, 97 Mutations, 98 IDEvent, CDR3MW, CDR3pI, Isotype, Blank4, Blank5, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, 99 ID
+	@pyqtSlot()
+	def on_actiontranslate_triggered(self):
+		self.myTranslateDialog = TranslateDialog()
+		self.myTranslateDialog.show()
 
 	@pyqtSlot()
 	def on_actionCreateVDJdb_triggered(self):
@@ -17726,7 +17779,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.radioButtonGermView.isChecked():
 				self.on_radioButtonGermView_clicked()
 			# self.ui.lblSeq2.setText(msg)
-			frame = 0
+			try:
+				frame = int(data[105])
+			except:
+				frame = 0
 			ErMes = 'Amino acid sequence: \n\n'
 			AASeq, ErMessage = VGenesSeq.Translator(DNAseq, frame)
 			if len(ErMessage) > 0:
@@ -17761,7 +17817,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 					JustMoved = True
 
 		# self.ui.lblSeq2.setText(msg)
-		frame = 0
+		try:
+			frame = int(data[105])
+		except:
+			frame = 0
 		ErMes = 'Amino acid sequence:'
 
 		AASeq, ErMessage = VGenesSeq.Translator(DNAseq, frame)
@@ -19114,6 +19173,23 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				alignment = re.sub(r'\n+Lambda[\n\S\s]+','',alignment)
 				DATA[block_id][58] = alignment
 
+				# get ORF info from alignment
+				lines = alignment.split('\n')
+				line_num = 0
+				for line in lines:
+					match = re.match(r'^(\s+)<-+FR1', line)
+					if match:
+						num1 = len(match.group(1))
+						aa_line = lines[line_num + 1]
+						match1 = re.match(r'^\s+', aa_line)
+						num2 = len(match1.group())
+						ORF = num2 - num1 - 1
+						if ORF < 0:
+							ORF = 0
+						DATA[block_id][105] = alignment
+						break
+					line_num += 1
+
 				block_id += 1
 
 			cur_block = ''
@@ -20152,6 +20228,13 @@ def SequenceCheck(sequence, type):
 
 	return Msg
 
+def ReverseDNA(sequense):
+	result = ''
+	for i in range(len(sequense)):
+		result += DNADict[sequense[i]]
+	result = ''.join(reversed(result))
+	return result
+
 def Translator(Sequence, frame):
         # Translate sequence into a list of codons
     CodonList = [ ]
@@ -20693,6 +20776,7 @@ async def get_json_data(url: str) -> dict:
         async with session.get(url=url) as response:
             return await response.json()
 
+DNADict = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
 
 CodonDict={'ATT':'I',   'ATC':'I',  'ATA':'I',  'CTT':'L',  'CTC':'L',
 'CTA':'L',  'CTG':'L',  'TTA':'L',  'TTG':'L',  'GTT':'V',  'GTC':'V',

@@ -9110,6 +9110,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionFind_Clonal"/>
    <addaction name="actionAlignment"/>
    <addaction name="actionSuggestCanonical"/>
+   <addaction name="actiontranslate"/>
    <addaction name="separator"/>
    <addaction name="actionMultiple_Alignement"/>
    <addaction name="actionDNA"/>
@@ -9661,6 +9662,18 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionModify_Barcodes">
    <property name="text">
     <string>Modify Barcodes</string>
+   </property>
+  </action>
+  <action name="actiontranslate">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/magic_wand.png</normaloff>:/PNG-Icons/magic_wand.png</iconset>
+   </property>
+   <property name="text">
+    <string>translate</string>
+   </property>
+   <property name="toolTip">
+    <string>Translate DNA sequences to Protein sequences</string>
    </property>
   </action>
  </widget>

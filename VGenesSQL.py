@@ -126,7 +126,7 @@ def creatnewDB(DBpathname):
         [103, "GCDR3beg", "GermlneCDR3begin", "Fixed", ""],
         [104, "GCDR3end", "GermlineCDR3end", "Fixed", ""],
         [105, "Blank6", "Autoreactivity", "Fixed", ""],
-        [106, "Blank7", "Blank7", "Fixed", ""],
+        [106, "Blank7", "ORF", "Fixed", ""],
         [107, "Blank8", "10xCluster", "Fixed", ""],
         [108, "Blank9", "Seuret_Cluster", "Fixed", ""],
         [109, "Blank10", "10xBarCode", "Fixed", ""],
