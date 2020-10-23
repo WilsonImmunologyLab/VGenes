@@ -16432,7 +16432,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 				VSeq = data[79]
 				GVSeq = data[80].upper()
 				# AASeq, ErMessage = VGenesSeq.Translator(VGenesSeq, 0)
-
+				try:
+					ORF = int(data[105])
+				except:
+					ORF = 0
 				try:
 					Vbeg = int(data[67])
 					GVbeg = int(data[59])
@@ -16440,21 +16443,33 @@ class VGenesForm(QtWidgets.QMainWindow):
 					Vend = int(data[68])
 					self.ui.sbVend.setValue(Vend)
 
-					VBegSeq = VSeq[0:9]
-					VBegAASeq, ErMessage = VGenesSeq.Translator(VBegSeq, 0)
+					VBegSeq = VSeq[0:9+ORF]
+					VBegAASeq, ErMessage = VGenesSeq.Translator(VBegSeq, ORF)
 				except:
 					print('none error')
-
 				try:
-					VbegDisplay = ' ' + VBegAASeq[0] + '   ' + VBegAASeq[1] + '   ' + VBegAASeq[2] + ' \n' + VBegSeq[0:3] + ' ' + VBegSeq[3:6] + ' ' + VBegSeq[6:9]
+					if ORF == 0:
+						VbegDisplay = ' ' + VBegAASeq[0] + '   ' + VBegAASeq[1] + '   ' + VBegAASeq[2] + ' \n' + VBegSeq[0:3] + ' ' + VBegSeq[3:6] + ' ' + VBegSeq[6:9]
+					elif ORF ==1:
+						VbegDisplay = '   ' + VBegAASeq[0] + '   ' + VBegAASeq[1] + '   ' + VBegAASeq[
+							2] + ' \n' + VBegSeq[0:1] + ' ' + VBegSeq[1:4] + ' ' + VBegSeq[4:7] + ' ' + VBegSeq[7:10]
+					elif ORF == 2:
+						VbegDisplay = '    ' + VBegAASeq[0] + '   ' + VBegAASeq[1] + '   ' + VBegAASeq[
+							2] + ' \n' + VBegSeq[0:2] + ' ' + VBegSeq[2:5] + ' ' + VBegSeq[5:8] + ' ' + VBegSeq[8:11]
 				except:
 					print('oops')
 
-				GVBegSeq = GVSeq[0:9]
-				GVBegAASeq, ErMessage = VGenesSeq.Translator(GVBegSeq, 0)
+				GVBegSeq = GVSeq[0:9+ORF]
+				GVBegAASeq, ErMessage = VGenesSeq.Translator(GVBegSeq, ORF)
 				try:
-					GVbegDisplay = ' ' + GVBegAASeq[0] + '   ' + GVBegAASeq[1] + '   ' + GVBegAASeq[2] + ' \n' + GVBegSeq[0:3] + ' ' + GVBegSeq[3:6] + ' ' + GVBegSeq[6:9]
-
+					if ORF == 0:
+						GVbegDisplay = ' ' + GVBegAASeq[0] + '   ' + GVBegAASeq[1] + '   ' + GVBegAASeq[2] + ' \n' + GVBegSeq[0:3] + ' ' + GVBegSeq[3:6] + ' ' + GVBegSeq[6:9]
+					elif ORF == 1:
+						GVbegDisplay = '   ' + GVBegAASeq[0] + '   ' + GVBegAASeq[1] + '   ' + GVBegAASeq[
+							2] + ' \n' + GVBegSeq[0:1] + ' ' + GVBegSeq[1:4] + ' ' + GVBegSeq[4:7] + ' ' + GVBegSeq[7:10]
+					elif ORF == 2:
+						GVbegDisplay = '    ' + GVBegAASeq[0] + '   ' + GVBegAASeq[1] + '   ' + GVBegAASeq[
+							2] + ' \n' + GVBegSeq[0:2] + ' ' + GVBegSeq[2:5] + ' ' + GVBegSeq[5:8] + ' ' + GVBegSeq[8:11]
 				except:
 					print('oops')
 
@@ -16473,12 +16488,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 					Jbeg = int(data[73])
 					self.ui.sbJbeg.setValue(Jbeg)
 					Jend = int(data[74])
-					GJend = int(data[66])
+
 					self.ui.sbJend.setValue(Jend)
 
 					#JendSeq = VSeq[Jend-10:Jend]    # why last 11bp?
 					#JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
-					cur_orf = (3 - (Jbeg - 1)%3)%3
+					cur_orf = (3 - (Jbeg - 1)%3)%3 + ORF
 					Jseq = VSeq[Jbeg -1 + cur_orf:Jend - 1]
 					Jseq = Jseq[0:len(Jseq)//3*3]
 					JendSeq = Jseq[-9:]
@@ -16488,16 +16503,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.txtJend_2.setText(JendDisplay)
 				except:
 					print('J error')
-				'''
+
 				try:
-					GJendSeq = GVSeq[GJend-11:GJend]
+					cur_orf = (3 - (Jbeg - 1) % 3) % 3 + ORF
+					GJseq = GVSeq[Jbeg -1 + cur_orf:Jend - 1]
+					GJseq = GJseq[0:len(GJseq) // 3 * 3]
+					GJendSeq = GJseq[-9:]
 					GJendAASeq, ErMessage = VGenesSeq.Translator(GJendSeq, 0)
 					GJendDisplay = ' ' + GJendAASeq[0] + '   ' + GJendAASeq[1] + '   ' + GJendAASeq[2] + ' \n' + GJendSeq[0:3] + ' ' + GJendSeq[3:6] + ' ' + GJendSeq[6:9]
 
 					self.ui.txtJExp.setText(GJendDisplay)
 				except:
 					print('GJ error')
-				'''
+
 
 				self.ui.txtProject.setText(data[75])
 				self.ui.textMutations.setText(data[57])
@@ -18902,23 +18920,23 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				else:
 					this_data[15] = '-'
 
-				this_data[59] = record[64]
-				this_data[60] = record[65]
-				this_data[61] = record[68]
-				this_data[62] = record[69]
+				this_data[59] = record[65]
+				this_data[60] = record[66]
+				this_data[61] = record[69]
+				this_data[62] = record[70]
 				this_data[63] = ''
 				this_data[64] = ''
-				this_data[65] = record[72]
-				this_data[66] = record[73]
+				this_data[65] = record[73]
+				this_data[66] = record[74]
 
-				this_data[67] = record[14]
-				this_data[68] = record[15]
-				this_data[69] = record[16]
-				this_data[70] = record[17]
+				this_data[67] = record[15]
+				this_data[68] = record[16]
+				this_data[69] = record[17]
+				this_data[70] = record[18]
 				this_data[71] = ''
 				this_data[72] = ''
-				this_data[73] = record[18]
-				this_data[74] = record[19]
+				this_data[73] = record[19]
+				this_data[74] = record[20]
 
 				# identify grouping
 				if project == 'ByFunction':
@@ -18935,16 +18953,16 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 				this_data[78] = species
 				# sequence
-				vdj_seq = re.sub('-','',record[10])
+				vdj_seq = re.sub('-','',record[11])
 				seq_parts = record[1].split(vdj_seq)
 				try:
-					this_data[79] = record[10] + seq_parts[1]
+					this_data[79] = record[11] + seq_parts[1]
 				except:
 					print('sequence potential error')
 					print(record[1])
-					print(record[10])
-					this_data[79] = record[10]
-				this_data[80] = record[11]
+					print(record[11])
+					this_data[79] = record[11]
+				this_data[80] = record[12]
 
 				this_data[86] = "Specificity"
 				this_data[87] = "Subspecificity"
@@ -18956,7 +18974,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				# identify isotype
 				if this_data[2] == 'Heavy':
 					IsoSeq = record[1]
-					IsoSeq = IsoSeq[int(record[71]):]
+					IsoSeq = IsoSeq[int(record[72]):]
 					try:
 						IsoSeq = IsoSeq.strip('N')
 						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
@@ -18986,12 +19004,12 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				this_data[101] = Isotype
 
 				# import CDR3
-				JGeneName = record[9].split(',')[0]
-				CDR3_start = int(record[83]) + 1
+				JGeneName = record[10].split(',')[0]
+				CDR3_start = int(record[84]) + 1
 				if species == 'Human':
-					CDR3_end = int(record[70]) + JHuman[JGeneName]
+					CDR3_end = int(record[71]) + JHuman[JGeneName]
 				else:
-					CDR3_end = int(record[70]) + JMouse[JGeneName]
+					CDR3_end = int(record[71]) + JMouse[JGeneName]
 				CDR3_NT = record[1]
 				CDR3_NT = CDR3_NT[CDR3_start-1:CDR3_end]
 				CDR3_AA, msg = Translator(CDR3_NT,0)
@@ -19002,14 +19020,14 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				this_data[81] = CDR3_NT
 				this_data[82] = CDR3_AA
 				this_data[83] = CDR3_len
-				this_data[84] = str(CDR3_start - int(record[62]))
-				this_data[85] = str(CDR3_end - int(record[62]))
+				this_data[84] = str(CDR3_start - int(record[63]))
+				this_data[85] = str(CDR3_end - int(record[63]))
 				this_data[99] = str(CDR3_MW)
 				this_data[100] = str(CDR3_pI)
 
 				# import mutation
-				mAb_seq = record[10]
-				germline_seq = record[11]
+				mAb_seq = record[11]
+				germline_seq = record[12]
 				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
 				this_data[57] = str(num_mut)
 				this_data[96] = str(num_mut)
@@ -19186,7 +19204,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 						ORF = num2 - num1 - 1
 						if ORF < 0:
 							ORF = 0
-						DATA[block_id][105] = alignment
+						DATA[block_id][105] = ORF
 						break
 					line_num += 1
 
@@ -19342,6 +19360,22 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 		alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
 		DATA[block_id][58] = alignment
 
+		# get ORF info from alignment
+		lines = alignment.split('\n')
+		line_num = 0
+		for line in lines:
+			match = re.match(r'^(\s+)<-+FR1', line)
+			if match:
+				num1 = len(match.group(1))
+				aa_line = lines[line_num + 1]
+				match1 = re.match(r'^\s+', aa_line)
+				num2 = len(match1.group())
+				ORF = num2 - num1 - 1
+				if ORF < 0:
+					ORF = 0
+				DATA[block_id][105] = ORF
+				break
+			line_num += 1
 		block_id += 1
 
 	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
