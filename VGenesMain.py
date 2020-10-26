@@ -3859,7 +3859,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread.loadProgress.connect(self.progressLabel)
 
 			self.progress = ProgressBar(self)
-			self.progress.setLabel('Running IgBlast...')
+			self.progress.setLabel('Running IgBlast, may take a few minutes ...')
 			self.progress.show()
 
 			import_file = os.path.join(temp_folder, "import_file_name.txt")
@@ -17121,17 +17121,30 @@ class VGenesForm(QtWidgets.QMainWindow):
 				EndSel = int(data[74])
 			elif self.ui.btnV.isChecked() and self.ui.btnD.isChecked():
 				StartSel = int(data[67]) - 1
-				EndSel = int(data[70])
+				try:
+					EndSel = int(data[70])
+				except:
+					EndSel = int(data[68])
 			elif self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
-				StartSel = int(data[69]) - 1
+				try:
+					StartSel = int(data[69]) - 1
+				except:
+					StartSel = int(data[73]) - 1
 				EndSel = int(data[74])
 			else:  # then not a combination
 				if self.ui.btnV.isChecked():
 					StartSel = int(data[67]) - 1
 					EndSel = int(data[68])
 				if self.ui.btnD.isChecked():
-					StartSel = int(data[69]) - 1
-					EndSel = int(data[70])
+					try:
+						StartSel = int(data[69]) - 1
+						EndSel = int(data[70])
+					except:
+						Msg = 'No D gene for light chain!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+						                    QMessageBox.Ok)
+						self.ui.btnD.setChecked(False)
+						return
 				if self.ui.btnJ.isChecked():
 					StartSel = int(data[73]) - 1
 					EndSel = int(data[74])
