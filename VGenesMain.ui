@@ -893,7 +893,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -3909,6 +3909,11 @@
              <item>
               <property name="text">
                <string>Count AA mutations</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Sequence for Gibson cloning order</string>
               </property>
              </item>
             </widget>

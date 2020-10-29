@@ -76,6 +76,7 @@ from ui_barcode_dialog import Ui_BarcodeDialog
 from ui_table_dialog import Ui_TableDialog
 from ui_statcheck_dislog import Ui_StatCheckDialog
 from ui_translate_dialo import Ui_Translate_Dialog
+from ui_gibson_dialog import Ui_GibsonDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -304,6 +305,147 @@ def reName(ori_name, rep1, rep2, prefix):
 		my_name = prefix + '_' + my_name
 	return my_name
 
+class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
+	GibsonUpdateSelectionSignal = pyqtSignal(str)
+	LogFileSignal = pyqtSignal(str)
+
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		super(GibsonDialog, self).__init__()
+		self.ui = Ui_GibsonDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButtonConfirm.clicked.connect(self.accept)
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+		self.ui.pushButtonSave.clicked.connect(self.save)
+		self.ui.pushButtonOK.clicked.connect(self.OK)
+
+		GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
+		if os.path.isfile(GibsonFile):
+			f = open(GibsonFile, "r")
+			for line in f:
+				line = re.sub('\n','', line)
+				tmp = line.split(',')
+				if tmp[0] == 'GibsonStart':
+					self.ui.GibsonStart.setText(tmp[1])
+				elif tmp[0] == 'GibsonHend':
+					self.ui.GibsonHEnd.setText(tmp[1])
+				elif tmp[0] == 'GibsonKend':
+					self.ui.GibsonKEnd.setText(tmp[1])
+				elif tmp[0] == 'GibsonLend':
+					self.ui.GibsonLEnd.setText(tmp[1])
+
+	def OK(self):
+		global FieldChanged
+		currentRow = self.ui.tableWidget.currentRow()
+
+		# update
+		FieldChanged = True
+		self.ui.tableWidget.item(currentRow, 0).setText('Good')
+		self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
+		FieldChanged = False
+
+	def updateSelection(self, currentRow, currentColumn, lstRow, lastColumn):
+		SeqName = self.ui.tableWidget.item(currentRow, 1).text()
+		#self.GibsonUpdateSelectionSignal.emit(SeqName)
+		self.GibsonUpdateSelectionSignal.emit(SeqName)
+
+	def updateData(self, currentRow, currentColumn):
+		global FieldChanged
+		if FieldChanged == True:
+			return
+
+		updatedVDJSeq = self.ui.tableWidget.item(currentRow, currentColumn).text()
+		updatedJend = updatedVDJSeq[-6:]
+		Genetype = self.ui.tableWidget.item(currentRow, 2).text()
+		checkRes = VReports.checkJend(Genetype, updatedJend)
+		
+		# update
+		FieldChanged = True
+		self.ui.tableWidget.item(currentRow, 0).setText(checkRes)
+		if checkRes == "Good":
+			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
+		else:
+			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
+		self.ui.tableWidget.item(currentRow, 3).setText(updatedJend)
+		FieldChanged = False
+
+	def sort(self, index):
+		self.ui.tableWidget.sortByColumn(index, self.ui.tableWidget.horizontalHeader().sortIndicatorOrder())
+
+	def save(self):
+		if self.ui.GibsonStart == "" or self.ui.GibsonHEnd == "" or self.ui.GibsonKEnd == "" or self.ui.GibsonLEnd == "":
+			Msg = 'Please fill all information before save!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+		else:
+			GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
+			with open(GibsonFile, 'w') as currentFile:
+				currentFile.write('GibsonStart' + ',' + self.ui.GibsonStart.text() + '\n')
+				currentFile.write('GibsonHend' + ',' + self.ui.GibsonHEnd.text() + '\n')
+				currentFile.write('GibsonKend' + ',' + self.ui.GibsonKEnd.text() + '\n')
+				currentFile.write('GibsonLend' + ',' + self.ui.GibsonLEnd.text())
+
+			Msg = 'Gibson connectors saved!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+
+	def accept(self):
+		if self.ui.GibsonStart == "" or self.ui.GibsonHEnd == "" or self.ui.GibsonKEnd == "" or self.ui.GibsonLEnd == "":
+			Msg = 'Please fill all GibsonStart connector information before proceed!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		GibsonStart = self.ui.GibsonStart.text()
+		GibsonHend = self.ui.GibsonHEnd.text()
+		GibsonKend = self.ui.GibsonKEnd.text()
+		GibsonLend = self.ui.GibsonLEnd.text()
+
+		Pathname = saveFile(self.parent(), 'csv')
+		if Pathname == None:
+			return
+
+		Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
+
+		with open(Pathname, 'w') as currentfile:
+			out_str = 'SeqName,V(D)J sequence\n'
+			currentfile.write(out_str)
+
+			total_out = 0
+			total_rows = self.ui.tableWidget.rowCount()
+			for index in range(total_rows):
+				checkRes = self.ui.tableWidget.item(index, 0).text()
+				if checkRes == "Good":
+					SeqName = self.ui.tableWidget.item(index, 1).text()
+					GeneType = self.ui.tableWidget.item(index, 2).text()
+					VDJSeq = self.ui.tableWidget.item(index, 4).text()
+
+					if GeneType == "Heavy":
+						GibsonEnd = GibsonHend
+					elif GeneType == "Kappa":
+						GibsonEnd = GibsonKend
+					elif GeneType == "Lambda":
+						GibsonEnd = GibsonLend
+					else:
+						continue
+					out_str = SeqName + ',' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+					currentfile.write(out_str)
+					total_out += 1
+				else:
+					Error_seq_names += checkRes + '\t' + self.ui.tableWidget.item(index, 1).text() + '\n'
+		Msg = 'Your sequences have been saved to ' + Pathname + '!\n Total ' + str(total_out) + \
+		      ' sequences were exported!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,
+		                    QMessageBox.Ok)
+		self.close()
+
+		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+		with open(ErlogFile, 'w') as currentFile:
+			currentFile.write(Error_seq_names)
+
+		self.LogFileSignal.emit(ErlogFile)
+
 class TranslateDialog(QtWidgets.QDialog, Ui_Translate_Dialog):
 
 	def __init__(self, parent=None):
@@ -349,8 +491,6 @@ class TranslateDialog(QtWidgets.QDialog, Ui_Translate_Dialog):
 			offset_pool = [-1, 1]
 			offset = offset_pool[random.randint(0, 1)]
 			self.resize(size_w + offset, size_h + offset)
-
-
 
 class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 	BatchSignal = pyqtSignal(list)
@@ -6168,6 +6308,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.enableEdit = False
 		self.HeatmapList = []
+
+	def displayLog(self, logFile):
+		self.ShowVGenesText(logFile)
 
 	def copySelAA(self):
 		txt = self.ui.txtAASeq.textCursor().selectedText()
@@ -16494,7 +16637,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					#JendSeq = VSeq[Jend-10:Jend]    # why last 11bp?
 					#JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
 					cur_orf = (3 - (Jbeg - 1)%3)%3 + ORF
-					Jseq = VSeq[Jbeg -1 + cur_orf:Jend - 1]
+					Jseq = VSeq[Jbeg -1 + cur_orf:Jend]
 					Jseq = Jseq[0:len(Jseq)//3*3]
 					JendSeq = Jseq[-9:]
 					JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
@@ -16506,7 +16649,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				try:
 					cur_orf = (3 - (Jbeg - 1) % 3) % 3 + ORF
-					GJseq = GVSeq[Jbeg -1 + cur_orf:Jend - 1]
+					GJseq = GVSeq[Jbeg -1 + cur_orf:Jend]
 					GJseq = GJseq[0:len(GJseq) // 3 * 3]
 					GJendSeq = GJseq[-9:]
 					GJendAASeq, ErMessage = VGenesSeq.Translator(GJendSeq, 0)
@@ -17047,8 +17190,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		format.setForeground(QBrush(QColor("red")))
 		cursor.mergeCharFormat(format)
 
-		AAStartSel = math.floor(StartSel / 3)
-		AAEndSel = math.floor(EndSel / 3)
+		try:
+			ORF = int(data[105])
+		except:
+			ORF = 0
+		AAStartSel = math.floor(StartSel - ORF / 3)
+		AAEndSel = math.floor(EndSel - ORF / 3)
 		print(str(StartSel) + ',' + str(EndSel) + ',' + str(AAStartSel) + ',' + str(AAEndSel))
 
 		AAcursor.setPosition(AAStartSel)
@@ -17376,8 +17523,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
 
-		AAStartSel = math.floor(StartSel / 3)
-		AAEndSel = math.floor(EndSel / 3)
+		try:
+			ORF = int(data[105])
+		except:
+			ORF = 0
+		if StartSel - ORF > 0:
+			AAStartSel = math.floor((StartSel - ORF) / 3)
+		else:
+			AAStartSel = math.floor(StartSel / 3)
+		AAEndSel = math.floor((EndSel - ORF) / 3)
 
 		print(str(StartSel) + ',' + str(EndSel) + ',' + str(AAStartSel) + ',' + str(AAEndSel))
 
@@ -17737,14 +17891,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		JustMoved = True
 		cursor.setPosition(StartSel)
 		cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
-		if StartSel != 0:
-			AAStartSel = StartSel / 3
-		else:
-			AAStartSel = StartSel
-		if EndSel != 0:
-			AAEndSel = EndSel / 3
-		else:
-			AAEndSel = EndSel
+
+		try:
+			ORF = int(data[105])
+		except:
+			ORF = 0
+		AAStartSel = (StartSel - ORF) / 3
+		AAEndSel = (EndSel - ORF) / 3
 
 		AAcursor.setPosition(AAStartSel)
 		AAcursor.setPosition(AAEndSel, QTextCursor.KeepAnchor)

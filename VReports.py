@@ -4,8 +4,10 @@ import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
     setText
 from VGenesMain import ProgressBar
-from PyQt5.QtWidgets import QMessageBox
-from PyQt5.QtCore import QThread, pyqtSignal
+from VGenesMain import GibsonDialog
+from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView
+from PyQt5.QtCore import QThread, pyqtSignal, Qt
+from PyQt5 import QtGui
 
 import re
 import os
@@ -1406,6 +1408,136 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     currentfile.write(out_str)
                     #res.append((name, type, num_aa_mutation, num_aa_mutation_v, num_aa_mutation_j))
             self.ShowVGenesText(Pathname)
+    elif option == 'Sequence for Gibson cloning order':
+        selected_list = self.getTreeCheckedChild()
+        selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        self.myGibsonDialog = GibsonDialog()
+
+        SQLStatement = 'SELECT SeqName,GeneType,Sequence,Vbeg,Jend,Blank7,SeqAlignment FROM vgenesdb' + WHEREStatement
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        horizontalHeader = ['Seq check', 'Name', 'GeneType', 'J end', 'V(D)J sequence']
+        num_row = len(DataIn)
+        num_col = len(horizontalHeader)
+        self.myGibsonDialog.ui.tableWidget.setRowCount(num_row)
+        self.myGibsonDialog.ui.tableWidget.setColumnCount(num_col)
+        self.myGibsonDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+        self.myGibsonDialog.ui.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        #self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        #self.myGibsonDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.myGibsonDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.myGibsonDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+        if len(DataIn) > 0:
+            index = 0
+            for records in DataIn:
+                SeqName = records[0]
+                GeneType = records[1]
+                Sequence = records[2].upper()
+                Vbeg = int(records[3])
+                Jend = int(records[4])
+
+                VDJseq = Sequence[Vbeg - 1:Jend]
+                JendSeq = VDJseq[-6:]
+                checkRes = checkJend(GeneType, JendSeq)
+                try:
+                    if int(records[5]) != 0:
+                        checkRes = 'Missing nucleotide in begining'
+                except:
+                    ORF = getORF(records[6])
+                    if ORF != 0:
+                        checkRes = 'Missing nucleotide in begining'
+
+                unit1 = QTableWidgetItem(checkRes)
+                unit2 = QTableWidgetItem(SeqName)
+                unit3 = QTableWidgetItem(GeneType)
+                unit4 = QTableWidgetItem(JendSeq)
+                unit5 = QTableWidgetItem(VDJseq)
+                unit1.setFlags(Qt.ItemIsEnabled)
+                unit2.setFlags(Qt.ItemIsEnabled)
+                unit3.setFlags(Qt.ItemIsEnabled)
+                unit4.setFlags(Qt.ItemIsEnabled)
+                self.myGibsonDialog.ui.tableWidget.setItem(index, 0, unit1)
+                self.myGibsonDialog.ui.tableWidget.setItem(index, 1, unit2)
+                self.myGibsonDialog.ui.tableWidget.setItem(index, 2, unit3)
+                self.myGibsonDialog.ui.tableWidget.setItem(index, 3, unit4)
+                self.myGibsonDialog.ui.tableWidget.setItem(index, 4, unit5)
+                if checkRes == "Good":
+                    self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.green)
+                else:
+                    self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.red)
+                index += 1
+
+        # disable edit
+        self.myGibsonDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.DoubleClicked)
+        # resize table
+        self.myGibsonDialog.ui.tableWidget.resizeColumnsToContents()
+        self.myGibsonDialog.ui.tableWidget.resizeRowsToContents()
+        # setWrapMode
+        self.myGibsonDialog.ui.tableWidget.doc = QtGui.QTextDocument(self.myGibsonDialog.ui.tableWidget)
+        mode = QtGui.QTextOption.WordWrap
+        textOption = QtGui.QTextOption(self.myGibsonDialog.ui.tableWidget.doc.defaultTextOption())
+        textOption.setWrapMode(mode)
+        self.myGibsonDialog.ui.tableWidget.doc.setDefaultTextOption(textOption)
+        self.myGibsonDialog.ui.tableWidget.viewport().update()
+        # show sort indicator
+        self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSortIndicatorShown(True)
+        # connect sort indicator to slot function
+        self.myGibsonDialog.ui.tableWidget.horizontalHeader().sectionClicked.connect(self.myGibsonDialog.sort)
+        # set signal
+        self.myGibsonDialog.ui.tableWidget.cellChanged.connect(self.myGibsonDialog.updateData)
+        self.myGibsonDialog.ui.tableWidget.currentCellChanged.connect(self.myGibsonDialog.updateSelection)
+        self.myGibsonDialog.GibsonUpdateSelectionSignal.connect(self.select_tree_by_name)
+        self.myGibsonDialog.LogFileSignal.connect(self.displayLog)
+        # show dialog
+        self.myGibsonDialog.show()
 
     print('done')
 
+
+def checkJend(GeneType, JendSeq):
+    if GeneType == 'Heavy':
+        if JendSeq.upper() == 'TCCTCA':
+            res = 'Good'
+        else:
+            res = 'Jend Error'
+    elif GeneType == 'Kappa':
+        if JendSeq.upper() in ['TCGAAC', 'ATTAAA', 'ATCAAA']:
+            res = 'Good'
+        else:
+            res = 'Jend Error'
+    elif GeneType == 'Lambda':
+        if JendSeq.upper() == 'GTCCTA':
+            res = 'Good'
+        else:
+            res = 'Jend Error'
+
+    return res
+
+def getORF(alignment):
+    # get ORF info from alignment
+    lines = alignment.split('\n')
+    line_num = 0
+    for line in lines:
+        match = re.match(r'^(\s+)<-+FR1', line)
+        if match:
+            num1 = len(match.group(1))
+            aa_line = lines[line_num + 1]
+            match1 = re.match(r'^\s+', aa_line)
+            num2 = len(match1.group())
+            ORF = num2 - num1 - 1
+            if ORF < 0:
+                ORF = 0
+            return ORF
+        line_num += 1
