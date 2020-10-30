@@ -319,6 +319,10 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		self.ui.pushButtonCancel.clicked.connect(self.reject)
 		self.ui.pushButtonSave.clicked.connect(self.save)
 		self.ui.pushButtonOK.clicked.connect(self.OK)
+		self.ui.pushButtonUp.clicked.connect(self.up)
+		self.ui.pushButtonDown.clicked.connect(self.down)
+
+		self.previousRow = 0
 
 		GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
 		if os.path.isfile(GibsonFile):
@@ -334,6 +338,18 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 					self.ui.GibsonKEnd.setText(tmp[1])
 				elif tmp[0] == 'GibsonLend':
 					self.ui.GibsonLEnd.setText(tmp[1])
+
+	def up(self):
+		num_row = self.ui.tableWidget.rowCount()
+		cur_height = self.ui.tableWidget.rowHeight(0)
+		for index in range(num_row):
+			self.ui.tableWidget.setRowHeight(index, cur_height + 20)
+
+	def down(self):
+		num_row = self.ui.tableWidget.rowCount()
+		cur_height = self.ui.tableWidget.rowHeight(0)
+		for index in range(num_row):
+			self.ui.tableWidget.setRowHeight(index, cur_height - 20)
 
 	def OK(self):
 		global FieldChanged
@@ -352,12 +368,40 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		self.resize(size_w + offset, size_h + offset)
 
 
-	def updateSelection(self, currentRow, currentColumn, lstRow, lastColumn):
+	def updateSelection(self, currentRow, currentColumn, previousRow, previousColumn):
 		SeqName = self.ui.tableWidget.item(currentRow, 1).text()
-		#self.GibsonUpdateSelectionSignal.emit(SeqName)
+		self.ui.tableWidget.item(self.previousRow, 1).setBackground(Qt.white)
+		self.ui.tableWidget.item(self.previousRow, 2).setBackground(Qt.white)
+		self.ui.tableWidget.item(self.previousRow, 3).setBackground(Qt.white)
+		self.ui.tableWidget.item(currentRow, 1).setBackground(Qt.gray)
+		self.ui.tableWidget.item(currentRow, 2).setBackground(Qt.gray)
+		self.ui.tableWidget.item(currentRow, 3).setBackground(Qt.gray)
+		self.previousRow = currentRow
 		self.GibsonUpdateSelectionSignal.emit(SeqName)
 
-	def updateData(self, currentRow, currentColumn):
+	def updateData(self):
+		global FieldChanged
+		if FieldChanged == True:
+			return
+
+		sender_widget = self.sender()
+		currentRow = sender_widget.rowindex
+		updatedVDJSeq = self.ui.tableWidget.cellWidget(currentRow,4).toPlainText()
+		updatedJend = updatedVDJSeq[-6:]
+		Genetype = self.ui.tableWidget.item(currentRow, 2).text()
+		checkRes = VReports.checkJend(Genetype, updatedJend)
+
+		# update
+		FieldChanged = True
+		self.ui.tableWidget.item(currentRow, 0).setText(checkRes)
+		if checkRes == "Good":
+			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
+		else:
+			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
+		self.ui.tableWidget.item(currentRow, 3).setText(updatedJend)
+		FieldChanged = False
+
+	def updateDataOld(self, currentRow, currentColumn):
 		global FieldChanged
 		if FieldChanged == True:
 			return

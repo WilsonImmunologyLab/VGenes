@@ -5,7 +5,7 @@ from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMess
     setText
 from VGenesMain import ProgressBar
 from VGenesMain import GibsonDialog
-from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView
+from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView, QTextEdit
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5 import QtGui
 
@@ -1433,9 +1433,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.myGibsonDialog.ui.tableWidget.setRowCount(num_row)
         self.myGibsonDialog.ui.tableWidget.setColumnCount(num_col)
         self.myGibsonDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
-        self.myGibsonDialog.ui.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
+        #self.myGibsonDialog.ui.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         #self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
-        #self.myGibsonDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.myGibsonDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.myGibsonDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.myGibsonDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
 
@@ -1463,7 +1463,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 unit2 = QTableWidgetItem(SeqName)
                 unit3 = QTableWidgetItem(GeneType)
                 unit4 = QTableWidgetItem(JendSeq)
-                unit5 = QTableWidgetItem(VDJseq)
+                #unit5 = QTableWidgetItem(VDJseq)
                 unit1.setFlags(Qt.ItemIsEnabled)
                 unit2.setFlags(Qt.ItemIsEnabled)
                 unit3.setFlags(Qt.ItemIsEnabled)
@@ -1472,7 +1472,15 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 self.myGibsonDialog.ui.tableWidget.setItem(index, 1, unit2)
                 self.myGibsonDialog.ui.tableWidget.setItem(index, 2, unit3)
                 self.myGibsonDialog.ui.tableWidget.setItem(index, 3, unit4)
-                self.myGibsonDialog.ui.tableWidget.setItem(index, 4, unit5)
+                #self.myGibsonDialog.ui.tableWidget.setItem(index, 4, unit5)
+
+                cell_Text = QTextEdit()
+                cell_Text.setPlainText(VDJseq)
+                cell_Text.resize(cell_Text.size().width(), 10)
+                cell_Text.rowindex = index
+                cell_Text.textChanged.connect(self.myGibsonDialog.updateData)
+                self.myGibsonDialog.ui.tableWidget.setCellWidget(index, 4, cell_Text)
+
                 if checkRes == "Good":
                     self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.green)
                 else:
@@ -1480,23 +1488,18 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 index += 1
 
         # disable edit
-        self.myGibsonDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.DoubleClicked)
+        self.myGibsonDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # resize table
         self.myGibsonDialog.ui.tableWidget.resizeColumnsToContents()
         self.myGibsonDialog.ui.tableWidget.resizeRowsToContents()
-        # setWrapMode
-        self.myGibsonDialog.ui.tableWidget.doc = QtGui.QTextDocument(self.myGibsonDialog.ui.tableWidget)
-        mode = QtGui.QTextOption.WordWrap
-        textOption = QtGui.QTextOption(self.myGibsonDialog.ui.tableWidget.doc.defaultTextOption())
-        textOption.setWrapMode(mode)
-        self.myGibsonDialog.ui.tableWidget.doc.setDefaultTextOption(textOption)
-        self.myGibsonDialog.ui.tableWidget.viewport().update()
+        for index in range(num_row):
+            self.myGibsonDialog.ui.tableWidget.setRowHeight(index, 90)
         # show sort indicator
         self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSortIndicatorShown(True)
         # connect sort indicator to slot function
         self.myGibsonDialog.ui.tableWidget.horizontalHeader().sectionClicked.connect(self.myGibsonDialog.sort)
         # set signal
-        self.myGibsonDialog.ui.tableWidget.cellChanged.connect(self.myGibsonDialog.updateData)
+        #self.myGibsonDialog.ui.tableWidget.cellChanged.connect(self.myGibsonDialog.updateData)
         self.myGibsonDialog.ui.tableWidget.currentCellChanged.connect(self.myGibsonDialog.updateSelection)
         self.myGibsonDialog.GibsonUpdateSelectionSignal.connect(self.select_tree_by_name)
         self.myGibsonDialog.LogFileSignal.connect(self.displayLog)
