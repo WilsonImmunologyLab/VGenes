@@ -1453,11 +1453,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 checkRes = checkJend(GeneType, JendSeq)
                 try:
                     if int(records[5]) != 0:
-                        checkRes = 'Missing nucleotide in begining'
+                        checkRes = 'ORF error'
                 except:
                     ORF = getORF(records[6])
                     if ORF != 0:
-                        checkRes = 'Missing nucleotide in begining'
+                        checkRes = 'ORF error'
 
                 unit1 = QTableWidgetItem(checkRes)
                 unit2 = QTableWidgetItem(SeqName)

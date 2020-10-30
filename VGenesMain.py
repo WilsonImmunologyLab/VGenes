@@ -345,6 +345,13 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
 		FieldChanged = False
 
+		size_w = self.size().width()
+		size_h = self.size().height()
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
+
+
 	def updateSelection(self, currentRow, currentColumn, lstRow, lastColumn):
 		SeqName = self.ui.tableWidget.item(currentRow, 1).text()
 		#self.GibsonUpdateSelectionSignal.emit(SeqName)
@@ -433,7 +440,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 					currentfile.write(out_str)
 					total_out += 1
 				else:
-					Error_seq_names += checkRes + '\t' + self.ui.tableWidget.item(index, 1).text() + '\n'
+					Error_seq_names += self.ui.tableWidget.item(index, 1).text() + '\t' + checkRes + '\n'
 		Msg = 'Your sequences have been saved to ' + Pathname + '!\n Total ' + str(total_out) + \
 		      ' sequences were exported!'
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,
