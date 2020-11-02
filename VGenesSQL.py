@@ -1365,7 +1365,7 @@ def MakeSQLStatement(self, fields, SeqName):
     return SQLStatement
 
 def MakeSQLStatementNew(self, fields, SeqName):
-    checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeChecked()
+    checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeCheckedChild()
 
     SQLStatement = 'SELECT '
     SQLStatement_all = ''
@@ -1386,7 +1386,7 @@ def MakeSQLStatementNew(self, fields, SeqName):
 
     i = 1
     if len(checkedkids) > 0:
-        SQLStatement += 'WHERE SeqName IN ('
+        SQLStatement += ' WHERE SeqName IN ('
         for item in checkedkids:
             SQLStatement += '"' + item + '",'
             i += 1

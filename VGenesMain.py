@@ -470,7 +470,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 				if checkRes == "Good":
 					SeqName = self.ui.tableWidget.item(index, 1).text()
 					GeneType = self.ui.tableWidget.item(index, 2).text()
-					VDJSeq = self.ui.tableWidget.item(index, 4).text()
+					VDJSeq = self.ui.tableWidget.cellWidget(index,4).toPlainText()
 
 					if GeneType == "Heavy":
 						GibsonEnd = GibsonHend
