@@ -264,7 +264,7 @@
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -370,32 +370,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="0">
-           <widget class="QPushButton" name="pushButtonBatch">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="toolTip">
-             <string>Edit distinct values of selected field in batches</string>
-            </property>
-            <property name="text">
-             <string>Batch Edit</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/tag.png</normaloff>:/PNG-Icons/tag.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0" colspan="2">
            <widget class="QLineEdit" name="lineEditTarget">
             <property name="minimumSize">
@@ -416,7 +390,7 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="2">
+          <item row="0" column="0" colspan="2">
            <widget class="QPushButton" name="pushButtonLock">
             <property name="minimumSize">
              <size>
@@ -426,7 +400,7 @@
             </property>
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>300</width>
               <height>16777215</height>
              </size>
             </property>
@@ -434,7 +408,7 @@
              <string>Lock/Unlock Edit</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Lock</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -4022,7 +3996,7 @@
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
+               <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
              </property>
              <property name="iconSize">
               <size>

@@ -15012,13 +15012,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.pushButtonLock.setIcon(lock_icon)
 			self.ui.btnFieldBulk.setEnabled(False)
-			self.ui.pushButtonBatch.setEnabled(False)
+			#self.ui.pushButtonBatch.setEnabled(False)
 		else:
 			unlock_icon = QIcon()
 			unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.pushButtonLock.setIcon(unlock_icon)
 			self.ui.btnFieldBulk.setEnabled(True)
-			self.ui.pushButtonBatch.setEnabled(True)
+			#self.ui.pushButtonBatch.setEnabled(True)
 
 	@pyqtSlot()
 	def on_btnSaveChange_clicked(self):
