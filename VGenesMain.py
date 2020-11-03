@@ -343,7 +343,8 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 	def ignore(self):
 		global FieldChanged
 		currentRow = self.ui.tableWidget.currentRow()
-
+		if currentRow < 0:
+			return
 		# update
 		FieldChanged = True
 		self.ui.tableWidget.item(currentRow, 0).setText('Ignore')
@@ -371,7 +372,8 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 	def OK(self):
 		global FieldChanged
 		currentRow = self.ui.tableWidget.currentRow()
-
+		if currentRow < 0:
+			return
 		# update
 		FieldChanged = True
 		self.ui.tableWidget.item(currentRow, 0).setText('Good')
