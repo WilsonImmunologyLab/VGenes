@@ -376,7 +376,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 			return
 		# update
 		FieldChanged = True
-		self.ui.tableWidget.item(currentRow, 0).setText('Good')
+		self.ui.tableWidget.item(currentRow, 0).setText('Good *')
 		self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
 		FieldChanged = False
 
@@ -413,7 +413,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		# update
 		FieldChanged = True
 		self.ui.tableWidget.item(currentRow, 0).setText(checkRes)
-		if checkRes == "Good":
+		if checkRes[0:4] == "Good":
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
 		else:
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
@@ -433,7 +433,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		# update
 		FieldChanged = True
 		self.ui.tableWidget.item(currentRow, 0).setText(checkRes)
-		if checkRes == "Good":
+		if checkRes[0:4] == "Good":
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
 		else:
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
@@ -492,7 +492,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 			total_rows = self.ui.tableWidget.rowCount()
 			for index in range(total_rows):
 				checkRes = self.ui.tableWidget.item(index, 0).text()
-				if checkRes == "Good":
+				if checkRes[0:4] == "Good":
 					SeqName = self.ui.tableWidget.item(index, 1).text()
 					GeneType = self.ui.tableWidget.item(index, 2).text()
 					VDJSeq = self.ui.tableWidget.cellWidget(index,4).toPlainText()
