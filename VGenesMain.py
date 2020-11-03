@@ -192,7 +192,7 @@ RealNameList = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene
                 "Specificity", "Subspecificity", "Clonal Pool", "Clonal Rank", "V locus", "J locus", "D locus",
                 "Date and time entered", "Comments", "Quality", "Total Mutations", "Mutation list",
                 "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
-                "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster", "10xBarCode", "Population",
+                "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "ORF", "10xCluster", "Seuret_Cluster", "10xBarCode", "Population",
                 "Label", "Status", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
 
 global FieldTypeList

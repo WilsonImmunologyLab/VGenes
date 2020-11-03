@@ -4092,7 +4092,7 @@ class Ui_MainWindow(object):
         self.cboReportOptions.setItemText(6, _translate("MainWindow", "Custom report"))
         self.cboReportOptions.setItemText(7, _translate("MainWindow", "10x Synthesis report"))
         self.cboReportOptions.setItemText(8, _translate("MainWindow", "Heavy/Light Chain pairs (.csv)"))
-        self.cboReportOptions.setItemText(9, _translate("MainWindow", "CSV format Entire VDB"))
+        self.cboReportOptions.setItemText(9, _translate("MainWindow", "CSV format full records"))
         self.cboReportOptions.setItemText(10, _translate("MainWindow", "Count AA mutations"))
         self.cboReportOptions.setItemText(11, _translate("MainWindow", "Sequence for Gibson cloning order"))
         self.ckReportDisplay.setToolTip(_translate("MainWindow", "Display"))

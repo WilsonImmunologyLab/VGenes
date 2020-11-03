@@ -1120,7 +1120,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         self.progress = ProgressBar(self)
         self.progress.show()
-    elif option == 'CSV format Entire VDB':
+    elif option == 'CSV format full records':
         '''
         SQLSTATEMENT = 'SELECT Field,FieldNickName from fieldsname ORDER BY ID'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
