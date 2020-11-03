@@ -3862,16 +3862,6 @@
              </item>
              <item>
               <property name="text">
-               <string>Custom report</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>10x Synthesis report</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>Heavy/Light Chain pairs (.csv)</string>
               </property>
              </item>
@@ -3887,7 +3877,7 @@
              </item>
              <item>
               <property name="text">
-               <string>Sequence for Gibson cloning order</string>
+               <string>Sequence for GibsonClone</string>
               </property>
              </item>
             </widget>
@@ -8711,7 +8701,7 @@ If the J-end is off the J gene end may need adjusted</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>2</number>
                 </property>
                 <widget class="QWidget" name="tab_8">
                  <attribute name="title">

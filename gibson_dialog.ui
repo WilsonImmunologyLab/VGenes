@@ -107,20 +107,7 @@
    </item>
    <item row="0" column="3" colspan="2">
     <layout class="QGridLayout" name="gridLayout_4">
-     <item row="0" column="0">
-      <widget class="QPushButton" name="pushButtonOK">
-       <property name="maximumSize">
-        <size>
-         <width>200</width>
-         <height>16777215</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>I think this sequnece is OK</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0">
+     <item row="1" column="1">
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
         <widget class="QLabel" name="label_6">
@@ -183,6 +170,26 @@
        </item>
       </layout>
      </item>
+     <item row="0" column="0">
+      <widget class="QPushButton" name="pushButtonIgnore">
+       <property name="text">
+        <string>Ignore this</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QPushButton" name="pushButtonOK">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>I think this sequnece is OK</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item row="3" column="4">
@@ -205,7 +212,7 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>1048</width>
+       <width>939</width>
        <height>20</height>
       </size>
      </property>

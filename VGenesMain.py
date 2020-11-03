@@ -321,6 +321,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		self.ui.pushButtonOK.clicked.connect(self.OK)
 		self.ui.pushButtonUp.clicked.connect(self.up)
 		self.ui.pushButtonDown.clicked.connect(self.down)
+		self.ui.pushButtonIgnore.clicked.connect(self.ignore)
 
 		self.previousRow = 0
 
@@ -338,6 +339,22 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 					self.ui.GibsonKEnd.setText(tmp[1])
 				elif tmp[0] == 'GibsonLend':
 					self.ui.GibsonLEnd.setText(tmp[1])
+
+	def ignore(self):
+		global FieldChanged
+		currentRow = self.ui.tableWidget.currentRow()
+
+		# update
+		FieldChanged = True
+		self.ui.tableWidget.item(currentRow, 0).setText('Ignore')
+		self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
+		FieldChanged = False
+
+		size_w = self.size().width()
+		size_h = self.size().height()
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
 
 	def up(self):
 		num_row = self.ui.tableWidget.rowCount()
@@ -442,6 +459,12 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 			                    QMessageBox.Ok)
 
 	def accept(self):
+		question = 'Only "Good" sequences will be exported, confirm?'
+		buttons = 'YN'
+		answer = questionMessage(self, question, buttons)
+		if answer == 'No':
+			return
+
 		if self.ui.GibsonStart == "" or self.ui.GibsonHEnd == "" or self.ui.GibsonKEnd == "" or self.ui.GibsonLEnd == "":
 			Msg = 'Please fill all GibsonStart connector information before proceed!'
 			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,

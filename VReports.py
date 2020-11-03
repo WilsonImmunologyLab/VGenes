@@ -1408,7 +1408,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     currentfile.write(out_str)
                     #res.append((name, type, num_aa_mutation, num_aa_mutation_v, num_aa_mutation_j))
             self.ShowVGenesText(Pathname)
-    elif option == 'Sequence for Gibson cloning order':
+    elif option == 'Sequence for GibsonClone':
         selected_list = self.getTreeCheckedChild()
         selected_list = selected_list[3]
 
