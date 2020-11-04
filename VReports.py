@@ -1409,8 +1409,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     #res.append((name, type, num_aa_mutation, num_aa_mutation_v, num_aa_mutation_j))
             self.ShowVGenesText(Pathname)
     elif option == 'Sequence for GibsonClone':
-        selected_list = self.getTreeCheckedChild()
-        selected_list = selected_list[3]
+        if len(self.AntibodyCandidates) == 0:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+        else:
+            selected_list = self.AntibodyCandidates
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
