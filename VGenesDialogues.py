@@ -274,7 +274,7 @@ def setText(self, QueryIS, DefaultText):
     text, ok = QtWidgets.QInputDialog.getText(self, "Input",
             QueryIS, QtWidgets.QLineEdit.Normal, DefaultText) #QtCore.QDir.home().dirName())
             # QueryIS, DefaultText, QtCore.QDir.home().dirName())
-    if ok and text != '':
+    if ok:
         return text
     else:
         return 'Cancelled Action'
@@ -291,4 +291,4 @@ def setItem(self, items, title):
     if ok and item:
         return item
     else:
-        return'Cancel'
+        return 'Cancel'

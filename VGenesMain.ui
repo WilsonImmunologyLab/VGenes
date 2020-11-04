@@ -720,20 +720,6 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QPushButton" name="pushButtonClear">
-         <property name="text">
-          <string>Clear Check</string>
-         </property>
-         <property name="icon">
-          <iconset resource="Resources/VgenesResources.qrc">
-           <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
        <item row="6" column="0" colspan="2">
         <widget class="QComboBox" name="cboTreeOp3">
          <property name="minimumSize">
@@ -768,6 +754,26 @@
            <width>0</width>
            <height>27</height>
           </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButtonClear">
+         <property name="text">
+          <string>Clear Check</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>18</width>
+           <height>18</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -4026,7 +4032,7 @@
               <string>Make a copy of current DB</string>
              </property>
              <property name="text">
-              <string>Match</string>
+              <string>HC/LC</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -8958,6 +8964,95 @@ If the J-end is off the J gene end may need adjusted</string>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="tab_14">
+       <attribute name="title">
+        <string>Antibody candidate</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_60">
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_88">
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Heavy chains</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QLabel" name="label_89">
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Light chains</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="QTableWidget" name="tableWidgetHC"/>
+        </item>
+        <item row="2" column="1">
+         <widget class="QTableWidget" name="tableWidgetLC"/>
+        </item>
+        <item row="3" column="0" colspan="2">
+         <layout class="QHBoxLayout" name="horizontalLayout_15">
+          <item>
+           <widget class="QPushButton" name="pushButtonDeleteThis">
+            <property name="text">
+             <string>Delete this record</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonDeleteThese">
+            <property name="text">
+             <string>Delete this record and its HC/LCs</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonDeleteAll">
+            <property name="text">
+             <string>Clear list</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="0" colspan="2">
+         <widget class="QFrame" name="frame_22">
+          <property name="frameShape">
+           <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_59">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_90">
+             <property name="font">
+              <font>
+               <pointsize>18</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Antibody candidates</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>
@@ -9009,7 +9104,6 @@ If the J-end is off the J gene end may need adjusted</string>
      <string>Tools</string>
     </property>
     <addaction name="actionAnalyze_Mutations"/>
-    <addaction name="actionMap_hotspots"/>
     <addaction name="actionMultiple_Alignement"/>
     <addaction name="actionAlignment"/>
     <addaction name="actionFind_Clonal"/>
@@ -9127,6 +9221,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionAlignment"/>
    <addaction name="actionSuggestCanonical"/>
    <addaction name="actiontranslate"/>
+   <addaction name="actionaddABlist"/>
    <addaction name="separator"/>
    <addaction name="actionMultiple_Alignement"/>
    <addaction name="actionDNA"/>
@@ -9240,7 +9335,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/Align.png</normaloff>:/PNG-Icons/Align.png</iconset>
    </property>
    <property name="text">
-    <string>Alignment</string>
+    <string>IgBlats Alignment</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+L</string>
@@ -9690,6 +9785,18 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="toolTip">
     <string>Translate DNA sequences to Protein sequences</string>
+   </property>
+  </action>
+  <action name="actionaddABlist">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/mAB.png</normaloff>:/PNG-Icons/mAB.png</iconset>
+   </property>
+   <property name="text">
+    <string>addABlist</string>
+   </property>
+   <property name="toolTip">
+    <string>add all checked records to Antibody candidate list</string>
    </property>
   </action>
  </widget>

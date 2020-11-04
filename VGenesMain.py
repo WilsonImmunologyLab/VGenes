@@ -13,7 +13,7 @@ import pandas as pd
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
 
-from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable
+from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable, QEvent
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
@@ -45,6 +45,7 @@ import IgBLASTer
 from VgenesTextEdit import VGenesTextMain
 import VGenesSQL
 import VGenesSeq
+import VGenesDialogues
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
@@ -6345,6 +6346,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.comboBoxTree.currentTextChanged.connect(self.updateCloneTreeInfo)
 		self.ui.CopyAA.clicked.connect(self.copySelAA)
 		self.ui.CopyDNA.clicked.connect(self.copySelDNA)
+		self.ui.pushButtonDeleteThis.clicked.connect(self.deleteThis)
+		self.ui.pushButtonDeleteThese.clicked.connect(self.deleteThese)
+		self.ui.pushButtonDeleteAll.clicked.connect(self.deleteAll)
+		self.ui.tableWidgetHC.cellClicked.connect(self.matchSelection)
+		self.ui.tableWidgetLC.cellClicked.connect(self.matchSelection)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -6382,8 +6388,112 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.gridLayoutClone.addWidget(self.ui.HTMLviewClone)
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
 
+		self.AntibodyCandidates = []
+
 		self.enableEdit = False
 		self.HeatmapList = []
+
+		self.initialHCLCTable()
+
+	def deleteThis(self):
+		curTable = self.ui.tabWidget.focusWidget()
+		row = curTable.currentRow()
+		name = curTable.item(row, 0).text()
+		curTable.removeRow(row)
+		try:
+			self.AntibodyCandidates = self.AntibodyCandidates.remove(name)
+		except:
+			print('opps!')
+
+	def deleteAll(self):
+		self.ui.tableWidgetHC.setRowCount(0)
+		self.ui.tableWidgetLC.setRowCount(0)
+		self.AntibodyCandidates = []
+
+	def deleteThese(self):
+		curTable = self.ui.tabWidget.focusWidget()
+		row = curTable.currentRow()
+		if curTable.columnCount() == 10:
+			barcode = curTable.item(row, 8).text()
+		else:
+			barcode = curTable.item(row, 7).text()
+		# delete HC
+		delete_sign = True
+		while delete_sign == True:
+			delete_sign = False
+			for index in range(self.ui.tableWidgetHC.rowCount()):
+				if barcode == self.ui.tableWidgetHC.item(index, 8).text():
+					self.ui.tableWidgetHC.removeRow(index)
+					delete_sign = True
+					break
+		# delete LC
+		delete_sign = True
+		while delete_sign == True:
+			delete_sign = False
+			for index in range(self.ui.tableWidgetLC.rowCount()):
+				if barcode == self.ui.tableWidgetLC.item(index, 7).text():
+					self.ui.tableWidgetLC.removeRow(index)
+					delete_sign = True
+					break
+		
+	def matchSelection(self, row, col):
+		curTable = self.ui.tabWidget.focusWidget()
+		if curTable.columnCount() == 10:
+			barcode = curTable.item(row, 8).text()
+		else:
+			barcode = curTable.item(row, 7).text()
+
+		# color HC table
+		for index in range(self.ui.tableWidgetHC.rowCount()):
+			if barcode == self.ui.tableWidgetHC.item(index, 8).text():
+				if curTable.columnCount() == 9:
+					self.ui.tableWidgetHC.setCurrentCell(index, 0)
+				for col_index in range(self.ui.tableWidgetHC.columnCount()):
+					#self.ui.tableWidgetHC.item(index, col_index).setForeground(QBrush(QColor("red")))
+					self.ui.tableWidgetHC.item(index, col_index).setBackground(QBrush(QColor("gray")))
+			else:
+				for col_index in range(self.ui.tableWidgetHC.columnCount()):
+					#self.ui.tableWidgetHC.item(index, col_index).setForeground(QBrush(QColor("black")))
+					self.ui.tableWidgetHC.item(index, col_index).setBackground(QBrush(QColor("white")))
+		# color LC table
+		for index in range(self.ui.tableWidgetLC.rowCount()):
+			if barcode == self.ui.tableWidgetLC.item(index, 7).text():
+				if curTable.columnCount() == 10:
+					self.ui.tableWidgetLC.setCurrentCell(index, 0)
+				for col_index in range(self.ui.tableWidgetLC.columnCount()):
+					#self.ui.tableWidgetLC.item(index, col_index).setForeground(QBrush(QColor("red")))
+					self.ui.tableWidgetLC.item(index, col_index).setBackground(QBrush(QColor("gray")))
+			else:
+				for col_index in range(self.ui.tableWidgetLC.columnCount()):
+					#self.ui.tableWidgetLC.item(index, col_index).setForeground(QBrush(QColor("black")))
+					self.ui.tableWidgetLC.item(index, col_index).setBackground(QBrush(QColor("white")))
+		
+	def initialHCLCTable(self):
+		# setup HC table
+		num_row = 0
+		horizontalHeader = ['SeqName','GeneType','ClonalPool','Vgene','Dgene','Jgene','TotalMuts','Tsotype','Barcode', 'Notes']
+		num_col = len(horizontalHeader)
+		self.ui.tableWidgetHC.setRowCount(num_row)
+		self.ui.tableWidgetHC.setColumnCount(num_col)
+		self.ui.tableWidgetHC.setHorizontalHeaderLabels(horizontalHeader)
+		# self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+		self.ui.tableWidgetHC.horizontalHeader().setStretchLastSection(True)
+		self.ui.tableWidgetHC.setSelectionMode(QAbstractItemView.SingleSelection)
+		self.ui.tableWidgetHC.setSelectionBehavior(QAbstractItemView.SelectRows)
+		self.ui.tableWidgetHC.setEditTriggers(QAbstractItemView.NoEditTriggers)
+
+		# setup LC table
+		num_row = 0
+		horizontalHeader = ['SeqName', 'GeneType', 'ClonalPool', 'Vgene', 'Jgene', 'TotalMuts', 'Tsotype', 'Barcode', 'Notes']
+		num_col = len(horizontalHeader)
+		self.ui.tableWidgetLC.setRowCount(num_row)
+		self.ui.tableWidgetLC.setColumnCount(num_col)
+		self.ui.tableWidgetLC.setHorizontalHeaderLabels(horizontalHeader)
+		# self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+		self.ui.tableWidgetLC.horizontalHeader().setStretchLastSection(True)
+		self.ui.tableWidgetLC.setSelectionMode(QAbstractItemView.SingleSelection)
+		self.ui.tableWidgetLC.setSelectionBehavior(QAbstractItemView.SelectRows)
+		self.ui.tableWidgetLC.setEditTriggers(QAbstractItemView.NoEditTriggers)
 
 	def displayLog(self, logFile):
 		self.ShowVGenesText(logFile)
@@ -6858,6 +6968,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			QMessageBox.warning(self, 'Warning', 'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
 			                    QMessageBox.Ok,
 			                    QMessageBox.Ok)
+
+	@pyqtSlot()
+	def on_actionAlignment_triggered(self):
+		self.ui.tabWidget.setCurrentIndex(3)
 
 	@pyqtSlot()
 	def on_actionAlignmentHTML_triggered(self):
@@ -15394,7 +15508,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		fields = ['SeqName', 'Sequence', 'GermlineSequence', 'CDR3Length', 'CDR1From', 'CDR1To', 'CDR2From', 'CDR2To',
 		          'CDR3beg', 'CDR3end', 'Mutations', 'IDEvent', 'ID', 'Species', 'Jend']
 		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
+		SQLStatement = VGenesSQL.MakeSQLStatementNew(self, fields, data[0])
 		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 		#  make array of fixed seqs to decorate
@@ -16454,6 +16568,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.DecorateText(FinalMap, Scale, CurPos, cursor)
 
+		# slightly resize the UI to refresh
+		size_w = self.size().width()
+		size_h = self.size().height()
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
+
 	@pyqtSlot()
 	def on_btnUpdateTree_clicked(self):
 		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
@@ -16878,13 +16999,103 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#  76 Grouping, 77 SubGroup, 78 Species, 79 Sequence, 80 GermlineSequence, 81 CDR3DNA, 82 CDR3AA,
 			#  83 CDR3Length, 84 CDR3beg, 85 CDRend, 86 Specificity, 87 Subspecificity, 88 ClonalPool, 89 ClonalRank,
 			#  90 VLocus, 91 JLocus, 92 DLocus, 93 DateEntered, 94 Comments, 95 Quality, 96 TotalMuts, 97 Mutations, 98 IDEvent, CDR3MW, CDR3pI, Isotype, Blank4, Blank5, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, 99 ID
+
 	@pyqtSlot()
 	def on_actiontranslate_triggered(self):
 		self.myTranslateDialog = TranslateDialog()
 		self.myTranslateDialog.show()
 
 	@pyqtSlot()
+	def on_actionaddABlist_triggered(self):
+		self.addToABlist()
+
+	def addToABlist(self):
+		listItems = self.getTreeCheckedChild()
+		listItems = listItems[3]
+
+		if len(listItems) == 0:
+			QMessageBox.warning(self, 'Warning', 'Please check sequence from active sequence panel!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# get notice for this batch
+		notice = VGenesDialogues.setText(self, 'Please write notes for these sequences, e.g. clones', '')
+		if notice == 'Cancelled Action':
+			return
+
+		shared = list(set(listItems).intersection(self.AntibodyCandidates))
+		novel_ele = list(set(listItems).difference(self.AntibodyCandidates))
+
+		# warn redundant sequences
+		if len(shared) > 0:
+			Msg = "Those sequences are already in the list:\n" + ", ".join(shared)
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+		# update Antibody Candidate list if there is new sequences
+		if len(novel_ele) > 0:
+			self.AntibodyCandidates = self.AntibodyCandidates + novel_ele
+
+			WhereState = 'SeqName IN ("' + '","'.join(novel_ele) + '")'
+
+			SQLStatement = 'SELECT SeqName,GeneType,ClonalPool,V1,D1,J1,TotalMuts,Isotype,Blank10 FROM vgenesDB WHERE ' + WhereState
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			for item in DataIn:
+				SeqName = item[0]
+				Genetype = item[1]
+				Clone = item[2]
+				Vgene = item[3]
+				Dgene = item[4]
+				Jgene = item[5]
+				TotalMuts = item[6]
+				Isotype = item[7]
+				barcode = item[8]
+
+				if Genetype == 'Heavy':
+					rowPosition = self.ui.tableWidgetHC.rowCount()
+					self.ui.tableWidgetHC.insertRow(rowPosition)
+					self.ui.tableWidgetHC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+					self.ui.tableWidgetHC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+					self.ui.tableWidgetHC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+					self.ui.tableWidgetHC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 4, QTableWidgetItem(Dgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 5, QTableWidgetItem(Jgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 6, QTableWidgetItem(TotalMuts))
+					self.ui.tableWidgetHC.setItem(rowPosition, 7, QTableWidgetItem(Isotype))
+					self.ui.tableWidgetHC.setItem(rowPosition, 8, QTableWidgetItem(barcode))
+					self.ui.tableWidgetHC.setItem(rowPosition, 9, QTableWidgetItem(notice))
+				else:
+					rowPosition = self.ui.tableWidgetLC.rowCount()
+					self.ui.tableWidgetLC.insertRow(rowPosition)
+					self.ui.tableWidgetLC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+					self.ui.tableWidgetLC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+					self.ui.tableWidgetLC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+					self.ui.tableWidgetLC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+					self.ui.tableWidgetLC.setItem(rowPosition, 4, QTableWidgetItem(Jgene))
+					self.ui.tableWidgetLC.setItem(rowPosition, 5, QTableWidgetItem(TotalMuts))
+					self.ui.tableWidgetLC.setItem(rowPosition, 6, QTableWidgetItem(Isotype))
+					self.ui.tableWidgetLC.setItem(rowPosition, 7, QTableWidgetItem(barcode))
+					self.ui.tableWidgetLC.setItem(rowPosition, 8, QTableWidgetItem(notice))
+
+			self.ui.tableWidgetHC.resizeColumnsToContents()
+			self.ui.tableWidgetHC.horizontalHeader().setSortIndicatorShown(True)
+			self.ui.tableWidgetHC.horizontalHeader().sectionClicked.connect(self.sortHCtable)
+
+			self.ui.tableWidgetLC.resizeColumnsToContents()
+			self.ui.tableWidgetLC.horizontalHeader().setSortIndicatorShown(True)
+			self.ui.tableWidgetLC.horizontalHeader().sectionClicked.connect(self.sortLCtable)
+
+	def sortHCtable(self, index):
+		self.ui.tableWidgetHC.sortByColumn(index, self.ui.tableWidgetHC.horizontalHeader().sortIndicatorOrder())
+
+	def sortLCtable(self, index):
+		self.ui.tableWidgetLC.sortByColumn(index, self.ui.tableWidgetLC.horizontalHeader().sortIndicatorOrder())
+
+	@pyqtSlot()
 	def on_actionCreateVDJdb_triggered(self):
+		Msg = 'This function is disabled! Please see user guide for details about updating IMGT reference DB!'
+		QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		return
 
 		Pathname = openFile(self, 'Nucleotide')
 		if Pathname == None:

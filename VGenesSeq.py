@@ -1023,7 +1023,8 @@ def Intraclonal(DataIn, DBFilename):
                         Quality = 'pH1N1'
                     else:
                         Quality = 'prePandemic'
-
+                else:
+                    Quality = 'None'
 
 
                 Act  = seq[12]
