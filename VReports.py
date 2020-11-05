@@ -1430,7 +1430,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         SQLStatement = 'SELECT SeqName,GeneType,Sequence,Vbeg,Jend,Blank7,SeqAlignment FROM vgenesdb' + WHEREStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-        horizontalHeader = ['Seq check', 'Name', 'GeneType', 'J end', 'V(D)J sequence']
+        horizontalHeader = ['Seq check', 'Name', 'GeneType', 'J end', 'V(D)J sequence', 'Translated AA']
         num_row = len(DataIn)
         num_col = len(horizontalHeader)
         self.myGibsonDialog.ui.tableWidget.setRowCount(num_row)
@@ -1455,12 +1455,15 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 JendSeq = VDJseq[-6:]
                 checkRes = checkJend(GeneType, JendSeq)
                 try:
-                    if int(records[5]) != 0:
-                        checkRes = 'ORF error'
+                    ORF = int(records[5])
                 except:
                     ORF = getORF(records[6])
-                    if ORF != 0:
-                        checkRes = 'ORF error'
+                if ORF != 0:
+                    checkRes = 'Check ORF'
+                    VDJseq = VDJseq[ORF:]
+                AAseq, msg = VGenesSeq.Translator(VDJseq, 0)
+                if "*" in AAseq:
+                    checkRes = 'ORF error'
 
                 unit1 = QTableWidgetItem(checkRes)
                 unit2 = QTableWidgetItem(SeqName)
@@ -1479,13 +1482,21 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
                 cell_Text = QTextEdit()
                 cell_Text.setPlainText(VDJseq)
-                cell_Text.resize(cell_Text.size().width(), 10)
+                #cell_Text.resize(cell_Text.size().width(), 20)
                 cell_Text.rowindex = index
                 cell_Text.textChanged.connect(self.myGibsonDialog.updateData)
                 self.myGibsonDialog.ui.tableWidget.setCellWidget(index, 4, cell_Text)
 
+                cell_TextAA = QTextEdit()
+                cell_TextAA.setPlainText(AAseq)
+                cell_TextAA.setReadOnly(True)
+                cell_TextAA.rowindex = index
+                self.myGibsonDialog.ui.tableWidget.setCellWidget(index, 5, cell_TextAA)
+
                 if checkRes == "Good":
                     self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.green)
+                elif checkRes == "Check ORF":
+                    self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.yellow)
                 else:
                     self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.red)
                 index += 1

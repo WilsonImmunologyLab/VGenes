@@ -9002,6 +9002,13 @@ If the J-end is off the J gene end may need adjusted</string>
         <item row="3" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_15">
           <item>
+           <widget class="QRadioButton" name="radioButtonNavigate">
+            <property name="text">
+             <string>Navigate to my selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButtonDeleteThis">
             <property name="text">
              <string>Delete this record</string>
@@ -9018,7 +9025,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteAll">
             <property name="text">
-             <string>Clear list</string>
+             <string>Clear candidate list</string>
             </property>
            </widget>
           </item>

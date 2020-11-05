@@ -410,6 +410,12 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		updatedJend = updatedVDJSeq[-6:]
 		Genetype = self.ui.tableWidget.item(currentRow, 2).text()
 		checkRes = VReports.checkJend(Genetype, updatedJend)
+		AAseq, msg = VGenesSeq.Translator(updatedVDJSeq, 0)
+		if "*" in AAseq:
+			if checkRes == 'Good':
+				checkRes = 'ORF error'
+			else:
+				checkRes += ',ORF error'
 
 		# update
 		FieldChanged = True
@@ -419,6 +425,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		else:
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
 		self.ui.tableWidget.item(currentRow, 3).setText(updatedJend)
+		self.ui.tableWidget.cellWidget(currentRow,5).setPlainText(AAseq)
 		FieldChanged = False
 
 	def updateDataOld(self, currentRow, currentColumn):
@@ -6397,13 +6404,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def deleteThis(self):
 		curTable = self.ui.tabWidget.focusWidget()
-		row = curTable.currentRow()
-		name = curTable.item(row, 0).text()
-		curTable.removeRow(row)
 		try:
-			self.AntibodyCandidates = self.AntibodyCandidates.remove(name)
+			if curTable.rowCount() > 0:
+				row = curTable.currentRow()
+				name = curTable.item(row, 0).text()
+				curTable.removeRow(row)
+				try:
+					self.AntibodyCandidates = self.AntibodyCandidates.remove(name)
+				except:
+					print('opps!')
 		except:
-			print('opps!')
+			pass
 
 	def deleteAll(self):
 		self.ui.tableWidgetHC.setRowCount(0)
@@ -6412,29 +6423,33 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def deleteThese(self):
 		curTable = self.ui.tabWidget.focusWidget()
-		row = curTable.currentRow()
-		if curTable.columnCount() == 10:
-			barcode = curTable.item(row, 8).text()
-		else:
-			barcode = curTable.item(row, 7).text()
-		# delete HC
-		delete_sign = True
-		while delete_sign == True:
-			delete_sign = False
-			for index in range(self.ui.tableWidgetHC.rowCount()):
-				if barcode == self.ui.tableWidgetHC.item(index, 8).text():
-					self.ui.tableWidgetHC.removeRow(index)
-					delete_sign = True
-					break
-		# delete LC
-		delete_sign = True
-		while delete_sign == True:
-			delete_sign = False
-			for index in range(self.ui.tableWidgetLC.rowCount()):
-				if barcode == self.ui.tableWidgetLC.item(index, 7).text():
-					self.ui.tableWidgetLC.removeRow(index)
-					delete_sign = True
-					break
+		try:
+			if curTable.rowCount() > 0:
+				row = curTable.currentRow()
+				if curTable.columnCount() == 10:
+					barcode = curTable.item(row, 8).text()
+				else:
+					barcode = curTable.item(row, 7).text()
+				# delete HC
+				delete_sign = True
+				while delete_sign == True:
+					delete_sign = False
+					for index in range(self.ui.tableWidgetHC.rowCount()):
+						if barcode == self.ui.tableWidgetHC.item(index, 8).text():
+							self.ui.tableWidgetHC.removeRow(index)
+							delete_sign = True
+							break
+				# delete LC
+				delete_sign = True
+				while delete_sign == True:
+					delete_sign = False
+					for index in range(self.ui.tableWidgetLC.rowCount()):
+						if barcode == self.ui.tableWidgetLC.item(index, 7).text():
+							self.ui.tableWidgetLC.removeRow(index)
+							delete_sign = True
+							break
+		except:
+			pass
 		
 	def matchSelection(self, row, col):
 		curTable = self.ui.tabWidget.focusWidget()
@@ -6467,7 +6482,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for col_index in range(self.ui.tableWidgetLC.columnCount()):
 					#self.ui.tableWidgetLC.item(index, col_index).setForeground(QBrush(QColor("black")))
 					self.ui.tableWidgetLC.item(index, col_index).setBackground(QBrush(QColor("white")))
-		
+
+		if self.ui.radioButtonNavigate.isChecked():
+			self.select_tree_by_name(curTable.item(row, 0).text())
+
+
 	def initialHCLCTable(self):
 		# setup HC table
 		num_row = 0
