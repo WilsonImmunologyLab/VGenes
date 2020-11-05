@@ -6611,6 +6611,36 @@ class VGenesForm(QtWidgets.QMainWindow):
 		DontFindTwice = False
 
 	@pyqtSlot()
+	def on_actionpreviousChecked_triggered(self):
+		checked = self.getTreeCheckedChild()
+		checked = checked[3]
+		if len(checked) > 0:
+			cur_selection = self.ui.txtName.toPlainText()
+			if cur_selection in checked:
+				index = checked.index(cur_selection)
+				moveindex = index - 1
+				if moveindex < 0:
+					moveindex = 0
+				self.select_tree_by_name(checked[moveindex])
+			else:
+				self.select_tree_by_name(checked[0])
+
+	@pyqtSlot()
+	def on_actionnextChecked_triggered(self):
+		checked = self.getTreeCheckedChild()
+		checked = checked[3]
+		if len(checked) > 0:
+			cur_selection = self.ui.txtName.toPlainText()
+			if cur_selection in checked:
+				index = checked.index(cur_selection)
+				moveindex = index + 1
+				if moveindex >= len(checked):
+					moveindex = len(checked) - 1
+				self.select_tree_by_name(checked[moveindex])
+			else:
+				self.select_tree_by_name(checked[0])
+
+	@pyqtSlot()
 	def on_actionSave_As_triggered(self):
 		self.saveAS()
 

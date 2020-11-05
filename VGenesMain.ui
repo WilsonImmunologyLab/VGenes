@@ -9206,6 +9206,8 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionMove_Down"/>
    <addaction name="actionTop"/>
    <addaction name="actionBottom"/>
+   <addaction name="actionpreviousChecked"/>
+   <addaction name="actionnextChecked"/>
    <addaction name="separator"/>
    <addaction name="action_New"/>
    <addaction name="action_Open"/>
@@ -9804,6 +9806,30 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="toolTip">
     <string>add all checked records to Antibody candidate list</string>
+   </property>
+  </action>
+  <action name="actionpreviousChecked">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/up_checked.png</normaloff>:/PNG-Icons/up_checked.png</iconset>
+   </property>
+   <property name="text">
+    <string>previousChecked</string>
+   </property>
+   <property name="toolTip">
+    <string>Navigate to previous checked record</string>
+   </property>
+  </action>
+  <action name="actionnextChecked">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/down_checked.png</normaloff>:/PNG-Icons/down_checked.png</iconset>
+   </property>
+   <property name="text">
+    <string>nextChecked</string>
+   </property>
+   <property name="toolTip">
+    <string>Navigate to next checked record</string>
    </property>
   </action>
  </widget>

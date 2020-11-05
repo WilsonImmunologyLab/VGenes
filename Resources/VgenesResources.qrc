@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>down_checked.png</file>
+    <file>up_checked.png</file>
     <file>Export1.png</file>
     <file>Import1.png</file>
     <file>tree.png</file>
