@@ -6985,6 +6985,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.barcodeDislog.show()
 
 	@pyqtSlot()
+	def on_actionmatchHCLC_triggered(self):
+		cur_seq_name = self.ui.txtName.toPlainText()
+		SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + cur_seq_name + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		barcode = DataIn[0][1]
+		if barcode == 'Blank10' or barcode == '':
+			QMessageBox.warning(self, 'Warning', 'Your barcode information is empty!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		i = len(DataIn) - 1
+		if i == 0:
+			QMessageBox.warning(self, 'Warning', 'Did not find any Heavy/Light chain using same barcode!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+		else:
+			for record in DataIn:
+				Seqname = record[0]
+				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+				for record in found:
+					wasClicked = True
+					record.setCheckState(0, Qt.Checked)
+
+			self.match_tree_to_table()
+
+			QMessageBox.information(self, 'Information',
+			                    'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
+			                    QMessageBox.Ok,
+			                    QMessageBox.Ok)
+
+
+	@pyqtSlot()
 	def on_btnMatchHL_clicked(self):
 		cur_seq_name = self.ui.txtName.toPlainText()
 		SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + cur_seq_name + '"'
@@ -7014,7 +7050,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			self.match_tree_to_table()
 
-			QMessageBox.warning(self, 'Warning', 'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
+			QMessageBox.information(self, 'Information', 'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
 			                    QMessageBox.Ok,
 			                    QMessageBox.Ok)
 
@@ -13232,6 +13268,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			#self.ui.tableView.setFont(font)
 			# self.ui.tableView.resizeColumnsToContents()
+		elif self.ui.tabWidget.currentIndex() == 4:
+			FontIs = self.ui.txtProtein.currentFont()
+			FontSize = int(FontIs.pointSize())
+			if FontSize < 36:
+				FontSize += 1
+			FontIs.setPointSize(FontSize)
+			FontIs.setFamily('Courier New')
+			self.ui.txtProtein.setFont(FontIs)
+		else:
+			pass
 
 	@pyqtSlot()
 	def on_actionDecrease_font_size_triggered(self):
@@ -13266,6 +13312,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#self.ui.tableView.setFont(font)
 
 			# self.ui.tableView.resizeColumnsToContents()
+		elif self.ui.tabWidget.currentIndex() == 4:
+			FontIs = self.ui.txtProtein.currentFont()
+			FontSize = int(FontIs.pointSize())
+			if FontSize > 7:
+				FontSize -= 1
+			FontIs.setPointSize(FontSize)
+			FontIs.setFamily('Courier New')
+			self.ui.txtProtein.setFont(FontIs)
 
 	def on_spnAlignFont_valueChanged(self, value):
 		self.AlignFont()

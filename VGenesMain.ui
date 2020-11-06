@@ -873,7 +873,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -4029,14 +4029,14 @@
               </size>
              </property>
              <property name="toolTip">
-              <string>Make a copy of current DB</string>
+              <string>Match HC/LC for selected sequence</string>
              </property>
              <property name="text">
               <string>HC/LC</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/mAB.png</normaloff>:/PNG-Icons/mAB.png</iconset>
+               <normaloff>:/PNG-Icons/mAB_match.png</normaloff>:/PNG-Icons/mAB_match.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -9115,7 +9115,9 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionAlignment"/>
     <addaction name="actionFind_Clonal"/>
     <addaction name="actionCreateVDJdb"/>
+    <addaction name="actiontranslate"/>
     <addaction name="actionAnalyze_Isotypes"/>
+    <addaction name="actionaddABlist"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -9144,6 +9146,9 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionBottom"/>
     <addaction name="actionMove_Up"/>
     <addaction name="actionMove_Down"/>
+    <addaction name="separator"/>
+    <addaction name="actionpreviousChecked"/>
+    <addaction name="actionnextChecked"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_record"/>
     <addaction name="actionDuplicate_current"/>
@@ -9223,7 +9228,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionCut"/>
    <addaction name="actionPaste"/>
    <addaction name="separator"/>
-   <addaction name="actionIMGT"/>
+   <addaction name="actionmatchHCLC"/>
    <addaction name="separator"/>
    <addaction name="actionAnalyze_Mutations"/>
    <addaction name="actionFind_Clonal"/>
@@ -9773,7 +9778,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
    </property>
    <property name="text">
-    <string>Import Annotate</string>
+    <string>Import Annotatation</string>
    </property>
    <property name="toolTip">
     <string>Import Annotation from CSV</string>
@@ -9787,7 +9792,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actiontranslate">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/magic_wand.png</normaloff>:/PNG-Icons/magic_wand.png</iconset>
+     <normaloff>:/PNG-Icons/nt2aa.png</normaloff>:/PNG-Icons/nt2aa.png</iconset>
    </property>
    <property name="text">
     <string>translate</string>
@@ -9802,7 +9807,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/mAB.png</normaloff>:/PNG-Icons/mAB.png</iconset>
    </property>
    <property name="text">
-    <string>addABlist</string>
+    <string>Add to Antibody Candidate list</string>
    </property>
    <property name="toolTip">
     <string>add all checked records to Antibody candidate list</string>
@@ -9814,7 +9819,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/up_checked.png</normaloff>:/PNG-Icons/up_checked.png</iconset>
    </property>
    <property name="text">
-    <string>previousChecked</string>
+    <string>Previous Checked</string>
    </property>
    <property name="toolTip">
     <string>Navigate to previous checked record</string>
@@ -9826,10 +9831,22 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/down_checked.png</normaloff>:/PNG-Icons/down_checked.png</iconset>
    </property>
    <property name="text">
-    <string>nextChecked</string>
+    <string>Next Checked</string>
    </property>
    <property name="toolTip">
     <string>Navigate to next checked record</string>
+   </property>
+  </action>
+  <action name="actionmatchHCLC">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/mAB_match.png</normaloff>:/PNG-Icons/mAB_match.png</iconset>
+   </property>
+   <property name="text">
+    <string>matchHCLC</string>
+   </property>
+   <property name="toolTip">
+    <string>match HC or LC for selected sequence according to their barcodes</string>
    </property>
   </action>
  </widget>
