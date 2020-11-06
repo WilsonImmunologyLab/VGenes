@@ -6,7 +6,7 @@ __author__ = 'wilsonp'
 
 # must first switch to a directory containing both the database and the FASTA file
 # then use the subprocess command to run program and grab the output as a string
-import os, time, sys
+import os, time, sys, re
 import sqlite3 as db
 from PyQt5 import QtWidgets
 from multiprocessing.dummy import Pool as ThreadPool
@@ -205,10 +205,10 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	try:
 		start = time.time()
 		if species == 'Human':
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut = os.popen(BLASTCommandLine)
 		elif species == 'Mouse':
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut = os.popen(BLASTCommandLine)
 		end = time.time()
 		print('Run time for IgBlast: ' + str(end - start))
@@ -317,6 +317,7 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	D2end = 0
 	Jbeg = 0
 	Jend = 0
+	ORF = ""
 
 	current_seq = 0
 	totel_seq = len(Sequences)
@@ -383,7 +384,8 @@ def IgBLASTit(FASTAFile, datalist, signal):
 				IgBLASTAnalysis.append(GCDR3beg)
 				IgBLASTAnalysis.append(GCDR3end)
 				IgBLASTAnalysis.append('Blank6')
-				IgBLASTAnalysis.append('Blank7')
+				IgBLASTAnalysis.append(ORF)
+				ORF = ''
 				IgBLASTAnalysis.append('Blank8')
 				IgBLASTAnalysis.append('Blank9')
 				IgBLASTAnalysis.append('Blank10')
@@ -470,6 +472,24 @@ def IgBLASTit(FASTAFile, datalist, signal):
 					GrabAlignment = False
 					IgBLASTAnalysis.append(SeqAlignment)
 					AlignParts = []
+
+					# get ORF info from alignment
+					if ORF == "":
+						lines = SeqAlignment.split('\n')
+						line_num = 0
+						for line in lines:
+							match = re.match(r'^(\s+)<-+FR1', line)
+							if match:
+								num1 = len(match.group(1))
+								aa_line = lines[line_num + 1]
+								match1 = re.match(r'^\s+', aa_line)
+								num2 = len(match1.group())
+								ORF = num2 - num1 - 1
+								if ORF < 0:
+									ORF = 0
+								break
+							line_num += 1
+
 					AlignParts = ParseAlignment(SeqAlignment)
 					if AlignParts == 'None':
 						NotValid = True
@@ -1005,9 +1025,12 @@ def IgBLASTit(FASTAFile, datalist, signal):
 			file_handle.write(',' + str(current_seq) + '/' + str(totel_seq))
 			file_handle.close()
 
-			pct = int(current_seq*100/totel_seq)
-			label = 'Processing: ' + str(current_seq) + '/' + str(totel_seq)
-			signal.emit(pct, label)
+			if signal == False:
+				pass
+			else:
+				pct = int(current_seq*100/totel_seq)
+				label = 'Processing: ' + str(current_seq) + '/' + str(totel_seq)
+				signal.emit(pct, label)
 			#print('Current Progress: ' + progress)
 			current_seq += 1
 
@@ -1090,7 +1113,8 @@ def IgBLASTit(FASTAFile, datalist, signal):
 					IgBLASTAnalysis.append(GCDR3beg)
 					IgBLASTAnalysis.append(GCDR3end)
 					IgBLASTAnalysis.append('Blank6')
-					IgBLASTAnalysis.append('Blank7')
+					IgBLASTAnalysis.append(ORF)
+					ORF = ''
 					IgBLASTAnalysis.append('Blank8')
 					IgBLASTAnalysis.append('Blank9')
 					IgBLASTAnalysis.append('Blank10')
@@ -1905,8 +1929,10 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist, signal):
 						SeqOrient = AlignParts[7]
 						SeqBegin = AlignParts[8]
 						SeqAdjust = SeqBegin - 1
-						Vbeg = GVbeg + AdjustEnd
-						Vend = GVend + AdjustEnd
+						#Vbeg = GVbeg + AdjustEnd
+						#Vend = GVend + AdjustEnd
+						Vbeg = GVbeg
+						Vend = GVend
 
 						try:
 							if SeqBegin > Vbeg and int(FR1From) == SeqBegin:
@@ -3007,14 +3033,14 @@ def parseIgBlast(Files, datalist):
 def parseIMGT(Files, datalist):
 	pass
 
-
 def GetGLCDRs(Sequence, species):
 	import os
 
 
 	#todo change to app folder
 	try:
-		DBpathname = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'VDJGenes.db')
+		#DBpathname = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'VDJGenes.db')
+		DBpathname = os.path.join(working_prefix, 'Data', 'VDJGenes.db')
 
 
 		(dirname, filename) = os.path.split(DBpathname)
@@ -3036,8 +3062,8 @@ def GetGLCDRs(Sequence, species):
 	IgBLASTAnalysis = []
 
 
-	workingdir = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast')  #'/Applications/IgBlast/database'
-	workingfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'IgBlast', 'WorkingFile.nt') #'/Applications/IgBlast/database/WorkingFile.nt'
+	workingdir = os.path.join(working_prefix, 'IgBlast')  #'/Applications/IgBlast/database'
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt') #'/Applications/IgBlast/database/WorkingFile.nt'
 	os.chdir(workingdir)
 
 	Sequence = '>It\n' + Sequence + '\n'
