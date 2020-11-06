@@ -873,7 +873,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -3884,6 +3884,11 @@
              <item>
               <property name="text">
                <string>Sequence for GibsonClone</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Antibody Patent report</string>
               </property>
              </item>
             </widget>
@@ -9005,6 +9010,23 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QRadioButton" name="radioButtonNavigate">
             <property name="text">
              <string>Navigate to my selection</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonCheckHCLC">
+            <property name="toolTip">
+             <string>Check if there is any HC in candidate list has multiple LC or no LC</string>
+            </property>
+            <property name="text">
+             <string>Highlight un-paired HC/LC</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonClearHL">
+            <property name="text">
+             <string>Clear highlight</string>
             </property>
            </widget>
           </item>

@@ -4,8 +4,8 @@ import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
     setText
 from VGenesMain import ProgressBar
-from VGenesMain import GibsonDialog
-from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView, QTextEdit
+from VGenesMain import GibsonDialog, PatentDialog
+from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView, QTextEdit, QLineEdit
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5 import QtGui
 
@@ -1294,7 +1294,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
             return
         '''
     elif option == 'Custom report':
-        print('custom report generator')
+        pass
     elif option == 'Count AA mutations':
         selected_list = self.getTreeCheckedChild()
         selected_list = selected_list[3]
@@ -1519,7 +1519,79 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.myGibsonDialog.LogFileSignal.connect(self.displayLog)
         # show dialog
         self.myGibsonDialog.show()
+    elif option == 'Antibody Patent report':
+        if len(self.AntibodyCandidates) == 0:
+            Msg = 'Nothing in Antibody candidate list!'
+            self.ShowMessageBox([0, Msg])
+        else:
+            # check if all HC/LCs are correctly paired
+            if self.ui.tableWidgetHC.rowCount() != self.ui.tableWidgetLC.rowCount():
+                Msg = 'Number of HCs and LCs are not match!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                return
+            # fill HC data
+            HC_dict = {}
+            for index in range(self.ui.tableWidgetHC.rowCount()):
+                barcode = self.ui.tableWidgetHC.item(index, 8).text()
+                name = self.ui.tableWidgetHC.item(index, 0).text()
+                if barcode in HC_dict.keys():
+                    Msg = 'Multiple HCs shared same barcode!\n' + HC_dict[barcode] + ' and ' + name
+                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                    return
+                HC_dict[barcode] = name
+            # fill LC data
+            LC_dict = {}
+            for index in range(self.ui.tableWidgetLC.rowCount()):
+                barcode = self.ui.tableWidgetLC.item(index, 7).text()
+                name = self.ui.tableWidgetLC.item(index, 0).text()
+                if barcode in LC_dict.keys():
+                    Msg = 'Multiple LCs shared same barcode!\n' + LC_dict[barcode] + ' and ' + name
+                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                    return
+                LC_dict[barcode] = name
+            # make data
+            Paired_data = []
+            for barcode in HC_dict.keys():
+                if barcode in LC_dict.keys():
+                    Paired_data.append((barcode, HC_dict[barcode], LC_dict[barcode]))
+                else:
+                    Msg = 'A barcode can not find LC!\n' + barcode
+                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                    return
+            # open dialog
+            self.myPatentDialog = PatentDialog()
+            self.myPatentDialog.DBFilename = DBFilename
 
+            horizontalHeader = ['Antibody Name', 'Barcode', 'Heavy Chain', 'Light Chain']
+            num_row = len(Paired_data)
+            num_col = len(horizontalHeader)
+            self.myPatentDialog.ui.tableWidget.setRowCount(num_row)
+            self.myPatentDialog.ui.tableWidget.setColumnCount(num_col)
+            self.myPatentDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+            self.myPatentDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+            self.myPatentDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+            self.myPatentDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+            index = 0
+            for record in Paired_data:
+                cell_Text = QLineEdit()
+                cell_Text.setMinimumSize(250,20)
+                cell_Text.setText(record[1])
+                self.myPatentDialog.ui.tableWidget.setCellWidget(index, 0, cell_Text)
+
+                unit1 = QTableWidgetItem(record[0])
+                unit2 = QTableWidgetItem(record[1])
+                unit3 = QTableWidgetItem(record[2])
+                self.myPatentDialog.ui.tableWidget.setItem(index, 1, unit1)
+                self.myPatentDialog.ui.tableWidget.setItem(index, 2, unit2)
+                self.myPatentDialog.ui.tableWidget.setItem(index, 3, unit3)
+
+                index += 1
+            # disable edit
+            self.myPatentDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            # resize table
+            self.myPatentDialog.ui.tableWidget.resizeColumnsToContents()
+            self.myPatentDialog.ui.tableWidget.resizeRowsToContents()
+            self.myPatentDialog.show()
     print('done')
 
 

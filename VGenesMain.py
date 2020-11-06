@@ -78,6 +78,7 @@ from ui_table_dialog import Ui_TableDialog
 from ui_statcheck_dislog import Ui_StatCheckDialog
 from ui_translate_dialo import Ui_Translate_Dialog
 from ui_gibson_dialog import Ui_GibsonDialog
+from ui_patentdialog import Ui_PatentDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -306,6 +307,104 @@ def reName(ori_name, rep1, rep2, prefix):
 		my_name = prefix + '_' + my_name
 	return my_name
 
+class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
+
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		super(PatentDialog, self).__init__()
+		self.ui = Ui_PatentDialog()
+		self.ui.setupUi(self)
+
+		self.DBFilename = ""
+
+		self.ui.pushButtonConfirm.clicked.connect(self.accept)
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+	def accept(self):
+		# collect data and make sure all antibody names are non-redundant
+		Data = []
+		mAb_names = []
+		for index in range(self.ui.tableWidget.rowCount()):
+			mAb_name = self.ui.tableWidget.cellWidget(index, 0).text()
+			hc_name = self.ui.tableWidget.item(index, 2).text()
+			lc_name = self.ui.tableWidget.item(index, 3).text()
+			if mAb_name in mAb_names:
+				Msg = 'Redundant mAb name found!\n' + mAb_name
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			mAb_names.append(mAb_name)
+			Data.append((mAb_name, hc_name, lc_name))
+		# get out file
+		Pathname = saveFile(self.parent(), 'csv')
+		if Pathname == None:
+			return
+		# fetch sequenc information from DB for HC and LC
+		hc_list = [record[1] for record in Data]
+		lc_list = [record[2] for record in Data]
+		WHEREStatementHC = ' WHERE SeqName IN ("' + '","'.join(hc_list) + '")'
+		SQLStatementHC = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatementHC
+		WHEREStatementLC = ' WHERE SeqName IN ("' + '","'.join(lc_list) + '")'
+		SQLStatementLC = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatementLC
+		DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatementHC)
+		DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatementLC)
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		hc_fasta_file = os.path.join(temp_folder, time_stamp+'_HC.fasta')
+		lc_fasta_file = os.path.join(temp_folder, time_stamp+'_LC.fasta')
+		with open(hc_fasta_file, 'w') as currentFile:
+			for record in DataInHC:
+				currentFile.write('>' + record[0] + '\n')
+				currentFile.write(record[1] + '\n')
+		with open(lc_fasta_file, 'w') as currentFile:
+			for record in DataInLC:
+				currentFile.write('>' + record[0] + '\n')
+				currentFile.write(record[1] + '\n')
+
+		species = 'Human'
+		# run IgBlast
+		workingdir = os.path.join(working_prefix, 'IgBlast')
+		os.chdir(workingdir)
+		if species == 'Human':
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			IgBlastOut_HC = os.popen(BLASTCommandLine)
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query " + lc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			IgBlastOut_LC = os.popen(BLASTCommandLine)
+		elif species == 'Mouse':
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			IgBlastOut_HC = os.popen(BLASTCommandLine)
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			IgBlastOut_LC = os.popen(BLASTCommandLine)
+		
+		Final_data = []
+		index = -1
+		for HCLine in IgBlastOut_HC:
+			if index >= 0:
+				tmp = HCLine.split('\t')
+				ele = [Data[index][0]]
+				ele = ele + [tmp[11], tmp[13], tmp[22], tmp[36], tmp[40], tmp[46], tmp[34], tmp[38], tmp[42], tmp[44]]
+				Final_data.append(ele)
+			index += 1
+		index = -1
+		for LCLine in IgBlastOut_LC:
+			if index >= 0:
+				tmp = LCLine.split('\t')
+				Final_data[index] += [tmp[2], tmp[11], tmp[13], tmp[22], tmp[36], tmp[40], tmp[46], tmp[34], tmp[38], tmp[42], tmp[44]]
+			index += 1
+		
+		# output to file
+		with open(Pathname, 'w') as currentfile:
+			header = "mAb ID,HC_Sequence,HC_Seq_peptide,HC_V_region_peptide,HC CDR1_peptide,HC_CDR2_peptide," \
+			         "HC_CDR3_peptide,HC_FRW1_peptide,HC_FRW2_peptide,HC_FRW3_peptide,HC_FRW4_peptide,LC_Type," \
+			         "LC_Sequence,LC_Seq_peptide,LC_V_region_peptide,LC CDR1_peptide,LC_CDR2_peptide,LC_CDR3_peptide," \
+			         "LC_FRW1_peptide,LC_FRW2_peptide,LC_FRW3_peptide,LC_FRW4_peptide\n"
+			currentfile.write(header)
+			for record in Final_data:
+				line = ','.join(record) + '\n'
+				currentfile.write(line)
+
+		Msg = 'Report is saved as\n' + Pathname + '!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		self.close()
+		
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 	GibsonUpdateSelectionSignal = pyqtSignal(str)
 	LogFileSignal = pyqtSignal(str)
@@ -6402,6 +6501,52 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.initialHCLCTable()
 
+	def resizeUI(self):
+		size_w = self.size().width()
+		size_h = self.size().height()
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
+
+	@pyqtSlot()
+	def on_pushButtonCheckHCLC_clicked(self):
+		if self.ui.tableWidgetHC.rowCount() > 0:
+			self.ui.tableWidgetHC.clearSelection()
+			pass_sign = True
+			barcode_dict = {'barcode':0}
+			for index in range(self.ui.tableWidgetHC.rowCount()):
+				hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
+				if hc_barcode in barcode_dict.keys():
+					self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("red")))
+					pass_sign = False
+					if barcode_dict[hc_barcode] == -1:
+						pass
+					else:
+						self.ui.tableWidgetHC.item(barcode_dict[hc_barcode], 0).setForeground(QBrush(QColor("red")))
+						barcode_dict[hc_barcode] = -1
+				else:
+					barcode_dict[hc_barcode] = index
+				match_num = 0
+				for lc_index in range(self.ui.tableWidgetLC.rowCount()):
+					if hc_barcode == self.ui.tableWidgetLC.item(lc_index, 7).text():
+						match_num += 1
+				if match_num != 1:
+					self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("red")))
+					pass_sign = False
+		self.resizeUI()
+		if pass_sign == True:
+			Msg = 'All HCs and LCs are correctly paired!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+	@pyqtSlot()
+	def on_pushButtonClearHL_clicked(self):
+		for index in range(self.ui.tableWidgetHC.rowCount()):
+			self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("black")))
+		for index in range(self.ui.tableWidgetLC.rowCount()):
+			self.ui.tableWidgetLC.item(index, 0).setForeground(QBrush(QColor("black")))
+		self.resizeUI()
+
 	def deleteThis(self):
 		curTable = self.ui.tabWidget.focusWidget()
 		try:
@@ -6412,7 +6557,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				try:
 					self.AntibodyCandidates = self.AntibodyCandidates.remove(name)
 				except:
-					print('opps!')
+					print('opppppps!')
+				self.ui.tableWidgetHC.clearSelection()
+				self.ui.tableWidgetLC.clearSelection()
 		except:
 			pass
 
@@ -6448,6 +6595,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 							self.ui.tableWidgetLC.removeRow(index)
 							delete_sign = True
 							break
+				self.ui.tableWidgetHC.clearSelection()
+				self.ui.tableWidgetLC.clearSelection()
 		except:
 			pass
 		
@@ -6455,8 +6604,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		curTable = self.ui.tabWidget.focusWidget()
 		if curTable.columnCount() == 10:
 			barcode = curTable.item(row, 8).text()
+			self.ui.tableWidgetLC.clearSelection()
 		else:
 			barcode = curTable.item(row, 7).text()
+			self.ui.tableWidgetHC.clearSelection()
 
 		# color HC table
 		for index in range(self.ui.tableWidgetHC.rowCount()):
