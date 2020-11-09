@@ -1508,6 +1508,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.myGibsonDialog.ui.tableWidget.resizeRowsToContents()
         for index in range(num_row):
             self.myGibsonDialog.ui.tableWidget.setRowHeight(index, 90)
+        self.myGibsonDialog.ui.tableWidget.setColumnWidth(4, 600)
         # show sort indicator
         self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSortIndicatorShown(True)
         # connect sort indicator to slot function
