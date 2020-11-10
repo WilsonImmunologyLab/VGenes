@@ -422,6 +422,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		self.ui.pushButtonUp.clicked.connect(self.up)
 		self.ui.pushButtonDown.clicked.connect(self.down)
 		self.ui.pushButtonIgnore.clicked.connect(self.ignore)
+		self.ui.comboBox.currentTextChanged.connect(self.update)
 
 		self.previousRow = 0
 
@@ -439,6 +440,33 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 					self.ui.GibsonKEnd.setText(tmp[1])
 				elif tmp[0] == 'GibsonLend':
 					self.ui.GibsonLEnd.setText(tmp[1])
+
+	def update(self):
+		GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
+		if self.ui.comboBox.currentText() == 'Gibson AbVec':
+			GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
+		elif self.ui.comboBox.currentText() == 'HT-AbVec':
+			GibsonFile = os.path.join(working_prefix, 'Data', 'HtConnectors.txt')
+		elif self.ui.comboBox.currentText() == 'AbVec classic':
+			GibsonFile = os.path.join(working_prefix, 'Data', 'AbVecConnectors.txt')
+		try:
+			if os.path.isfile(GibsonFile):
+				f = open(GibsonFile, "r")
+				for line in f:
+					line = re.sub('\n','', line)
+					tmp = line.split(',')
+					if tmp[0] == 'GibsonStart':
+						self.ui.GibsonStart.setText(tmp[1])
+					elif tmp[0] == 'GibsonHend':
+						self.ui.GibsonHEnd.setText(tmp[1])
+					elif tmp[0] == 'GibsonKend':
+						self.ui.GibsonKEnd.setText(tmp[1])
+					elif tmp[0] == 'GibsonLend':
+						self.ui.GibsonLEnd.setText(tmp[1])
+		except:
+			Msg = 'Something wrong with your connector file!\n' + GibsonFile
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+			                    QMessageBox.Ok)
 
 	def ignore(self):
 		global FieldChanged
@@ -505,7 +533,7 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 
 		sender_widget = self.sender()
 		currentRow = sender_widget.rowindex
-		updatedVDJSeq = self.ui.tableWidget.cellWidget(currentRow,4).toPlainText()
+		updatedVDJSeq = self.ui.tableWidget.cellWidget(currentRow,4).toPlainText().upper()
 		updatedJend = updatedVDJSeq[-6:]
 		Genetype = self.ui.tableWidget.item(currentRow, 2).text()
 		checkRes = VReports.checkJend(Genetype, updatedJend)
@@ -557,6 +585,13 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 			                    QMessageBox.Ok)
 		else:
 			GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
+			if self.ui.comboBox.currentText() == 'Gibson AbVec':
+				GibsonFile = os.path.join(working_prefix, 'Data', 'GibsonConnectors.txt')
+			elif self.ui.comboBox.currentText() == 'HT-AbVec':
+				GibsonFile = os.path.join(working_prefix, 'Data', 'HtConnectors.txt')
+			elif self.ui.comboBox.currentText() == 'AbVec classic':
+				GibsonFile = os.path.join(working_prefix, 'Data', 'AbVecConnectors.txt')
+
 			with open(GibsonFile, 'w') as currentFile:
 				currentFile.write('GibsonStart' + ',' + self.ui.GibsonStart.text() + '\n')
 				currentFile.write('GibsonHend' + ',' + self.ui.GibsonHEnd.text() + '\n')

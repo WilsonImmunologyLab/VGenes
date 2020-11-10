@@ -1,0 +1,4 @@
+GibsonStart,gcaactggtgtacattcc
+GibsonHend,gcgtcgaccaagggcc
+GibsonKend,cgtacggtggcacagaaccggtgtccattcc
+GibsonLend,ggtcagcccaaggccaaccccactgtcactctgttcccgccctcgaggtggcacagaaccggtgtccattcc

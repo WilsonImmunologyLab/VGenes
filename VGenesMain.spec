@@ -27,6 +27,8 @@ added_files = [
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_raxml_tree.html','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_newick_tree.html','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/GibsonConnectors.txt','Data'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/HtConnectors.txt','Data'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Data/AbVecConnectors.txt','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_tree.html','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/VDJGenes.db','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/IgBlast/*','IgBlast'),
