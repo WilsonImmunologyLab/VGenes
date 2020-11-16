@@ -15750,7 +15750,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if New == True:
 				VGenesSQL.creatnewDB(filename)
 
-			Processed, answer, dup_msg = VGenesSQL.enterData(self, filename, IgBLASTAnalysis, answer3)
+			Processed, answer, dup_msg = VGenesSQL.enterData(self, filename, IgBLASTAnalysis, answer3, ErlogFile)
 
 			if dup_msg[0] == 'd':
 				dup_msg = "Find some duplicated sequence names! We did some midifications:\n" + dup_msg
