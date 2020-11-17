@@ -20765,9 +20765,9 @@ def AlignSequencesHTML(DataSet, template):
 			cur_strange = pattern.findall(NTseq)
 			cur_strange = list(set(cur_strange))
 			if len(cur_strange) > 0:
-				ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
+				ErrMsg = "Warning! We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
 				         '\nPlease remove those Unlawful nucleotide!'
-				return ErrMsg
+				#return ErrMsg
 
 			AAseq, ErMessage = VGenesSeq.Translator(NTseq, 0)
 			AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
@@ -20781,9 +20781,8 @@ def AlignSequencesHTML(DataSet, template):
 		try:
 			os.system(cmd)
 		except:
-			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
-			                    QMessageBox.Ok)
-			return
+			ErrMsg = 'Warning! Fail to run muscle! Check your muscle path!'
+			return ErrMsg
 
 	# read alignment file, make alignment NT and AA sequences
 	SeqName = ''
@@ -20832,9 +20831,8 @@ def AlignSequencesHTML(DataSet, template):
 					seq = all[key][0]
 					tester += seq[i]
 				except:
-					Msg = 'Find sequence error in ' + key + ', please check your sequence!'
-					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-					return
+					ErrMsg = 'Warning! Find sequence error in ' + key + ', please check your sequence!'
+					return ErrMsg
 
 			frequencies = [(c, tester.count(c)) for c in set(tester)]
 			Cnuc = max(frequencies, key=lambda x: x[1])[0]
@@ -20978,8 +20976,11 @@ def BuildNTalignment(aa, nt):
 			aa = aa[:i] + '*' + aa[i+1:]
 			pos = pos + 3
 		elif cur_aa == 'Z':
-			new_nt += nt[pos:] + '-'*(3 - len(nt[pos:]))
-			aa = aa[:i] + '~' + aa[i + 1:]
+			nt_add = nt[pos:] + '-'*(3 - len(nt[pos:]))
+			if len(nt_add) > 3:
+				nt_add = nt_add[0:3]
+			new_nt += nt_add
+			aa = aa[:i] + '~' + aa[i+1:]
 			pos = pos + 3
 		elif cur_aa == 'J':
 			new_nt += nt[pos:pos + 3]
