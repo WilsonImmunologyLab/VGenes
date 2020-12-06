@@ -1,1 +1,2 @@
-/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA5_N.fasta
+/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA5.fasta
+/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA7.fasta

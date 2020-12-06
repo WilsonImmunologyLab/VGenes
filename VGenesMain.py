@@ -9,6 +9,7 @@ import shutil
 import math
 import numpy
 import pandas as pd
+from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
@@ -15063,6 +15064,32 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"' # AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
 		foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		NumFound = len(foundRecs)
+
+		# if precise match fails, try fuzzy match
+		if NumFound == 0:
+			if self.ui.rdoLocal.isChecked():
+				# global RefreshSQL
+				if field1 == 'None' or field1 is None:
+					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%"'
+				elif field2 == 'None' or field2 is None:
+					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%" AND ' + field1 + ' = "' + field1Value + '"'
+				elif field3 == 'None' or field3 is None:
+					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '"'
+				else:
+					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '" AND ' + field3 + ' = "' + field3Value + '"'
+			else:
+				SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%"'
+
+			foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			NumFound = len(foundRecs)
+
+		# if still no match, quite with messages
+		if NumFound == 0:
+			Msg = 'No related records found in your current search range!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# if matched something...
 		answer = "No"
 		global wasClicked
 		wasClicked = False
