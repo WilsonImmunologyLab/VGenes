@@ -9,7 +9,7 @@ import shutil
 import math
 import numpy
 import pandas as pd
-from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+#from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
@@ -6493,6 +6493,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonDeleteAll.clicked.connect(self.deleteAll)
 		self.ui.tableWidgetHC.cellClicked.connect(self.matchSelection)
 		self.ui.tableWidgetLC.cellClicked.connect(self.matchSelection)
+		self.ui.txtFieldSearch.textChanged.connect(self.trimInfo)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -6536,6 +6537,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.HeatmapList = []
 
 		self.initialHCLCTable()
+
+	def trimInfo(self):
+		global DontFindTwice
+		if DontFindTwice == False:
+			cur_txt = self.ui.txtFieldSearch.text()
+			DontFindTwice = True
+			new_text = re.sub("\t.+", "", cur_txt)
+			self.ui.txtFieldSearch.setText(new_text)
+			DontFindTwice = False
 
 	def resizeUI(self):
 		size_w = self.size().width()

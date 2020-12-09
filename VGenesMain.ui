@@ -870,7 +870,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -1143,7 +1143,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1226</width>
+             <width>1211</width>
              <height>821</height>
             </rect>
            </property>
@@ -3922,8 +3922,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1210</width>
-             <height>750</height>
+             <width>1211</width>
+             <height>747</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_56">
@@ -5467,8 +5467,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1210</width>
-             <height>687</height>
+             <width>1226</width>
+             <height>695</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_57">
@@ -5848,7 +5848,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1210</width>
+             <width>1211</width>
              <height>911</height>
             </rect>
            </property>
@@ -9961,7 +9961,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>
