@@ -14562,9 +14562,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# get value list
 		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
 		if cur_field != '':
-			SQLStatement = 'SELECT DISTINCT(' + cur_field + ') FROM vgenesdb'
+			SQLStatement = 'SELECT DISTINCT(' + cur_field + '),COUNT(*) FROM vgenesdb GROUP BY ' + cur_field
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-			value_list = [row[0] for row in DataIn]
+			value_list = [str(row[0]) + "\t(Count=" + str(row[1]) + ")" for row in DataIn]
+			if len(value_list) > 10000:
+				Msg = 'This field have ' + str(len(value_list)) + ' distinct values, the auto complete function will be slow, please be patient!\n'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			# link value list to lineEdit
 			self.init_lineedit(self.ui.txtFieldSearch, value_list)
 
