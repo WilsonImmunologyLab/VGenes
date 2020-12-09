@@ -18,7 +18,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
@@ -14553,11 +14553,31 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.SpecSet()
 		if self.ui.cboFindField.currentText() == 'Subspecificity':
 			self.SubspecSet()
-
 		if self.ui.cboFindField.currentText() == 'Autoreactivity':
 			self.AutoRXSet()
 
 		self.ui.cboFindField1.setCurrentText(self.ui.cboFindField.currentText())
+
+		# update value list for auto complete
+		# get value list
+		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
+		if cur_field != '':
+			SQLStatement = 'SELECT DISTINCT(' + cur_field + ') FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			value_list = [row[0] for row in DataIn]
+			# link value list to lineEdit
+			self.init_lineedit(self.ui.txtFieldSearch, value_list)
+
+	def init_lineedit(self, lineEdit, items_list):
+		# add auto complete
+		self.completer = QCompleter(items_list)
+		self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+		# set match mode
+		self.completer.setFilterMode(Qt.MatchContains)
+		# set complete mode
+		self.completer.setCompletionMode(QCompleter.PopupCompletion)
+		# set QCompleter for lineEdit
+		lineEdit.setCompleter(self.completer)
 
 	def SpecSet(self):
 		global LastSelected
