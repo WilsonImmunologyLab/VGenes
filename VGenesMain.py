@@ -1513,7 +1513,7 @@ class Clone_thread(QThread):
         Vgenes.initial_Clone()
 
         sign = 0
-        Msg = 'Success!'
+        Msg = 'Successfully identified clones!'
         self.Clone_finish.emit([sign, Msg])
 
 class barcode_thread(QThread):
@@ -6545,6 +6545,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			DontFindTwice = True
 			new_text = re.sub("\t.+", "", cur_txt)
 			self.ui.txtFieldSearch.setText(new_text)
+			print("q")
 			DontFindTwice = False
 
 	def resizeUI(self):
@@ -6951,6 +6952,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.lineEditCloneCDR3len.clear()
 
 		# identify if clones exist
+		'''   # old code
 		SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		list1 = []
@@ -6972,6 +6974,28 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.listWidgetClone.addItems(list_unique)
 		msg = 'Total ' + str(len(list_unique)) + ' Clones identified'
 		self.ui.titleClone.setText(msg)
+		'''
+
+		SQLStatement = 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		clone_dict = {}
+		list_unique = []
+		for ele in DataIn:
+			clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
+			if clone_dict.__contains__(clone_name):
+				clone_dict[clone_name] += 1
+			else:
+				clone_dict[clone_name] = 1
+
+		for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
+			list_unique.append(key + '|Count=' + str(value))
+
+		list_unique.sort(key=lambda x: x[0])
+		self.ui.listWidgetClone.clear()
+		self.ui.listWidgetClone.addItems(list_unique)
+		msg = 'Total ' + str(len(list_unique)) + ' Clones identified'
+		self.ui.titleClone.setText(msg)
 
 		if DBFilename != '' and DBFilename != None and DBFilename != 'none':
 			fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
@@ -6989,9 +7013,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	def selectClone(self):
 		items = self.ui.listWidgetClone.selectedItems()
+		if len(items) == 0:
+			return
+
 		clone_id = ''
 		for item in items:
 			clone_id = item.text()
+
+		clone_id = clone_id.split('|')[1]
 		clone_id = re.sub('Clone','',clone_id)
 
 		SQLStatement = 'SELECT GeneType,V1,D1,J1,CDR3Length,SeqName FROM vgenesDB WHERE ClonalPool = "' + clone_id + '"'
@@ -8281,51 +8310,76 @@ class VGenesForm(QtWidgets.QMainWindow):
 				else:
 					stack = None
 
-				label_data = []
-				for element in DataIn:
-					label_data.append(element[0])
+				if self.ui.checkBoxYClone.isChecked():
+					labels = []
+					values = []
+					try:
+						for element in DataIn:
+							labels.append(element[0])
+							values.append(int(element[1]))
+					except:
+						QMessageBox.warning(self, 'Warning', 'Some values of your field2 are not numbers!',
+						                    QMessageBox.Ok, QMessageBox.Ok)
+						return
 
-				result = Counter(label_data)
-				labels = list(result.keys())
-				values = list(result.values())
-
-				data = {}
-				for element in DataIn:
-					if data.__contains__(element[1]):
-						data[element[1]] = data[element[1]] + [element[0]]
-					else:
-						data[element[1]] = [element[0]]
-
-				dic_keys = list(data.keys())
-
-				my_bar = Bar(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg')) \
-					.add_xaxis(labels) \
-					.set_global_opts(
-						title_opts=opts.TitleOpts(title=""),
-						legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
-						xaxis_opts=opts.AxisOpts(
-							name=field1,
-							name_location='center',
-							name_gap=30,
-						),
-						yaxis_opts=opts.AxisOpts(
-							name='Count',
-							name_location='center',
-							name_gap=30,
-						),
+					my_pyecharts = (
+						Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+							.add_xaxis(labels)
+							.add_yaxis(field2, values)
+							.set_global_opts(
+							title_opts=opts.TitleOpts(title=""),
+							legend_opts=opts.LegendOpts(
+								is_show=self.ui.checkBoxFigLegend.isChecked()
+							),
+						)
+							.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
 					)
+				else:
+					label_data = []
+					for element in DataIn:
+						label_data.append(element[0])
 
-				for group in dic_keys:
-					cur_data = data[group]
-					group_data = []
-					for ele in labels:
-						group_data.append(cur_data.count(ele))
-					my_bar.add_yaxis(group, group_data, stack=stack)
-				my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+					result = Counter(label_data)
+					labels = list(result.keys())
+					values = list(result.values())
 
-				my_pyecharts = (
-					my_bar
-				)
+					data = {}
+					for element in DataIn:
+						if data.__contains__(element[1]):
+							data[element[1]] = data[element[1]] + [element[0]]
+						else:
+							data[element[1]] = [element[0]]
+
+					dic_keys = list(data.keys())
+
+					my_bar = Bar(init_opts=opts.InitOpts(width=str(self.ui.HTMLviewClone.w)+"px", height=str(self.ui.HTMLviewClone.h)+"px", renderer='svg')) \
+						.add_xaxis(labels) \
+						.set_global_opts(
+							title_opts=opts.TitleOpts(title=""),
+							legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+							xaxis_opts=opts.AxisOpts(
+								name=field1,
+								name_location='center',
+								name_gap=30,
+							),
+							yaxis_opts=opts.AxisOpts(
+								name='Count',
+								name_location='center',
+								name_gap=30,
+							),
+						)
+
+					for group in dic_keys:
+						cur_data = data[group]
+						group_data = []
+						for ele in labels:
+							group_data.append(cur_data.count(ele))
+						my_bar.add_yaxis(group, group_data, stack=stack)
+					my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+
+					my_pyecharts = (
+						my_bar
+					)
 			else:
 				data = []
 				for element in DataIn:
@@ -8738,73 +8792,108 @@ class VGenesForm(QtWidgets.QMainWindow):
 					else:
 						stack = None
 
-					label_data = []
-					for element in DataIn:
-						label_data.append(element[0])
+					if self.ui.checkBoxY.isChecked():
+						labels = []
+						values = []
+						try:
+							for element in DataIn:
+								labels.append(element[0])
+								values.append(int(element[1]))
+						except:
+							QMessageBox.warning(self, 'Warning', 'Some values of your field2 are not numbers!',
+							                    QMessageBox.Ok, QMessageBox.Ok)
+							return
 
-					result = Counter(label_data)
-					labels = list(result.keys())
-					values = list(result.values())
+						colors = sns.color_palette("hls", len(values))
 
-					data = {}
-					for element in DataIn:
-						if data.__contains__(element[1]):
-							data[element[1]] = data[element[1]] + [element[0]]
+						font_size = 30 / len(labels)
+						if font_size > 8:
+							font_size = 8
+						elif font_size < 4:
+							font_size = 4
 						else:
-							data[element[1]] = [element[0]]
+							font_size = int(font_size)
 
-					dic_keys = list(data.keys())
+						col_num = int(len(labels) / 25)
+						if col_num == 0:
+							col_num = 1
 
-					# for each sub group
-					font_size = 80 / len(dic_keys)
-					if font_size > 8:
-						font_size = 8
-					elif font_size < 4:
-						font_size = 4
+						self.ui.figure.clf()
+						# self.ui.figure.ax.remove()
+						self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.15, 0.8, 0.8])
+						self.ui.figure.ax.bar(labels, values, color=colors)
+						self.ui.figure.ax.set_xticklabels(labels, rotation=-90)
+						self.ui.figure.ax.tick_params(labelsize=5)
+						self.ui.F.draw()
+
 					else:
-						font_size = int(font_size)
+						label_data = []
+						for element in DataIn:
+							label_data.append(element[0])
 
-					col_num = int(len(labels) / 15)
-					if col_num == 0:
-						col_num = 1
+						result = Counter(label_data)
+						labels = list(result.keys())
+						values = list(result.values())
 
-					lab_size = 30/len(labels)
-					if lab_size > 8:
-						lab_size = 8
-					elif lab_size < 4:
-						lab_size = 4
-					else:
-						lab_size = int(lab_size)
+						data = {}
+						for element in DataIn:
+							if data.__contains__(element[1]):
+								data[element[1]] = data[element[1]] + [element[0]]
+							else:
+								data[element[1]] = [element[0]]
 
-					self.ui.figure.clf()
-					# self.ui.figure.ax.remove()
-					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-					x = numpy.arange(len(labels))
-					if stack == None:
-						width = 0.9 / len(dic_keys)
-						i = 0
-						for sub_label in dic_keys:
-							sub_data = []
-							for label in labels:
-								sub_data.append(data[sub_label].count(label))
-							self.ui.figure.ax.bar(x - width*(len(dic_keys)-1)/2 + i*width, sub_data, width, label=sub_label)
-							i += 1
-					else:
-						width = 0.8
-						bottom_list = [0] * len(labels)
-						for sub_label in dic_keys:
-							sub_data = []
-							for label in labels:
-								sub_data.append(data[sub_label].count(label))
-							self.ui.figure.ax.bar(x , sub_data, width, bottom=bottom_list, label=sub_label)
-							for i in range(len(sub_data)):
-								bottom_list[i] = bottom_list[i] + sub_data[i]
-					self.ui.figure.ax.legend(prop={'size': font_size}, ncol = col_num)
-					self.ui.figure.ax.set_xticks(x)
-					self.ui.figure.ax.set_xticklabels(labels)
-					self.ui.figure.ax.tick_params(labelsize=lab_size)
-					self.ui.figure.ax.set_ylabel('Count')
-					self.ui.F.draw()
+						dic_keys = list(data.keys())
+
+						# for each sub group
+						font_size = 80 / len(dic_keys)
+						if font_size > 8:
+							font_size = 8
+						elif font_size < 4:
+							font_size = 4
+						else:
+							font_size = int(font_size)
+
+						col_num = int(len(labels) / 15)
+						if col_num == 0:
+							col_num = 1
+
+						lab_size = 30/len(labels)
+						if lab_size > 8:
+							lab_size = 8
+						elif lab_size < 4:
+							lab_size = 4
+						else:
+							lab_size = int(lab_size)
+
+						self.ui.figure.clf()
+						# self.ui.figure.ax.remove()
+						self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+						x = numpy.arange(len(labels))
+						if stack == None:
+							width = 0.9 / len(dic_keys)
+							i = 0
+							for sub_label in dic_keys:
+								sub_data = []
+								for label in labels:
+									sub_data.append(data[sub_label].count(label))
+								self.ui.figure.ax.bar(x - width*(len(dic_keys)-1)/2 + i*width, sub_data, width, label=sub_label)
+								i += 1
+						else:
+							width = 0.8
+							bottom_list = [0] * len(labels)
+							for sub_label in dic_keys:
+								sub_data = []
+								for label in labels:
+									sub_data.append(data[sub_label].count(label))
+								self.ui.figure.ax.bar(x , sub_data, width, bottom=bottom_list, label=sub_label)
+								for i in range(len(sub_data)):
+									bottom_list[i] = bottom_list[i] + sub_data[i]
+						self.ui.figure.ax.legend(prop={'size': font_size}, ncol = col_num)
+						self.ui.figure.ax.set_xticks(x)
+						self.ui.figure.ax.set_xticklabels(labels)
+						self.ui.figure.ax.tick_params(labelsize=lab_size)
+						self.ui.figure.ax.set_ylabel('Count')
+						self.ui.F.draw()
 				else:
 					data = []
 					for element in DataIn:
@@ -8849,43 +8938,67 @@ class VGenesForm(QtWidgets.QMainWindow):
 					labels = list(result.keys())
 					values = list(result.values())
 
-					data = {}
-					for element in DataIn:
-						if data.__contains__(element[1]):
-							data[element[1]] = data[element[1]] + [element[0]]
-						else:
-							data[element[1]] = [element[0]]
+					if self.ui.checkBoxY.isChecked():
+						labels = []
+						values = []
+						try:
+							for element in DataIn:
+								labels.append(element[0])
+								values.append(int(element[1]))
+						except:
+							QMessageBox.warning(self, 'Warning', 'Some values of your field2 are not numbers!',
+							                    QMessageBox.Ok, QMessageBox.Ok)
+							return
 
-					dic_keys = list(data.keys())
-
-					my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
-						.add_xaxis(labels)\
-						.set_global_opts(
-							title_opts=opts.TitleOpts(title=""),
-							legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
-							xaxis_opts=opts.AxisOpts(
-								name=field1,
-								name_location='center',
-								name_gap=30,
-							),
-							yaxis_opts=opts.AxisOpts(
-								name='Count',
-								name_location='center',
-								name_gap=30,
-							),
+						my_pyecharts = (
+							Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+								.add_xaxis(labels)
+								.add_yaxis(field2, values)
+								.set_global_opts(
+								title_opts=opts.TitleOpts(title=""),
+								legend_opts=opts.LegendOpts(
+									is_show=self.ui.checkBoxFigLegend.isChecked()
+								),
+							)
+								.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
 						)
+					else:
+						data = {}
+						for element in DataIn:
+							if data.__contains__(element[1]):
+								data[element[1]] = data[element[1]] + [element[0]]
+							else:
+								data[element[1]] = [element[0]]
+						dic_keys = list(data.keys())
 
-					for group in dic_keys:
-						cur_data = data[group]
-						group_data = []
-						for ele in labels:
-							group_data.append(cur_data.count(ele))
-						my_bar.add_yaxis(group, group_data,stack=stack)
-					my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+						my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+							.add_xaxis(labels)\
+							.set_global_opts(
+								title_opts=opts.TitleOpts(title=""),
+								legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+								xaxis_opts=opts.AxisOpts(
+									name=field1,
+									name_location='center',
+									name_gap=30,
+								),
+								yaxis_opts=opts.AxisOpts(
+									name='Count',
+									name_location='center',
+									name_gap=30,
+								),
+							)
 
-					my_pyecharts = (
-						my_bar
-					)
+						for group in dic_keys:
+							cur_data = data[group]
+							group_data = []
+							for ele in labels:
+								group_data.append(cur_data.count(ele))
+							my_bar.add_yaxis(group, group_data,stack=stack)
+						my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+
+						my_pyecharts = (
+							my_bar
+						)
 				else:
 					data = []
 					for element in DataIn:
@@ -12992,6 +13105,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				VGenesSQL.creatnewDB(DBFilename)
 			self.UpdateRecentList(DBFilename, True)
 		if backup == True:
+			print('Save backup!')
 			self.SaveBackup()
 
 	@pyqtSlot()
@@ -13349,7 +13463,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			self.UpdateRecentList(DBFilename, True)
 			if GetName == True:
-				self.SaveBackup
+				self.SaveBackup()
 		else:
 			self.hide()
 			#self.ApplicationStarted()
@@ -15708,14 +15822,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def SaveBackup(self):
-
-		import shutil
 		Backfilename = os.path.join(working_prefix, 'BackUP.vdb')
 		global DBFilename
 
 		try:
 			if DBFilename != None:
-				shutil.copy(DBFilename, Backfilename)
+				#shutil.copy(DBFilename, Backfilename)
+				print('Bcak up current DB!')
+				shutil.copyfile(DBFilename, Backfilename)
 		except:
 			return
 

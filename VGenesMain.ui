@@ -7168,7 +7168,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>1</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -7212,19 +7212,6 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>Bar Chart</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_30">
-            <item row="0" column="6">
-             <spacer name="horizontalSpacer_11">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>40</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
-            </item>
             <item row="0" column="4">
              <widget class="QComboBox" name="comboBoxCol2">
               <property name="minimumSize">
@@ -7232,6 +7219,13 @@ If the J-end is off the J gene end may need adjusted</string>
                 <width>200</width>
                 <height>0</height>
                </size>
+              </property>
+             </widget>
+            </item>
+            <item row="0" column="0">
+             <widget class="QLabel" name="label_29">
+              <property name="text">
+               <string>Select Field 1:</string>
               </property>
              </widget>
             </item>
@@ -7258,6 +7252,19 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
+            <item row="0" column="6">
+             <spacer name="horizontalSpacer_11">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
             <item row="0" column="3">
              <widget class="QLabel" name="label_30">
               <property name="text">
@@ -7265,10 +7272,10 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label_29">
+            <item row="1" column="5">
+             <widget class="QCheckBox" name="checkBoxY">
               <property name="text">
-               <string>Select Field 1:</string>
+               <string>Use value of field2 as Y</string>
               </property>
              </widget>
             </item>
@@ -8299,7 +8306,7 @@ If the J-end is off the J gene end may need adjusted</string>
         <string>Clones</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_47">
-        <item row="0" column="0" colspan="2">
+        <item row="0" column="0" colspan="3">
          <widget class="QFrame" name="frame_19">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
@@ -8352,53 +8359,7 @@ If the J-end is off the J gene end may need adjusted</string>
           </layout>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QFrame" name="frame_20">
-          <property name="minimumSize">
-           <size>
-            <width>150</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>200</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
-          </property>
-          <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
-          </property>
-          <layout class="QGridLayout" name="gridLayout_46">
-           <item row="1" column="0">
-            <widget class="QListWidget" name="listWidgetClone">
-             <property name="maximumSize">
-              <size>
-               <width>140</width>
-               <height>16777215</height>
-              </size>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_62">
-             <property name="font">
-              <font>
-               <pointsize>15</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Clones:</string>
-             </property>
-            </widget>
-           </item>
-          </layout>
-         </widget>
-        </item>
-        <item row="1" column="1">
+        <item row="1" column="2">
          <widget class="QFrame" name="frame_21">
           <property name="frameShape">
            <enum>QFrame::StyledPanel</enum>
@@ -8560,7 +8521,7 @@ If the J-end is off the J gene end may need adjusted</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>2</number>
+                 <number>1</number>
                 </property>
                 <widget class="QWidget" name="tab_8">
                  <attribute name="title">
@@ -8610,13 +8571,6 @@ If the J-end is off the J gene end may need adjusted</string>
                   <string>Bar Chart</string>
                  </attribute>
                  <layout class="QGridLayout" name="gridLayout_49">
-                  <item row="0" column="0">
-                   <widget class="QLabel" name="label_71">
-                    <property name="text">
-                     <string>Select Field 1:</string>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="0" column="1">
                    <widget class="QLabel" name="label_72">
                     <property name="text">
@@ -8624,8 +8578,8 @@ If the J-end is off the J gene end may need adjusted</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="0">
-                   <widget class="QComboBox" name="comboBoxCol1Clone">
+                  <item row="1" column="1">
+                   <widget class="QComboBox" name="comboBoxCol2Clone">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -8634,8 +8588,8 @@ If the J-end is off the J gene end may need adjusted</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="1" column="1">
-                   <widget class="QComboBox" name="comboBoxCol2Clone">
+                  <item row="1" column="0">
+                   <widget class="QComboBox" name="comboBoxCol1Clone">
                     <property name="minimumSize">
                      <size>
                       <width>0</width>
@@ -8657,6 +8611,20 @@ If the J-end is off the J gene end may need adjusted</string>
                     </property>
                     <property name="checked">
                      <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_71">
+                    <property name="text">
+                     <string>Select Field 1:</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="2" column="2">
+                   <widget class="QCheckBox" name="checkBoxYClone">
+                    <property name="text">
+                     <string>Field2 = Y</string>
                     </property>
                    </widget>
                   </item>
@@ -8813,6 +8781,16 @@ If the J-end is off the J gene end may need adjusted</string>
             </widget>
            </item>
           </layout>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QListWidget" name="listWidgetClone">
+          <property name="maximumSize">
+           <size>
+            <width>200</width>
+            <height>16777215</height>
+           </size>
+          </property>
          </widget>
         </item>
        </layout>
