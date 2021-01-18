@@ -1,2 +1,1 @@
-/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA5.fasta
-/Users/leil/Documents/Projects/VGene/TestData/Fasta/HA7.fasta
+/Users/leil/Documents/Projects/scRNAseq/SiRI/vdj/R478910/consensus.fasta

@@ -6602,7 +6602,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				name = curTable.item(row, 0).text()
 				curTable.removeRow(row)
 				try:
-					self.AntibodyCandidates = self.AntibodyCandidates.remove(name)
+					self.AntibodyCandidates.remove(name)
 				except:
 					print('opppppps!')
 				self.ui.tableWidgetHC.clearSelection()
@@ -6631,6 +6631,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 					for index in range(self.ui.tableWidgetHC.rowCount()):
 						if barcode == self.ui.tableWidgetHC.item(index, 8).text():
 							self.ui.tableWidgetHC.removeRow(index)
+							name = self.ui.tableWidgetHC.item(row, 0).text()
+							try:
+								self.AntibodyCandidates.remove(name)
+							except:
+								print('opppppps!')
 							delete_sign = True
 							break
 				# delete LC
@@ -6640,6 +6645,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 					for index in range(self.ui.tableWidgetLC.rowCount()):
 						if barcode == self.ui.tableWidgetLC.item(index, 7).text():
 							self.ui.tableWidgetLC.removeRow(index)
+							name = self.ui.tableWidgetLC.item(row, 0).text()
+							try:
+								self.AntibodyCandidates.remove(name)
+							except:
+								print('opppppps!')
 							delete_sign = True
 							break
 				self.ui.tableWidgetHC.clearSelection()
