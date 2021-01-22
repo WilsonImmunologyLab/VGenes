@@ -248,10 +248,6 @@ def informationMessage(self, statement, buttons):
 
     reply = QtWidgets.QMessageBox.information(self, "QMessageBox.information()", statement, type)
 
-
-
-
-
     if reply == QtWidgets.QMessageBox.Yes:
         return 'Yes'
     elif reply == QtWidgets.QMessageBox.No:
@@ -265,7 +261,7 @@ def informationMessage(self, statement, buttons):
 def getItemDial(self, queryIs, items):
     # dialogue to generate combo box, OK, cancel
 
-    item, ok = QtWidgets.QInputDialog.getItem(self, "QInputDialog.getItem()",
+    item, ok = QtWidgets.QInputDialog.getItem(self, "Choose Info",
             queryIs, items, 0, False)
     if ok and item:
         return item

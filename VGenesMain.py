@@ -65,7 +65,7 @@ from_table = False
 import csv
 import copy
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
-	setText, openfastq
+	setText, openfastq, getItemDial
 from ui_VGenesStartUpDialogue import Ui_VGenesStartUpDialog
 from ui_import_data_dialog import Ui_ImportDataDialog
 from ui_VGenesTextEdit import ui_TextEditor
@@ -8242,6 +8242,63 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.EditLock.setIcon(lock_icon)
 			self.ui.EditLock.setText('Edit locked')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+
+	@pyqtSlot()
+	def on_actionIdentifyPublicClone_triggered(self):
+		SQLStatement = 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"'
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		if len(DataIn) > 1:
+			QueryIS = 'Please choose field that contains sample/subject/batch information:'
+			Fields = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+			fieldName = getItemDial(self, QueryIS, Fields)
+			fieldName = re.sub('\(.+', '', fieldName)
+
+			SQLStatement = 'SELECT GeneType,ClonalPool,' + fieldName + ' FROM vgenesDB WHERE ClonalPool <> "0" ORDER BY ClonalPool'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if len(DataIn) > 1:
+				clone_dict = {}
+				clone_public = {}
+				list_unique = []
+				for ele in DataIn:
+					clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
+					if clone_dict.__contains__(clone_name):
+						clone_dict[clone_name] += 1
+					else:
+						clone_dict[clone_name] = 1
+
+					if clone_public.__contains__(clone_name):
+						if clone_public[clone_name] != ele[2]:
+							clone_public[clone_name] = 'public'
+					else:
+						clone_public[clone_name] = ele[2]
+
+				for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
+					list_unique.append(key)
+
+				list_unique.sort(key=lambda x: x[0])
+				num_public = 0
+				self.ui.listWidgetClone.clear()
+				for clone_item in list_unique:
+					clone_text = clone_item + '|Num of seq: ' + str(clone_dict[clone_item])
+					self.ui.listWidgetClone.addItem(clone_text)
+					if clone_public[clone_item] == "public":
+						index = self.ui.listWidgetClone.count() - 1
+						self.ui.listWidgetClone.item(index).setForeground(QColor('red'))
+						self.ui.listWidgetClone.item(index).setBackground(QColor('#e6d933'))
+						num_public += 1
+
+				Msg = 'Total ' + str(num_public) + ' public clones found! We highlighted them in red!'
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+		else:
+			Msg = 'Did not find any clone in your dataset! Please identify clone first (Tools -> Find Clones)!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+	@pyqtSlot()
+	def on_pushButtonPublicClone_clicked(self):
+		print('Find public clone')
+		self.on_actionIdentifyPublicClone_triggered()
 
 	def GenerateFigureClone(self):
 		msg = 'h:' + str(self.ui.HTMLviewClone.h) + ',w:' +str(self.ui.HTMLviewClone.w)

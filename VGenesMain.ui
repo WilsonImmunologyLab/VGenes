@@ -7168,7 +7168,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>1</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -8315,7 +8315,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_45">
-           <item row="0" column="0">
+           <item row="0" column="1">
             <widget class="QLabel" name="titleClone">
              <property name="font">
               <font>
@@ -8330,7 +8330,7 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
+           <item row="0" column="2">
             <widget class="QPushButton" name="RefreshClone">
              <property name="maximumSize">
               <size>
@@ -8344,6 +8344,32 @@ If the J-end is off the J gene end may need adjusted</string>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>25</width>
+               <height>25</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QPushButton" name="pushButtonPublicClone">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Find Public</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -8521,7 +8547,7 @@ If the J-end is off the J gene end may need adjusted</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>1</number>
+                 <number>0</number>
                 </property>
                 <widget class="QWidget" name="tab_8">
                  <attribute name="title">
@@ -8785,6 +8811,12 @@ If the J-end is off the J gene end may need adjusted</string>
         </item>
         <item row="1" column="1">
          <widget class="QListWidget" name="listWidgetClone">
+          <property name="minimumSize">
+           <size>
+            <width>120</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="maximumSize">
            <size>
             <width>200</width>
@@ -9131,6 +9163,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionMultiple_Alignement"/>
     <addaction name="actionAlignment"/>
     <addaction name="actionFind_Clonal"/>
+    <addaction name="actionIdentifyPublicClone"/>
     <addaction name="actionCreateVDJdb"/>
     <addaction name="actiontranslate"/>
     <addaction name="actionAnalyze_Isotypes"/>
@@ -9864,6 +9897,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="toolTip">
     <string>match HC or LC for selected sequence according to their barcodes</string>
+   </property>
+  </action>
+  <action name="actionIdentifyPublicClone">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
+   </property>
+   <property name="text">
+    <string>IdentifyPublicClone</string>
    </property>
   </action>
  </widget>
