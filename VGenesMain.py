@@ -6468,7 +6468,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxAll.stateChanged.connect(self.checkAll)
 		self.ui.checkBoxAll1.stateChanged.connect(self.checkAll1)
 		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
-		self.ui.pushButtonRefresh.clicked.connect(self.load_table)
+		self.ui.pushButtonRefresh.clicked.connect(self.refreshDB)
 		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
 		self.ui.pushButtonAlter.clicked.connect(self.openAlter)
 		self.ui.pushButtonTable.clicked.connect(self.openTableDialog)
@@ -7060,6 +7060,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def refreshDB(self):
+		if self.ui.SeqTable.rowCount() == 0:
+			return
+
 		self.load_table()
 
 		# update combox
@@ -15423,6 +15426,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.load_table()
 					self.match_tree_to_table()
 					self.tree_to_table_selection()
+			else:
+				self.load_table()
+				self.match_tree_to_table()
+				self.tree_to_table_selection()
 
 	@pyqtSlot()
 	def on_StatUpdate_clicked(self):
