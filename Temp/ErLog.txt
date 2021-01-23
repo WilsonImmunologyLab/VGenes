@@ -1,0 +1,78 @@
+Running finished!
+
+These records have paired HC/LC:
+For R125_clonetype10_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype110_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype111_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype117_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype120_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype122_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype125_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype127_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype128_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype129_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype12_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype131_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype132_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype133_H2, find 2Heavy/Light chain using same barcode!
+For R125_clonetype134_H1, find 3Heavy/Light chain using same barcode!
+For R125_clonetype134_H2, find 3Heavy/Light chain using same barcode!
+For R125_clonetype135_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype136_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype137_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype149_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype150_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype151_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype152_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype153_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype154_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype156_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype159_H3, find 2Heavy/Light chain using same barcode!
+For R125_clonetype15_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype160_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype161_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype162_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype164_H1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype167_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype16_H2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype10_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype110_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype111_L2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype117_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype120_L2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype122_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype125_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype127_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype128_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype129_K2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype12_L2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype131_L2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype132_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype133_K1, find 2Heavy/Light chain using same barcode!
+For R125_clonetype133_L3, find 2Heavy/Light chain using same barcode!
+For R125_clonetype134_L3, find 3Heavy/Light chain using same barcode!
+For R125_clonetype134_L4, find 3Heavy/Light chain using same barcode!
+For R125_clonetype135_K2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype136_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype137_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype149_L2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype150_L2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype151_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype152_K2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype153_K2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype154_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype156_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype159_K1, find 2Heavy/Light chain using same barcode!
+For R125_clonetype159_L2, find 2Heavy/Light chain using same barcode!
+For R125_clonetype15_K1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype160_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype161_K2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype162_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype164_K2, find 1Heavy/Light chain using same barcode!
+For R125_clonetype167_L1, find 1Heavy/Light chain using same barcode!
+For R125_clonetype16_L1, find 1Heavy/Light chain using same barcode!
+
+These records do not have barcode information:
+
+These records do not have any paired HC/LC:
+For R125_clonetype155_H1, did not find any Heavy/Light chain using same barcode!
