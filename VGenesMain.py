@@ -15111,11 +15111,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if currentitemIs:
 			self.findTreeItem(currentitemIs)
 
-	@pyqtSlot()
-	def on_btnCopyRecords_clicked(self):
 
-		New = False
-		self.MoveRecords(New)
 
 	@pyqtSlot()
 	def on_pushButtonSimilar_clicked(self):
@@ -15960,9 +15956,36 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                        QMessageBox.Ok)
 
 	@pyqtSlot()
-	def on_btnExtractRecords_clicked(self):
-		New = True
+	def on_btnCopyRecords_clicked(self):
+
+		New = False
 		self.MoveRecords(New)
+
+
+	@pyqtSlot()
+	def on_btnExtractRecords_clicked(self):
+		global DBFilename
+		global temp_folder
+
+		#New = True
+		#self.MoveRecords(New)
+		checkedItems = self.getTreeCheckedChild()
+		checkedItems = checkedItems[3]
+		dump_sql_file = VGenesSQL.DumpDB(DBFilename, temp_folder, checkedItems)
+
+		filename = saveFile(self, 'db')
+		SuccessMsg = VGenesSQL.ImportDB(filename, dump_sql_file)
+		if SuccessMsg == False:
+			Msg = 'Something wrong when import your selected records into new DB!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+			                        QMessageBox.Ok)
+
+		msg = 'Open ' + filename + '?'
+		buttons = 'YN'
+		answer = questionMessage(self, msg, buttons)
+		if answer == 'Yes':
+			DBFilename = filename
+			self.GOOpen(False)
 
 	@pyqtSlot()
 	def on_action_Help_triggered(self):

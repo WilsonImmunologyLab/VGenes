@@ -286,7 +286,6 @@ def checkFieldTable(DBpathname):
 
     conn.close()
 
-
 def CopyDatatoDB2(SQLSELECT, DBpathname, DB2path):
     # (dirname, filename) = os.path.split(DBpathname)
     conn = db.connect(DBpathname)
@@ -310,7 +309,6 @@ def CopyDatatoDB2(SQLSELECT, DBpathname, DB2path):
     except:
 
         print(SQLStatement + ', '+ SQLStatement2 + ', '+ SQLStatement3)
-
 
 def UpdateMulti(SQLCommand, DBpathname):
     (dirname, filename) = os.path.split(DBpathname)
@@ -336,6 +334,7 @@ def UpdateMulti(SQLCommand, DBpathname):
 
     conn.commit()
     conn.close
+
 def UpdateField(ID, Value, Field, DBpathname):
     (dirname, filename) = os.path.split(DBpathname)
 
@@ -553,6 +552,43 @@ def CreateAnalysisDB(FileName, DBpathname):
 
     conn.commit()
     conn.close()
+
+def DumpDB(DBpathname, tmp_path, recordNames):
+    import time
+    import re
+
+    conn = db.connect(DBpathname)
+    time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+    file_path = os.path.join(tmp_path, time_stamp + '_dump.sql')
+
+    if len(recordNames) == 0:
+        with open(file_path, 'w') as f:
+            for line in conn.iterdump():
+                f.write('%s\n' % line)
+    else:
+        with open(file_path, 'w') as f:
+            for line in conn.iterdump():
+                if line.startswith('INSERT INTO "vgenesDB"'):
+                    match = re.findall(r"VALUES\(\'([^\']+)", line)
+                    if match[0] in recordNames:
+                        f.write('%s\n' % line)
+                else:
+                    f.write('%s\n' % line)
+
+    conn.close()
+    return file_path
+
+def ImportDB(DBpathname, SQLfile):
+    try:
+        conn = db.connect(DBpathname)
+        cur = conn.cursor()
+        SQL_f = open(SQLfile, 'r')
+        SQL_str = SQL_f.read()
+        cur.executescript(SQL_str)
+        conn.close()
+        return True
+    except:
+        return False
 
 def RunAnalysisSQL(DBpathname):
     # returns a dictionary with seqname as key and all other fileds  as a list as data
