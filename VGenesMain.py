@@ -7229,6 +7229,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		checkedItems = self.getTreeCheckedChild()
 		checkedItems = checkedItems[3]
+		checkedItemsAll = checkedItems.copy()
 		# if users checked any records, will search paired HC/LC for all checked records
 		if len(checkedItems) > 0:
 			ErrMsgType1 = ''
@@ -7252,14 +7253,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 						ErrMsgType3 += "For " + item + ", find " + str(i) +  "Heavy/Light chain using same barcode!\n"
 						for record in DataIn:
 							Seqname = record[0]
-							if Seqname in checkedItems:
+							if Seqname in checkedItemsAll:
 								continue
 							else:
 								found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
 								for record in found:
 									wasClicked = True
 									record.setCheckState(0, Qt.Checked)
-								checkedItems.append(Seqname)
+								checkedItemsAll.append(Seqname)
 
 			self.match_tree_to_table()
 
