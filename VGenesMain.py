@@ -7060,6 +7060,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def refreshDB(self):
+		global MoveNotChange
+		MoveNotChange = True
 		if self.ui.SeqTable.rowCount() == 0:
 			return
 
@@ -7109,7 +7111,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			index = FieldList.index(tree_txt3)
 			self.ui.cboTreeOp3.setCurrentText(FieldList[index] + '(' + RealNameList[index] + ')')
-
+		MoveNotChange = False
+		
 	@pyqtSlot()
 	def on_actionImport_Annotate_triggered(self):
 		anno_file, _ = QtWidgets.QFileDialog.getOpenFileName(self, "select annotation file", '~/',
@@ -13583,8 +13586,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				VGenesSQL.creatnewDB(DBFilename)
 
 			self.UpdateRecentList(DBFilename, True)
-			if GetName == True:
-				self.SaveBackup()
+			#if GetName == True:
+				#self.SaveBackup()
 		else:
 			self.hide()
 			#self.ApplicationStarted()
@@ -13902,7 +13905,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			NameIndex[NameIs] = i
 
 	def OnOpen(self):
-
+		global MoveNotChange
+		MoveNotChange = True
 		# self.ui.tableView.ColumnsToContents()
 		#self.ui.tableView.resizeColumnsToContents()
 
@@ -13954,6 +13958,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboTreeOp1.setCurrentText(FieldList[75] + '(' + RealNameList[75] + ')')
 		self.ui.cboTreeOp2.setCurrentText(FieldList[76] + '(' + RealNameList[76] + ')')
 		self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
+
+		MoveNotChange = False
 
 		try:
 			SQLFields = ('Project', 'Grouping', 'SubGroup')
@@ -14794,6 +14800,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_cboFindField_currentTextChanged(self):
+		global MoveNotChange
+
 		if self.ui.cboFindField.currentText() == 'Specificity':
 			self.SpecSet()
 		if self.ui.cboFindField.currentText() == 'Subspecificity':
@@ -14810,9 +14818,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			SQLStatement = 'SELECT DISTINCT(' + cur_field + '),COUNT(*) FROM vgenesdb GROUP BY ' + cur_field
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			value_list = [str(row[0]) + "\t(Count=" + str(row[1]) + ")" for row in DataIn]
-			if len(value_list) > 10000:
-				Msg = 'This field have ' + str(len(value_list)) + ' distinct values, the auto complete function will be slow, please be patient!\n'
-				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			if MoveNotChange == False:
+				if len(value_list) > 10000:
+					Msg = 'This field have ' + str(len(value_list)) + ' distinct values, the auto complete function will be slow, please be patient!\n'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			# link value list to lineEdit
 			self.init_lineedit(self.ui.txtFieldSearch, value_list)
 
@@ -15951,6 +15960,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				#shutil.copy(DBFilename, Backfilename)
 				print('Bcak up current DB!')
 				shutil.copyfile(DBFilename, Backfilename)
+				print('Bcak up finished!')
 		except:
 			return
 
