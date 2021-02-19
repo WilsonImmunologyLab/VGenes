@@ -1,1 +1,1 @@
-/Users/leil/Documents/Projects/scRNAseq/SiRI/vdj/R478910/consensus.fasta
+/Users/leil/Documents/Projects/VGene/HA6-vdj/outs/consensus.fasta

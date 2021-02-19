@@ -6536,6 +6536,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.enableEdit = False
 		self.HeatmapList = []
 
+		# save all checked records name, this is the only way I know to improve our DB page without changing the SQL table design
+		self.CheckedRecords = []
+		self.ui.SeqTable.pageSize = 20
+		self.ui.SeqTable.EditTag = False
+
 		self.initialHCLCTable()
 
 	def trimInfo(self):
@@ -7980,7 +7985,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						#worker = Worker(self.load_table)
 						#self.threadpool.start(worker)
 						self.load_table()
-						self.match_tree_to_table()
+						#self.match_tree_to_table()
 						self.tree_to_table_selection()
 			# clone page
 			elif self.ui.tabWidget.currentIndex() == 9:
@@ -8008,6 +8013,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
 			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 
+			# paging system
+			pageSize = int(self.ui.spinBoxPageSize.text())
+			if self.ui.SeqTable.pageSize == pageSize:
+				pass
+			else:
+				self.ui.SeqTable.pageSize = pageSize
+				self.ui.labelCurPage.setText('1')
+
+			CurPage = int(self.ui.labelCurPage.text()) - 1
+			#RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str((CurPage + 1) * pageSize)
+			RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str(pageSize)
+			SQLStatement = 'SELECT COUNT(*) FROM vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			TotalRecords = DataIn[0][0]
+			TotalRecordsStr = str(math.ceil(TotalRecords/pageSize))
+			self.ui.labelTotalPage.setText(TotalRecordsStr)
+
 			SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID'
 			HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			current_field_list = [i[0] for i in HeaderIn]
@@ -8016,6 +8038,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if fields == '':
 				fields = '*'
 			SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+			SQLStatement += RecordLimitStatement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 			#pct = 0
@@ -8041,8 +8064,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#process = 1
 			for row_index in range(num_row):
 				cell_checkBox = QCheckBox()
+				cell_checkBox.id = str(DataIn[row_index][0])
 				# cell_checkBox.setText(DataIn[row_index][0])
-				cell_checkBox.setChecked(False)
+				if str(DataIn[row_index][0]) in self.CheckedRecords:
+					cell_checkBox.setChecked(True)
+				else:
+					cell_checkBox.setChecked(False)
 				cell_checkBox.stateChanged.connect(self.multipleSelection)
 				self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
 
@@ -8058,14 +8085,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 			# disable edit
-			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+			if self.ui.SeqTable.EditTag == True:
+				self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
+			else:
+				self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 			# show sort indicator
 			self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
 			# connect sort indicator to slot function
 			self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
 			self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
 
-			self.match_tree_to_table()
+
+
+			#self.match_tree_to_table()
 			#msg = 'Table fully loaded!'
 			#self.ShowMessageBox([0, msg])
 
@@ -8085,10 +8117,70 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.progress.show()
 		'''
 
+	@pyqtSlot()
+	def on_pushButtonFirstPage_clicked(self):
+		if self.ui.labelCurPage.text() == '1':
+			Msg = 'This is already the first page!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			self.ui.labelCurPage.setText("1")
+			self.load_table()
+
+	@pyqtSlot()
+	def on_pushButtonPreviousPage_clicked(self):
+		if self.ui.labelCurPage.text() == '1':
+			Msg = 'This is already the first page!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			CurPage = int(self.ui.labelCurPage.text()) - 1
+			self.ui.labelCurPage.setText(str(CurPage))
+			self.load_table()
+
+	@pyqtSlot()
+	def on_pushButtonNextPage_clicked(self):
+		if self.ui.labelCurPage.text() == self.ui.labelTotalPage.text():
+			Msg = 'This is already the last page!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			CurPage = int(self.ui.labelCurPage.text()) + 1
+			self.ui.labelCurPage.setText(str(CurPage))
+			self.load_table()
+
+	@pyqtSlot()
+	def on_pushButtonLastPage_clicked(self):
+		if self.ui.labelCurPage.text() == self.ui.labelTotalPage.text():
+			Msg = 'This is already the last page!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		else:
+			self.ui.labelCurPage.setText(self.ui.labelTotalPage.text())
+			self.load_table()
+
+	@pyqtSlot()
+	def on_pushButtonJumpTo_clicked(self):
+		setPage = self.ui.lineEditPageNumber.text()
+		maxPage = self.ui.labelTotalPage.text()
+		try:
+			setPage = int(setPage)
+			maxPage = int(maxPage)
+			if setPage < 1:
+				Msg = 'Page number can not < 1!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			elif setPage > maxPage:
+				Msg = 'Page number can not > than Max page!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			else:
+				self.ui.labelCurPage.setText(str(setPage))
+				self.load_table()
+		except:
+			Msg = 'Please type page numbers!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
 	def clearCheck(self):
 		self.ui.checkBoxAll1.setChecked(False)
 		self.ui.checkBoxAll.setChecked(False)
-		self.checkAll1()
+		self.clearTreeChecks()
+		self.CheckedRecords = []
+		self.match_tree_to_table()
 
 	def checkAll(self):
 		global MoveNotChange
@@ -8102,12 +8194,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.checkBoxAll1.setChecked(True)
 				for row in range(rows):
 					self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+				self.TreeChecksAll()
+				# update check list
+				SQLStatement = 'SELECT SeqName from vgenesdb'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				self.CheckedRecords = [u[0] for u in DataIn]
 			else:
 				self.ui.checkBoxAll1.setChecked(False)
 				for row in range(rows):
 					self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+				# update check list
+				self.CheckedRecords = []
 			MoveNotChange = False
-			self.match_table_to_tree()
 		else:
 			if self.ui.checkBoxAll.isChecked():
 				self.ui.checkBoxAll1.setChecked(True)
@@ -8131,6 +8229,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# check trre
 			root = self.ui.treeWidget.invisibleRootItem()
 			self.TreeChecksAll()
+			# update check list
+			SQLStatement = 'SELECT SeqName from vgenesdb'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			self.CheckedRecords = [u[0] for u in DataIn]
 		else:
 			self.ui.checkBoxAll.setChecked(False)
 			# check table
@@ -8140,12 +8242,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# check trre
 			root = self.ui.treeWidget.invisibleRootItem()
 			self.clearTreeChecks()
+			# update check list
+			self.CheckedRecords = []
 		MoveNotChange = False
 
 	def multipleSelection(self, int_signal):
 		global MoveNotChange
 		if MoveNotChange:
 			return
+
+		sender = self.sender()
+		sender_name = sender.id
 
 		MoveNotChange = True
 		buttonClicked = self.sender()
@@ -8160,7 +8267,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.SeqTable.indexFromItem(i).row() not in rows:
 				rows.append(self.ui.SeqTable.indexFromItem(i).row())
 
-		DataIn = []
+		# prepare names
+		checked_names = []
 		# if current row in selected rows, check all rows
 		if row in rows:
 			for cur_row in rows:
@@ -8169,9 +8277,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(True)
 					else:
 						self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(False)
+
+			for cur_row in rows:
+				checked_names.append(self.ui.SeqTable.item(cur_row, 1).text())
+		else:
+			checked_names.append(sender_name)
+
+		if int_signal == 2:
+			events = True
+			for name in checked_names:
+				self.CheckedRecords.append(name)
+		else:
+			events = False
+			for name in checked_names:
+				try:
+					self.CheckedRecords.remove(name)
+				except:
+					print(name + ':Not in the list')
+		self.match_table_to_tree(checked_names, events)
 		MoveNotChange = False
 
-		self.match_table_to_tree()
 
 	def match_tree_to_table(self):
 		global TreeSelected
@@ -8179,7 +8304,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# check if checked item changed
 		selected_list = self.getTreeCheckedChild()
 		selected_list = selected_list[3]
-
+		self.CheckedRecords = selected_list
 		# if TreeSelected.sort() == selected_list.sort():
 		#	print(",".join(selected_list))
 		#	print(",".join(TreeSelected))
@@ -8195,7 +8320,24 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
 		MoveNotChange = False
 
-	def match_table_to_tree(self):
+	def match_table_to_tree(self, names, events):
+		# update the selection
+		if events == True:
+			action = Qt.Checked
+		else:
+			action = Qt.Unchecked
+
+		NumFound = len(names)
+		i = 0
+		for Seqname in names:
+			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+			i += 1
+			for record in found:
+				if i == NumFound - 1:
+					wasClicked = True
+				record.setCheckState(0, action)
+
+	def match_table_to_tree_old(self):
 		DataIn = []
 		# get all checked table rows
 		total_rows = self.ui.SeqTable.rowCount()
@@ -8293,12 +8435,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.EditLock.setIcon(unlock_icon)
 			self.ui.EditLock.setText('Edit unlock')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
+			self.ui.SeqTable.EditTag = True
 		else:
 			lock_icon = QIcon()
 			lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
 			self.ui.EditLock.setIcon(lock_icon)
 			self.ui.EditLock.setText('Edit locked')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+			self.ui.SeqTable.EditTag = False
 
 	@pyqtSlot()
 	def on_actionIdentifyPublicClone_triggered(self):
@@ -11042,15 +11186,60 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if item.checkState(column) == Qt.Checked:
 				self.CheckBelow(item, True)
 				self.CheckUp(item, True)
-				# childs = item.childCount()
+				print("checked!")
 			if item.checkState(column) == Qt.Unchecked:
 				self.CheckBelow(item, False)
 				self.CheckUp(item, False)
 				print("unchecked")
-
 		self.match_tree_to_table()
 
 	def tree_to_table_selection(self):
+		# find selection name
+		Selected = self.ui.treeWidget.selectedItems()
+		try:
+			Selected = Selected[-1]
+		except:
+			return
+		name = Selected.text(0)
+
+		print(name)
+
+		# try to match before re-generate table
+		rows = self.ui.SeqTable.rowCount()
+		for row in range(rows):
+			cur_name = self.ui.SeqTable.item(row, 1).text()
+			if cur_name == name:
+				self.ui.SeqTable.setCurrentCell(row,1)
+				return
+
+		# loacte records in table and update table
+		print('re-generate table!\n')
+		field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+		field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+		field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+
+		orderStatement = "ORDER BY " + field1 + "," + field2 + "," + field3 + ",SeqName"
+		#SQLStatement = 'SELECT * FROM (SELECT ROW_NUMBER () OVER ( ' + orderStatement + ') RowNum,SeqName FROM vgenesDB) WHERE `SeqName` = "' + name + '"'
+		SQLStatement = 'SELECT SeqName FROM vgenesDB ' + orderStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		name_list = [u[0] for u in DataIn]
+		row_number = name_list.index(name) + 1
+
+		pageSize = int(self.ui.spinBoxPageSize.text())
+		PageNumber = math.ceil(row_number/pageSize)
+
+		self.ui.labelCurPage.setText(str(PageNumber))
+		self.load_table()
+		
+		# setup focus on seqTable
+		rows = self.ui.SeqTable.rowCount()
+		for row in range(rows):
+			cur_name = self.ui.SeqTable.item(row, 1).text()
+			if cur_name == name:
+				self.ui.SeqTable.setCurrentCell(row,1)
+				return
+
+	def tree_to_table_selection_old(self):
 		Selected = self.ui.treeWidget.selectedItems()
 		try:
 			Selected = Selected[-1]
