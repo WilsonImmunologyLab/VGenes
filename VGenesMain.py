@@ -106,8 +106,6 @@ global clustal_path
 global muscle_path
 global raxml_path
 
-sys.setrecursionlimit(100000)
-
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
 temp_folder = os.path.join(working_prefix, 'Temp')
 js_folder = os.path.join(working_prefix, 'JS')
@@ -14055,6 +14053,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		view.setModel(model)
 
 	def LoadDB(self, DBFilename):
+		time_start = time.time()
 		global FieldList
 		global FieldCommentList
 		global FieldTypeList
@@ -14076,8 +14075,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		b = RealNameList
 		c = FieldTypeList
 		d = FieldCommentList
-
+		time_end = time.time()
+		print('Load DB, step1 time cost: ', time_end - time_start, 's')
+		time_start = time.time()
 		self.OnOpen()
+		time_end = time.time()
+		print('Load DB, step2 time cost: ', time_end - time_start, 's')
 		titletext = 'VGenes - ' + DBFilename
 		self.setWindowTitle(titletext)
 
@@ -14097,6 +14100,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			NameIndex[NameIs] = i
 
 	def OnOpen(self):
+		time_start = time.time()
 		global MoveNotChange
 		MoveNotChange = True
 		# self.ui.tableView.ColumnsToContents()
@@ -14152,12 +14156,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
 
 		MoveNotChange = False
-
+		time_end = time.time()
+		print('\tOn open, step1 time cost: ', time_end - time_start, 's')
 		try:
 			SQLFields = ('Project', 'Grouping', 'SubGroup')
+			time_start = time.time()
 			self.initializeTreeView(SQLFields)
+			time_end = time.time()
+			print('\tOn open, initializeTreeView time cost: ', time_end - time_start, 's')
+			time_start = time.time()
 			self.updateF(-2)
+			time_end = time.time()
+			print('\tOn open, updateF time cost: ', time_end - time_start, 's')
+			time_start = time.time()
 			self.findTreeItem(data[0])
+			time_end = time.time()
+			print('\tOn open, findTreeItem time cost: ', time_end - time_start, 's')
 		except:
 			return
 
