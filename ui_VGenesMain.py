@@ -1007,6 +1007,7 @@ class Ui_MainWindow(object):
         self.txtGeneType = QtWidgets.QTextEdit(self.frame_6)
         self.txtGeneType.setMaximumSize(QtCore.QSize(16777215, 25))
         self.txtGeneType.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.txtGeneType.setReadOnly(True)
         self.txtGeneType.setObjectName("txtGeneType")
         self.gridLayout_5.addWidget(self.txtGeneType, 2, 1, 1, 1)
         self.seqlabel_4 = QtWidgets.QLabel(self.frame_6)

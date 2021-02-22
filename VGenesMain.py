@@ -13988,7 +13988,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# msg = 'Changes were made to this record, save them (if no the changes will be lost)?'
 			# buttons = 'YN'
 			# answer = questionMessage(self, msg, buttons)
-			answer = 'Yes'
+			answer = 'No'
 			if answer == 'Yes':
 				self.on_action_Save_triggered()
 				return "exit"
@@ -15835,7 +15835,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtDateTime.setReadOnly(True)
 			self.ui.txtGroup.setReadOnly(True)
 			self.ui.txtLabel.setReadOnly(True)
-			self.ui.txtName.setReadOnly(True)
+			self.ui.txtName.setReadOnly(False)
 			self.ui.txtProject.setReadOnly(True)
 			self.ui.txtQuality.setReadOnly(True)
 			self.ui.txtStatus.setReadOnly(True)
@@ -15969,7 +15969,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			SETStatement += 'Project = "' + self.ui.txtProject.toPlainText() + '",'
 			SETStatement += 'Grouping = "' + self.ui.txtGroup.toPlainText() + '",'
 			SETStatement += 'SubGroup = "' + self.ui.txtSubGroup.toPlainText() + '",'
-			SETStatement += 'SeqName = "' + self.ui.txtName.toPlainText() + '",'
+			# SETStatement += 'SeqName = "' + self.ui.txtName.toPlainText() + '",'
 			SETStatement += 'Species = "' + self.ui.comboBoxSpecies.currentText() + '",'
 			SETStatement += 'DateEntered = "' + self.ui.txtDateTime.toPlainText() + '",'
 			SETStatement += 'Quality = "' + self.ui.txtQuality.toPlainText() + '",'
