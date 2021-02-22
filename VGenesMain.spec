@@ -1,4 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
+import sys
+sys.setrecursionlimit(5000)
 
 block_cipher = None
 
@@ -38,7 +40,7 @@ a = Analysis(['VGenesMain.py'],
              pathex=['/Users/leil/Documents/Projects/VGene/VGenes'],
              binaries=[],
              datas=added_files,
-             hiddenimports=['scipy.special.cython_special'],
+             hiddenimports=['scipy.special.cython_special','cmath'],
              hookspath=['hooks'],
              runtime_hooks=[],
              excludes=[],
@@ -71,6 +73,6 @@ app = BUNDLE(coll,
              icon='mAB.icns',
              bundle_identifier=None,
              info_plist={
-              'NSHumanReadableCopyright':"Copyright @ 2019, Wilson Lab, All Rights Reserved",
+              'NSHumanReadableCopyright':"Copyright @ 2021, Wilson Lab, All Rights Reserved",
               'NSHighResolutionCapable': 'True'
              })

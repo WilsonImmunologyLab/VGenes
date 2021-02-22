@@ -106,6 +106,8 @@ global clustal_path
 global muscle_path
 global raxml_path
 
+sys.setrecursionlimit(100000)
+
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
 temp_folder = os.path.join(working_prefix, 'Temp')
 js_folder = os.path.join(working_prefix, 'JS')
