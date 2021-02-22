@@ -6469,6 +6469,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxAll1.stateChanged.connect(self.checkAll1)
 		self.ui.checkBoxRowSelection.stateChanged.connect(self.selectionMode)
 		self.ui.pushButtonRefresh.clicked.connect(self.refreshDB)
+		self.ui.pushButtonRefresh1.clicked.connect(self.refreshDB)
 		self.ui.SeqTable.clicked.connect(self.table_to_tree_selection)
 		self.ui.pushButtonAlter.clicked.connect(self.openAlter)
 		self.ui.pushButtonTable.clicked.connect(self.openTableDialog)
@@ -7972,8 +7973,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					#	updateMarker = False
 				else:
 					max_number = self.ui.lcdNumber_max.value()
-					if max_number > 5000:
-						message = 'Your current DB has more than 5000 records (' + str(int(max_number)) + \
+					if max_number > 5000000:
+						message = 'Your current DB has more than 5000000 records (' + str(int(max_number)) + \
 						           '), loading a table with all details could be time-consuming ' \
 						           'and cause slow UI response，the table will be hide by default, ' \
 						           'you can click "Table" button to display/hide the table.\n'
@@ -15659,8 +15660,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.SeqTable.setRowCount(0)
 		else:
 			max_number = self.ui.lcdNumber_max.value()
-			if max_number > 5000:
-				message = 'Your current DB has more than 5000 records (' + str(int(max_number)) + \
+			if max_number > 5000000:
+				message = 'Your current DB has more than 5000000 records (' + str(int(max_number)) + \
 				          '), loading a table with all details could be time-consuming ' \
 				          'and cause slow UI response，are you sure to display the table?\n'
 				buttons = 'YN'

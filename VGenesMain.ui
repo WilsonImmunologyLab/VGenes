@@ -1151,6 +1151,11 @@
           </item>
           <item>
            <widget class="QLabel" name="labelCurPage">
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>1</string>
             </property>
@@ -1179,6 +1184,11 @@
           </item>
           <item>
            <widget class="QLabel" name="labelTotalPage">
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+             </font>
+            </property>
             <property name="text">
              <string>X</string>
             </property>
@@ -1232,6 +1242,26 @@
             </property>
             <property name="value">
              <number>20</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonRefresh1">
+            <property name="text">
+             <string>Refresh</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>16</width>
+              <height>16</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
             </property>
            </widget>
           </item>
