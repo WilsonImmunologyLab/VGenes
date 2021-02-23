@@ -17567,6 +17567,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				PreVID = ID
 
+				if data[78] == 'Human':
+					self.ui.comboBoxSpecies.setCurrentText('Human')
+				elif data[78] == 'Mouse':
+					self.ui.comboBoxSpecies.setCurrentText('Mouse')
+				else:
+					self.ui.comboBoxSpecies.setCurrentText('Others')
+				
 				self.ui.txtName.setText(data[0])
 				self.ui.txtName_2.setText(data[0])
 				self.ui.label_Name.setText(data[0])
