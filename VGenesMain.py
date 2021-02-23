@@ -14626,9 +14626,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		#JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
 		Jseq = VSeq[Jbeg - 1:Jend - 1]
 		Jseq = Jseq[0:len(Jseq) // 3 * 3]
-		JendSeq = Jseq[-9:]
-		JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
-		JendDisplay = ' ' + JendAASeq[0] + '   ' + JendAASeq[1] + '   ' + JendAASeq[2] + ' \n' + JendSeq[0:3] + ' ' + JendSeq[3:6] + ' ' + JendSeq[6:9]
+		if len(Jseq) >= 9:
+			JendSeq = Jseq[-9:]
+			JendAASeq, ErMessage = VGenesSeq.Translator(JendSeq, 0)
+			JendDisplay = ' ' + JendAASeq[0] + '   ' + JendAASeq[1] + '   ' + JendAASeq[2] + ' \n' + JendSeq[0:3] + ' ' + JendSeq[3:6] + ' ' + JendSeq[6:9]
+		else:
+			JendDisplay = "Too short Jend\n Check Ig Alignment!"
 
 		self.ui.txtJend_2.setText(JendDisplay)
 

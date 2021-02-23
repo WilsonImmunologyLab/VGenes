@@ -695,24 +695,32 @@ def IgBLASTit(FASTAFile, datalist, signal):
 						for row in cursor:
 							for column in row:
 								GVseq.append(column)     # 0 SeqName, 1 Allele, 2 Species, 3 CodingStartNucleotide, 4 Sequence, 5 IMGTSequence
-						VGeneLocus = GVseq[0]
-						GVgene = GVseq[4]
-						GStart = int(GVseq[3])-1
-						GVgene = GVgene[GStart:GVend]
-						IMGTVgene = ''
-						IMGTGVgene = GVseq[5]
-						dotsIn = IMGTGVgene.count('.')
-						# CharCount = 0
+						if len(GVseq) < 6:
+							VGeneLocus = 'NA'
+							GVgene = 'NA'
+							GStart = ''
+							IMGTGVgene = 'NA'
+							IMGTend = ''
+							IMGTVDJ = 'NA'
+						else:
+							VGeneLocus = GVseq[0]
+							GVgene = GVseq[4]
+							GStart = int(GVseq[3])-1
+							GVgene = GVgene[GStart:GVend]
+							IMGTVgene = ''
+							IMGTGVgene = GVseq[5]
+							dotsIn = IMGTGVgene.count('.')
+							# CharCount = 0
 
-						# if GStart-1 != 0:
-						#      #make sure no '.' in beginning (like if seq starts after CDR1)
-						#     while CharCount != GStart-1:
-						#         if IMGTVgene[CharCount] == '.':
-						#             dotsIn -= 1
+							# if GStart-1 != 0:
+							#      #make sure no '.' in beginning (like if seq starts after CDR1)
+							#     while CharCount != GStart-1:
+							#         if IMGTVgene[CharCount] == '.':
+							#             dotsIn -= 1
 
-						IMGTend = GVend + dotsIn
+							IMGTend = GVend + dotsIn
 
-						IMGTVDJ = IMGTGVgene[int(GVseq[3])-1:IMGTend]  #full length germline V with IMGT spacers
+							IMGTVDJ = IMGTGVgene[int(GVseq[3])-1:IMGTend]  #full length germline V with IMGT spacers
 
 
 
