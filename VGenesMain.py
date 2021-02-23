@@ -80,6 +80,7 @@ from ui_statcheck_dislog import Ui_StatCheckDialog
 from ui_translate_dialo import Ui_Translate_Dialog
 from ui_gibson_dialog import Ui_GibsonDialog
 from ui_patentdialog import Ui_PatentDialog
+from ui_SHMtabledialog import Ui_SHMtableDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -307,6 +308,13 @@ def reName(ori_name, rep1, rep2, prefix):
 	if prefix != '':
 		my_name = prefix + '_' + my_name
 	return my_name
+
+class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		super(SHMtableDialog, self).__init__()
+		self.ui = Ui_SHMtableDialog()
+		self.ui.setupUi(self)
 
 class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
 
@@ -13945,6 +13953,160 @@ class VGenesForm(QtWidgets.QMainWindow):
 			FontIs.setPointSize(FontSize)
 			FontIs.setFamily('Courier New')
 			self.ui.txtProtein.setFont(FontIs)
+
+	@pyqtSlot()
+	def on_pushButtonSHM_table_clicked(self):
+		self.mySHMtableDialog = SHMtableDialog()
+
+		horizontalHeader = ['Seq Name', 'mut_FR1_S', 'mut_CDR1_S', 'mut_FR2_S', 'mut_CDR2_S', 'mut_FR3_S',
+		                    'mut_FR1_NonS', 'mut_CDR1_NonS', 'mut_FR2_NonS', 'mut_CDR2_NonS', 'mut_FR3_NonS']
+
+		num_row = len(self.SHM_STAT_res)
+		num_col = len(horizontalHeader)
+		self.mySHMtableDialog.ui.tableWidget.setRowCount(num_row)
+		self.mySHMtableDialog.ui.tableWidget.setColumnCount(num_col)
+		self.mySHMtableDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+		self.mySHMtableDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+		self.mySHMtableDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+		self.mySHMtableDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+		for i in range(len(self.SHM_STAT_res)):
+			record = self.SHM_STAT_res[i]
+			for j in range(len(record)):
+				item = QTableWidgetItem(str(record[j]))
+				self.mySHMtableDialog.ui.tableWidget.setItem(i, j, item)
+
+		# disable edit
+		self.mySHMtableDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+		# resize table
+		self.mySHMtableDialog.ui.tableWidget.resizeColumnsToContents()
+		self.mySHMtableDialog.ui.tableWidget.resizeRowsToContents()
+		self.mySHMtableDialog.show()
+
+
+
+	@pyqtSlot()
+	def on_pushButtonSHManalysis_clicked(self):
+		if len(self.CheckedRecords) == 0:
+			Msg = 'Please check some records first!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		# get all checked records
+		WHEREStatement = 'WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
+
+		SQLStatement = "SELECT SeqName,SeqAlignment FROM vgenesDB " + WHEREStatement
+		#print(SQLStatement)
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		# SHM STAT
+		SHM_STAT_res = []
+		for record in DataIn:
+			detail_shm_s, detail_shm_nons = self.MutationalAnalysis(record[1])
+			stat_s = self.SHM_STAT(detail_shm_s)
+			stat_nons = self.SHM_STAT(detail_shm_nons)
+			stat = [record[0]] + stat_s + stat_nons
+			SHM_STAT_res.append(stat)
+
+		self.SHM_STAT_res = SHM_STAT_res
+		# prepare UI and notice user
+		self.ui.pushButtonSHM_draw.setEnabled(True)
+		self.ui.pushButtonSHM_table.setEnabled(True)
+
+		Msg = 'SHM analysis finished!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+	def MutationalAnalysis(self, input):
+		# initialize variable
+		LineRegion = ''
+		LineQueryAA = ''
+		LineQueryNT = ''
+		LineGermlineNT = ''
+		LineGermlineAA = ''
+		
+		# fetch correct information
+		Lines = input.split("\n")
+		i = 0
+		for line in Lines:
+			if line == '':
+				tmp_region = Lines[i + 1]
+				str,end = re.search(r'\S+', tmp_region).span()
+
+				LineRegion += Lines[i + 1][str:end]
+				LineQueryAA += Lines[i + 2][str:end]
+				LineQueryNT += Lines[i + 3][str:end]
+				LineGermlineNT += Lines[i + 4][str:end]
+				LineGermlineAA += Lines[i + 5][str:end]
+
+				if re.search(r'FR3-+>', LineRegion):
+					break
+			i += 1
+
+		# regions
+		FR1_region = re.search(r'<-+FR1-+>', LineRegion).span()
+		FR2_region = re.search(r'<-+FR2-+>', LineRegion).span()
+		FR3_region = re.search(r'<-+FR3-+>', LineRegion).span()
+		CDR1_region = re.search(r'<-+CDR1-+>', LineRegion).span()
+		CDR2_region = re.search(r'<-+CDR2-+>', LineRegion).span()
+
+		region_list = ['FR1'] * (FR1_region[1] - FR1_region[0]) + \
+		              ['CDR1'] * (CDR1_region[1] - CDR1_region[0]) + \
+		              ['FR2'] * (FR2_region[1] - FR2_region[0]) + \
+		              ['CDR2'] * (CDR2_region[1] - CDR2_region[0]) + \
+		              ['FR3'] * (FR3_region[1] - FR3_region[0])
+
+		MutDetail_S = []
+		MutDetail_N = []
+		for i in range(len(LineRegion)):
+			if LineGermlineNT[i] != '.' and LineGermlineNT[i] != '-':
+				pos_nt = i + 1
+				germline_nt = LineGermlineNT[i]
+				query_nt = LineQueryNT[i]
+				start_codon = i - 1
+				if start_codon < 0:
+					start_codon = 0
+				end_codon = i + 1
+				germline_aa = LineGermlineAA[start_codon:end_codon]
+				query_aa = LineQueryAA[start_codon:end_codon]
+				germline_aa = re.sub(' ', '', germline_aa)
+				query_aa = re.sub(' ', '', query_aa)
+				if i < len(region_list):
+					region = region_list[i]
+				else:
+					region = 'Other'
+				str_aa = LineQueryAA[0:pos_nt + 1]
+				str_aa = re.sub(' ', '', str_aa)
+				pos_aa = len(str_aa)
+
+				if germline_aa == query_aa:
+					mut_type = 'synonymous'
+					record = [pos_nt, germline_nt, query_nt, pos_aa, germline_aa, query_aa, mut_type, region]
+					MutDetail_S.append(record)
+				else:
+					mut_type = 'Nonsynonymous'
+					record = [pos_nt, germline_nt, query_nt, pos_aa, germline_aa, query_aa, mut_type, region]
+					MutDetail_N.append(record)
+
+
+		#res = LineRegion + "\n" + \
+		#      LineQueryAA + "\n" + \
+		#      LineQueryNT + "\n" + \
+		#      LineGermlineNT + "\n" + \
+		#      LineGermlineAA
+
+		return MutDetail_S, MutDetail_N
+
+	def SHM_STAT(self, input):
+		# accept input from MutationalAnalysis function
+		my_list = [u[7] for u in input]
+
+		FR1_MUT_count = my_list.count('FR1')
+		FR2_MUT_count = my_list.count('FR2')
+		FR3_MUT_count = my_list.count('FR3')
+		CDR1_MUT_count = my_list.count('CDR1')
+		CDR2_MUT_count = my_list.count('CDR2')
+
+		res_stat = [FR1_MUT_count, CDR1_MUT_count, FR2_MUT_count, CDR2_MUT_count, FR3_MUT_count]
+		return res_stat
 
 	def on_spnAlignFont_valueChanged(self, value):
 		self.AlignFont()
