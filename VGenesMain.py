@@ -6182,9 +6182,14 @@ class ResizeWidget(QWebEngineView):
 	def resizeEvent(self, event):
 		w = event.size().width()
 		h = event.size().height()
+		# only emit re-size signal if change size more than 20px
+		if (abs(self.h - h) > 20) or (abs(self.w - w) > 20):
+			self.updateResizeTimer(300)
+		else:
+			print('minor re-size')
+			
 		self.h = h
 		self.w = w
-		self.updateResizeTimer(300)
 
 	def timerEvent(self, event):
 		if event.timerId() == self._resize_timer:
@@ -10704,7 +10709,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.HTMLviewSHM.html == '':
 			return
 		else:
-			pass
+			#print('re-generate figure')
 			self.on_pushButtonSHM_draw_clicked()
 
 	def updateSelection(self, msg):
