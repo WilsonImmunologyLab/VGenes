@@ -310,11 +310,17 @@ def reName(ori_name, rep1, rep2, prefix):
 	return my_name
 
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
+	SHMUpdateSelectionSignal = pyqtSignal(str)
+
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
 		super(SHMtableDialog, self).__init__()
 		self.ui = Ui_SHMtableDialog()
 		self.ui.setupUi(self)
+
+	def updateSelection(self, currentRow, currentColumn, previousRow, previousColumn):
+		SeqName = self.ui.tableWidget.item(currentRow, 0).text()
+		self.SHMUpdateSelectionSignal.emit(SeqName)
 
 class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
 
@@ -6503,6 +6509,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.tableWidgetHC.cellClicked.connect(self.matchSelection)
 		self.ui.tableWidgetLC.cellClicked.connect(self.matchSelection)
 		self.ui.txtFieldSearch.textChanged.connect(self.trimInfo)
+		self.ui.checkBoxSHM_Vregion.clicked.connect(self.SHMcheck)
+		self.ui.checkBoxSHM_FR1.clicked.connect(self.SHMcheck1)
+		self.ui.checkBoxSHM_FR2.clicked.connect(self.SHMcheck1)
+		self.ui.checkBoxSHM_FR3.clicked.connect(self.SHMcheck1)
+		self.ui.checkBoxSHM_CDR1.clicked.connect(self.SHMcheck1)
+		self.ui.checkBoxSHM_CDR2.clicked.connect(self.SHMcheck1)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -6540,6 +6552,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.gridLayoutClone.addWidget(self.ui.HTMLviewClone)
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTMLClone)
 
+		self.ui.HTMLviewSHM = ResizeWidget(self)
+		self.ui.gridLayoutSHM.addWidget(self.ui.HTMLviewSHM)
+		self.ui.HTMLviewSHM.resizeSignal.connect(self.resizeHTMLSHM)
+
 		self.AntibodyCandidates = []
 
 		self.enableEdit = False
@@ -6551,6 +6567,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.EditTag = False
 
 		self.initialHCLCTable()
+
+	def SHMcheck(self):
+		if self.ui.checkBoxSHM_Vregion.isChecked():
+			self.ui.checkBoxSHM_FR1.setChecked(False)
+			self.ui.checkBoxSHM_FR2.setChecked(False)
+			self.ui.checkBoxSHM_FR3.setChecked(False)
+			self.ui.checkBoxSHM_CDR1.setChecked(False)
+			self.ui.checkBoxSHM_CDR2.setChecked(False)
+		else:
+			self.ui.checkBoxSHM_Vregion.setChecked(True)
+
+	def SHMcheck1(self):
+		if self.sender().isChecked():
+			self.ui.checkBoxSHM_Vregion.setChecked(False)
+		else:
+			if self.ui.checkBoxSHM_FR1.isChecked() or self.ui.checkBoxSHM_FR2.isChecked() \
+				or self.ui.checkBoxSHM_FR3.isChecked() or self.ui.checkBoxSHM_CDR1.isChecked() \
+				   or self.ui.checkBoxSHM_CDR2.isChecked():
+				pass
+			else:
+				self.ui.checkBoxSHM_Vregion.setChecked(True)
 
 	def trimInfo(self):
 		global DontFindTwice
@@ -10663,6 +10700,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			self.GenerateFigureClone()
 
+	def resizeHTMLSHM(self):
+		if self.ui.HTMLviewSHM.html == '':
+			return
+		else:
+			pass
+			self.on_pushButtonSHM_draw_clicked()
+
 	def updateSelection(self, msg):
 		if self.ui.checkBoxUpdateSelection.isChecked():
 			# split msg
@@ -10981,6 +11025,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			# FontSize = int(font.pointSize())
 			font.setPointSize(10)
+			font.setFamily('Lucida Grande')
+
+			self.TextEdit.textEdit.setFont(font)
+
+		elif style == 'standard-large':
+			FontIs = self.TextEdit.textEdit.currentFont()
+			font = QFont(FontIs)
+
+			# FontSize = int(font.pointSize())
+			font.setPointSize(15)
 			font.setFamily('Lucida Grande')
 
 			self.TextEdit.textEdit.setFont(font)
@@ -13955,6 +14009,313 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtProtein.setFont(FontIs)
 
 	@pyqtSlot()
+	def on_pushButtonSHM_saveFig_clicked(self):
+		print('download')
+		js_cmd = 'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;$("#download").click();'
+		self.ui.HTMLviewSHM.page().runJavaScript(js_cmd)
+
+	@pyqtSlot()
+	def on_pushButtonSHM_draw_clicked(self):
+		# fetch raw data
+		raw_data = copy.copy(self.SHM_STAT_res)
+
+		# fetch config
+		if self.ui.radioButtonSHM_all.isChecked():
+			mutation_type = 'all'
+		elif self.ui.radioButtonSHM_NonS.isChecked():
+			mutation_type = 'nons'
+		else:
+			mutation_type = 's'
+
+		region = ''
+		if self.ui.checkBoxSHM_Vregion.isChecked():
+			region = 'all'
+		else:
+			if self.ui.checkBoxSHM_FR1.isChecked():
+				region += ',FR1'
+			if self.ui.checkBoxSHM_CDR1.isChecked():
+				region += ',CDR1'
+			if self.ui.checkBoxSHM_FR2.isChecked():
+				region += ',FR2'
+			if self.ui.checkBoxSHM_CDR2.isChecked():
+				region += ',CDR2'
+			if self.ui.checkBoxSHM_FR3.isChecked():
+				region += ',FR3'
+			region = re.sub(r'^,','',region)
+
+		if self.ui.listWidgetSHM_groups.currentItem() == None:
+			group == ''
+		else:
+			group = self.ui.listWidgetSHM_groups.currentItem().text()
+			group = re.sub(r'\(.+', "", group)
+		if group == '':
+			pass
+		else:
+			names = [record[0] for record in raw_data]
+			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(names) + '")'
+			SQLStatement = 'SELECT SeqName,' + group + ' FROM vgenesDB' + WHEREStatement
+
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			groups = [i[1] for i in DataIn]
+			result = Counter(groups)
+			group_labels = list(result.keys())
+			if len(group_labels) > 10:
+				QueryIS = 'Your selected group factor has more than 10 levels, are you sure?'
+				buttons = 'YN'
+				answer = questionMessage(self, QueryIS, buttons)
+				if answer == 'No':
+					return
+			keys = [i[0] for i in DataIn]
+			values = [i[1] for i in DataIn]
+			group_dictionary = dict(zip(keys, values))
+
+		# generate data
+		format_data = []
+		for line in raw_data:
+			if mutation_type == 'all':
+				if region == 'all':
+					data_count = sum(line[1:11])
+					data_group1 = 'V-region combined'
+					if group == '':
+						data_group2 = 'All'
+					else:
+						data_group2 = str(group_dictionary[line[0]])
+						if data_group2 == '':
+							data_group2 = 'Empty value'
+					ele = [data_count, data_group1, data_group2]
+					format_data.append(ele)
+				else:
+					regions = region.split(',')
+					for region_name in regions:
+						if region_name == 'FR1':
+							data_count = line[1] + line[6]
+							data_group1 = 'FR1'
+						elif region_name == 'CDR1':
+							data_count = line[2] + line[7]
+							data_group1 = 'CDR1'
+						elif region_name == 'FR2':
+							data_count = line[3] + line[8]
+							data_group1 = 'FR2'
+						elif region_name == 'CDR2':
+							data_count = line[4] + line[9]
+							data_group1 = 'CDR2'
+						elif region_name == 'FR3':
+							data_count = line[5] + line[10]
+							data_group1 = 'FR3'
+						if group == '':
+							data_group2 = 'All'
+						else:
+							data_group2 = str(group_dictionary[line[0]])
+							if data_group2 == '':
+								data_group2 = 'Empty value'
+						ele = [data_count, data_group1, data_group2]
+						format_data.append(ele)
+			elif mutation_type == 'nons':
+				if region == 'all':
+					data_count = sum(line[6:11])
+					data_group1 = 'V-region combined'
+					if group == '':
+						data_group2 = 'All'
+					else:
+						data_group2 = str(group_dictionary[line[0]])
+						if data_group2 == '':
+							data_group2 = 'Empty value'
+					ele = [data_count, data_group1, data_group2]
+					format_data.append(ele)
+				else:
+					regions = region.split(',')
+					for region_name in regions:
+						if region_name == 'FR1':
+							data_count = line[6]
+							data_group1 = 'FR1'
+						elif region_name == 'CDR1':
+							data_count = line[7]
+							data_group1 = 'CDR1'
+						elif region_name == 'FR2':
+							data_count = line[8]
+							data_group1 = 'FR2'
+						elif region_name == 'CDR2':
+							data_count = line[9]
+							data_group1 = 'CDR2'
+						elif region_name == 'FR3':
+							data_count = line[10]
+							data_group1 = 'FR3'
+						if group == '':
+							data_group2 = 'All'
+						else:
+							data_group2 = str(group_dictionary[line[0]])
+							if data_group2 == '':
+								data_group2 = 'Empty value'
+						ele = [data_count, data_group1, data_group2]
+						format_data.append(ele)
+			else:
+				if region == 'all':
+					data_count = sum(line[1:6])
+					data_group1 = 'V-region combined'
+					if group == '':
+						data_group2 = 'All'
+					else:
+						data_group2 = str(group_dictionary[line[0]])
+						if data_group2 == '':
+							data_group2 = 'Empty value'
+					ele = [data_count, data_group1, data_group2]
+					format_data.append(ele)
+				else:
+					regions = region.split(',')
+					for region_name in regions:
+						if region_name == 'FR1':
+							data_count = line[1]
+							data_group1 = 'FR1'
+						elif region_name == 'CDR1':
+							data_count = line[2]
+							data_group1 = 'CDR1'
+						elif region_name == 'FR2':
+							data_count = line[3]
+							data_group1 = 'FR2'
+						elif region_name == 'CDR2':
+							data_count = line[4]
+							data_group1 = 'CDR2'
+						elif region_name == 'FR3':
+							data_count = line[5]
+							data_group1 = 'FR3'
+						if group == '':
+							data_group2 = 'All'
+						else:
+							data_group2 = str(group_dictionary[line[0]])
+							if data_group2 == '':
+								data_group2 = 'Empty value'
+						ele = [data_count, data_group1, data_group2]
+						format_data.append(ele)
+
+		# make pycharts
+		box_data = [i[0] for i in format_data]
+		if min(box_data) >= 0:
+			null_data = [0, 0, 0, 0, 0]
+		else:
+			null_data = [min(box_data), min(box_data), min(box_data), min(box_data), min(box_data)]
+
+		label_data = []
+		g2_label = []
+		for element in format_data:
+			label_data.append(element[1])
+			g2_label.append(element[2])
+
+		result = Counter(label_data)
+		labels = list(result.keys())
+
+		g2_dict = {}
+		i = 0
+		for ele in g2_label:
+			if g2_dict.__contains__(ele):
+				g2_dict[ele] = g2_dict[ele] + [i]
+			else:
+				g2_dict[ele] = [i]
+			i += 1
+		g2_dict_keys = list(g2_dict.keys())
+
+		my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg')) \
+			.add_xaxis(labels) \
+			.set_global_opts(
+			title_opts=opts.TitleOpts(title=""),
+			legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxSHM_legend.isChecked()),
+			xaxis_opts=opts.AxisOpts(
+				name='V gene region',
+				name_location='center',
+				name_gap=30,
+			),
+			yaxis_opts=opts.AxisOpts(
+				name='SHM count',
+				name_location='center',
+				name_gap=30,
+			),
+			# toolbox_opts = opts.ToolboxOpts()
+		)
+
+		# for each group in field 2
+		for group in g2_dict_keys:
+			cur_box_data = []
+			cur_label_data = []
+			for i in g2_dict[group]:
+				cur_box_data.append(box_data[i])
+				cur_label_data.append(label_data[i])
+
+			sub_dict = {}
+			i = 0
+			for ele in cur_label_data:
+				if sub_dict.__contains__(ele):
+					sub_dict[ele] = sub_dict[ele] + [i]
+				else:
+					sub_dict[ele] = [i]
+				i += 1
+
+			data_v1 = []
+			for ele in labels:
+				if sub_dict.__contains__(ele):
+					cur_data = []
+					for i in sub_dict[ele]:
+						cur_data.append(cur_box_data[i])
+					data_v1.append(cur_data)
+				else:
+					data_v1.append(null_data)
+
+			#my_bar.add_yaxis(group, Boxplot.prepare_data(data_v1),itemstyle_opts=opts.ItemStyleOpts(color='green'))
+			my_bar.add_yaxis(group, Boxplot.prepare_data(data_v1))
+
+		my_pyecharts = (
+			my_bar
+		)
+
+		# load figure
+		html_path = os.path.join(temp_folder, 'shm_figure.html')
+		my_pyecharts.render(path=html_path)
+		# adjust the window size seting
+		file_handle = open(html_path, 'r')
+		lines = file_handle.readlines()
+		file_handle.close()
+		# edit js line
+		js_line = '<script type="text/javascript" src="' + \
+		          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
+		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
+		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
+		lines[5] = js_line
+		# edit style line
+		style_line = lines[9]
+		style_pos = style_line.find('style')
+		style_line = style_line[
+		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
+			self.ui.HTMLviewSHM.h - 20) + 'px;"></div>'
+		lines[9] = style_line
+		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
+		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
+		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+		            'my_object.download(text);});$("#update").click(function(){' \
+		            'my_object.updateSelection(text);});});});</script>'
+		insert_btn = '<input id="download" type="button" value="" style="display:none;"/>' \
+		             '<input id="update" type="button" value="" style="display:none;"/>'
+		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
+
+		content = '\n'.join(lines)
+		file_handle = open(html_path, 'w')
+		file_handle.write(content)
+		file_handle.close()
+		# show local HTML
+		self.ui.HTMLviewSHM.load(QUrl('file://' + html_path))
+		self.ui.HTMLviewSHM.show()
+		self.ui.HTMLviewSHM.html = "loaded"
+		#self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
+
+		# build qweb channel
+		channel = QWebChannel(self.ui.HTMLviewSHM.page())
+		my_object = MyObjectCls(self.ui.HTMLviewSHM)
+		channel.registerObject('connection', my_object)
+		self.ui.HTMLviewSHM.page().setWebChannel(channel)
+		my_object.downloadFigSignal.connect(self.downloadSVG)
+
+		# enable save figure function
+		self.ui.pushButtonSHM_saveFig.setEnabled(True)
+
+
+	@pyqtSlot()
 	def on_pushButtonSHM_table_clicked(self):
 		self.mySHMtableDialog = SHMtableDialog()
 
@@ -13981,12 +14342,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# resize table
 		self.mySHMtableDialog.ui.tableWidget.resizeColumnsToContents()
 		self.mySHMtableDialog.ui.tableWidget.resizeRowsToContents()
+
+		# set signal
+		self.mySHMtableDialog.ui.tableWidget.currentCellChanged.connect(self.mySHMtableDialog.updateSelection)
+		self.mySHMtableDialog.SHMUpdateSelectionSignal.connect(self.select_tree_by_name)
+
 		self.mySHMtableDialog.show()
-
-
 
 	@pyqtSlot()
 	def on_pushButtonSHManalysis_clicked(self):
+		ErrMes = ''
 		if len(self.CheckedRecords) == 0:
 			Msg = 'Please check some records first!'
 			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -14001,19 +14366,32 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# SHM STAT
 		SHM_STAT_res = []
 		for record in DataIn:
-			detail_shm_s, detail_shm_nons = self.MutationalAnalysis(record[1])
-			stat_s = self.SHM_STAT(detail_shm_s)
-			stat_nons = self.SHM_STAT(detail_shm_nons)
-			stat = [record[0]] + stat_s + stat_nons
-			SHM_STAT_res.append(stat)
+			try:
+				detail_shm_s, detail_shm_nons = self.MutationalAnalysis(record[1])
+				stat_s = self.SHM_STAT(detail_shm_s)
+				stat_nons = self.SHM_STAT(detail_shm_nons)
+				stat = [record[0]] + stat_s + stat_nons
+				SHM_STAT_res.append(stat)
+			except:
+				ErrMes += record[0] + "\n"
 
 		self.SHM_STAT_res = SHM_STAT_res
 		# prepare UI and notice user
 		self.ui.pushButtonSHM_draw.setEnabled(True)
 		self.ui.pushButtonSHM_table.setEnabled(True)
 
-		Msg = 'SHM analysis finished!'
-		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+		self.ui.listWidgetSHM_groups.clear()
+		self.ui.listWidgetSHM_groups.addItems(fields_name)
+
+		if ErrMes != '':
+			Style = 'standard-large'
+			ErrMes = 'SHM analysis finished!\n\n Found errors in the following sequences (records have been ignored): \n' + ErrMes
+			self.ShowVGenesTextEdit(ErrMes, Style)
+		else:
+			Msg = 'SHM analysis finished!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
 
 	def MutationalAnalysis(self, input):
 		# initialize variable
