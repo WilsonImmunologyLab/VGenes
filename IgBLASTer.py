@@ -21,7 +21,7 @@ global temp_folder
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
 temp_folder = os.path.join(working_prefix, 'Temp')
 
-def ProcessFASTA(FASTAfile, MaxNum):
+def ProcessFASTAold(FASTAfile, MaxNum):
 	ErLog = ''
 	ErlogFile = ''
 
@@ -95,13 +95,70 @@ def ProcessFASTA(FASTAfile, MaxNum):
 	with open(workingfilename, 'w') as currentFile:
 		currentFile.write(CleanSeq)
 
+	return ErLog, TotSeqs
 
 
+def ProcessFASTA(FASTAfile, MaxNum):
+	ErLog = ''
+	ErlogFile = ''
 
+	TotSeqs = 0
 
+	with open(FASTAfile, 'r') as currentFile:  #using with for this automatically closes the file even if you crash
 
+		SeqName = ''
+		Sequence = ''
+		ErLog = ''
+		CleanSeq = ''
+		for FASTAline in currentFile:
+
+			FASTAline = FASTAline.replace('\n', '').replace('\r', '')
+			if FASTAline == '':
+				FASTAline = ' '
+
+			if FASTAline[0] == '>':
+				if SeqName == "":
+					pass
+				else:
+					SeqName = SeqNameParse(SeqName,25)
+					CleanSeq += SeqName + '\n' + Sequence + '\n'
+					TotSeqs += 1
+
+				SeqName = FASTAline
+				Sequence = ''
+			else:
+				Sequence += re.sub(r'[^NATCG\-]','',FASTAline.upper())
+
+			if MaxNum > 0:
+				if TotSeqs > MaxNum-1:
+					break
+		# need to write the last sequence into the FASTA file
+		SeqName = SeqNameParse(SeqName, 25)
+		CleanSeq += SeqName + '\n' + Sequence + '\n'
+		TotSeqs += 1
+
+	WorkingDir  = os.path.join(working_prefix, 'IgBlast')
+	os.chdir(WorkingDir)
+
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
+
+	if CleanSeq == '':
+		msg = 'There were no good variable gene seqeunces in this set'
+		buttons = 'OK'
+		# answer = VGenesDialogues.informationMessage(self, msg, buttons)
+		return
+
+	with open(workingfilename, 'w') as currentFile:
+		currentFile.write(CleanSeq)
 
 	return ErLog, TotSeqs
+
+def SeqNameParse(SeqName, maxLen):
+	SeqName = re.sub(r'[^\w\d\-\_\>]', '_', SeqName)
+	if len(SeqName) > maxLen:
+		SeqName = SeqName[0:maxLen]
+
+	return SeqName
 
 def TimeCheck(listname):
 	countim = 0
