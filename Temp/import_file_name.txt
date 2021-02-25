@@ -1,1 +1,1 @@
-/Users/leil/Documents/Projects/Lab/Jenna/20210225_vgeneDB/KEOV011.fasta
+/Users/leil/Documents/Projects/scRNAseq/COVID2/VDJ/NEW_17/S50/consensus.fasta

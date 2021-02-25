@@ -18893,276 +18893,243 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def SeqButton(self, button):
-		global JustMoved
-		cursor = self.ui.txtDNASeq.textCursor()
-		AAcursor = self.ui.txtAASeq.textCursor()
-		StartSel = 0
-		EndSel = 0
-		if button == 'v' or button == 'd' or button == 'j':
-			# clear check first
-			self.ui.btnFW_1.setChecked(False)
-			self.ui.btnCW_1.setChecked(False)
-			self.ui.btnFW_2.setChecked(False)
-			self.ui.btnCW_2.setChecked(False)
-			self.ui.btnFW_3.setChecked(False)
-			self.ui.btnCW_3.setChecked(False)
-			self.ui.btnFW_4.setChecked(False)
-			self.ui.btnVDJ.setChecked(False)
-			self.ui.btnC.setChecked(False)
+		try:
+			global JustMoved
+			cursor = self.ui.txtDNASeq.textCursor()
+			AAcursor = self.ui.txtAASeq.textCursor()
+			StartSel = 0
+			EndSel = 0
+			if button == 'v' or button == 'd' or button == 'j':
+				# clear check first
+				self.ui.btnFW_1.setChecked(False)
+				self.ui.btnCW_1.setChecked(False)
+				self.ui.btnFW_2.setChecked(False)
+				self.ui.btnCW_2.setChecked(False)
+				self.ui.btnFW_3.setChecked(False)
+				self.ui.btnCW_3.setChecked(False)
+				self.ui.btnFW_4.setChecked(False)
+				self.ui.btnVDJ.setChecked(False)
+				self.ui.btnC.setChecked(False)
 
-			if self.ui.btnV.isChecked() and self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
-				self.ui.btnVDJ.setChecked(True)
-				self.ui.btnFW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-				self.ui.btnFW_4.setChecked(True)
+				if self.ui.btnV.isChecked() and self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
+					self.ui.btnVDJ.setChecked(True)
+					self.ui.btnFW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+					self.ui.btnFW_4.setChecked(True)
 
-				StartSel = int(data[67]) - 1
-				EndSel = int(data[74])
-			elif self.ui.btnV.isChecked() and self.ui.btnJ.isChecked():
-				self.ui.btnD.setChecked(True)
-				self.ui.btnVDJ.setChecked(True)
-				self.ui.btnFW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-				self.ui.btnFW_4.setChecked(True)
-
-				StartSel = int(data[67]) - 1
-				EndSel = int(data[74])
-			elif self.ui.btnV.isChecked() and self.ui.btnD.isChecked():
-				StartSel = int(data[67]) - 1
-				try:
-					EndSel = int(data[70])
-				except:
-					EndSel = int(data[68])
-			elif self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
-				try:
-					StartSel = int(data[69]) - 1
-				except:
-					StartSel = int(data[73]) - 1
-				EndSel = int(data[74])
-			else:  # then not a combination
-				if self.ui.btnV.isChecked():
 					StartSel = int(data[67]) - 1
-					EndSel = int(data[68])
-				if self.ui.btnD.isChecked():
+					EndSel = int(data[74])
+				elif self.ui.btnV.isChecked() and self.ui.btnJ.isChecked():
+					self.ui.btnD.setChecked(True)
+					self.ui.btnVDJ.setChecked(True)
+					self.ui.btnFW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+					self.ui.btnFW_4.setChecked(True)
+
+					StartSel = int(data[67]) - 1
+					EndSel = int(data[74])
+				elif self.ui.btnV.isChecked() and self.ui.btnD.isChecked():
+					StartSel = int(data[67]) - 1
 					try:
-						StartSel = int(data[69]) - 1
 						EndSel = int(data[70])
 					except:
-						Msg = 'No D gene for light chain!'
-						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
-						                    QMessageBox.Ok)
-						self.ui.btnD.setChecked(False)
-						return
-				if self.ui.btnJ.isChecked():
-					StartSel = int(data[73]) - 1
+						EndSel = int(data[68])
+				elif self.ui.btnD.isChecked() and self.ui.btnJ.isChecked():
+					try:
+						StartSel = int(data[69]) - 1
+					except:
+						StartSel = int(data[73]) - 1
 					EndSel = int(data[74])
-				else:
-					cursor.setPosition(0)
+				else:  # then not a combination
+					if self.ui.btnV.isChecked():
+						StartSel = int(data[67]) - 1
+						EndSel = int(data[68])
+					if self.ui.btnD.isChecked():
+						try:
+							StartSel = int(data[69]) - 1
+							EndSel = int(data[70])
+						except:
+							Msg = 'No D gene for light chain!'
+							QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
+							                    QMessageBox.Ok)
+							self.ui.btnD.setChecked(False)
+							return
+					if self.ui.btnJ.isChecked():
+						StartSel = int(data[73]) - 1
+						EndSel = int(data[74])
+					else:
+						cursor.setPosition(0)
 
-					JustMoved = True
-					self.ui.txtDNASeq.setTextCursor(cursor)
-					self.ui.txtAASeq.setTextCursor(AAcursor)
-					AAcursor.setPosition(0)
-					AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
-					format = QTextCharFormat()
-					format.setFontUnderline(False)
-					AAcursor.mergeCharFormat(format)
-					AAcursor.setPosition(0)
-					JustMoved = False
-		elif button == 'f1' or button == 'c1' or button == 'f2' or button == 'c2' or button == 'f3' or button == 'c3' or button == 'f4':
-			self.ui.btnV.setChecked(False)
-			self.ui.btnD.setChecked(False)
-			self.ui.btnJ.setChecked(False)
-			self.ui.btnC.setChecked(False)
-			self.ui.btnVDJ.setChecked(False)
-
-			if self.ui.btnFW_1.isChecked() and self.ui.btnFW_4.isChecked():
-				StartSel = int(data[23]) - 1
-				EndSel = int(data[74])
-				self.ui.btnV.setChecked(True)
-				self.ui.btnD.setChecked(True)
-				self.ui.btnJ.setChecked(True)
-				self.ui.btnVDJ.setChecked(True)
-
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-			# todo need fix this after cdr3 works
-			elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_3.isChecked():
-				StartSel = int(data[22]) - 1
-				EndSel = int(data[85])
-				self.ui.btnV.setChecked(True)
-				self.ui.btnD.setChecked(True)
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-			elif self.ui.btnFW_1.isChecked() and self.ui.btnFW_3.isChecked():
-				StartSel = int(data[22]) - 1
-				EndSel = int(data[51])
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-			elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_2.isChecked():
-				StartSel = int(data[22]) - 1
-				EndSel = int(data[44])
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-			elif self.ui.btnFW_1.isChecked() and self.ui.btnFW_2.isChecked():
-				StartSel = int(data[22]) - 1
-				EndSel = int(data[37])
-				self.ui.btnCW_1.setChecked(True)
-			elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_1.isChecked():
-				StartSel = int(data[22]) - 1
-				EndSel = int(data[30])
-			elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_4.isChecked():
-				StartSel = int(data[29]) - 1
-				EndSel = int(data[74])
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-			elif self.ui.btnCW_1.isChecked() and self.ui.btnCW_3.isChecked():
-				StartSel = int(data[29]) - 1
-				EndSel = int(data[85])
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-			elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_3.isChecked():
-				StartSel = int(data[29]) - 1
-				EndSel = int(data[51])
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-			elif self.ui.btnCW_1.isChecked() and self.ui.btnCW_2.isChecked():
-				StartSel = int(data[29]) - 1
-				EndSel = int(data[44])
-				self.ui.btnFW_2.setChecked(True)
-			elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_2.isChecked():
-				StartSel = int(data[29]) - 1
-				EndSel = int(data[37])
-			elif self.ui.btnFW_2.isChecked() and self.ui.btnFW_4.isChecked():
-				StartSel = int(data[36]) - 1
-				EndSel = int(data[74])
-
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-			elif self.ui.btnFW_2.isChecked() and self.ui.btnCW_3.isChecked():
-				StartSel = int(data[36]) - 1
-				EndSel = int(data[85])
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-			elif self.ui.btnFW_2.isChecked() and self.ui.btnFW_3.isChecked():
-				StartSel = int(data[36]) - 1
-				EndSel = int(data[51])
-				self.ui.btnCW_2.setChecked(True)
-			elif self.ui.btnFW_2.isChecked() and self.ui.btnCW_2.isChecked():
-				StartSel = int(data[36]) - 1
-				EndSel = int(data[44])
-			elif self.ui.btnCW_2.isChecked() and self.ui.btnFW_4.isChecked():
-				StartSel = int(data[43]) - 1
-				EndSel = int(data[74])
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-			elif self.ui.btnCW_2.isChecked() and self.ui.btnCW_3.isChecked():
-				StartSel = int(data[43]) - 1
-				EndSel = int(data[85])
-				self.ui.btnFW_3.setChecked(True)
-			elif self.ui.btnCW_2.isChecked() and self.ui.btnFW_3.isChecked():
-				StartSel = int(data[43]) - 1
-				EndSel = int(data[51])
-			elif self.ui.btnFW_3.isChecked() and self.ui.btnFW_4.isChecked():
-				StartSel = int(data[50]) - 1
-				EndSel = int(data[74])
-
-				self.ui.btnCW_3.setChecked(True)
-			elif self.ui.btnFW_3.isChecked() and self.ui.btnCW_3.isChecked():
-				StartSel = int(data[50]) - 1
-				EndSel = int(data[85])
-			elif self.ui.btnCW_3.isChecked() and self.ui.btnFW_4.isChecked():
-				StartSel = int(data[84]) - 1
-				EndSel = int(data[74])
-			else:
-				if self.ui.btnFW_1.isChecked():
-					StartSel = int(data[22]) - 1
-					EndSel = int(data[23])
-				if self.ui.btnCW_1.isChecked():
-					StartSel = int(data[29]) - 1
-					EndSel = int(data[30])
-				if self.ui.btnFW_2.isChecked():
-					StartSel = int(data[36]) - 1
-					EndSel = int(data[37])
-				if self.ui.btnCW_2.isChecked():
-					StartSel = int(data[43]) - 1
-					EndSel = int(data[44])
-				if self.ui.btnFW_3.isChecked():
-					StartSel = int(data[50]) - 1
-					EndSel = int(data[51])
-				if self.ui.btnCW_3.isChecked():
-					StartSel = int(data[84]) - 1
-					EndSel = int(data[85])
-				if self.ui.btnFW_4.isChecked():
-					StartSel = int(data[85]) - 1
-					EndSel = int(data[74])
-				else:
-					cursor.setPosition(0)
-					AAcursor.setPosition(0)
-
-					JustMoved = True
-					self.ui.txtDNASeq.setTextCursor(cursor)
-					self.ui.txtAASeq.setTextCursor(AAcursor)
-					AAcursor.setPosition(0)
-					AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
-					format = QTextCharFormat()
-					format.setFontUnderline(False)
-					AAcursor.mergeCharFormat(format)
-					AAcursor.setPosition(0)
-					JustMoved = False
-		elif button == 'c':
-			self.ui.btnFW_1.setChecked(False)
-			self.ui.btnCW_1.setChecked(False)
-			self.ui.btnFW_2.setChecked(False)
-			self.ui.btnCW_2.setChecked(False)
-			self.ui.btnFW_3.setChecked(False)
-			self.ui.btnCW_3.setChecked(False)
-			self.ui.btnFW_4.setChecked(False)
-			self.ui.btnV.setChecked(False)
-			self.ui.btnD.setChecked(False)
-			self.ui.btnJ.setChecked(False)
-			self.ui.btnVDJ.setChecked(False)
-			if self.ui.btnC.isChecked():
-				if int(data[1]) > int(data[74]):
-					StartSel = int(data[74]) + 1
-					EndSel = len(data[79])
-			else:
-				StartSel = 0
-				EndSel = 0
-		elif button == 'vdj':
-			if self.ui.btnVDJ.isChecked():
-				self.ui.btnFW_1.setChecked(True)
-				self.ui.btnCW_1.setChecked(True)
-				self.ui.btnFW_2.setChecked(True)
-				self.ui.btnCW_2.setChecked(True)
-				self.ui.btnFW_3.setChecked(True)
-				self.ui.btnCW_3.setChecked(True)
-				self.ui.btnFW_4.setChecked(True)
-				self.ui.btnV.setChecked(True)
-				self.ui.btnD.setChecked(True)
-				self.ui.btnJ.setChecked(True)
+						JustMoved = True
+						self.ui.txtDNASeq.setTextCursor(cursor)
+						self.ui.txtAASeq.setTextCursor(AAcursor)
+						AAcursor.setPosition(0)
+						AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+						format = QTextCharFormat()
+						format.setFontUnderline(False)
+						AAcursor.mergeCharFormat(format)
+						AAcursor.setPosition(0)
+						JustMoved = False
+			elif button == 'f1' or button == 'c1' or button == 'f2' or button == 'c2' or button == 'f3' or button == 'c3' or button == 'f4':
+				self.ui.btnV.setChecked(False)
+				self.ui.btnD.setChecked(False)
+				self.ui.btnJ.setChecked(False)
 				self.ui.btnC.setChecked(False)
-				StartSel = int(data[67]) - 1
-				EndSel = int(data[74])
-			else:
+				self.ui.btnVDJ.setChecked(False)
+
+				if self.ui.btnFW_1.isChecked() and self.ui.btnFW_4.isChecked():
+					StartSel = int(data[23]) - 1
+					EndSel = int(data[74])
+					self.ui.btnV.setChecked(True)
+					self.ui.btnD.setChecked(True)
+					self.ui.btnJ.setChecked(True)
+					self.ui.btnVDJ.setChecked(True)
+
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+				# todo need fix this after cdr3 works
+				elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_3.isChecked():
+					StartSel = int(data[22]) - 1
+					EndSel = int(data[85])
+					self.ui.btnV.setChecked(True)
+					self.ui.btnD.setChecked(True)
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+				elif self.ui.btnFW_1.isChecked() and self.ui.btnFW_3.isChecked():
+					StartSel = int(data[22]) - 1
+					EndSel = int(data[51])
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+				elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_2.isChecked():
+					StartSel = int(data[22]) - 1
+					EndSel = int(data[44])
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+				elif self.ui.btnFW_1.isChecked() and self.ui.btnFW_2.isChecked():
+					StartSel = int(data[22]) - 1
+					EndSel = int(data[37])
+					self.ui.btnCW_1.setChecked(True)
+				elif self.ui.btnFW_1.isChecked() and self.ui.btnCW_1.isChecked():
+					StartSel = int(data[22]) - 1
+					EndSel = int(data[30])
+				elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_4.isChecked():
+					StartSel = int(data[29]) - 1
+					EndSel = int(data[74])
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+				elif self.ui.btnCW_1.isChecked() and self.ui.btnCW_3.isChecked():
+					StartSel = int(data[29]) - 1
+					EndSel = int(data[85])
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+				elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_3.isChecked():
+					StartSel = int(data[29]) - 1
+					EndSel = int(data[51])
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+				elif self.ui.btnCW_1.isChecked() and self.ui.btnCW_2.isChecked():
+					StartSel = int(data[29]) - 1
+					EndSel = int(data[44])
+					self.ui.btnFW_2.setChecked(True)
+				elif self.ui.btnCW_1.isChecked() and self.ui.btnFW_2.isChecked():
+					StartSel = int(data[29]) - 1
+					EndSel = int(data[37])
+				elif self.ui.btnFW_2.isChecked() and self.ui.btnFW_4.isChecked():
+					StartSel = int(data[36]) - 1
+					EndSel = int(data[74])
+
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+				elif self.ui.btnFW_2.isChecked() and self.ui.btnCW_3.isChecked():
+					StartSel = int(data[36]) - 1
+					EndSel = int(data[85])
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+				elif self.ui.btnFW_2.isChecked() and self.ui.btnFW_3.isChecked():
+					StartSel = int(data[36]) - 1
+					EndSel = int(data[51])
+					self.ui.btnCW_2.setChecked(True)
+				elif self.ui.btnFW_2.isChecked() and self.ui.btnCW_2.isChecked():
+					StartSel = int(data[36]) - 1
+					EndSel = int(data[44])
+				elif self.ui.btnCW_2.isChecked() and self.ui.btnFW_4.isChecked():
+					StartSel = int(data[43]) - 1
+					EndSel = int(data[74])
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+				elif self.ui.btnCW_2.isChecked() and self.ui.btnCW_3.isChecked():
+					StartSel = int(data[43]) - 1
+					EndSel = int(data[85])
+					self.ui.btnFW_3.setChecked(True)
+				elif self.ui.btnCW_2.isChecked() and self.ui.btnFW_3.isChecked():
+					StartSel = int(data[43]) - 1
+					EndSel = int(data[51])
+				elif self.ui.btnFW_3.isChecked() and self.ui.btnFW_4.isChecked():
+					StartSel = int(data[50]) - 1
+					EndSel = int(data[74])
+
+					self.ui.btnCW_3.setChecked(True)
+				elif self.ui.btnFW_3.isChecked() and self.ui.btnCW_3.isChecked():
+					StartSel = int(data[50]) - 1
+					EndSel = int(data[85])
+				elif self.ui.btnCW_3.isChecked() and self.ui.btnFW_4.isChecked():
+					StartSel = int(data[84]) - 1
+					EndSel = int(data[74])
+				else:
+					if self.ui.btnFW_1.isChecked():
+						StartSel = int(data[22]) - 1
+						EndSel = int(data[23])
+					if self.ui.btnCW_1.isChecked():
+						StartSel = int(data[29]) - 1
+						EndSel = int(data[30])
+					if self.ui.btnFW_2.isChecked():
+						StartSel = int(data[36]) - 1
+						EndSel = int(data[37])
+					if self.ui.btnCW_2.isChecked():
+						StartSel = int(data[43]) - 1
+						EndSel = int(data[44])
+					if self.ui.btnFW_3.isChecked():
+						StartSel = int(data[50]) - 1
+						EndSel = int(data[51])
+					if self.ui.btnCW_3.isChecked():
+						StartSel = int(data[84]) - 1
+						EndSel = int(data[85])
+					if self.ui.btnFW_4.isChecked():
+						StartSel = int(data[85]) - 1
+						EndSel = int(data[74])
+					else:
+						cursor.setPosition(0)
+						AAcursor.setPosition(0)
+
+						JustMoved = True
+						self.ui.txtDNASeq.setTextCursor(cursor)
+						self.ui.txtAASeq.setTextCursor(AAcursor)
+						AAcursor.setPosition(0)
+						AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+						format = QTextCharFormat()
+						format.setFontUnderline(False)
+						AAcursor.mergeCharFormat(format)
+						AAcursor.setPosition(0)
+						JustMoved = False
+			elif button == 'c':
 				self.ui.btnFW_1.setChecked(False)
 				self.ui.btnCW_1.setChecked(False)
 				self.ui.btnFW_2.setChecked(False)
@@ -19173,65 +19140,101 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.btnV.setChecked(False)
 				self.ui.btnD.setChecked(False)
 				self.ui.btnJ.setChecked(False)
-				self.ui.btnC.setChecked(False)
-				cursor.setPosition(0)
-				AAcursor.setPosition(0)
-				self.ui.txtDNASeq.setTextCursor(cursor)
-				self.ui.txtAASeq.setTextCursor(AAcursor)
-				AAcursor.setPosition(0)
+				self.ui.btnVDJ.setChecked(False)
+				if self.ui.btnC.isChecked():
+					if int(data[1]) > int(data[74]):
+						StartSel = int(data[74]) + 1
+						EndSel = len(data[79])
+				else:
+					StartSel = 0
+					EndSel = 0
+			elif button == 'vdj':
+				if self.ui.btnVDJ.isChecked():
+					self.ui.btnFW_1.setChecked(True)
+					self.ui.btnCW_1.setChecked(True)
+					self.ui.btnFW_2.setChecked(True)
+					self.ui.btnCW_2.setChecked(True)
+					self.ui.btnFW_3.setChecked(True)
+					self.ui.btnCW_3.setChecked(True)
+					self.ui.btnFW_4.setChecked(True)
+					self.ui.btnV.setChecked(True)
+					self.ui.btnD.setChecked(True)
+					self.ui.btnJ.setChecked(True)
+					self.ui.btnC.setChecked(False)
+					StartSel = int(data[67]) - 1
+					EndSel = int(data[74])
+				else:
+					self.ui.btnFW_1.setChecked(False)
+					self.ui.btnCW_1.setChecked(False)
+					self.ui.btnFW_2.setChecked(False)
+					self.ui.btnCW_2.setChecked(False)
+					self.ui.btnFW_3.setChecked(False)
+					self.ui.btnCW_3.setChecked(False)
+					self.ui.btnFW_4.setChecked(False)
+					self.ui.btnV.setChecked(False)
+					self.ui.btnD.setChecked(False)
+					self.ui.btnJ.setChecked(False)
+					self.ui.btnC.setChecked(False)
+					cursor.setPosition(0)
+					AAcursor.setPosition(0)
+					self.ui.txtDNASeq.setTextCursor(cursor)
+					self.ui.txtAASeq.setTextCursor(AAcursor)
+					AAcursor.setPosition(0)
+					AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+					format = QTextCharFormat()
+					format.setFontUnderline(False)
+					AAcursor.mergeCharFormat(format)
+					AAcursor.setPosition(0)
+
+			JustMoved = True
+			cursor.setPosition(StartSel)
+			if EndSel > len(self.ui.txtDNASeq.toPlainText()):
+				cursor.setPosition(len(self.ui.txtDNASeq.toPlainText()), QTextCursor.KeepAnchor)
+			else:
+				cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
+
+			try:
+				ORF = int(data[105])
+			except:
+				ORF = 0
+			if StartSel - ORF > 0:
+				AAStartSel = math.floor((StartSel - ORF) / 3)
+			else:
+				AAStartSel = math.floor(StartSel / 3)
+			AAEndSel = math.floor((EndSel - ORF) / 3)
+
+			print(str(StartSel) + ',' + str(EndSel) + ',' + str(AAStartSel) + ',' + str(AAEndSel))
+
+			AAcursor.setPosition(AAStartSel)
+			if AAEndSel > len(self.ui.txtDNASeq.toPlainText()):
 				AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
+			else:
+				AAcursor.setPosition(AAEndSel, QTextCursor.KeepAnchor)
+
+			self.ui.txtDNASeq.setTextCursor(cursor)
+			if self.ui.cboDecorate.currentText() == 'None':
+				self.ui.txtAASeq.setTextCursor(AAcursor)
+			else:
+				# if AAEndSel>0:
+				self.ui.txtAASeq.setTextCursor(AAcursor)
 				format = QTextCharFormat()
-				format.setFontUnderline(False)
+				format.setFontUnderline(True)
+				format.setUnderlineColor(QColor("cyan"))
+				format.setUnderlineStyle(QTextCharFormat.WaveUnderline)  # QTextCharFormat('WaveUnderline')
 				AAcursor.mergeCharFormat(format)
 				AAcursor.setPosition(0)
+				self.ui.txtAASeq.setTextCursor(AAcursor)
 
-		JustMoved = True
-		cursor.setPosition(StartSel)
-		if EndSel > len(self.ui.txtDNASeq.toPlainText()):
-			cursor.setPosition(len(self.ui.txtDNASeq.toPlainText()), QTextCursor.KeepAnchor)
-		else:
-			cursor.setPosition(EndSel, QTextCursor.KeepAnchor)
+			JustMoved = False
 
-		try:
-			ORF = int(data[105])
+			# slightly resize window to display the selection, i don't know why the winodw can not display the changes automatically
+			size_w = self.size().width()
+			size_h = self.size().height()
+			offset_pool = [-1, 1]
+			offset = offset_pool[random.randint(0, 1)]
+			self.resize(size_w + offset, size_h + offset)
 		except:
-			ORF = 0
-		if StartSel - ORF > 0:
-			AAStartSel = math.floor((StartSel - ORF) / 3)
-		else:
-			AAStartSel = math.floor(StartSel / 3)
-		AAEndSel = math.floor((EndSel - ORF) / 3)
-
-		print(str(StartSel) + ',' + str(EndSel) + ',' + str(AAStartSel) + ',' + str(AAEndSel))
-
-		AAcursor.setPosition(AAStartSel)
-		if AAEndSel > len(self.ui.txtDNASeq.toPlainText()):
-			AAcursor.setPosition(len(self.ui.txtAASeq.toPlainText()), QTextCursor.KeepAnchor)
-		else:
-			AAcursor.setPosition(AAEndSel, QTextCursor.KeepAnchor)
-
-		self.ui.txtDNASeq.setTextCursor(cursor)
-		if self.ui.cboDecorate.currentText() == 'None':
-			self.ui.txtAASeq.setTextCursor(AAcursor)
-		else:
-			# if AAEndSel>0:
-			self.ui.txtAASeq.setTextCursor(AAcursor)
-			format = QTextCharFormat()
-			format.setFontUnderline(True)
-			format.setUnderlineColor(QColor("cyan"))
-			format.setUnderlineStyle(QTextCharFormat.WaveUnderline)  # QTextCharFormat('WaveUnderline')
-			AAcursor.mergeCharFormat(format)
-			AAcursor.setPosition(0)
-			self.ui.txtAASeq.setTextCursor(AAcursor)
-
-		JustMoved = False
-
-		# slightly resize window to display the selection, i don't know why the winodw can not display the changes automatically
-		size_w = self.size().width()
-		size_h = self.size().height()
-		offset_pool = [-1, 1]
-		offset = offset_pool[random.randint(0, 1)]
-		self.resize(size_w + offset, size_h + offset)
+			pass
 
 	@pyqtSlot()
 	def SeqButtonold(self, button):
@@ -20959,65 +20962,111 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 					DATA[block_id][20] = junction_list[2]
 				
 				# import Alignment summary
-				ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
-				fr1_match = ig_match[0]
-				fr1_match = fr1_match[1:]
-				fr1_match = fr1_match.split('\t')
-				DATA[block_id][22] = 1
-				DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
-				DATA[block_id][24] = fr1_match[3]
-				DATA[block_id][25] = fr1_match[4]
-				DATA[block_id][26] = fr1_match[5]
-				DATA[block_id][27] = fr1_match[6]
-				DATA[block_id][28] = fr1_match[7]
+				try:
+					ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+					fr1_match = ig_match[0]
+					fr1_match = fr1_match[1:]
+					fr1_match = fr1_match.split('\t')
+					DATA[block_id][22] = 1
+					DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][24] = fr1_match[3]
+					DATA[block_id][25] = fr1_match[4]
+					DATA[block_id][26] = fr1_match[5]
+					DATA[block_id][27] = fr1_match[6]
+					DATA[block_id][28] = fr1_match[7]
+				except:
+					print(DATA[block_id][0])
+					DATA[block_id][22] = 'NA'
+					DATA[block_id][23] = 'NA'
+					DATA[block_id][24] = 'NA'
+					DATA[block_id][25] = 'NA'
+					DATA[block_id][26] = 'NA'
+					DATA[block_id][27] = 'NA'
+					DATA[block_id][28] = 'NA'
 
-				ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
-				cdr1_match = ig_match[0]
-				cdr1_match = cdr1_match[1:]
-				cdr1_match = cdr1_match.split('\t')
-				DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
-				DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
-				DATA[block_id][31] = cdr1_match[3]
-				DATA[block_id][32] = cdr1_match[4]
-				DATA[block_id][33] = cdr1_match[5]
-				DATA[block_id][34] = cdr1_match[6]
-				DATA[block_id][35] = cdr1_match[7]
+				try:
+					ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+					cdr1_match = ig_match[0]
+					cdr1_match = cdr1_match[1:]
+					cdr1_match = cdr1_match.split('\t')
+					DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][31] = cdr1_match[3]
+					DATA[block_id][32] = cdr1_match[4]
+					DATA[block_id][33] = cdr1_match[5]
+					DATA[block_id][34] = cdr1_match[6]
+					DATA[block_id][35] = cdr1_match[7]
+				except:
+					DATA[block_id][29] = 'NA'
+					DATA[block_id][30] = 'NA'
+					DATA[block_id][31] = 'NA'
+					DATA[block_id][32] = 'NA'
+					DATA[block_id][33] = 'NA'
+					DATA[block_id][34] = 'NA'
+					DATA[block_id][35] = 'NA'
 
-				ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
-				fr2_match = ig_match[0]
-				fr2_match = fr2_match[1:]
-				fr2_match = fr2_match.split('\t')
-				DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
-				DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
-				DATA[block_id][38] = fr2_match[3]
-				DATA[block_id][39] = fr2_match[4]
-				DATA[block_id][40] = fr2_match[5]
-				DATA[block_id][41] = fr2_match[6]
-				DATA[block_id][42] = fr2_match[7]
+				try:
+					ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+					fr2_match = ig_match[0]
+					fr2_match = fr2_match[1:]
+					fr2_match = fr2_match.split('\t')
+					DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][38] = fr2_match[3]
+					DATA[block_id][39] = fr2_match[4]
+					DATA[block_id][40] = fr2_match[5]
+					DATA[block_id][41] = fr2_match[6]
+					DATA[block_id][42] = fr2_match[7]
+				except:
+					DATA[block_id][36] = 'NA'
+					DATA[block_id][37] = 'NA'
+					DATA[block_id][38] = 'NA'
+					DATA[block_id][39] = 'NA'
+					DATA[block_id][40] = 'NA'
+					DATA[block_id][41] = 'NA'
+					DATA[block_id][42] = 'NA'
 
-				ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
-				cdr2_match = ig_match[0]
-				cdr2_match = cdr2_match[1:]
-				cdr2_match = cdr2_match.split('\t')
-				DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
-				DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
-				DATA[block_id][45] = cdr2_match[3]
-				DATA[block_id][46] = cdr2_match[4]
-				DATA[block_id][47] = cdr2_match[5]
-				DATA[block_id][48] = cdr2_match[6]
-				DATA[block_id][49] = cdr2_match[7]
+				try:
+					ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+					cdr2_match = ig_match[0]
+					cdr2_match = cdr2_match[1:]
+					cdr2_match = cdr2_match.split('\t')
+					DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][45] = cdr2_match[3]
+					DATA[block_id][46] = cdr2_match[4]
+					DATA[block_id][47] = cdr2_match[5]
+					DATA[block_id][48] = cdr2_match[6]
+					DATA[block_id][49] = cdr2_match[7]
+				except:
+					DATA[block_id][43] = 'NA'
+					DATA[block_id][44] = 'NA'
+					DATA[block_id][45] = 'NA'
+					DATA[block_id][46] = 'NA'
+					DATA[block_id][47] = 'NA'
+					DATA[block_id][48] = 'NA'
+					DATA[block_id][49] = 'NA'
 
-				ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
-				fr3_match = ig_match[0]
-				fr3_match = fr3_match[1:]
-				fr3_match = fr3_match.split('\t')
-				DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
-				DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
-				DATA[block_id][52] = fr3_match[3]
-				DATA[block_id][53] = fr3_match[4]
-				DATA[block_id][54] = fr3_match[5]
-				DATA[block_id][55] = fr3_match[6]
-				DATA[block_id][56] = fr3_match[7]
+				try:
+					ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+					fr3_match = ig_match[0]
+					fr3_match = fr3_match[1:]
+					fr3_match = fr3_match.split('\t')
+					DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][52] = fr3_match[3]
+					DATA[block_id][53] = fr3_match[4]
+					DATA[block_id][54] = fr3_match[5]
+					DATA[block_id][55] = fr3_match[6]
+					DATA[block_id][56] = fr3_match[7]
+				except:
+					DATA[block_id][50] = 'NA'
+					DATA[block_id][51] = 'NA'
+					DATA[block_id][52] = 'NA'
+					DATA[block_id][53] = 'NA'
+					DATA[block_id][54] = 'NA'
+					DATA[block_id][55] = 'NA'
+					DATA[block_id][56] = 'NA'
 
 				# import Alignment summary
 				ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
