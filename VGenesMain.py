@@ -20689,15 +20689,21 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
-			IgBlastOut_fmt19 = os.system(BLASTCommandLine)
+			#BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
+			#IgBlastOut_fmt19 = os.system(BLASTCommandLine)
+			#print(BLASTCommandLine)
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 		elif species == 'Mouse':
 			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
-			IgBlastOut_fmt19 = os.system(BLASTCommandLine)
+			#BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
+			#IgBlastOut_fmt19 = os.system(BLASTCommandLine)
+			#print(BLASTCommandLine)
+			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 		end = time.time()
 		print('Run time for IgBlast: ' + str(end - start))
@@ -20706,142 +20712,156 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 		with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
 			currentFile.write(ErLog)
 
+	start = time.time()
 	# parse IgBlast out fmt 19
-	with open(igblast_out_fmt19, 'r') as IGBLAST_fmt19:
-		result = csv.reader(IGBLAST_fmt19, delimiter="\t")
-		line_id = 0
-		for record in result:
-			if line_id == 0:
-				pass
+	#with open(igblast_out_fmt19, 'r') as IGBLAST_fmt19:
+	#	result = csv.reader(IGBLAST_fmt19, delimiter="\t")
+	line_id = 0
+	for record in IgBlastOut_fmt19:
+		record = record.split('\t')
+		if line_id == 0:
+			pass
+		else:
+			'''
+			file_handle = open(progressBarFile, 'w')
+			progress = str(int((line_id + 1) * 50 / totel_seq))
+			file_handle.write(progress)
+			file_handle.write(',Step1:' + str(line_id + 1) + '/' + str(totel_seq))
+			file_handle.close()
+			'''
+
+			pct = int((line_id + 1) * 100 / totel_seq)
+			label = 'Step1:' + str(line_id + 1) + '/' + str(totel_seq)
+			signal.emit(pct, label)
+
+			this_data = [''] * 119
+
+			this_data[0] = record[0]
+			this_data[1] = str(len(record[1]))
+			if record[2] == 'IGH':
+				this_data[2] = 'Heavy'
+			elif record[2] == 'IGK':
+				this_data[2] = 'Kappa'
+			elif record[2] == 'IGL':
+				this_data[2] = 'Lambda'
 			else:
-				'''
-				file_handle = open(progressBarFile, 'w')
-				progress = str(int((line_id + 1) * 50 / totel_seq))
-				file_handle.write(progress)
-				file_handle.write(',Step1:' + str(line_id + 1) + '/' + str(totel_seq))
-				file_handle.close()
-				'''
+				this_data[2] = 'Unknown'
 
-				pct = int((line_id + 1) * 100 / totel_seq)
-				label = 'Step1:' + str(line_id + 1) + '/' + str(totel_seq)
-				signal.emit(pct, label)
+			if record[3] == 'F':
+				this_data[12] = 'No'
+			else:
+				this_data[12] = 'Yes'
 
-				this_data = [''] * 119
-
-				this_data[0] = record[0]
-				this_data[1] = str(len(record[1]))
-				if record[2] == 'IGH':
-					this_data[2] = 'Heavy'
-				elif record[2] == 'IGK':
-					this_data[2] = 'Kappa'
-				elif record[2] == 'IGL':
-					this_data[2] = 'Lambda'
-				else:
-					this_data[2] = 'Unknown'
-
-				if record[3] == 'F':
-					this_data[12] = 'No'
-				else:
-					this_data[12] = 'Yes'
-
-				if record[4] == '':
-					this_data[13] = 'N/A'
+			if record[4] == '':
+				this_data[13] = 'N/A'
+			else:
+				if record[4] == 'T':
+					this_data[13] = 'In-frame'
+				elif record[4] == 'F':
+					this_data[13] = 'Out-of-frame'
 				else:
 					this_data[13] = record[4]
-				if record[5] == '':
-					this_data[14] = 'N/A'
+
+			if record[5] == '':
+				this_data[14] = 'N/A'
+			else:
+				if record[5] == 'T':
+					this_data[14] = 'Yes'
+				elif record[5] == 'F':
+					this_data[14] = 'No'
 				else:
-					this_data[14] = record[5]
+					this_data[14] = record[4]
 
-				if record[6] == 'F':
-					this_data[15] = '+'
+			if record[6] == 'F':
+				this_data[15] = '+'
+			else:
+				this_data[15] = '-'
+
+			this_data[59] = record[65]
+			this_data[60] = record[66]
+			this_data[61] = record[69]
+			this_data[62] = record[70]
+			this_data[63] = ''
+			this_data[64] = ''
+			this_data[65] = record[73]
+			this_data[66] = record[74]
+
+			this_data[67] = record[15]
+			this_data[68] = record[16]
+			this_data[69] = record[17]
+			this_data[70] = record[18]
+			this_data[71] = ''
+			this_data[72] = ''
+			this_data[73] = record[19]
+			this_data[74] = record[20]
+
+			# identify grouping
+			if project == 'ByFunction':
+				this_data[75] = this_data[2]
+				if this_data[14] == "Yes":
+					this_data[76] = 'Functional'
 				else:
-					this_data[15] = '-'
+					this_data[76] = 'Nonfunctional'
+				this_data[77] = this_data[13]
+			else:
+				this_data[75] = project
+				this_data[76] = grouping
+				this_data[77] = subgroup
 
-				this_data[59] = record[65]
-				this_data[60] = record[66]
-				this_data[61] = record[69]
-				this_data[62] = record[70]
-				this_data[63] = ''
-				this_data[64] = ''
-				this_data[65] = record[73]
-				this_data[66] = record[74]
+			this_data[78] = species
+			# sequence
+			vdj_seq = re.sub('-','',record[11])
+			seq_parts = record[1].split(vdj_seq)
+			try:
+				this_data[79] = record[11] + seq_parts[1]
+			except:
+				print('sequence potential error')
+				print(record[1])
+				print(record[11])
+				this_data[79] = record[11]
+			this_data[80] = record[12]
 
-				this_data[67] = record[15]
-				this_data[68] = record[16]
-				this_data[69] = record[17]
-				this_data[70] = record[18]
-				this_data[71] = ''
-				this_data[72] = ''
-				this_data[73] = record[19]
-				this_data[74] = record[20]
+			this_data[86] = "Specificity"
+			this_data[87] = "Subspecificity"
+			this_data[88] = "0"
+			this_data[89] = "0"
 
-				# identify grouping
-				if project == 'ByFunction':
-					this_data[75] = this_data[2]
-					if this_data[14] == "Yes":
-						this_data[76] = 'Functional'
-					else:
-						this_data[76] = 'Nonfunctional'
-					this_data[77] = this_data[13]
-				else:
-					this_data[75] = project
-					this_data[76] = grouping
-					this_data[77] = subgroup
+			this_data[93] = now
 
-				this_data[78] = species
-				# sequence
-				vdj_seq = re.sub('-','',record[11])
-				seq_parts = record[1].split(vdj_seq)
+			# identify isotype
+			if this_data[2] == 'Heavy':
+				IsoSeq = record[1]
+				IsoSeq = IsoSeq[int(record[72]):]
 				try:
-					this_data[79] = record[11] + seq_parts[1]
-				except:
-					print('sequence potential error')
-					print(record[1])
-					print(record[11])
-					this_data[79] = record[11]
-				this_data[80] = record[12]
-
-				this_data[86] = "Specificity"
-				this_data[87] = "Subspecificity"
-				this_data[88] = "0"
-				this_data[89] = "0"
-
-				this_data[93] = now
-
-				# identify isotype
-				if this_data[2] == 'Heavy':
-					IsoSeq = record[1]
-					IsoSeq = IsoSeq[int(record[72]):]
-					try:
-						IsoSeq = IsoSeq.strip('N')
-						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
-						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-							Isotype = VGenesSeq.CallIsotype(IsoSeq)
-						else:
-							if len(IsoSeq) > 2:
-								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
-									Isotype = 'IgG'
-								elif IsoSeq[:3] == 'CAT':
-									Isotype = 'IgA'
-								elif IsoSeq[:3] == 'GGA':
-									Isotype = 'IgM'
-								elif IsoSeq[:3] == 'CAC':
-									Isotype = 'IgD'
-								else:
-									Isotype = IsoSeq
+					IsoSeq = IsoSeq.strip('N')
+					AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+					if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+						Isotype = VGenesSeq.CallIsotype(IsoSeq)
+					else:
+						if len(IsoSeq) > 2:
+							if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+								Isotype = 'IgG'
+							elif IsoSeq[:3] == 'CAT':
+								Isotype = 'IgA'
+							elif IsoSeq[:3] == 'GGA':
+								Isotype = 'IgM'
+							elif IsoSeq[:3] == 'CAC':
+								Isotype = 'IgD'
 							else:
-								Isotype = 'Unknown'
-					except:
-						Isotype = 'Unknown'
-				else:
-					if this_data[2] == 'Kappa':
-						Isotype = 'Kappa'
-					elif this_data[2] == 'Lambda':
-						Isotype = 'Lambda'
-				this_data[101] = Isotype
+								Isotype = IsoSeq
+						else:
+							Isotype = 'Unknown'
+				except:
+					Isotype = 'Unknown'
+			else:
+				if this_data[2] == 'Kappa':
+					Isotype = 'Kappa'
+				elif this_data[2] == 'Lambda':
+					Isotype = 'Lambda'
+			this_data[101] = Isotype
 
-				# import CDR3
+			# import CDR3
+			try:
 				JGeneName = record[10].split(',')[0]
 				CDR3_start = int(record[84]) + 1
 				if species == 'Human':
@@ -20862,17 +20882,19 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				this_data[85] = str(CDR3_end - int(record[63]))
 				this_data[99] = str(CDR3_MW)
 				this_data[100] = str(CDR3_pI)
+			except:
+				print(record[0])
 
-				# import mutation
-				mAb_seq = record[11]
-				germline_seq = record[12]
-				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
-				this_data[57] = str(num_mut)
-				this_data[96] = str(num_mut)
-				this_data[97] = mut
+			# import mutation
+			mAb_seq = record[11]
+			germline_seq = record[12]
+			mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+			this_data[57] = str(num_mut)
+			this_data[96] = str(num_mut)
+			this_data[97] = mut
 
-				DATA.append(this_data)
-			line_id += 1
+			DATA.append(this_data)
+		line_id += 1
 
 	# parse IgBlast out fmt 3
 	cur_block = ''
@@ -21267,7 +21289,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 		currentFile.write(ErLog)
 
 	# if productive = TRUE, only keep record with V and J
-	start = time.time()
+
 
 	if GetProductive == 0:  # only keep productive
 		# find record
@@ -21304,7 +21326,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 			cnt += 1
 
 	end = time.time()
-	print('Run time for productive: ' + str(end - start))
+	print('Run time for fast mode: ' + str(end - start))
 
 	return DATA
 

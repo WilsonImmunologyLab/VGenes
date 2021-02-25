@@ -120,7 +120,7 @@ def ProcessFASTA(FASTAfile, MaxNum):
 				if SeqName == "":
 					pass
 				else:
-					SeqName = SeqNameParse(SeqName,25)
+					SeqName = SeqNameParse(SeqName,35)
 					CleanSeq += SeqName + '\n' + Sequence + '\n'
 					TotSeqs += 1
 
@@ -277,7 +277,7 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	# IgBlastOut += '\nBLASTend'
 	# igblastn -germline_db_V human_gl_V_IMGT -germline_db_J human_gl_J_IMGT -germline_db_D human_gl_D_IMGT -organism human -domain_system kabat -query SFV-005H.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3
 	# IgBlastOut = os.popen("igblastn -germline_db_V mouse_gl_V -germline_db_J mouse_gl_J -germline_db_D mouse_gl_D -organism mouse -domain_system kabat -query MVtests1.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3")
-	print('stop')
+	#print('stop')
 
 	# todo Below is code to test IgBlast out put saving to a file...need comment out before use
 	# testfilename = '/Applications/IgBlast/database/testfilename.txt'
@@ -296,16 +296,6 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	#
 	#
 
-
-
-
-
-#
-#
-#
-#
-# def IgBLASTParse(IgBlastOut, datalist):
-#
 	testList = ''
 
 	# ErlogFile2 = '/Applications/IgBlast/database/ErLog2.txt'  # NoErrors  NoGoodSeqs
@@ -332,6 +322,7 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	# ErLog2  = 'VGenes input ended at: '+ time.strftime('%c') + '\n'
 	# return
 
+	start = time.time()
 
 
 	Importing  = False
@@ -516,6 +507,8 @@ def IgBLASTit(FASTAFile, datalist, signal):
 				currentFile.write(ErLog)
 
 			# TODO need to use error log contents to determine if seqs should be added to database
+			end = time.time()
+			print('Run time for original mode: ' + str(end - start))
 
 			return IgBLASTset
 
@@ -1680,6 +1673,9 @@ def IgBLASTit(FASTAFile, datalist, signal):
 		# TODO maybe need to analyze IgBLAST output for SHM
 
 	conn.close()
+
+	end = time.time()
+	print('Run time for original mode: ' + str(end - start))
 
 	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
 	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
