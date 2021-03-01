@@ -14049,7 +14049,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			region = re.sub(r'^,','',region)
 
 		if self.ui.listWidgetSHM_groups.currentItem() == None:
-			group == ''
+			group = ''
 		else:
 			group = self.ui.listWidgetSHM_groups.currentItem().text()
 			group = re.sub(r'\(.+', "", group)
