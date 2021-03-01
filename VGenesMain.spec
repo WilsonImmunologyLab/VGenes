@@ -33,7 +33,7 @@ added_files = [
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/AbVecConnectors.txt','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_tree.html','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/VDJGenes.db','Data'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/IgBlast/*','IgBlast'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/IgBlast','IgBlast'),
              ]
 
 a = Analysis(['VGenesMain.py'],
