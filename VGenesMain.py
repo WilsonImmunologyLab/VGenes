@@ -11291,7 +11291,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 		SQLStatement = 'SELECT SeqName FROM vgenesDB ' + orderStatement
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		name_list = [u[0] for u in DataIn]
-		row_number = name_list.index(name) + 1
+		try:
+			row_number = name_list.index(name) + 1
+		except:
+			row_number = 1
 
 		pageSize = int(self.ui.spinBoxPageSize.text())
 		PageNumber = math.ceil(row_number/pageSize)
