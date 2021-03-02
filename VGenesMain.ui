@@ -9140,7 +9140,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <item row="4" column="1">
             <widget class="QRadioButton" name="radioButtonExclusive">
              <property name="text">
-              <string>Exclusive</string>
+              <string>Exclusively</string>
              </property>
             </widget>
            </item>
@@ -9357,17 +9357,32 @@ If the J-end is off the J gene end may need adjusted</string>
                 </widget>
                </item>
                <item>
-                <spacer name="verticalSpacer">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                <widget class="QLabel" name="label_99">
+                 <property name="text">
+                  <string/>
                  </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_100">
+                 <property name="text">
+                  <string/>
                  </property>
-                </spacer>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_101">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_102">
+                 <property name="text">
+                  <string/>
+                 </property>
+                </widget>
                </item>
               </layout>
              </item>
@@ -9434,19 +9449,6 @@ If the J-end is off the J gene end may need adjusted</string>
                   <string>FR3</string>
                  </property>
                 </widget>
-               </item>
-               <item>
-                <spacer name="verticalSpacer_2">
-                 <property name="orientation">
-                  <enum>Qt::Vertical</enum>
-                 </property>
-                 <property name="sizeHint" stdset="0">
-                  <size>
-                   <width>20</width>
-                   <height>40</height>
-                  </size>
-                 </property>
-                </spacer>
                </item>
               </layout>
              </item>

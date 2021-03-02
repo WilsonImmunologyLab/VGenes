@@ -6988,16 +6988,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.match_table_to_tree()
 		'''
+		if self.ui.radioButtonExclusive.isChecked():
+			self.clearTreeChecks()
 
-		self.clearTreeChecks()
 		for cur_name in member_names:
 			found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
 			if len(found) > 0:
 				for item in found:
 					item.setCheckState(0, Qt.Checked)
 		rows = self.ui.SeqTable.rowCount()
-		if rows > 0:
-			self.match_tree_to_table()
+		self.match_tree_to_table()
+
+		Msg = 'All members of this clone were checked!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	def initial_Clone(self):
 		self.ui.listWidgetClone.clear()
@@ -14366,7 +14369,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 		# get all checked records
 		WHEREStatement = 'WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
-
 		SQLStatement = "SELECT SeqName,SeqAlignment FROM vgenesDB " + WHEREStatement
 		#print(SQLStatement)
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
