@@ -14400,6 +14400,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 			Msg = 'SHM analysis finished!'
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
+	@pyqtSlot()
+	def on_pushButtonAID_clicked(self):
+		ErrMes = ''
+		if len(self.CheckedRecords) == 0:
+			Msg = 'Please check some records first!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		# get all checked records
+		WHEREStatement = 'WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
+
+		SQLStatement = "SELECT SeqName,Sequence FROM vgenesDB " + WHEREStatement
+		# print(SQLStatement)
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		# SHM STAT
+		SHM_STAT_res = []
+		for record in DataIn:
+			mutman = MutMap(record[1])
+			a = 1
 
 	def MutationalAnalysis(self, input):
 		# initialize variable
@@ -22715,10 +22734,278 @@ def ReadFasta(file):
 
 	return res
 
+# calculate AA Similarity based on BLOSUM62 matrix
+def AASimilarity(AA):
+    # Proc Natl Acad Sci U S A. 1992 Nov 15;89(22):10915-9.
+    # Amino acid substitution matrices from protein blocks.
+    # Henikoff S1, Henikoff JG.
+    # Based on above reference and the BLOSUM62 similarity indices
+    # BLOSUM62 = {}
+    ExScore = ''
+    try:
+        if AA in BLOSUM62:
+            ExScore = BLOSUM62[AA]
+        else:
+            AA = AA[1]+ AA[0]
+            ExScore = BLOSUM62[AA]
+    except:
+            ExScore = ''
+    return ExScore
+
+# AID targeting
+def MutMap(Sequence):
+#     goal to identify RGYW, WRCY, WA, TW, coldspots, and Pol-eta hs and cs, plus C-to-T targeting
+# to optimally remove targetting under constraints of using codons at physiological frequencies
+# can decinstruct a sequence and make every possible variant then choose least and most evolved
+# can use to look at effects of mutation on changing substrate
+# for aged study, what are the consequences of relying on memory cells to much?
+    features = []
+    Sequence = Sequence.upper()
+    i=0
+    j=1
+    scores = ()
+    for base in range(0, len(Sequence)-2):
+
+        MutType = ''
+        CTType = ''
+        RScore = ''
+
+        if j == 1:
+            codon = Sequence[base:base+3]
+            AA = Translator(codon, 0)
+        Nuc = Sequence[base]
+        if Nuc == 'C' and base >1 and base < len(Sequence)-1:
+            if (Sequence[base-2] == 'A' or Sequence[base-2] == 'T') and (Sequence[base-1] == 'A' or Sequence[base-1] == 'G') and (Sequence[base+1] == 'C' or Sequence[base+1] == 'T'):
+                MutType = 'WRCY'
+            elif (Sequence[base-2] == 'A' or Sequence[base-2] == 'T') and (Sequence[base-1] == 'A' or Sequence[base-1] == 'G')and not (Sequence[base+1] == 'C' or Sequence[base+1] == 'T'):
+                MutType = 'WRC'
+            elif ((Sequence[base-2] == 'G' or Sequence[base-2] == 'C') and (Sequence[base-1] == 'C' or Sequence[base-1] == 'T')) or Sequence[base-2:base] == 'TTC' or Sequence[base-2:base] == 'CAC' or Sequence[base-2:base] == 'GGC' or Sequence[base-2:base] == 'GAC':
+                MutType = 'AID-CS'
+            else:
+                MutType = "Neutral"
+        if Nuc == 'C':
+            if j == 1:
+                CkCodon = 'T' + codon[1:]
+            elif j ==2:
+                try:
+                    CkCodon = codon[0] + 'T' + codon[2]
+                except:
+                    print('stop')
+            elif j == 3:
+                CkCodon = codon[0:1] + 'T'
+            CkAA = Translator(CkCodon, 0)
+            if AA[0] != CkAA[0]:
+                if CkAA[0] != '*':
+                    CTType = 'missense'
+                    RScore = AASimilarity(AA[0]+CkAA[0])  #gets the BLOSUM62 score for conservation liklihood
+                else:
+                    CTType = 'nonsense'
+            else:
+                CTType = 'silent'
+
+        if Nuc == 'G' and base >0 and base < len(Sequence)-2:
+            if (Sequence[base-1] == 'G' or Sequence[base-1] == 'A') and (Sequence[base+1] == 'C' or Sequence[base+1] == 'T') and (Sequence[base+2] == 'A' or Sequence[base+2] == 'T'):
+                MutType = 'WRCY'
+            elif (Sequence[base+1] == 'C' or Sequence[base+1] == 'T') and (Sequence[base+2] == 'A' or Sequence[base+2] == 'T'):
+                MutType = 'WRC'
+            elif ((Sequence[base+1] == 'G' or Sequence[base+1] == 'A') and (Sequence[base+2] == 'C' or Sequence[base+2] == 'G')) or Sequence[base:base+2] == 'GAA' or Sequence[base:base+2] == 'GTG' or Sequence[base:base+2] == 'GCC' or Sequence[base:base+2] == 'GTC':
+                MutType = 'AID-CS'
+            else:
+                MutType = "Neutral"
+        if Nuc == 'G':
+            if j == 1:
+                CkCodon = 'A' + codon[1:]
+            elif j ==2:
+                CkCodon = codon[0] + 'A' + codon[2]
+            elif j == 3:
+                CkCodon = codon[0:1] + 'A'
+            CkAA = Translator(CkCodon, 0)
+            if AA[0] != CkAA[0]:
+                if CkAA[0] != '*':
+                    CTType = 'missense'
+                    RScore = AASimilarity(AA[0]+CkAA[0])  #gets the BLOSUM62 score for conservation liklihood, negative is less, + is likly
+                else:
+                    CTType = 'nonsense'
+            else:
+                CTType = 'silent'
+
+        if Nuc == 'A'and base >0:  #WA
+            if (Sequence[base-1] == 'A' or Sequence[base-1] == 'T'):
+                MutType = 'WA'
+            else:
+                MutType = 'Neutral'
+
+        if Nuc == 'A':
+            if j == 1:
+                CkCodon = 'G' + codon[1:]
+            elif j ==2:
+                CkCodon = codon[0] + 'G' + codon[2]
+            elif j == 3:
+                CkCodon = codon[0:1] + 'G'
+            CkAA = Translator(CkCodon, 0)
+            if AA[0] != CkAA[0]:
+                if CkAA[0] != '*':
+                    CTType = 'missense'
+                    RScore = AASimilarity(AA[0]+CkAA[0])  #gets the BLOSUM62 score for conservation liklihood, negative is less, + is likly
+                else:
+                    CTType = 'nonsense'
+            else:
+                CTType = 'silent'
+
+        if Nuc == 'T'and base < len(Sequence)-1:  #WA
+            if (Sequence[base+1] == 'A' or Sequence[base+1] == 'T'):
+                MutType = 'TW'
+            else:
+                MutType = 'Neutral'
+
+        if Nuc == 'T':
+            if j == 1:
+                CkCodon = 'C' + codon[1:]
+            elif j ==2:
+                CkCodon = codon[0] + 'C' + codon[2]
+            elif j == 3:
+                CkCodon = codon[0:1] + 'C'
+            CkAA = Translator(CkCodon, 0)
+            if AA[0] != CkAA[0]:
+                if CkAA[0] != '*':
+                    CTType = 'missense'
+                    RScore = AASimilarity(AA[0]+CkAA[0])  #gets the BLOSUM62 score for conservation liklihood, negative is less, + is likly
+                else:
+                    CTType = 'nonsense'
+            else:
+                CTType = 'silent'
+
+        NMut = Nuc+MutType
+        TENDA, TENDG, TENDC, TENDT, MutIndex = 0,0,0,0,0
+
+        if NMut in Mutability:
+            MutIndex = Mutability[NMut]
+
+        if NMut == 'CWRCY':
+            TENDA = MutTendency['CAWRCY']
+            TENDG = MutTendency['CGWRCY']
+            TENDT = MutTendency['CTWRCY']
+            TENDC = 0
+        elif NMut == 'CWRC':
+            TENDA = MutTendency['CAWRC']
+            TENDG = MutTendency['CGWRC']
+            TENDT = MutTendency['CTWRC']
+            TENDC = 0
+        elif NMut == 'CAID-CS':
+            TENDA = MutTendency['CAAID-CS']
+            TENDG = MutTendency['CGAID-CS']
+            TENDT = MutTendency['CTAID-CS']
+            TENDC = 0
+        elif NMut == 'CNeutral':
+            TENDA = MutTendency['CANeutral']
+            TENDG = MutTendency['CGNeutral']
+            TENDT = MutTendency['CTNeutral']
+            TENDC = 0
+        elif NMut == 'GWRCY':
+            TENDA = MutTendency['GAWRCY']
+            TENDG = 0
+            TENDT = MutTendency['GTWRCY']
+            TENDC = MutTendency['GCWRCY']
+        elif NMut == 'GWRC':
+            TENDA = MutTendency['GAWRC']
+            TENDG = 0
+            TENDT = MutTendency['GTWRC']
+            TENDC = MutTendency['GCWRC']
+        elif NMut == 'GAID-CS':
+            TENDA = MutTendency['GAAID-CS']
+            TENDG = 0
+            TENDT = MutTendency['GTAID-CS']
+            TENDC = MutTendency['GCAID-CS']
+        elif NMut == 'GWRC':
+            TENDA = MutTendency['GANeutral']
+            TENDG = 0
+            TENDT = MutTendency['GTNeutral']
+            TENDC = MutTendency['GCNeutral']
+        elif NMut == 'AWA':
+            TENDA = 0
+            TENDG = MutTendency['AGWA']
+            TENDT = MutTendency['ATWA']
+            TENDC = MutTendency['ACWA']
+        elif NMut == 'ANeutral':
+            TENDA = 0
+            TENDG = MutTendency['AGNeutral']
+            TENDT = MutTendency['ATNeutral']
+            TENDC = MutTendency['ACNeutral']
+        elif NMut == 'TTW':
+            TENDA = MutTendency['TATW']
+            TENDG = MutTendency['TGTW']
+            TENDT = 0
+            TENDC = MutTendency['TCTW']
+        elif NMut == 'TNeutral':
+            TENDA = MutTendency['TANeutral']
+            TENDG = MutTendency['TGNeutral']
+            TENDT = 0
+            TENDC = MutTendency['TCNeutral']
+
+        scores = (Nuc, MutType, CTType, RScore, MutIndex, TENDA, TENDG, TENDC, TENDT)
+        #Nuc, obvious
+        # MutType, whether in a hot, cold, or neutral for AID or Pol-eta
+        # CTType, whether if C to T or G to A mutation would be silent (not verified code yet)
+        # RScore, when scoring mutations oif it is a conservative amino acid change based on Blosum62
+        # MutIndex, this is the empirical frequency of mutations determined from analyzing a million sequences if in hotspot, coldspot, etc
+        # TENDA, similar to MutIndex but it's tendency for the current base to become an A based on empirical
+        # TENDG, similar to MutIndex but it's tendency for the current base to become a G based on empirical
+        # TENDC, similar to MutIndex but it's tendency for the current base to become a C based on empirical
+        # TENDT similar to MutIndex but it's tendency for the current base to become a T based on empirical
+
+        features.append(scores)
+        if j <3:
+            j+=1
+        else:
+            j=1
+        # i+=1
+
+    return features
+
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
         async with session.get(url=url) as response:
             return await response.json()
+
+Mutability = {'CWRCY':5.328476052, 'CWRC':1.615976588, 'CAID-CS':0.878356004, 'CNeutral':1.080514212,
+                'GWRCY':3.75544955, 'GWRC':4.626183008, 'GAID-CS':0.725579452, 'GNeutral':1.512267645,
+                'AWA':3.897581991, 'ANeutral':2.518229922, 'TTW':2.646667088, 'TNeutral':0.889080601}
+MutTendency = {'CTWRCY':3.419071313, 'CTWRC':0.870149852, 'CTAID-CS':0.350768348, 'CTNeutral':0.72123155,
+               'CGWRCY':0.022854755, 'CGWRC':0.031806369, 'CGAID-CS':0.201546946, 'CGNeutral':0.225848265,
+               'CAWRCY':0.00152365, 'CAWRC':0.048097436, 'CAAID-CS':0.152787026, 'CANeutral':0.157784404,
+                'GTWRCY':0.092268681, 'GTWRC':2.371327585, 'GTAID-CS':0.145110857, 'GTNeutral':0.188034032,
+                'GCWRCY':0.241181924, 'GCWRC':0.573265113, 'GCAID-CS':0.073120796, 'GCNeutral':0.178289758,
+                'GAWRCY':4.103190461, 'GAWRC':3.620687502, 'GAAID-CS':0.216648625, 'GANeutral':0.801415762,
+                'ATWA':0.730736321, 'ATNeutral':0.273391661, 'TATW':0.275989829, 'TANeutral':0.163184205,
+                'AGWA':2.383833337, 'AGNeutral':1.502258807, 'TGTW':0.425101597, 'TGNeutral':0.194067827,
+                'ACWA':1.090225932, 'ACNeutral':0.608828997, 'TCTW':1.549320198, 'TCNeutral':0.409848594}
+
+BLOSUM62 = {'AA':4,'AR':-1, 'AN':-2, 'AD':-2, 'AC':0,'AQ':-1, 'AE':-1,
+'AG':0, 'AH':-2,'AI':-1, 'AL':-1, 'AK':-1, 'AM':-1,'AF':-2,
+'AP':-1, 'AS':1,'AT':0,'AW':-3, 'AY':-2, 'AV':0,'RR':4,
+'RN':0, 'RD':-2, 'RC':-3,'RQ':1, 'RE':0,'RG':-2, 'RH':0,
+'RI':-3, 'RL':-2, 'RK':2, 'RM':-1,'RF':-3,'RP':-2, 'RS':-1,
+'RT':-1,'RW':-3, 'RY':-2, 'RV':-3,'NN':6, 'ND':1, 'NC':-3,
+'NQ':0, 'NE':0,'NG':0, 'NH':1,'NI':-3, 'NL':-3, 'NK':0, 'NM':-2,
+'NF':-3,'NP':-2, 'NS':1,'NT':0,'NW':-4, 'NY':-2, 'NV':-3,'DD':6,
+'DC':-3,'DQ':0, 'DE':2,'DG':-1, 'DH':-1,'DI':-3, 'DL':-4, 'DK':-1,
+'DM':-3,'DF':-3,'DP':-1, 'DS':0,'DT':-1,'DW':-4, 'DY':-3, 'DV':-3,
+'CC':9,'CQ':-3, 'CE':-4,'CG':-3, 'CH':-3,'CI':-1, 'CL':-1, 'CK':-3,
+'CM':-1,'CF':-2,'CP':-3, 'CS':-1,'CT':-1,'CW':-2, 'CY':-2, 'CV':-1,
+'QQ':5, 'QE':2,'QG':-2, 'QH':0,'QI':-3, 'QL':-2, 'QK':1, 'QM':0,
+'QF':-3,'QP':-1, 'QS':0,'QT':-1,'QW':-2, 'QY':-1, 'QV':-2,'EE':5,
+'EG':-2, 'EH':0,'EI':-3, 'EL':-3, 'EK':1, 'EM':-2,'EF':-3,'EP':-1,
+'ES':0,'ET':-1,'EW':-3, 'EY':-2, 'EV':-2,'GG':6, 'GH':-2,'GI':-4, 'GL':-4,
+'GK':-2, 'GM':-3,'GF':-3,'GP':-2, 'GS':0,'GT':-2,'GW':-2, 'GY':-3, 'GV':-3,
+'HH':8,'HI':-3, 'HL':-3, 'HK':-1, 'HM':-2,'HF':-1,'HP':-2, 'HS':-1,'HT':-2,
+'HW':-2, 'HY':2, 'HV':-3,'II':4, 'IL':2, 'IK':-3, 'IM':1,'IF':0,'IP':-3,
+'IS':-2,'IT':-1,'IW':-3, 'IY':-1, 'IV':3,'LL':4, 'LK':-2, 'LM':2,'LF':0,
+'LP':-3, 'LS':-2,'LT':-1,'LW':-2, 'LY':-1, 'LV':1,'KK':5, 'KM':-1,'KF':-3,
+'KP':-1, 'KS':0,'KT':-1,'KW':-3, 'KY':-2, 'KV':-2,'MM':5,'MF':0,'MP':-2,
+'MS':-1,'MT':-1,'MW':-1, 'MY':-1, 'MV':1,'FF':6,'FP':-4, 'FS':-2,'FT':-2,
+'FW':1, 'FY':3, 'FV':-1,'PP':7, 'PS':-1,'PT':-1,'PW':-4, 'PY':-3, 'PV':-2,
+'SS':4,'ST':1,'SW':-3, 'SY':-2, 'SV':-2,'TT':5,'TW':-2, 'TY':-2, 'TV':0,
+'WW':11, 'WY':2, 'WV':3,'YY':7, 'YV':-1, 'VV':5}
 
 DNADict = {'A':'T', 'T':'A', 'C':'G', 'G':'C'}
 

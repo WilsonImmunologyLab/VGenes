@@ -8725,19 +8725,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_53">
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_76">
-             <property name="font">
-              <font>
-               <pointsize>15</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Sequences in this clone:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
+           <item row="0" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horizontalLayout_9">
              <item>
               <widget class="QLabel" name="label_63">
@@ -8783,7 +8771,7 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
             </layout>
            </item>
-           <item row="1" column="0" colspan="2">
+           <item row="1" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horizontalLayout_10">
              <item>
               <widget class="QLabel" name="label_66">
@@ -8843,24 +8831,19 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
             </layout>
            </item>
-           <item row="3" column="0">
-            <widget class="QListWidget" name="listWidgetCloneMember">
-             <property name="maximumSize">
-              <size>
-               <width>250</width>
-               <height>16777215</height>
-              </size>
+           <item row="2" column="0" colspan="2">
+            <widget class="QLabel" name="label_76">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
              </property>
-            </widget>
-           </item>
-           <item row="4" column="0">
-            <widget class="QPushButton" name="pushButtonCheckCloone">
              <property name="text">
-              <string>Check all</string>
+              <string>Sequences in this clone:</string>
              </property>
             </widget>
            </item>
-           <item row="2" column="1" rowspan="3">
+           <item row="2" column="2" rowspan="3">
             <widget class="QGroupBox" name="groupBox_11">
              <property name="title">
               <string/>
@@ -9137,6 +9120,30 @@ If the J-end is off the J gene end may need adjusted</string>
              </layout>
             </widget>
            </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QListWidget" name="listWidgetCloneMember">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>16777215</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QPushButton" name="pushButtonCheckCloone">
+             <property name="text">
+              <string>Check this clone</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QRadioButton" name="radioButtonExclusive">
+             <property name="text">
+              <string>Exclusive</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -9300,17 +9307,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_62">
-           <item row="8" column="0">
-            <widget class="QPushButton" name="pushButtonSHM_table">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Show Tables</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
+           <item row="3" column="0" colspan="2">
             <layout class="QVBoxLayout" name="verticalLayout_11">
              <item>
               <widget class="QLabel" name="label_98">
@@ -9324,17 +9321,145 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
             </layout>
            </item>
-           <item row="6" column="0">
-            <widget class="QPushButton" name="pushButtonSHM_draw">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Draw STAT</string>
+           <item row="2" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_19">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_7">
+               <item>
+                <widget class="QLabel" name="label_95">
+                 <property name="text">
+                  <string>Mutation Type:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="radioButtonSHM_all">
+                 <property name="text">
+                  <string>All</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="radioButtonSHM_NonS">
+                 <property name="text">
+                  <string>NonS</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QRadioButton" name="radioButtonSHM_S">
+                 <property name="text">
+                  <string>Synonymous</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_10">
+               <item>
+                <widget class="QLabel" name="label_96">
+                 <property name="text">
+                  <string>Regions:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxSHM_Vregion">
+                 <property name="text">
+                  <string>Entire V</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
+                 </property>
+                 <property name="autoExclusive">
+                  <bool>false</bool>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QLabel" name="label_97">
+                 <property name="text">
+                  <string>Or:</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxSHM_FR1">
+                 <property name="text">
+                  <string>FR1</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxSHM_CDR1">
+                 <property name="text">
+                  <string>CDR1</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxSHM_FR2">
+                 <property name="text">
+                  <string>FR2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxSHM_CDR2">
+                 <property name="text">
+                  <string>CDR2</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="checkBoxSHM_FR3">
+                 <property name="text">
+                  <string>FR3</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_2">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item row="1" column="1">
+            <widget class="Line" name="line_5">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
+           <item row="0" column="0" colspan="2">
             <widget class="QPushButton" name="pushButtonSHManalysis">
              <property name="minimumSize">
               <size>
@@ -9347,131 +9472,65 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="3" column="0">
-            <layout class="QVBoxLayout" name="verticalLayout_10">
+           <item row="4" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_17">
              <item>
-              <widget class="QLabel" name="label_96">
+              <widget class="QCheckBox" name="checkBoxSHM_legend">
                <property name="text">
-                <string>Regions:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBoxSHM_Vregion">
-               <property name="text">
-                <string>V-region combined</string>
+                <string>Legend</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
                </property>
-               <property name="autoExclusive">
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="pushButtonSHM_draw">
+               <property name="enabled">
                 <bool>false</bool>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_97">
                <property name="text">
-                <string>Or:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBoxSHM_FR1">
-               <property name="text">
-                <string>FR1</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBoxSHM_CDR1">
-               <property name="text">
-                <string>CDR1</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBoxSHM_FR2">
-               <property name="text">
-                <string>FR2</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBoxSHM_CDR2">
-               <property name="text">
-                <string>CDR2</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="checkBoxSHM_FR3">
-               <property name="text">
-                <string>FR3</string>
+                <string>Draw STAT</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
-           <item row="4" column="0">
-            <widget class="QCheckBox" name="checkBoxSHM_legend">
-             <property name="text">
-              <string>Legend</string>
-             </property>
-             <property name="checked">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <layout class="QVBoxLayout" name="verticalLayout_7">
+           <item row="5" column="0" colspan="2">
+            <layout class="QHBoxLayout" name="horizontalLayout_18">
              <item>
-              <widget class="QLabel" name="label_95">
+              <widget class="QPushButton" name="pushButtonSHM_table">
+               <property name="enabled">
+                <bool>false</bool>
+               </property>
                <property name="text">
-                <string>Mutation Type:</string>
+                <string>Show Tables</string>
                </property>
               </widget>
              </item>
              <item>
-              <widget class="QRadioButton" name="radioButtonSHM_all">
-               <property name="text">
-                <string>All</string>
+              <widget class="QPushButton" name="pushButtonSHM_saveFig">
+               <property name="enabled">
+                <bool>false</bool>
                </property>
-               <property name="checked">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioButtonSHM_NonS">
                <property name="text">
-                <string>Nonsynonymous</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QRadioButton" name="radioButtonSHM_S">
-               <property name="text">
-                <string>Synonymous</string>
+                <string>Save Figure</string>
                </property>
               </widget>
              </item>
             </layout>
            </item>
-           <item row="7" column="0">
-            <widget class="QPushButton" name="pushButtonSHM_saveFig">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Save Figure</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="Line" name="line_5">
+           <item row="6" column="0" colspan="2">
+            <widget class="Line" name="line_10">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButtonAID">
+             <property name="text">
+              <string>AID targeting</string>
              </property>
             </widget>
            </item>
