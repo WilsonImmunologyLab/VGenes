@@ -14526,6 +14526,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.ui.txtSeqAlignment.setFont(font)
 
+	def on_spinBoxProteinFont_valueChanged(self, value):
+		font = QFont()
+		font.setFamily("Courier New")
+		font.setPointSize(int(value))
+		self.ui.txtProtein.setFont(font)
+		print('change font size')
+
 	@pyqtSlot()
 	def on_actionMove_Down_triggered(self):  # how to activate menu and toolbar actions!!!
 		self.MoveRecord('down')

@@ -5820,7 +5820,7 @@
                <string>Report type:</string>
               </property>
               <layout class="QGridLayout" name="gridLayout_19">
-               <item row="0" column="0" colspan="2">
+               <item row="0" column="0" colspan="4">
                 <widget class="QRadioButton" name="rdoCommaSep">
                  <property name="font">
                   <font>
@@ -5832,7 +5832,7 @@
                  </property>
                 </widget>
                </item>
-               <item row="1" column="0" colspan="2">
+               <item row="1" column="0" colspan="3">
                 <widget class="QRadioButton" name="rdoText">
                  <property name="font">
                   <font>
@@ -5867,6 +5867,39 @@
                  </property>
                  <property name="checked">
                   <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="2">
+                <spacer name="horizontalSpacer_22">
+                 <property name="orientation">
+                  <enum>Qt::Horizontal</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>793</width>
+                   <height>20</height>
+                  </size>
+                 </property>
+                </spacer>
+               </item>
+               <item row="2" column="3">
+                <widget class="QLabel" name="label_103">
+                 <property name="text">
+                  <string>Font Size:</string>
+                 </property>
+                </widget>
+               </item>
+               <item row="2" column="4">
+                <widget class="QSpinBox" name="spinBoxProteinFont">
+                 <property name="minimum">
+                  <number>5</number>
+                 </property>
+                 <property name="maximum">
+                  <number>24</number>
+                 </property>
+                 <property name="value">
+                  <number>10</number>
                  </property>
                 </widget>
                </item>

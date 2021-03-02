@@ -17,6 +17,8 @@ added_files = [
              ('/Users/leil/Documents/Projects/VGene/VGenes/Js/underscore-min.map','Js'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/path_setting.txt','Conf'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/RecentPaths.vtx','Conf'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog.txt','Temp'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog2.txt','Temp'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/raxml','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/clustalo','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/muscle','Tools'),
