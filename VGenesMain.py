@@ -7932,7 +7932,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#Msg = str(self.ui.tabWidget.currentIndex())
 			#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			# stat figure
-			if self.ui.tabWidget.currentIndex() == 6:
+			if self.ui.tabWidget.currentIndex() == 7:
 				if self.ui.comboBoxPie.count() == 0:
 					# setup options for graph table
 					fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
@@ -7980,7 +7980,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.comboBoxSankey3.addItems(fields_name)
 					self.ui.comboBoxSankey4.addItems(fields_name)
 			# Ig phylogeny
-			elif self.ui.tabWidget.currentIndex() == 8:
+			elif self.ui.tabWidget.currentIndex() == 9:
 				SQLStatement = 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"'
 				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 				if len(DataIn) > 1:
@@ -8042,10 +8042,62 @@ class VGenesForm(QtWidgets.QMainWindow):
 						#self.match_tree_to_table()
 						self.tree_to_table_selection()
 			# clone page
-			elif self.ui.tabWidget.currentIndex() == 9:
+			elif self.ui.tabWidget.currentIndex() == 10:
 				self.initial_Clone()
+			elif self.ui.tabWidget.currentIndex() == 2:
+				# get current record
+				currentName = self.ui.txtName.toPlainText()
+				# fetch data for current record
+				SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + currentName + '"'
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				if len(DataIn) == 0:
+					return
+				Records = DataIn[0]
+				# make table
+				horizontalHeader = ['Field','Field Name','Value']
+				num_row = len(Records)
+				num_col = len(horizontalHeader)
+				self.ui.tableWidgetTableView.setRowCount(num_row)
+				self.ui.tableWidgetTableView.setColumnCount(num_col)
+				self.ui.tableWidgetTableView.setHorizontalHeaderLabels(horizontalHeader)
+				self.ui.tableWidgetTableView.horizontalHeader().setStretchLastSection(True)
+				self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
+				self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+
+				for row_index in range(num_row):
+					unit1 = QTableWidgetItem(FieldList[row_index])
+					unit2 = QTableWidgetItem(RealNameList[row_index])
+					unit3 = QTableWidgetItem(Records[row_index])
+
+					self.ui.tableWidgetTableView.setItem(row_index, 0, unit1)
+					self.ui.tableWidgetTableView.setItem(row_index, 1, unit2)
+					self.ui.tableWidgetTableView.setItem(row_index, 2, unit3)
+
+				self.ui.tableWidgetTableView.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+				self.ui.tableWidgetTableView.setSelectionMode(QAbstractItemView.SingleSelection)
+				self.ui.tableWidgetTableView.setSelectionBehavior(QAbstractItemView.SelectItems)
+				# bind selection
+				self.ui.tableWidgetTableView.currentItemChanged.connect(self.bindToSearch)
+
+				#self.ui.tableWidgetTableView.item(0, 0).row()
 
 			self.lastTab = self.ui.tabWidget.currentIndex()
+
+	def bindToSearch(self, current, previous):
+		global LastSelected
+
+		row_index = current.row()
+		fieldName = self.ui.tableWidgetTableView.item(row_index, 0).text()
+		valueis = self.ui.tableWidgetTableView.item(row_index, 2).text()
+		LastSelected = (fieldName, valueis)
+		field = LastSelected[0]
+		# Fiedlvalue = self.TransLateFieldtoReal(field, False)
+		Fiedlvalue = self.makeFieldName(field)
+		self.ui.cboFindField.setCurrentText(Fiedlvalue)
+
+		self.ui.fieldLine.setText(fieldName)
+		self.ui.valueLine.setText(valueis)
+
 
 	def load_table(self):
 		if self.ui.SeqTable.columnCount() > 0:
