@@ -302,13 +302,6 @@ class Worker(QRunnable):
 		finally:
 			self.signals.finished.emit()  # Done
 
-def reName(ori_name, rep1, rep2, prefix):
-	my_name = re.sub('clonotype',rep1, ori_name)
-	my_name = re.sub('consensus_', rep2, my_name)
-	if prefix != '':
-		my_name = prefix + '_' + my_name
-	return my_name
-
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
 	SHMUpdateSelectionSignal = pyqtSignal(str)
 
@@ -8066,7 +8059,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				for row_index in range(num_row):
 					unit1 = QTableWidgetItem(FieldList[row_index])
+					unit1.setFlags(Qt.ItemIsEnabled)
 					unit2 = QTableWidgetItem(RealNameList[row_index])
+					unit2.setFlags(Qt.ItemIsEnabled)
 					unit3 = QTableWidgetItem(Records[row_index])
 
 					self.ui.tableWidgetTableView.setItem(row_index, 0, unit1)
@@ -8078,10 +8073,46 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.tableWidgetTableView.setSelectionBehavior(QAbstractItemView.SelectItems)
 				# bind selection
 				self.ui.tableWidgetTableView.currentItemChanged.connect(self.bindToSearch)
+				self.ui.tableWidgetTableView.itemChanged.connect(self.AutoSaveTable)
 
 				#self.ui.tableWidgetTableView.item(0, 0).row()
 
 			self.lastTab = self.ui.tabWidget.currentIndex()
+
+	def AutoSaveTable(self, item):
+		global MoveNotChange
+		global NameIndex
+		if MoveNotChange:
+			return
+
+		if self.ui.checkBoxAutoSave.isChecked():
+			row = item.row()
+			col = item.column()
+			CurVal = item.text()
+
+			col_name = self.ui.tableWidgetTableView.item(row, 0).text()
+			SeqName = self.ui.tableWidgetTableView.item(0, 0).text()
+
+			try:
+				self.UpdateSeq(SeqName, CurVal, col_name)
+				if row == 0:  # update sequence name
+					SQLFields = (
+						re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()),
+						re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
+						re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+					)
+					self.initializeTreeView(SQLFields)
+					self.ui.treeWidget.expandAll()
+			except:
+				MoveNotChange = True
+				col = item.column()
+				self.ui.SeqTable.item(row, col).setText(SeqName)
+				MoveNotChange = False
+				QMessageBox.warning(self, 'Warning',
+				                    'The name:\n' + CurVal + '\nhas been taken! Please choose another name!',
+				                    QMessageBox.Ok, QMessageBox.Ok)
+
+
 
 	def bindToSearch(self, current, previous):
 		global LastSelected
@@ -20714,6 +20745,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.updateF(data[119])
 
+def reName(ori_name, rep1, rep2, prefix):
+	my_name = re.sub('clonotype',rep1, ori_name)
+	my_name = re.sub('consensus_', rep2, my_name)
+	if prefix != '':
+		my_name = prefix + '_' + my_name
+	return my_name
+
 def IgBlastParserFast(FASTAFile, datalist, signal):
 	import os
 	# todo change to app folder
@@ -20935,7 +20973,6 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 							Msg = 'Your current species is: ' + species + \
 							      '\nWe do not support this species!'
 							return Msg
-
 					else:
 						if len(IsoSeq) > 2:
 							if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
