@@ -13044,7 +13044,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_actionAnalyze_Isotypes_triggered(self):
 
-		fields = ['SeqName', 'Jend', 'Sequence', 'ID']
+		fields = ['SeqName', 'Jend', 'Sequence', 'ID', 'Species']
 
 		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
 		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
@@ -13053,14 +13053,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 			Sequence = record[2]
 			Jend = int(record[1])
 			SeqName = record[0]
-
+			species = record[4]
 			IsoSeq = (Sequence[(Jend):])
 			# print(SeqName)
 			IsoSeq = IsoSeq.strip('N')
 			AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
 			Isot = ''
 			if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-				Isot = VGenesSeq.CallIsotype(IsoSeq)
+				if species == 'Human':
+					Isotype = VGenesSeq.CallIsotype(IsoSeq)
+				elif species == 'Mouse':
+					Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+				else:
+					Msg = 'Your current species is: ' + species + \
+					      '\nWe do not support this species!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
 				print(Isot)
 
 			SQLStatement = 'UPDATE vgenesDB SET Isotype = "' + Isot + '" WHERE SeqName = "' + SeqName + '"'
@@ -20919,7 +20927,15 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 					IsoSeq = IsoSeq.strip('N')
 					AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
 					if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-						Isotype = VGenesSeq.CallIsotype(IsoSeq)
+						if species == 'Human':
+							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+						elif species == 'Mouse':
+							Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+						else:
+							Msg = 'Your current species is: ' + species + \
+							      '\nWe do not support this species!'
+							return Msg
+
 					else:
 						if len(IsoSeq) > 2:
 							if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
@@ -21780,7 +21796,14 @@ def IMGTparser(IMGT_out, data_list, signal):
 						IsoSeq = IsoSeq.strip('N')
 						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
 						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							if spe == 'Human':
+								Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							elif spe == 'Mouse':
+								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+							else:
+								Msg = 'Your current species is: ' + spe + \
+								      '\nWe do not support this species!'
+								return Msg
 						else:
 							if len(IsoSeq) > 2:
 								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
