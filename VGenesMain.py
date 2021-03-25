@@ -4,7 +4,7 @@ import sys
 import sqlite3 as db
 import time
 import re
-import sip
+#import sip
 import shutil
 import math
 import numpy
@@ -91,8 +91,6 @@ from itertools import combinations
 from collections import Counter
 from subprocess import call, Popen, PIPE
 
-# import changeo
-from changeo.IO import IMGTReader
 
 from PyQt5.QtWidgets import QMessageBox, QInputDialog
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery
@@ -21898,10 +21896,7 @@ def IMGTparser(IMGT_out, data_list, signal):
 		pct = 100
 		label = 'AA-sequence file processed:' + str(5) + '/' + str(5)
 		signal.emit(pct, label)
-	#result = IMGTReader(summary, gapped, ntseq, junction, receptor=False)
-		#for record in result:
-		#	#print(record)
-		#	DATA.append(record)
+
 	# Remove IMGT temporary directory
 	temp_dir.cleanup()
 
