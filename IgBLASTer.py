@@ -1119,7 +1119,14 @@ def IgBLASTit(FASTAFile, datalist, signal):
 						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') +IsoSeq.count('C') +IsoSeq.count('T')
 						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
 							#print('Start ' + SeqName + ' counts at ' + time.strftime('%c'))
-							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							if species == 'Human':
+								Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							elif species == 'Mouse':
+								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+							else:
+								Msg = 'Your current species is: ' + species + \
+								      '\nWe do not support this species!'
+								return Msg
 							#print('end ' + SeqName + ' counts at ' + time.strftime('%c'))
 
 						else:
@@ -2533,7 +2540,14 @@ def IgBLASTitResults(FASTAFile, IgBlastOutFile, datalist, signal):
 						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') +IsoSeq.count('C') +IsoSeq.count('T')
 						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
 							#print('Start ' + SeqName + ' counts at ' + time.strftime('%c'))
-							Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							if species == 'Human':
+								Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							elif species == 'Mouse':
+								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+							else:
+								Msg = 'Your current species is: ' + species + \
+								      '\nWe do not support this species!'
+								return Msg
 							#print('end ' + SeqName + ' counts at ' + time.strftime('%c'))
 
 						else:
