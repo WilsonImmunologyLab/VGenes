@@ -6454,6 +6454,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.cboReportOptions.currentTextChanged.connect(self.ReportOptions)
 		self.ui.cboFindField.currentTextChanged.connect(self.on_cboFindField_currentTextChanged)
 		self.ui.tabWidget.currentChanged['int'].connect(self.InitialGraphic)
+		self.ui.tabWidgetFig.currentChanged['int'].connect(self.InitialGraphicFig)
 		self.ui.pushButtonDraw.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxStack.clicked.connect(self.GenerateFigure)
@@ -7924,52 +7925,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			# stat figure
 			if self.ui.tabWidget.currentIndex() == 7:
-				if self.ui.comboBoxPie.count() == 0:
-					# setup options for graph table
-					fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
-
-					self.ui.comboBoxPie.clear()
-					self.ui.comboBoxPie.addItems(fields_name)
-					self.ui.comboBoxCol1.clear()
-					self.ui.comboBoxCol1.addItems(fields_name)
-					self.ui.comboBoxCol2.clear()
-					self.ui.comboBoxCol2.addItems(fields_name)
-					self.ui.comboBoxBoxData.clear()
-					self.ui.comboBoxBoxData.addItems(fields_name)
-					self.ui.comboBoxBox1.clear()
-					self.ui.comboBoxBox1.addItems(fields_name)
-					self.ui.comboBoxBox2.clear()
-					self.ui.comboBoxBox2.addItems(fields_name)
-					self.ui.comboBoxRiver1.clear()
-					self.ui.comboBoxRiver1.addItems(fields_name)
-					self.ui.comboBoxRiver2.clear()
-					self.ui.comboBoxRiver2.addItems(fields_name)
-					self.ui.comboBoxWord.clear()
-					self.ui.comboBoxWord.addItems(fields_name)
-					self.ui.comboBoxScatterX.clear()
-					self.ui.comboBoxScatterX.addItems(fields_name)
-					self.ui.comboBoxScatterY.clear()
-					self.ui.comboBoxScatterY.addItems(fields_name)
-					self.ui.comboBoxScatterGroup.clear()
-					self.ui.comboBoxScatterGroup.addItems(fields_name)
-					self.ui.comboBoxTree1.clear()
-					self.ui.comboBoxTree1.addItems(fields_name)
-					self.ui.comboBoxTree2.clear()
-					self.ui.comboBoxTree2.addItems(fields_name)
-					self.ui.comboBoxTree3.clear()
-					self.ui.comboBoxTree3.addItems(fields_name)
-					self.ui.listWidgetAll.clear()
-					self.ui.listWidgetAll.addItems(fields_name[1:])
-					self.ui.comboBoxSortField.clear()
-					self.ui.comboBoxSortField.addItems(fields_name)
-					self.ui.comboBoxSankey1.clear()
-					self.ui.comboBoxSankey2.clear()
-					self.ui.comboBoxSankey3.clear()
-					self.ui.comboBoxSankey4.clear()
-					self.ui.comboBoxSankey1.addItems(fields_name)
-					self.ui.comboBoxSankey2.addItems(fields_name)
-					self.ui.comboBoxSankey3.addItems(fields_name)
-					self.ui.comboBoxSankey4.addItems(fields_name)
+				self.InitialGraphicFig()
 			# Ig phylogeny
 			elif self.ui.tabWidget.currentIndex() == 9:
 				SQLStatement = 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"'
@@ -8041,6 +7997,79 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			self.lastTab = self.ui.tabWidget.currentIndex()
 
+	def InitialGraphicFig(self):
+		if self.ui.tabWidgetFig.currentIndex() == 0:
+			if self.ui.comboBoxPie.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxPie.clear()
+				self.ui.comboBoxPie.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 1:
+			if self.ui.comboBoxCol1.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxCol1.clear()
+				self.ui.comboBoxCol1.addItems(fields_name)
+				self.ui.comboBoxCol2.clear()
+				self.ui.comboBoxCol2.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 2:
+			if self.ui.comboBoxBoxData.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxBoxData.clear()
+				self.ui.comboBoxBoxData.addItems(fields_name)
+				self.ui.comboBoxBox1.clear()
+				self.ui.comboBoxBox1.addItems(fields_name)
+				self.ui.comboBoxBox2.clear()
+				self.ui.comboBoxBox2.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 3:
+			if self.ui.comboBoxWord.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxWord.clear()
+				self.ui.comboBoxWord.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 4:
+			if self.ui.comboBoxRiver1.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxRiver1.clear()
+				self.ui.comboBoxRiver1.addItems(fields_name)
+				self.ui.comboBoxRiver2.clear()
+				self.ui.comboBoxRiver2.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 5:
+			if self.ui.comboBoxTree1.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxTree1.clear()
+				self.ui.comboBoxTree1.addItems(fields_name)
+				self.ui.comboBoxTree2.clear()
+				self.ui.comboBoxTree2.addItems(fields_name)
+				self.ui.comboBoxTree3.clear()
+				self.ui.comboBoxTree3.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 6:
+			if self.ui.comboBoxScatterX.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxScatterX.clear()
+				self.ui.comboBoxScatterX.addItems(fields_name)
+				self.ui.comboBoxScatterY.clear()
+				self.ui.comboBoxScatterY.addItems(fields_name)
+				self.ui.comboBoxScatterGroup.clear()
+				self.ui.comboBoxScatterGroup.addItems(fields_name)
+		elif self.ui.tabWidgetFig.currentIndex() == 7:
+			if self.ui.comboBoxSortField.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxSortField.clear()
+				self.ui.comboBoxSortField.addItems(fields_name)
+				self.ui.listWidgetAll.clear()
+				self.ui.listWidgetAll.addItems(fields_name[1:])
+		elif self.ui.tabWidgetFig.currentIndex() == 9:
+			if self.ui.comboBoxSankey1.count() == 0:
+				fields_name = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+				self.ui.comboBoxSankey1.clear()
+				self.ui.comboBoxSankey2.clear()
+				self.ui.comboBoxSankey3.clear()
+				self.ui.comboBoxSankey4.clear()
+				self.ui.comboBoxSankey1.addItems(fields_name)
+				self.ui.comboBoxSankey2.addItems(fields_name)
+				self.ui.comboBoxSankey3.addItems(fields_name)
+				self.ui.comboBoxSankey4.addItems(fields_name)
+		else:
+			return
+		
 	def GenerateTableView(self):
 		# clear table if table exists
 		if self.ui.tableWidgetTableView.rowCount() > 0:
