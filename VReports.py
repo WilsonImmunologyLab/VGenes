@@ -595,7 +595,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
                 if Vlocus[0:3] == 'VL1':
                     VPrimer = 'Age1-VL1'
-                elif Vlocus[0:3] == 'VL4' or Vlocus == 'VL5' or Vlocus == 'VL9':
+                elif Vlocus[0:3] == 'VL4' or Vlocus[0:3] == 'VL5' or Vlocus[0:3] == 'VL9':
                     VPrimer = 'Age1-VL4/5/9'
                 elif Vlocus[0:3] == 'VL2':
                     VPrimer = 'Age1-VL2'
@@ -605,11 +605,10 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     VPrimer = 'Age1-VL3'
                 elif Vlocus[0:3] == 'VL6':
                     VPrimer = 'Age1-VL6'
-                elif Vlocus[0:3] == 'VL7' or Vlocus == 'VL8':
+                elif Vlocus[0:3] == 'VL7' or Vlocus[0:3] == 'VL8':
                     VPrimer = 'Age1-VL7/8'
                 else:
                     VPrimer = 'None'
-
                 JPrimer = 'Xho1-JL'
 
                 Priming = (VPrimer, JPrimer)
