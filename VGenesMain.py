@@ -8069,7 +8069,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.comboBoxSankey4.addItems(fields_name)
 		else:
 			return
-		
+
 	def GenerateTableView(self):
 		# clear table if table exists
 		if self.ui.tableWidgetTableView.rowCount() > 0:

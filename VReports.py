@@ -561,6 +561,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     VPrimer = 'Age1-VK3-20'
                 elif Vlocus[0:3] == 'Vk4':
                     VPrimer = 'Age1-VK4-1'
+                else:
+                    VPrimer = 'None'
 
                 if Jlocus[0:3] == 'JK1' or Jlocus[0:3] == 'JK2' or Jlocus[0:3] == 'JK4':
                     JPrimer = 'BsiW1-JK1/2/4'
@@ -605,6 +607,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     VPrimer = 'Age1-VL6'
                 elif Vlocus[0:3] == 'VL7' or Vlocus == 'VL8':
                     VPrimer = 'Age1-VL7/8'
+                else:
+                    VPrimer = 'None'
 
                 JPrimer = 'Xho1-JL'
 
