@@ -1327,8 +1327,16 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowMessageBox([0, Msg])
         '''
 
-        listItems = self.getTreeCheckedChild()
-        listItems = listItems[3]
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
         if len(listItems) == 0:
             question = 'You did not select any records, export all?'
             buttons = 'YN'
@@ -1353,9 +1361,35 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.progress = ProgressBar(self)
         self.progress.show()
     elif option == 'Clonal Analysis (.csv)':
+        '''
         fields = 'All'
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        '''
+
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT * FROM vgenesdb' + WHEREStatement
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
         CSVOut = ''
         i = 0
         for item in RealNameList:
@@ -1471,8 +1505,15 @@ def StandardReports(self, option, SequenceName, DBFilename):
     elif option == 'Custom report':
         pass
     elif option == 'Count AA mutations':
-        selected_list = self.getTreeCheckedChild()
-        selected_list = selected_list[3]
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
