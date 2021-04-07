@@ -402,9 +402,29 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowVGenesText(Pathname)
     elif option == 'FASTA Amino Acid file':
 
-        fields = ['SeqName', 'Sequence']
-        SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
         FASTAFile = ''
         for item in DataIs:
             Seqname = item[0]
@@ -423,9 +443,29 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowVGenesText(Pathname)
     elif option == 'FASTA Germline Nucleotide file':
 
-        fields = ['SeqName', 'GermlineSequence']
-        SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
         FASTAFile = ''
         for item in DataIs:
             Seqname = item[0]
@@ -442,9 +482,29 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowVGenesText(Pathname)
     elif option == 'FASTA Germline Amino Acid file':
 
-        fields = ['SeqName', 'GermlineSequence']
-        SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
         FASTAFile = ''
         for item in DataIs:
             Seqname = item[0]
@@ -468,8 +528,15 @@ def StandardReports(self, option, SequenceName, DBFilename):
         fields = ['SeqName', 'VLocus', 'JLocus', 'GeneType', 'Jend', 'Sequence']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         '''
-        selected_list = self.getTreeCheckedChild()
-        selected_list = selected_list[3]
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -778,8 +845,34 @@ def StandardReports(self, option, SequenceName, DBFilename):
             Msg = 'AbVec Cloning Report generated!'
             self.ShowMessageBox([0, Msg])
     elif option == 'HT-AbVec Cloning report':
-        fields = ['SeqName', 'GeneType', 'V1', 'J1', 'productive', 'Sequence', 'Vbeg', 'Jend', 'Blank10']
+        '''
+        fields = ['SeqName', 'GeneType', 'V1', 'J1', 'productive', 'Sequence', 'Vbeg', ',Jend', 'Blank10']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        SQLStatement += ' ORDER BY Blank10'
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        '''
+
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,GeneType,V1,J1,productive,Sequence,Vbeg,Jend,Blank10 FROM vgenesdb' + WHEREStatement
         SQLStatement += ' ORDER BY Blank10'
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
@@ -902,8 +995,34 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.ShowMessageBox([0, Msg])
     elif option == '10x Synthesis report':
 
+        '''
         fields = ['SeqName', 'GeneType', 'V1', 'J1', 'productive', 'Sequence', 'Vbeg', 'Jend', 'Blank10']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        SQLStatement += ' ORDER BY Blank10'
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        '''
+
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,GeneType,V1,J1,productive,Sequence,Vbeg,Jend,Blank10 FROM vgenesdb' + WHEREStatement
         SQLStatement += ' ORDER BY Blank10'
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
@@ -1000,9 +1119,37 @@ def StandardReports(self, option, SequenceName, DBFilename):
         Msg = '10x Synthesis Report generated!'
         self.ShowMessageBox([0, Msg])
     elif option == 'Sequence summary':
+        '''
         fields = ['SeqName', 'Project', 'V1', 'D1', 'J1', 'VLocus', 'JLocus', 'productive', 'TotMut', 'CDR3DNA', 'CDR3AA',
                   'CDR3Length', 'CDR3pI', 'ClonalPool', 'Isotype', 'Sequence', 'Blank7']
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        '''
+
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        fields = ['SeqName', 'Project', 'V1', 'D1', 'J1', 'VLocus', 'JLocus', 'productive', 'TotMut', 'CDR3DNA',
+                  'CDR3AA', 'CDR3Length', 'CDR3pI', 'ClonalPool', 'Isotype', 'Sequence', 'Blank7']
+        SQLStatement = 'SELECT ' + ','.join(fields) + ' FROM vgenesdb' + WHEREStatement
+        SQLStatement += ' ORDER BY Blank10'
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         NameList = []
