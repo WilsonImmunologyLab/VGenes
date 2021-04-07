@@ -310,10 +310,35 @@ def StandardReports(self, option, SequenceName, DBFilename):
     import os
     # first get list of seqs and info as tuple from DB:
     if option == 'FASTA Nucleotide file':
+        '''
         fields = ['SeqName', 'Sequence']
 
         SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SequenceName)
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        '''
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
         FASTAFile = ''
         for item in DataIs:
             Seqname = item[0]
