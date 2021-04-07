@@ -6667,43 +6667,45 @@ class VGenesForm(QtWidgets.QMainWindow):
 		curTable = self.ui.tabWidget.focusWidget()
 		try:
 			if curTable.rowCount() > 0:
+				# get barcode
 				row = curTable.currentRow()
 				if curTable.columnCount() == 10:
 					barcode = curTable.item(row, 8).text()
 				else:
 					barcode = curTable.item(row, 7).text()
-				# delete HC
+
+				# delete from HC table
 				delete_sign = True
 				while delete_sign == True:
 					delete_sign = False
 					for index in range(self.ui.tableWidgetHC.rowCount()):
 						if barcode == self.ui.tableWidgetHC.item(index, 8).text():
-							self.ui.tableWidgetHC.removeRow(index)
-							name = self.ui.tableWidgetHC.item(row, 0).text()
+							name = self.ui.tableWidgetHC.item(index, 0).text()
 							try:
 								self.AntibodyCandidates.remove(name)
 							except:
 								print('opppppps!')
+							self.ui.tableWidgetHC.removeRow(index)
 							delete_sign = True
 							break
-				# delete LC
+				# delete from LC table
 				delete_sign = True
 				while delete_sign == True:
 					delete_sign = False
 					for index in range(self.ui.tableWidgetLC.rowCount()):
 						if barcode == self.ui.tableWidgetLC.item(index, 7).text():
-							self.ui.tableWidgetLC.removeRow(index)
-							name = self.ui.tableWidgetLC.item(row, 0).text()
+							name = self.ui.tableWidgetLC.item(index, 0).text()
 							try:
 								self.AntibodyCandidates.remove(name)
 							except:
 								print('opppppps!')
+							self.ui.tableWidgetLC.removeRow(index)
 							delete_sign = True
 							break
 				self.ui.tableWidgetHC.clearSelection()
 				self.ui.tableWidgetLC.clearSelection()
 		except:
-			pass
+			print('wrong in delete these!')
 		
 	def matchSelection(self, row, col):
 		curTable = self.ui.tabWidget.focusWidget()
