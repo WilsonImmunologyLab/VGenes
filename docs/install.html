@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Lei Li leil@uchicago.edu" />
+
+<meta name="date" content="2020-07-02" />
+
+<title>VGenes, an integrated graphical tool for efficient, comprehensive and multimodal analyses of massive B-cell repertoire sequences</title>
+<link rel="icon" type="image/x-icon" href="logo.ico"/>
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+<style>
+.title {
+  background: #f0fbeb;
+  border: 1px solid #9bdf70;
+  border-radius: 5px;
+  display:block;
+  width: 90%;
+  padding-left: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.title0 {
+  background: #A6CDE7;
+  border-radius: 0px;
+  display:block;
+  width: 90%;
+  padding: 12px;
+  padding-left: 25px;
+  border: 3px solid black;
+}
+
+.download {
+  border-radius: 3px;
+  padding: 12px;
+  padding-left: 25px;
+  border: 0px;
+  font-size:120%;
+  display: inline;
+}
+
+.mac {
+  background: #A6CDE7;
+} 
+
+.mac:hover {
+  background: #71A9C9;
+}
+
+.windows {
+  background: #4DAF4A;
+}
+
+.windows:hover {
+  background: #388E33;
+}
+</style>
+
+
+
+
+<script type="text/javascript"> 
+function showorhide(id)  
+{  
+  var mychar = document.getElementById(id).style.display;
+  if (mychar == "none") 
+  {
+    document.getElementById(id).style.display ="block";  
+  }
+  else
+  {
+    document.getElementById(id).style.display ="none";
+  }
+}
+</script> 
+
+<style type="text/css">
+  div.MysourceCode {
+    background-color: black; 
+    font-family: "Lucida Console", Monaco, monospace; 
+    color: #66FF00; 
+    font-weight: bold;
+    font-size: 15px;
+    border:2px solid #a1a1a1;
+    border-radius:10px;
+  }
+  div.MysourceCode p {
+    margin-left: 20px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+  }
+</style>
+
+<script type="text/javascript">
+$(document).ready(function(){
+  $('.title0').click(function(){
+    var father = $(this).parent('li');
+    var display = father.children(".mycontent").css('display');
+    if(display == 'none'){
+      father.children(".mycontent").css('display','block');
+    } else {
+      father.children(".mycontent").css('display','none');
+    }
+  });
+
+  $('.title0').click()
+});
+</script>
+
+</head>
+
+<body>
+
+
+<div class="navbox">
+<ul class="nav">
+  <li><a href="index.html">About</a></li>
+  <li><a class="active" href="install.html">Install</a></li>
+  <li><a href="tutorial.html">Tutorial</a></li>
+  <li><a href="contact.html">Contact</a></li>
+  <li><a href="index.html">Github Page</a></li>
+</ul>
+</div>
+
+<div class="row">
+
+  <div class="left">
+    <div class="center">
+      <img class="logo" src="img/logo.png" style="margin:auto;">
+      <span class="author_name">VGenes, an integrated graphical tool for efficient, comprehensive and multimodal analyses of massive B-cell repertoire sequences</span>
+      <span class="author_bio"><a href="http://wilsonlab.uchicago.edu/" target="blank">Wilson Lab</a></span>
+      <span class="author_job">The University of Chicago </span>
+    </div>
+  </div>
+  <div class="info">
+    <div class="post-listing">
+      <div id="post">
+        <article class="post-content">
+          <h1>Download VGenes</h1>
+          
+          <a href="https://uchicagoedu-my.sharepoint.com/:f:/g/personal/leil_uchicago_edu/Ev0oLIIRck1Oi1v5z1NVwO0BYB3HsZOkcGjTLirZcYoWtg?e=vDG3yA" target="_blank">
+            <div class = 'download mac'>
+              <img src="./img/mac.png" style="width: 23px;"> 
+              <p style="margin-left: 80px; margin-right: 80px; display: inline;">Download for Mac</p>
+            </div>
+          </a>
+          
+          <a href="https://uchicagoedu-my.sharepoint.com/:f:/g/personal/leil_uchicago_edu/EiS0PQEm671CtkaoHxFxbFoBKLpKhtbKE2L93i4A7RaClA?e=Crn7ye" target="_blank">
+            <div class = 'download windows' style="margin-left: 20px;">
+              <img src="./img/windows.png" style="width: 21px;">
+              <p style="margin-left: 80px; margin-right: 80px; display: inline;">Download for Windows</p>
+            </div>
+          </a>
+          
+          <h1 style="margin-top: 50px;">Installation Instructions</h1>
+          <ul>
+            <li>
+              <h3 class = 'title0'> <img src="./img/mac.png" style="width: 23px;"> <p style="margin-left: 30px; display: inline;">Install VGenes on MAC OS (Click to show/hide) </p></h3>
+              <div class='mycontent' style="margin-left: 20px;">
+                <h3>Install VGenes</h3>
+                <div class="section level1">
+                  <ul>
+                    <li>Download DMG file from the link on the top</li>
+                    <li>Double click the DMG file and then drag and drop "VGenes" to "Applications" folder</li>
+                    <img src="img/install1.png" style="width: 50%;">
+                    <li>Users can make a alias on desktop for better(faster) user experience by the following steps:</li>
+                    <img src="img/install.png" style="width: 50%;">
+                  </ul>
+                </div>
+                <h3>Install Dependencies</h3>
+                  <span>We already included <a href="https://www.drive5.com/muscle/" target="_blank" style="color: green;">Muscle</a>, <a href="http://www.clustal.org/omega/" target="_blank" style="color: green;">Clustal Omega</a> and <a href="http://www.exelixis-lab.org/software.html" target="_blank" style="color: green;">RAxML</a> in VGenes. If those pre-complied softwares don't work on your computer, you can download or complie from offical website and determine the path for those tools in Setting</span>
+                  <br><br>
+                <h3>Install Dependencies - optional</h3>
+                  <p class="title"><a href="https://www.ghostscript.com/" target="_blank" style="color: green;">GhostScript</a> and <a href="https://github.com/dawbarton/pdf2svg" target="_blank" style="color: green;">Pdf2svg</a> (Recommended, for a faster sequence logo) </p>
+                  Install <a href="https://brew.sh/" target="_blank" style="color: green;">Home brew</a>. It's a Missing Package Manager for macOS (or Linux). You may need the help form homebrew to install some missing packages. Open a terminal and paste the follow commands, then enter
+                  <div class="MysourceCode">
+                    <p>/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"</p>
+                  </div>
+                  After you installed home brew, you can install the following packages for better user experience.
+                  <div class="MysourceCode">
+                    <p>brew install ghostscript</p>
+                    <p>brew install pdf2svg</p>
+                  </div>
+                  <br><br>
+                </span> 
+              </div>
+            </li>
+            <li>
+              <h3 class = 'title0'> <img src="./img/windows.png" style="width: 21px;"><p style="margin-left: 30px; display: inline;">Install VGenes on Windows (Click to show/hide)</p></h3>
+              <div class='mycontent' style="margin-left: 20px;">
+                <h3>Install VGenes</h3>
+                <div class="section level1">
+                  <ul>
+                    <li>Download zipped executable file from the link on the top</li>
+                    <li>Unzip the zipped file and put VGenes folder to a local folder you prefer</li>
+                    <li>Save User Guide to your computer for reference</li>
+                    <li>Users can make a shortcut on desktop for better(faster) user experience.</li>
+                  </ul>
+                </div>
+                <h3>Install Dependencies</h3>
+                  <span>We already included <a href="https://www.drive5.com/muscle/" target="_blank" style="color: green;">Muscle</a>, <a href="http://www.clustal.org/omega/" target="_blank" style="color: green;">Clustal Omega</a> and <a href="http://www.exelixis-lab.org/software.html" target="_blank" style="color: green;">RAxML</a> in VGenes. If those pre-complied softwares don't work on your computer, you can download or complie from offical website and determine the path for those tools in Setting</span>
+                  <br><br>
+                <h3>Install Dependencies - optional</h3>
+                  <p class="title"><a href="https://www.ghostscript.com/" target="_blank" style="color: green;">GhostScript</a> (Recommended, for a faster sequence logo) </p>
+                  <p>Please download and install GhostScript from <a href="https://www.ghostscript.com/download/gsdnld.html" target="_blank" style="color: green;">this link</a>, and set up system PATH according to the guidence in our user guide.</p>
+                </span> 
+              </div>
+            </li>
+          </ul>
+
+          
+          
+
+        </article>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

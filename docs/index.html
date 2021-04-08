@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Lei Li leil@uchicago.edu" />
+
+<meta name="date" content="2020-07-02" />
+
+<title>VGenes, an integrated graphical tool for efficient, comprehensive and multimodal analyses of massive B-cell repertoire sequences</title>
+<link rel="icon" type="image/x-icon" href="logo.ico"/>
+
+<script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+<link rel="stylesheet" type="text/css" href="css/style.css">
+
+
+</head>
+
+<body>
+
+<div class="navbox">
+<ul class="nav">
+  <li><a class="active" href="index.html">About</a></li>
+  <li><a href="install.html">Install</a></li>
+  <li><a href="tutorial.html">Tutorial</a></li>
+  <li><a href="contact.html">Contact</a></li>
+  <li><a href="index.html">Github Page</a></li>
+</ul>
+</div>
+
+<div class="row">
+
+  <div class="left">
+    <div class="center">
+      <img class="logo" src="img/logo.png" style="margin:auto;">
+      <span class="author_name">VGenes, an integrated graphical tool for efficient, comprehensive and multimodal analyses of massive B-cell repertoire sequences</span>
+      <span class="author_bio"><a href="http://wilsonlab.uchicago.edu/" target="blank">Wilson Lab</a></span>
+      <span class="author_job">The University of Chicago </span>
+    </div>
+  </div>
+  <div class="info">
+      <div id="post">
+        <h1>VGenes, an integrated graphical tool for efficient, comprehensive and multimodal analyses of massive B-cell repertoire sequences</h1>
+        <p>
+          Diversities of B cell receptor (BCR) Genes bring about the production of antigen-specific antibodies for a variety of antigens, laying the foundation of adaptive immunity. Single cell sequencing advances have enabled large-scale BCR gene profiling under single cell resolution and simultaneous investigation of BCR sequencing alongside single cell genotype and phenotypes, allowing efficient screening of antibodies and in-depth study of immune mechanism. However, rapid growing of both depth and width of BCR sequencing data proposed challenges to data process and interpretation. Here, we propose VGenes, a graphical and integrative tool for BCR analysis, enabling multimodal analysis of BCR genes along with their genotype/phenotype profiling (e.g. transcriptome expression, surface protein expression, antigen probe binding, and etc.). VGenes seamlessly connects BCR sequences with antibody cloning and characterization, integrates graphical statistical analysis, clonal analysis, Ig phenology analysis, mutation analysis, aiming to help users to select antibody candidates from massive B cells efficiently. We demonstrated the efficient selection of Spike-specific antibody candidates from a massive B cell dataset of COVID-19 infected subjects using VGenes.
+        </p>
+        <img src="img/GraphicalAbstract.png" style="margin: auto; width: 1200px;"/>
+        <h2>Github Page</h2>
+        Librator is developed using Python 3. All the source code are available on <a href="index.html" target="_blank" style="color: green;">Github Page</a>
+
+        <h2>System structure of Librator</h2>
+        <p>VGenes seamlessly connects BCR sequences with experimental characterization, helps immunologists to investigate BCR diversities and locate antigen-specific candidates from a massive B cell population. All the human-computer interactions of VGenes, for example, information display, function activation and user input/output, are completed through its graphical user interfaces (GUI), which highly reduces the learning cost to immunologists and is user-friendly. Based on the GUI, VGenes implemented a comprehensive collection of BCR-specific-functions, for example, single cell BCR annotation, graphical statistic of B cell population, matching of heavy and light chains, mutational, clonal and phylogenic analysis of BCR genes, and antibody cloning, aiming to help immunologists making biological conclusions and decisions more efficiently. Furthermore, VGenes accepts multiple input formats, allowing wider range of data resources and enabling better compatibility with existing BCR tools and datasets. We tested VGenes in our lab and believe it will be helpful for the B cell research community.</p>
+        <img src="img/Overall.png" style="margin: auto; width: 1200px;"/>
+    </div>
+  </div>
+</div>
+
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
