@@ -21139,10 +21139,14 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 			this_data[81] = CDR3_NT
 			this_data[82] = CDR3_AA
 			this_data[83] = CDR3_len
-			this_data[84] = str(int(record[87]) - int(record[63]))
-			this_data[85] = str(int(record[88]) - int(record[63]))
 			this_data[99] = str(CDR3_MW)
 			this_data[100] = str(CDR3_pI)
+			try:
+				this_data[84] = str(int(record[87]) - int(record[63]) + 1)
+				this_data[85] = str(int(record[88]) - int(record[63]) + 1)
+			except:
+				this_data[84] = 'NA'
+				this_data[85] = 'NA'
 
 			# import mutation
 			mAb_seq = record[11]
