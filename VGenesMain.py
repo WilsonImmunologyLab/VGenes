@@ -19367,7 +19367,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 						StartSel = int(data[84]) - 1
 						EndSel = int(data[85])
 					if self.ui.btnFW_4.isChecked():
-						StartSel = int(data[85]) - 1
+						# we don't have FR4 start and end, here we use end of CDR3 for FR4 position, so don't need to -1
+						StartSel = int(data[85])
 						EndSel = int(data[74])
 					else:
 						cursor.setPosition(0)
@@ -19397,7 +19398,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.btnVDJ.setChecked(False)
 				if self.ui.btnC.isChecked():
 					if int(data[1]) > int(data[74]):
-						StartSel = int(data[74]) + 1
+						# we don't have C region start and end, here we use end of J gene position, so don't need to -1
+						StartSel = int(data[74])
 						EndSel = len(data[79])
 				else:
 					StartSel = 0
