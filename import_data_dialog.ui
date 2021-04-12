@@ -536,6 +536,9 @@
          <property name="text">
           <string>Fast mode</string>
          </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
          <property name="autoExclusive">
           <bool>false</bool>
          </property>
@@ -581,6 +584,9 @@
         <widget class="QRadioButton" name="radioButtonFast2">
          <property name="text">
           <string>Fast mode</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -823,6 +829,9 @@
         <widget class="QRadioButton" name="radioButtonFast3">
          <property name="text">
           <string>Fast mode</string>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
