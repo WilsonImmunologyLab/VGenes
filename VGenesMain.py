@@ -7014,6 +7014,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.lineEditCloneJ.clear()
 		self.ui.lineEditCloneCDR3len.clear()
 
+		sizeCutoff = self.ui.spinBoxMinCloneSize.value()
+
 		# identify if clones exist
 		'''   # old code
 		SQLStatement = 'SELECT ClonalPool FROM vgenesDB'
@@ -7052,12 +7054,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				clone_dict[clone_name] = 1
 
 		for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
-			list_unique.append(key + '|Count=' + str(value))
+			if value >= sizeCutoff:
+				list_unique.append(key + '|Count=' + str(value))
 
 		list_unique.sort(key=lambda x: x[0])
 		self.ui.listWidgetClone.clear()
 		self.ui.listWidgetClone.addItems(list_unique)
-		msg = 'Total ' + str(len(list_unique)) + ' Clones identified'
+		msg = 'Total ' + str(len(list_unique)) + ' Clones displayed'
 		self.ui.titleClone.setText(msg)
 
 		if DBFilename != '' and DBFilename != None and DBFilename != 'none':

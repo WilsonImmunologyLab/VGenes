@@ -8709,22 +8709,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_45">
-           <item row="0" column="1">
-            <widget class="QLabel" name="titleClone">
-             <property name="font">
-              <font>
-               <pointsize>15</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Total 0 Clones identified (Use Tools-&gt;Find Clone to identify clones)</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
+           <item row="0" column="6">
             <widget class="QPushButton" name="RefreshClone">
              <property name="maximumSize">
               <size>
@@ -8749,6 +8734,26 @@ If the J-end is off the J gene end may need adjusted</string>
               <bool>true</bool>
              </property>
             </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_104">
+             <property name="text">
+              <string>Min Size:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <spacer name="horizontalSpacer_23">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item row="0" column="0">
             <widget class="QPushButton" name="pushButtonPublicClone">
@@ -8775,6 +8780,41 @@ If the J-end is off the J gene end may need adjusted</string>
               <bool>true</bool>
              </property>
             </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QSpinBox" name="spinBoxMinCloneSize">
+             <property name="maximum">
+              <number>9999</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="titleClone">
+             <property name="font">
+              <font>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Total 0 Clones identified (Use Tools-&gt;Find Clone to identify clones)</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer_24">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -10476,7 +10516,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
  </buttongroups>
 </ui>
