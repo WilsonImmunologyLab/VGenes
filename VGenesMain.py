@@ -7632,8 +7632,41 @@ class VGenesForm(QtWidgets.QMainWindow):
 		treefilename = 'tree'
 		out_handle = open(aafilename, 'w')
 
-		out_handle.write('>Germline\n')
-		out_handle.write(DataIn[0][2] + '\n')
+		# make a consensus germline seq and write to file
+		GermSequences = [item[2] for item in DataIn]
+		GermConsensusSeq = CalConsensus(GermSequences)
+		## if the length of those germline sequences are not same, which is unlikely
+		if GermConsensusSeq == 'bad':
+			print('align germline seq...')
+			ConRawfilename = this_folder + "/con_raw_input.fas"
+			Conoutfilename = this_folder + "/con_alignment.fas"
+			with open(ConRawfilename, 'w') as f:
+				for item in DataIn:
+					f.write('>' + item[0] + '\n')
+					f.write(item[2] + '\n')
+
+			# align all consensus seqs
+			cmd = muscle_path
+			cmd += " -in " + ConRawfilename + " -out " + Conoutfilename
+			try:
+				os.system(cmd)
+			except:
+				Msg = 'Fail to run muscle! Check your muscle path!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			if os.path.exists(Conoutfilename) == False:
+				Msg = 'Fail to run muscle! Check your muscle path!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			ConAli = ReadFasta(Conoutfilename)
+			GermSequences = [item[1] for item in ConAli]
+			GermConsensusSeq = CalConsensus(GermSequences)
+
+		out_handle.write('>Germline_consensus\n')
+		out_handle.write(GermConsensusSeq + '\n')
+		# write sequences into file
 		for item in DataIn:
 			SeqName = item[0]
 			Sequence = item[1]
@@ -7676,6 +7709,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if os.path.exists(ErlogFile):
 				self.ShowVGenesText(ErlogFile)
 			return
+
 		f = open(treefile, 'r')
 		tree_str = f.readline()
 		f.close()
@@ -23713,6 +23747,27 @@ def AASimilarity(AA):
     except:
             ExScore = ''
     return ExScore
+
+# calculate consensus
+def CalConsensus(inputlist):
+	try:
+		consensusSeq = ''
+		seqLen = len(inputlist[0])
+		for i in range(seqLen):
+			curStr = []
+			for seq in inputlist:
+				if seq[i] == '-':
+					pass
+				else:
+					curStr.append(seq[i])
+			if len(curStr) > 0:
+				maxStr = max(curStr, key=curStr.count)
+			else:
+				maxStr = '-'
+			consensusSeq += maxStr
+		return consensusSeq
+	except:
+		return "bad"
 
 # AID targeting
 def MutMap(Sequence):
