@@ -8709,7 +8709,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_45">
-           <item row="0" column="6">
+           <item row="0" column="7">
             <widget class="QPushButton" name="RefreshClone">
              <property name="maximumSize">
               <size>
@@ -8735,12 +8735,25 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
+           <item row="0" column="5">
             <widget class="QLabel" name="label_104">
              <property name="text">
               <string>Min Size:</string>
              </property>
             </widget>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer_24">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
            <item row="0" column="3">
             <spacer name="horizontalSpacer_23">
@@ -8781,7 +8794,7 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="5">
+           <item row="0" column="6">
             <widget class="QSpinBox" name="spinBoxMinCloneSize">
              <property name="maximum">
               <number>9999</number>
@@ -8806,18 +8819,15 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
-            <spacer name="horizontalSpacer_24">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+           <item row="0" column="4">
+            <widget class="QRadioButton" name="radioButtonHConly">
+             <property name="text">
+              <string>HC only</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>40</width>
-               <height>20</height>
-              </size>
+             <property name="checked">
+              <bool>true</bool>
              </property>
-            </spacer>
+            </widget>
            </item>
           </layout>
          </widget>

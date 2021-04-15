@@ -6512,6 +6512,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxSHM_FR3.clicked.connect(self.SHMcheck1)
 		self.ui.checkBoxSHM_CDR1.clicked.connect(self.SHMcheck1)
 		self.ui.checkBoxSHM_CDR2.clicked.connect(self.SHMcheck1)
+		self.ui.spinBoxMinCloneSize.valueChanged.connect(self.initial_Clone)
+		self.ui.radioButtonHConly.clicked.connect(self.initial_Clone)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -7015,6 +7017,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.lineEditCloneCDR3len.clear()
 
 		sizeCutoff = self.ui.spinBoxMinCloneSize.value()
+		HConly = self.ui.radioButtonHConly.isChecked()
 
 		# identify if clones exist
 		'''   # old code
@@ -7047,11 +7050,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 		clone_dict = {}
 		list_unique = []
 		for ele in DataIn:
-			clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
-			if clone_dict.__contains__(clone_name):
-				clone_dict[clone_name] += 1
+			if HConly == True:
+				if ele[0] == 'Heavy':
+					clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
+					if clone_dict.__contains__(clone_name):
+						clone_dict[clone_name] += 1
+					else:
+						clone_dict[clone_name] = 1
 			else:
-				clone_dict[clone_name] = 1
+				clone_name = ele[0] + '|' + 'Clone' + str(ele[1])
+				if clone_dict.__contains__(clone_name):
+					clone_dict[clone_name] += 1
+				else:
+					clone_dict[clone_name] = 1
 
 		for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
 			if value >= sizeCutoff:
