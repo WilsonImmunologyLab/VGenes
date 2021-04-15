@@ -3526,6 +3526,7 @@ class Ui_MainWindow(object):
         self.gridLayout_45.addWidget(self.pushButtonPublicClone, 0, 0, 1, 1)
         self.spinBoxMinCloneSize = QtWidgets.QSpinBox(self.frame_19)
         self.spinBoxMinCloneSize.setMaximum(9999)
+        self.spinBoxMinCloneSize.setProperty("value", 5)
         self.spinBoxMinCloneSize.setObjectName("spinBoxMinCloneSize")
         self.gridLayout_45.addWidget(self.spinBoxMinCloneSize, 0, 5, 1, 1)
         self.titleClone = QtWidgets.QLabel(self.frame_19)

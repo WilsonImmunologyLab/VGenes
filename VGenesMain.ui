@@ -8786,6 +8786,9 @@ If the J-end is off the J gene end may need adjusted</string>
              <property name="maximum">
               <number>9999</number>
              </property>
+             <property name="value">
+              <number>5</number>
+             </property>
             </widget>
            </item>
            <item row="0" column="2">
