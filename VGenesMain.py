@@ -10066,7 +10066,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			if self.ui.radioButtonTree.isChecked():
 				tree_data = [{"name":"MyData", "children":data}]
 				my_pyecharts = (
-					Tree(init_opts=opts.InitOpts(width="380px", height="380px", renderer='canvas'))
+					Tree(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 						.add("MyData", tree_data)
 						.set_global_opts(
 						title_opts=opts.TitleOpts(title="Tree"),
@@ -10076,7 +10076,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				)
 			else:
 				my_pyecharts = (
-					TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='canvas'))
+					TreeMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
 					.add(
 						series_name="MyData",
 						data=data,
