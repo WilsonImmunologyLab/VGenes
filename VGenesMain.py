@@ -8768,6 +8768,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			QueryIS = 'Please choose field that contains sample/subject/batch information:'
 			Fields = [''] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
 			fieldName = getItemDial(self, QueryIS, Fields)
+			if fieldName == None:
+				return
 			fieldName = re.sub('\(.+', '', fieldName)
 
 			SQLStatement = 'SELECT GeneType,ClonalPool,' + fieldName + ' FROM vgenesDB WHERE ClonalPool <> "0" ORDER BY ClonalPool'
