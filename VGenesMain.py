@@ -7860,16 +7860,49 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#	i += 1
 
 			field = self.ui.comboBoxFieldLogo.currentText()
-			SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
-			DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if field in FieldList:
+				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-			for item in DataIn:
-				SeqName = item[0]
-				Sequence = item[1]
+				for item in DataIn:
+					SeqName = item[0]
+					Sequence = item[1]
 
-				Sequence = Sequence.upper()
-				EachIn = (SeqName, Sequence)
-				DataSet.append(EachIn)
+					Sequence = Sequence.upper()
+					EachIn = (SeqName, Sequence)
+					DataSet.append(EachIn)
+			else:
+				# determine gene region
+				if field == 'V gene':
+					field = 'Sequence,Vbeg,Vend'
+				elif field == 'J gene':
+					field = 'Sequence,Jbeg,Jend'
+				elif field == 'FWR1':
+					field = 'Sequence,FR1From,FR1To'
+				elif field == 'CDR1':
+					field = 'Sequence,CDR1From,CDR1To'
+				elif field == 'FWR2':
+					field = 'Sequence,FR2From,FR2To'
+				elif field == 'CDR2':
+					field = 'Sequence,CDR2From,CDR2To'
+				elif field == 'FWR3':
+					field = 'Sequence,FR3From,FR3To'
+				else:
+					return
+				
+				# make sequences
+				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				for item in DataIn:
+					SeqName = item[0]
+					Sequence = item[1]
+					SeqFrom = int(item[2])
+					SeqTo = int(item[3])
+					Sequence = Sequence[SeqFrom-1:SeqTo]
+					Sequence = Sequence.upper()
+					EachIn = (SeqName, Sequence)
+					DataSet.append(EachIn)
 
 		# align selected sequences using ClustalOmega
 		outfilename = ''
@@ -7967,17 +8000,51 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#	i += 1
 
 			field = self.ui.comboBoxFieldLogo.currentText()
-			SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
-			DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if field in FieldList:
+				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
+				DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-			for item in DataIn:
-				SeqName = item[0]
-				Sequence = item[1]
+				for item in DataIn:
+					SeqName = item[0]
+					Sequence = item[1]
 
-				AAseq, msg = VGenesSeq.Translator(Sequence, 0)
-				AAseq = AAseq.upper()
-				EachIn = (SeqName, AAseq)
-				DataSet.append(EachIn)
+					AAseq, msg = VGenesSeq.Translator(Sequence, 0)
+					AAseq = AAseq.upper()
+					EachIn = (SeqName, AAseq)
+					DataSet.append(EachIn)
+			else:
+				# determine gene region
+				if field == 'V gene':
+					field = 'Sequence,Vbeg,Vend'
+				elif field == 'J gene':
+					field = 'Sequence,Jbeg,Jend'
+				elif field == 'FWR1':
+					field = 'Sequence,FR1From,FR1To'
+				elif field == 'CDR1':
+					field = 'Sequence,CDR1From,CDR1To'
+				elif field == 'FWR2':
+					field = 'Sequence,FR2From,FR2To'
+				elif field == 'CDR2':
+					field = 'Sequence,CDR2From,CDR2To'
+				elif field == 'FWR3':
+					field = 'Sequence,FR3From,FR3To'
+				else:
+					return
+
+				# make sequences
+				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				for item in DataIn:
+					SeqName = item[0]
+					Sequence = item[1]
+					SeqFrom = int(item[2])
+					SeqTo = int(item[3])
+					Sequence = Sequence[SeqFrom - 1:SeqTo]
+					AAseq, msg = VGenesSeq.Translator(Sequence, 0)
+					AAseq = AAseq.upper()
+					EachIn = (SeqName, AAseq)
+					DataSet.append(EachIn)
 
 		# align selected sequences using ClustalOmega
 		outfilename = ''

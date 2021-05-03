@@ -8473,6 +8473,41 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>GermlineSequence</string>
            </property>
           </item>
+          <item>
+           <property name="text">
+            <string>V gene</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>J gene</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>FWR1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CDR1</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>FWR2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>CDR2</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>FWR3</string>
+           </property>
+          </item>
          </widget>
         </item>
        </layout>
@@ -10529,7 +10564,7 @@ If the J-end is off the J gene end may need adjusted</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
