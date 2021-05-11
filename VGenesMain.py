@@ -8567,7 +8567,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Records = DataIn[0]
 		# make table
 		horizontalHeader = ['Field', 'Field Name', 'Value']
-		num_row = len(Records)
+		num_row = len(FieldList)
 		num_col = len(horizontalHeader)
 		self.ui.tableWidgetTableView.setRowCount(num_row)
 		self.ui.tableWidgetTableView.setColumnCount(num_col)
@@ -8576,12 +8576,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
 		self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
 
+		#a = FieldList
+		#b = RealNameList
 		for row_index in range(num_row):
+			print(str(row_index))
 			unit1 = QTableWidgetItem(FieldList[row_index])
 			unit1.setFlags(Qt.ItemIsEnabled)
 			unit2 = QTableWidgetItem(RealNameList[row_index])
 			unit2.setFlags(Qt.ItemIsEnabled)
-			unit3 = QTableWidgetItem(Records[row_index])
+			unit3 = QTableWidgetItem(str(Records[row_index]))
 			if row_index == 0:
 				unit3.setFlags(Qt.ItemIsEnabled)
 
