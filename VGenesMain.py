@@ -7574,7 +7574,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		VGenesTextWindows[window_id].id = window_id
 		layout = QGridLayout(VGenesTextWindows[window_id])
 		view = QWebEngineView(self)
-		view.load(QUrl("file://" + html_file))
+		#view.load(QUrl("file://" + html_file))
+		url = QUrl.fromLocalFile(str(html_file))
+		view.load(url)
 		view.show()
 		layout.addWidget(view)
 		VGenesTextWindows[window_id].show()
@@ -7613,14 +7615,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 			VGenesTextWindows[window_id].id = window_id
 			layout = QGridLayout(VGenesTextWindows[window_id])
 			view = QWebEngineView(self)
-			view.load(QUrl("file://" + out_html_file))
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
 			view.show()
 			layout.addWidget(view)
 			VGenesTextWindows[window_id].show()
 		else:
 			# display
 			view = QWebEngineView()
-			view.load(QUrl("file://" + out_html_file))
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
 			view.show()
 
 			layout = self.ui.groupBoxTree.layout()
@@ -7765,14 +7771,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 			VGenesTextWindows[window_id].id = window_id
 			layout = QGridLayout(VGenesTextWindows[window_id])
 			view = QWebEngineView(self)
-			view.load(QUrl("file://" + out_html_file))
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
 			view.show()
 			layout.addWidget(view)
 			VGenesTextWindows[window_id].show()
 		else:
 			# display
 			view = QWebEngineView()
-			view.load(QUrl("file://" + out_html_file))
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
 			view.show()
 
 			layout = self.ui.groupBoxTree.layout()
@@ -7834,14 +7844,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 			VGenesTextWindows[window_id].id = window_id
 			layout = QGridLayout(VGenesTextWindows[window_id])
 			view = QWebEngineView(self)
-			view.load(QUrl("file://" + out_html_file))
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
 			view.show()
 			layout.addWidget(view)
 			VGenesTextWindows[window_id].show()
 		else:
 			# display
 			view = QWebEngineView()
-			view.load(QUrl("file://" + out_html_file))
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
 			view.show()
 
 			layout = self.ui.groupBoxTree.layout()
@@ -9514,7 +9528,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		file_handle.write(content)
 		file_handle.close()
 		# show local HTML
-		self.ui.HTMLviewClone.load(QUrl('file://' + html_path))
+		#self.ui.HTMLviewClone.load(QUrl('file://' + html_path))
+		url = QUrl.fromLocalFile(str(html_path))
+		self.ui.HTMLviewClone.load(url)
 		self.ui.HTMLviewClone.show()
 		self.ui.HTMLviewClone.html = "loaded"
 		self.ui.HTMLviewClone.resizeSignal.connect(self.resizeHTML)
@@ -10204,7 +10220,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			file_handle.write(content)
 			file_handle.close()
 			# show local HTML
-			self.ui.HTMLview.load(QUrl('file://' + html_path))
+			#self.ui.HTMLview.load(QUrl('file://' + html_path))
+			url = QUrl.fromLocalFile(str(html_path))
+			self.ui.HTMLview.load(url)
 			self.ui.HTMLview.show()
 			self.ui.HTMLview.html = "loaded"
 			self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
@@ -11227,7 +11245,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			file_handle.write(content)
 			file_handle.close()
 			# show local HTML
-			self.ui.HTMLview.load(QUrl('file://' + html_path))
+			#self.ui.HTMLview.load(QUrl('file://' + html_path))
+			url = QUrl.fromLocalFile(str(html_path))
+			self.ui.HTMLview.load(url)
 			self.ui.HTMLview.show()
 			self.ui.HTMLview.html = "loaded"
 			self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
@@ -14942,7 +14962,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		file_handle.write(content)
 		file_handle.close()
 		# show local HTML
-		self.ui.HTMLviewSHM.load(QUrl('file://' + html_path))
+		#self.ui.HTMLviewSHM.load(QUrl('file://' + html_path))
+		url = QUrl.fromLocalFile(str(html_path))
+		self.ui.HTMLviewSHM.load(url)
 		self.ui.HTMLviewSHM.show()
 		self.ui.HTMLviewSHM.html = "loaded"
 		#self.ui.HTMLview.resizeSignal.connect(self.resizeHTML)
