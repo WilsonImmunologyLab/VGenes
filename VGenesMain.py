@@ -28,6 +28,7 @@ from pyecharts.charts import *
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType
 from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_formatter, svg_formatter
+from PIL import Image
 import statistics
 import itertools
 from itertools import chain, groupby, zip_longest
@@ -106,12 +107,26 @@ global clustal_path
 global muscle_path
 global raxml_path
 
+# path setting
 working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
-temp_folder = os.path.join(working_prefix, 'Temp')
-js_folder = os.path.join(working_prefix, 'JS')
-clustal_path = os.path.join(working_prefix, 'Tools', 'clustalo')
-muscle_path = os.path.join(working_prefix, 'Tools', 'muscle')
-raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
+if system() == 'Darwin':
+	temp_folder = os.path.join(working_prefix, 'Temp')
+	js_folder = os.path.join(working_prefix, 'JS')
+	clustal_path = os.path.join(working_prefix, 'Tools', 'clustalo')
+	muscle_path = os.path.join(working_prefix, 'Tools', 'muscle')
+	raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
+elif system() == 'Windows':
+	temp_folder = os.path.join(working_prefix, 'Temp')
+	js_folder = os.path.join(working_prefix, 'JS')
+	clustal_path = os.path.join(working_prefix, 'Tools', 'clustalo.exe')
+	muscle_path = os.path.join(working_prefix, 'Tools', 'muscle.exe')
+	raxml_path = os.path.join(working_prefix, 'Tools', 'raxml.exe')
+else:
+	temp_folder = os.path.join(working_prefix, 'Temp')
+	js_folder = os.path.join(working_prefix, 'JS')
+	clustal_path = os.path.join(working_prefix, 'Tools', 'clustalo')
+	muscle_path = os.path.join(working_prefix, 'Tools', 'muscle')
+	raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
 
 ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
 ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
@@ -7906,25 +7921,46 @@ class VGenesForm(QtWidgets.QMainWindow):
 					DataSet.append(EachIn)
 
 		# align selected sequences using ClustalOmega
-		outfilename = ''
-		try:
-			if len(DataSet) == 1:
-				time_stamp = str(int(time.time() * 100))
-				outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
-				out_handle = open(outfilename, 'w')
-				out_handle.write('>' + DataSet[0][0] + '\n')
-				out_handle.write(DataSet[0][1])
-				out_handle.close()
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
+		aafilename = os.path.join(temp_folder, "in-" + time_stamp + ".fas")
+		if len(DataSet) == 1:
+			SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+			SeqName = SeqName.strip()
+			NTseq = DataSet[0][1]
+
+			out_handle = open(outfilename, 'w')
+			out_handle.write('>' + SeqName + '\n')
+			out_handle.write(NTseq)
+			out_handle.close()
+		else:
+			out_handle = open(aafilename, 'w')
+			for record in DataSet:
+				SeqName = record[0].replace('\n', '').replace('\r', '')
+				SeqName = SeqName.strip()
+				NTseq = record[1]
+				out_handle.write('>' + SeqName + '\n')
+				out_handle.write(NTseq + '\n')
+			out_handle.close()
+
+			if system() == 'Windows':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			elif system() == 'Darwin':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			elif system() == 'Linux':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
 			else:
-				if os.path.exists(clustal_path):
-					outfilename = VGenesSeq.ClustalO_new(DataSet, 80, True, temp_folder, clustal_path)
-				else:
-					QMessageBox.warning(self, 'Warning',
-					                    'The Clustal Omega does not exist! Check your path!', QMessageBox.Ok,
-					                    QMessageBox.Ok)
-					return
-		except:
-			return
+				cmd = ''
+			try:
+				os.system(cmd)
+			except:
+				QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!',
+				                    QMessageBox.Ok,
+				                    QMessageBox.Ok)
+				return
 
 		# start web logo
 		f = open(outfilename)
@@ -7939,13 +7975,37 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		if self.ui.radioButtonPop.isChecked():
 			eps = eps_formatter(data, format)
-			out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
-			with open(out_eps, 'wb') as f:
-				f.write(eps)
-			cmd = "open " + out_eps
+			if system() == 'Windows':
+				options = QtWidgets.QFileDialog.Options()
+				out_eps, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+				                                                   "New NT logo",
+				                                                   "New NT logo",
+				                                                   "Encapsulated PostScript Files (*.eps);;All Files (*)",
+				                                                   options=options)
+				if out_eps != 'none':
+					with open(out_eps, 'wb') as f:
+						f.write(eps)
+					Msg = 'You sequence logo EPS file has been saved at ' + out_eps
+					QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+				return
+			elif system() == 'Darwin':
+				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+				with open(out_eps, 'wb') as f:
+					f.write(eps)
+				cmd = 'open ' + out_eps  # mac
+			# cmd = 'open ' + out_eps  # mac
+			elif system() == 'Linux':
+				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+				with open(out_eps, 'wb') as f:
+					f.write(eps)
+				cmd = 'nautilus' + out_eps  # Linux
+			else:
+				return
 			bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
 			             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
 		else:
+			error = 0
 			try:
 				svg = svg_formatter(data, format)
 				svg = svg.decode("utf-8")
@@ -7958,7 +8018,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				# display
 				view = QWebEngineView()
-				view.load(QUrl("file://" + out_svg))
+				# view.load(QUrl("file://" + out_svg))
+				url = QUrl.fromLocalFile(str(out_svg))
+				view.load(url)
 				view.show()
 
 				layout = self.ui.groupBoxLogo.layout()
@@ -7969,13 +8031,77 @@ class VGenesForm(QtWidgets.QMainWindow):
 						layout.removeWidget(layout.itemAt(i).widget())
 				layout.addWidget(view)
 			except:
-				eps = eps_formatter(data, format)
-				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
-				with open(out_eps, 'wb') as f:
-					f.write(eps)
-				cmd = "open " + out_eps
-				bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
-				             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+				error = 1
+
+			if error == 1:
+				try:
+					# generate eps and png
+					eps = eps_formatter(data, format)
+					out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+					with open(out_eps, 'wb') as f:
+						f.write(eps)
+
+					im = Image.open(out_eps)
+					im.load(scale=4)
+					out_png = os.path.join(temp_folder, "out-" + time_stamp + ".png")
+					im.save(out_png)
+
+					# load png to HMTL
+					out_html = os.path.join(temp_folder, "out-" + time_stamp + ".html")
+					with open(out_html, 'w') as f:
+						f.write('<!DOCTYPE html>\n<html>\n<body style="margin-left: 0px;\n">')
+						f.write('<p><img src="' + out_png + '" width="960">')
+						f.write('</p>')
+						f.write('\n</body>\n</html>')
+
+					view = QWebEngineView()
+					# view.load(QUrl("file://" + out_svg))
+					url = QUrl.fromLocalFile(str(out_html))
+					view.load(url)
+					view.show()
+
+					layout = self.ui.groupBoxLogo.layout()
+					if layout == None:
+						layout = QGridLayout(self.ui.groupBoxLogo)
+					else:
+						for i in range(layout.count()):
+							layout.removeWidget(layout.itemAt(i).widget())
+					layout.addWidget(view)
+				except:
+					eps = eps_formatter(data, format)
+					if system() == 'Windows':
+						options = QtWidgets.QFileDialog.Options()
+						out_eps, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+						                                                   "New NT logo",
+						                                                   "New NT logo",
+						                                                   "Encapsulated PostScript Files (*.eps);;All Files (*)",
+						                                                   options=options)
+						if out_eps != 'none':
+							with open(out_eps, 'wb') as f:
+								f.write(eps)
+							Msg = 'You sequence logo EPS file has been saved at ' + out_eps
+							QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+						return
+					elif system() == 'Darwin':
+						out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+						with open(out_eps, 'wb') as f:
+							f.write(eps)
+						cmd = 'open ' + out_eps  # mac
+						bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+						             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+						Msg = 'Supporting package missed! Will show sequence logo in a file!\n' + out_eps
+						QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					# cmd = 'open ' + out_eps  # mac
+					elif system() == 'Linux':
+						out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+						with open(out_eps, 'wb') as f:
+							f.write(eps)
+						cmd = 'nautilus' + out_eps  # Linux
+						bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+						             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+					else:
+						return
 
 	def makeAALogo(self):
 		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
@@ -8003,7 +8129,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			field = self.ui.comboBoxFieldLogo.currentText()
 			if field in FieldList:
 				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
-				DataIn =  VGenesSQL.RunSQL(DBFilename, SQLStatement)
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 				for item in DataIn:
 					SeqName = item[0]
@@ -8048,25 +8174,46 @@ class VGenesForm(QtWidgets.QMainWindow):
 					DataSet.append(EachIn)
 
 		# align selected sequences using ClustalOmega
-		outfilename = ''
-		try:
-			if len(DataSet) == 1:
-				time_stamp = str(int(time.time() * 100))
-				outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
-				out_handle = open(outfilename, 'w')
-				out_handle.write('>' + DataSet[0][0] + '\n')
-				out_handle.write(DataSet[0][1])
-				out_handle.close()
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
+		aafilename = os.path.join(temp_folder, "in-" + time_stamp + ".fas")
+		if len(DataSet) == 1:
+			SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+			SeqName = SeqName.strip()
+			AAseq = DataSet[0][1]
+
+			out_handle = open(outfilename, 'w')
+			out_handle.write('>' + SeqName + '\n')
+			out_handle.write(AAseq)
+			out_handle.close()
+		else:
+			aa_handle = open(aafilename, 'w')
+			for record in DataSet:
+				SeqName = record[0].replace('\n', '').replace('\r', '')
+				SeqName = SeqName.strip()
+				AAseq = record[1]
+				aa_handle.write('>' + SeqName + '\n')
+				aa_handle.write(AAseq + '\n')
+			aa_handle.close()
+
+			if system() == 'Windows':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			elif system() == 'Darwin':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			elif system() == 'Linux':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
 			else:
-				if os.path.exists(clustal_path):
-					outfilename = VGenesSeq.ClustalO_new(DataSet, 80, True, temp_folder, clustal_path)
-				else:
-					QMessageBox.warning(self, 'Warning',
-					                    'The Clustal Omega does not exist! Check your path!', QMessageBox.Ok,
-					                    QMessageBox.Ok)
-					return
-		except:
-			return
+				cmd = ''
+			try:
+				os.system(cmd)
+			except:
+				QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!',
+				                    QMessageBox.Ok,
+				                    QMessageBox.Ok)
+				return
 
 		# start web logo
 		f = open(outfilename)
@@ -8081,14 +8228,36 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		if self.ui.radioButtonPop.isChecked():
 			eps = eps_formatter(data, format)
-			out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
-			with open(out_eps, 'wb') as f:
-				f.write(eps)
-			cmd = "open " + out_eps
+			if system() == 'Windows':
+				options = QtWidgets.QFileDialog.Options()
+				out_eps, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+				                                                   "New AA logo",
+				                                                   "New AA logo",
+				                                                   "Encapsulated PostScript Files (*.eps);;All Files (*)",
+				                                                   options=options)
+				if out_eps != 'none':
+					with open(out_eps, 'wb') as f:
+						f.write(eps)
+
+					Msg = 'You sequence logo EPS file has been saved at ' + out_eps
+					QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			elif system() == 'Darwin':
+				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+				with open(out_eps, 'wb') as f:
+					f.write(eps)
+				cmd = 'open ' + out_eps  # mac
+			elif system() == 'Linux':
+				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+				with open(out_eps, 'wb') as f:
+					f.write(eps)
+				cmd = 'nautilus' + out_eps  # Linux
+			else:
+				cmd = ''
 			bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
 			             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
 		else:
-
+			error = 0
 			try:
 				svg = svg_formatter(data, format)
 				svg = svg.decode("utf-8")
@@ -8101,7 +8270,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 				# display
 				view = QWebEngineView()
-				view.load(QUrl("file://" + out_svg))
+				#view.load(QUrl("file://" + out_svg))
+				url = QUrl.fromLocalFile(str(out_svg))
+				view.load(url)
 				view.show()
 
 				layout = self.ui.groupBoxLogo.layout()
@@ -8112,13 +8283,76 @@ class VGenesForm(QtWidgets.QMainWindow):
 						layout.removeWidget(layout.itemAt(i).widget())
 				layout.addWidget(view)
 			except:
-				eps = eps_formatter(data, format)
-				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
-				with open(out_eps, 'wb') as f:
-					f.write(eps)
-				cmd = "open " + out_eps
-				bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
-				             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+				error = 1
+
+			if error == 1:
+				try:
+					# generate eps and png
+					eps = eps_formatter(data, format)
+					out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+					with open(out_eps, 'wb') as f:
+						f.write(eps)
+
+					im = Image.open(out_eps)
+					im.load(scale=4)
+					out_png = os.path.join(temp_folder, "out-" + time_stamp + ".png")
+					im.save(out_png)
+
+					# load png to HMTL
+					out_html = os.path.join(temp_folder, "out-" + time_stamp + ".html")
+					with open(out_html, 'w') as f:
+						f.write('<!DOCTYPE html>\n<html>\n<body style="margin-left: 0px;\n">')
+						f.write('<p><img src="' + out_png + '" width="960">')
+						f.write('</p>')
+						f.write('\n</body>\n</html>')
+
+					view = QWebEngineView()
+					# view.load(QUrl("file://" + out_svg))
+					url = QUrl.fromLocalFile(str(out_html))
+					view.load(url)
+					view.show()
+
+					layout = self.ui.groupBoxLogo.layout()
+					if layout == None:
+						layout = QGridLayout(self.ui.groupBoxLogo)
+					else:
+						for i in range(layout.count()):
+							layout.removeWidget(layout.itemAt(i).widget())
+					layout.addWidget(view)
+				except:
+					eps = eps_formatter(data, format)
+					if system() == 'Windows':
+						options = QtWidgets.QFileDialog.Options()
+						out_eps, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+						                                                   "New AA logo",
+						                                                   "New AA logo",
+						                                                   "Encapsulated PostScript Files (*.eps);;All Files (*)",
+						                                                   options=options)
+						if out_eps != 'none':
+							with open(out_eps, 'wb') as f:
+								f.write(eps)
+
+							Msg = 'You sequence logo EPS file has been saved at ' + out_eps
+							QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+					elif system() == 'Darwin':
+						out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+						with open(out_eps, 'wb') as f:
+							f.write(eps)
+						cmd = 'open ' + out_eps  # mac
+						bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+						             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+						Msg = 'Supporting package missed! Will show sequence logo in a file!\n' + out_eps
+						QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					elif system() == 'Linux':
+						out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+						with open(out_eps, 'wb') as f:
+							f.write(eps)
+						cmd = 'nautilus' + out_eps  # Linux
+						bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+						             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+					else:
+						return
 
 	def InitialGraphic(self):
 		global DBFilename
