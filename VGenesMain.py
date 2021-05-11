@@ -31,6 +31,7 @@ from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_format
 import statistics
 import itertools
 from itertools import chain, groupby, zip_longest
+from platform import system
 import threading as thd
 import seaborn as sns
 import matplotlib
@@ -8193,9 +8194,37 @@ class VGenesForm(QtWidgets.QMainWindow):
 			# clone page
 			elif self.ui.tabWidget.currentIndex() == 10:
 				self.initial_Clone()
+			# table view page
 			elif self.ui.tabWidget.currentIndex() == 2:
 				self.GenerateTableView()
 				#self.ui.tableWidgetTableView.item(0, 0).row()
+			# sequence logo page
+			elif self.ui.tabWidget.currentIndex() == 8:
+				layout = self.ui.groupBoxLogo.layout()
+				if layout == None:
+					if system() == 'Windows':
+						# display
+						view = QWebEngineView()
+						out_svg = os.path.join(working_prefix, 'Data', 'win.html')
+						url = QUrl.fromLocalFile(str(out_svg))
+						view.load(url)
+						view.show()
+						layout = QGridLayout(self.ui.groupBoxLogo)
+						layout.addWidget(view)
+					elif system() == 'Darwin':
+						# display
+						view = QWebEngineView()
+						out_svg = os.path.join(working_prefix, 'Data', 'mac.html')
+						url = QUrl.fromLocalFile(str(out_svg))
+						view.load(url)
+						view.show()
+						layout = self.ui.groupBoxLogo.layout()
+						layout = QGridLayout(self.ui.groupBoxLogo)
+						layout.addWidget(view)
+					else:
+						print('system not support!')
+				else:
+					print('layout exist!')
 
 			self.lastTab = self.ui.tabWidget.currentIndex()
 
