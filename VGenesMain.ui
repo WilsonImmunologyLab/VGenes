@@ -1318,6 +1318,7 @@
           <property name="font">
            <font>
             <family>Lucida Grande</family>
+            <pointsize>15</pointsize>
            </font>
           </property>
           <property name="toolTip">
@@ -4510,6 +4511,7 @@
           <property name="font">
            <font>
             <family>Lucida Grande</family>
+            <pointsize>15</pointsize>
            </font>
           </property>
          </widget>
@@ -4571,6 +4573,12 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
+                 </property>
                 </widget>
                </item>
                <item row="0" column="6">
@@ -4592,6 +4600,12 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
                  </property>
                 </widget>
                </item>
@@ -4617,6 +4631,9 @@
                  </property>
                  <property name="text">
                   <string>Subgroup:</string>
+                 </property>
+                 <property name="alignment">
+                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -4665,6 +4682,12 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
+                 </property>
                 </widget>
                </item>
                <item row="0" column="2">
@@ -4711,6 +4734,12 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
                  </property>
                 </widget>
                </item>
@@ -4784,6 +4813,12 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
+                 </property>
                 </widget>
                </item>
                <item row="2" column="0">
@@ -4833,6 +4868,12 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
+                 </property>
                 </widget>
                </item>
                <item row="2" column="6">
@@ -4854,6 +4895,12 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
                  </property>
                 </widget>
                </item>
@@ -4877,6 +4924,12 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
+                 </property>
                 </widget>
                </item>
                <item row="1" column="6">
@@ -4898,6 +4951,12 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
                  </property>
                 </widget>
                </item>
@@ -4999,6 +5058,12 @@
                    <width>16777215</width>
                    <height>40</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
+                  </font>
                  </property>
                 </widget>
                </item>
@@ -9136,6 +9201,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneName">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9150,6 +9220,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneType">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9164,6 +9239,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneNum">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9182,6 +9262,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneV">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9196,6 +9281,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneD">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9210,6 +9300,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneJ">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9224,6 +9319,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <widget class="QLineEdit" name="lineEditCloneCDR3len">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
                <property name="readOnly">
                 <bool>true</bool>
                </property>
@@ -9531,6 +9631,7 @@ If the J-end is off the J gene end may need adjusted</string>
              <property name="font">
               <font>
                <family>Lucida Grande</family>
+               <pointsize>15</pointsize>
               </font>
              </property>
             </widget>
@@ -9569,6 +9670,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="font">
            <font>
             <family>Lucida Grande</family>
+            <pointsize>15</pointsize>
            </font>
           </property>
          </widget>
@@ -9609,6 +9711,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="font">
            <font>
             <family>Lucida Grande</family>
+            <pointsize>15</pointsize>
            </font>
           </property>
          </widget>
@@ -9618,6 +9721,7 @@ If the J-end is off the J gene end may need adjusted</string>
           <property name="font">
            <font>
             <family>Lucida Grande</family>
+            <pointsize>15</pointsize>
            </font>
           </property>
          </widget>
@@ -9743,6 +9847,7 @@ If the J-end is off the J gene end may need adjusted</string>
                <property name="font">
                 <font>
                  <family>Lucida Grande</family>
+                 <pointsize>15</pointsize>
                 </font>
                </property>
               </widget>
