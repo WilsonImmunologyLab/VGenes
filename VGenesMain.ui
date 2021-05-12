@@ -245,6 +245,11 @@
               <height>22</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
+            </property>
            </widget>
           </item>
          </layout>
@@ -289,6 +294,11 @@
               <width>0</width>
               <height>30</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
             </property>
            </widget>
           </item>
@@ -337,6 +347,11 @@
               <width>0</width>
               <height>30</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
             </property>
            </widget>
           </item>
@@ -571,6 +586,11 @@
               <height>25</height>
              </size>
             </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
+            </property>
            </widget>
           </item>
           <item row="0" column="1">
@@ -587,6 +607,11 @@
               <width>0</width>
               <height>25</height>
              </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
             </property>
            </widget>
           </item>
@@ -1290,6 +1315,11 @@
         </item>
         <item row="1" column="0" colspan="15">
          <widget class="QTableWidget" name="SeqTable">
+          <property name="font">
+           <font>
+            <family>Lucida Grande</family>
+           </font>
+          </property>
           <property name="toolTip">
            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Click to show or hide the table&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
           </property>
@@ -1512,6 +1542,11 @@
                    <height>25</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -1554,6 +1589,11 @@
                       <width>50</width>
                       <height>30</height>
                      </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -1675,6 +1715,11 @@
                       <height>30</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
+                    </property>
                     <property name="readOnly">
                      <bool>true</bool>
                     </property>
@@ -1687,6 +1732,11 @@
                       <width>150</width>
                       <height>30</height>
                      </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -1811,6 +1861,11 @@
                    <width>100</width>
                    <height>25</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2072,6 +2127,11 @@
                       <height>20</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
+                    </property>
                     <property name="verticalScrollBarPolicy">
                      <enum>Qt::ScrollBarAlwaysOff</enum>
                     </property>
@@ -2099,6 +2159,11 @@
                       <width>16777215</width>
                       <height>20</height>
                      </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
                      <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2128,6 +2193,11 @@
                       <height>20</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
+                    </property>
                     <property name="verticalScrollBarPolicy">
                      <enum>Qt::ScrollBarAlwaysOff</enum>
                     </property>
@@ -2155,6 +2225,11 @@
                       <width>16777215</width>
                       <height>20</height>
                      </size>
+                    </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
                      <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2197,6 +2272,11 @@
                       <height>20</height>
                      </size>
                     </property>
+                    <property name="font">
+                     <font>
+                      <family>Lucida Grande</family>
+                     </font>
+                    </property>
                     <property name="verticalScrollBarPolicy">
                      <enum>Qt::ScrollBarAlwaysOff</enum>
                     </property>
@@ -2215,6 +2295,11 @@
                    <width>50</width>
                    <height>30</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2240,6 +2325,11 @@
                    <width>300</width>
                    <height>25</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2269,6 +2359,11 @@
                    <height>25</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -2296,6 +2391,11 @@
                    <width>100</width>
                    <height>25</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2384,6 +2484,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -2411,6 +2516,11 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2440,6 +2550,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -2467,6 +2582,13 @@
                    <width>1000</width>
                    <height>25</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                   <weight>75</weight>
+                   <bold>true</bold>
+                  </font>
                  </property>
                  <property name="acceptDrops">
                   <bool>true</bool>
@@ -2498,6 +2620,11 @@
                    <width>1000</width>
                    <height>25</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2601,6 +2728,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -2644,6 +2776,11 @@
                    <width>16777215</width>
                    <height>25</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2731,6 +2868,7 @@
                  </property>
                  <property name="font">
                   <font>
+                   <family>Lucida Grande</family>
                    <pointsize>11</pointsize>
                   </font>
                  </property>
@@ -2786,6 +2924,11 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -2889,6 +3032,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -2917,6 +3065,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -2944,6 +3097,11 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -3215,6 +3373,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -3243,6 +3406,11 @@
                    <height>20</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -3270,6 +3438,11 @@
                    <width>1000</width>
                    <height>20</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
@@ -3321,6 +3494,11 @@
                    <height>30</height>
                   </size>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="readOnly">
                   <bool>true</bool>
                  </property>
@@ -3333,6 +3511,11 @@
                    <width>100</width>
                    <height>30</height>
                   </size>
+                 </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3701,6 +3884,11 @@
                </item>
                <item row="1" column="3">
                 <widget class="QTextEdit" name="textEdit">
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -3724,6 +3912,11 @@
                  <property name="enabled">
                   <bool>true</bool>
                  </property>
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -3734,6 +3927,11 @@
                </item>
                <item row="1" column="1">
                 <widget class="QTextEdit" name="textCluster">
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -3773,6 +3971,11 @@
                </item>
                <item row="2" column="1">
                 <widget class="QTextEdit" name="textBarcode">
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="verticalScrollBarPolicy">
                   <enum>Qt::ScrollBarAlwaysOff</enum>
                  </property>
@@ -3809,6 +4012,11 @@
                </item>
                <item row="2" column="3">
                 <widget class="QTextEdit" name="txtPopulation">
+                 <property name="font">
+                  <font>
+                   <family>Lucida Grande</family>
+                  </font>
+                 </property>
                  <property name="toolTip">
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;B cell subset or population&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -4263,7 +4471,13 @@
          </widget>
         </item>
         <item row="1" column="0">
-         <widget class="QTableWidget" name="tableWidgetTableView"/>
+         <widget class="QTableWidget" name="tableWidgetTableView">
+          <property name="font">
+           <font>
+            <family>Lucida Grande</family>
+           </font>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
@@ -9279,6 +9493,11 @@ If the J-end is off the J gene end may need adjusted</string>
                <height>16777215</height>
               </size>
              </property>
+             <property name="font">
+              <font>
+               <family>Lucida Grande</family>
+              </font>
+             </property>
             </widget>
            </item>
            <item row="4" column="0">
@@ -9311,6 +9530,11 @@ If the J-end is off the J gene end may need adjusted</string>
             <width>200</width>
             <height>16777215</height>
            </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Lucida Grande</family>
+           </font>
           </property>
          </widget>
         </item>
@@ -9346,10 +9570,22 @@ If the J-end is off the J gene end may need adjusted</string>
          </widget>
         </item>
         <item row="2" column="0">
-         <widget class="QTableWidget" name="tableWidgetHC"/>
+         <widget class="QTableWidget" name="tableWidgetHC">
+          <property name="font">
+           <font>
+            <family>Lucida Grande</family>
+           </font>
+          </property>
+         </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QTableWidget" name="tableWidgetLC"/>
+         <widget class="QTableWidget" name="tableWidgetLC">
+          <property name="font">
+           <font>
+            <family>Lucida Grande</family>
+           </font>
+          </property>
+         </widget>
         </item>
         <item row="3" column="0" colspan="2">
          <layout class="QHBoxLayout" name="horizontalLayout_15">
@@ -9468,7 +9704,13 @@ If the J-end is off the J gene end may need adjusted</string>
               </widget>
              </item>
              <item>
-              <widget class="QListWidget" name="listWidgetSHM_groups"/>
+              <widget class="QListWidget" name="listWidgetSHM_groups">
+               <property name="font">
+                <font>
+                 <family>Lucida Grande</family>
+                </font>
+               </property>
+              </widget>
              </item>
             </layout>
            </item>
