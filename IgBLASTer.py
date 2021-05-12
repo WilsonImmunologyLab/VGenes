@@ -12,14 +12,21 @@ from PyQt5 import QtWidgets
 from multiprocessing.dummy import Pool as ThreadPool
 import VGenesDialogues #import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, setText
 import VGenesSeq
+from platform import system
 
 # IgBlastThreadTest = ''
 
 global working_prefix
 global temp_folder
+global igblast_path
 
-working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
+working_prefix = os.path.dirname(os.path.realpath(sys.argv[0]))
 temp_folder = os.path.join(working_prefix, 'Temp')
+
+if system() == 'Windows':
+	igblast_path = os.path.join(working_prefix, 'IgBlast', 'igblastn.exe')
+else:
+	igblast_path = os.path.join(working_prefix, 'IgBlast', 'igblastn')
 
 def ProcessFASTAold(FASTAfile, MaxNum):
 	ErLog = ''
@@ -180,7 +187,7 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
 	ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
 	ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
-	ErLog  = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
+	ErLog = 'VGenes input beginning at: '+ time.strftime('%c') + '\n'
 	with open(ErlogFile, 'w') as currentFile:  #using with for this automatically closes the file even if you crash
 		currentFile.write(ErLog)
 
@@ -262,10 +269,10 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	try:
 		start = time.time()
 		if species == 'Human':
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut = os.popen(BLASTCommandLine)
 		elif species == 'Mouse':
-			BLASTCommandLine = workingdir + "/igblastn -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut = os.popen(BLASTCommandLine)
 		end = time.time()
 		print('Run time for IgBlast: ' + str(end - start))
@@ -3150,10 +3157,10 @@ def GetGLCDRs(Sequence, species):
 
 
 	if species == 'Human':
-		BLASTCommandLine = workingdir + "/igblastn -germline_db_V HumanVGenes.nt -germline_db_J HumanJGenes.nt -germline_db_D HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+		BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 		IgBlastOut = os.popen(BLASTCommandLine)
 	elif species == 'Mouse':
-		BLASTCommandLine = workingdir + "/igblastn -germline_db_V MouseVGenes.nt -germline_db_J MouseJGenes.nt -germline_db_D MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+		BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 		IgBlastOut = os.popen(BLASTCommandLine)
 
 
