@@ -21859,137 +21859,271 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 				else:
 					this_data[13] = record[4]
 
-			if record[5] == '':
-				this_data[14] = 'N/A'
-			else:
-				if record[5] == 'T':
-					this_data[14] = 'Yes'
-				elif record[5] == 'F':
-					this_data[14] = 'No'
+			# because there is an extra column (6th column, v_frameshift) in igblast-Win (fmt19) compared to igblastn-Mac, we have to parse results seapreatly
+			if system() == 'Windows':
+				if record[6] == '':
+					this_data[14] = 'N/A'
 				else:
-					this_data[14] = record[4]
-
-			if record[6] == 'F':
-				this_data[15] = '+'
-			else:
-				this_data[15] = '-'
-
-			this_data[59] = record[65]
-			this_data[60] = record[66]
-			this_data[61] = record[69]
-			this_data[62] = record[70]
-			this_data[63] = ''
-			this_data[64] = ''
-			this_data[65] = record[73]
-			this_data[66] = record[74]
-
-			this_data[67] = record[15]
-			this_data[68] = record[16]
-			this_data[69] = record[17]
-			this_data[70] = record[18]
-			this_data[71] = ''
-			this_data[72] = ''
-			this_data[73] = record[19]
-			this_data[74] = record[20]
-
-			# identify grouping
-			if project == 'ByFunction':
-				this_data[75] = this_data[2]
-				if this_data[14] == "Yes":
-					this_data[76] = 'Functional'
-				else:
-					this_data[76] = 'Nonfunctional'
-				this_data[77] = this_data[13]
-			else:
-				this_data[75] = project
-				this_data[76] = grouping
-				this_data[77] = subgroup
-
-			this_data[78] = species
-			# sequence
-			vdj_seq = re.sub('-','',record[11])
-			seq_parts = record[1].split(vdj_seq)
-			try:
-				this_data[79] = record[11] + seq_parts[1]
-			except:
-				print('sequence potential error')
-				print(record[1])
-				print(record[11])
-				this_data[79] = record[11]
-			this_data[80] = record[12]
-
-			this_data[86] = "Specificity"
-			this_data[87] = "Subspecificity"
-			this_data[88] = "0"
-			this_data[89] = "0"
-
-			this_data[93] = now
-
-			# identify isotype
-			if this_data[2] == 'Heavy':
-				IsoSeq = record[1]
-				IsoSeq = IsoSeq[int(record[72]):]
-				try:
-					IsoSeq = IsoSeq.strip('N')
-					AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
-					if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-						if species == 'Human':
-							Isotype = VGenesSeq.CallIsotype(IsoSeq)
-						elif species == 'Mouse':
-							Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
-						else:
-							Msg = 'Your current species is: ' + species + \
-							      '\nWe do not support this species!'
-							return Msg
+					if record[6] == 'T':
+						this_data[14] = 'Yes'
+					elif record[6] == 'F':
+						this_data[14] = 'No'
 					else:
-						if len(IsoSeq) > 2:
-							if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
-								Isotype = 'IgG'
-							elif IsoSeq[:3] == 'CAT':
-								Isotype = 'IgA'
-							elif IsoSeq[:3] == 'GGA':
-								Isotype = 'IgM'
-							elif IsoSeq[:3] == 'CAC':
-								Isotype = 'IgD'
-							else:
-								Isotype = IsoSeq
-						else:
-							Isotype = 'Unknown'
+						this_data[14] = record[6]
+
+				if record[7] == 'F':
+					this_data[15] = '+'
+				else:
+					this_data[15] = '-'
+
+				this_data[59] = record[66]
+				this_data[60] = record[67]
+				this_data[61] = record[70]
+				this_data[62] = record[71]
+				this_data[63] = ''
+				this_data[64] = ''
+				this_data[65] = record[74]
+				this_data[66] = record[75]
+
+				this_data[67] = record[16]
+				this_data[68] = record[17]
+				this_data[69] = record[18]
+				this_data[70] = record[19]
+				this_data[71] = ''
+				this_data[72] = ''
+				this_data[73] = record[20]
+				this_data[74] = record[21]
+
+				# identify grouping
+				if project == 'ByFunction':
+					this_data[75] = this_data[2]
+					if this_data[14] == "Yes":
+						this_data[76] = 'Functional'
+					else:
+						this_data[76] = 'Nonfunctional'
+					this_data[77] = this_data[13]
+				else:
+					this_data[75] = project
+					this_data[76] = grouping
+					this_data[77] = subgroup
+
+				this_data[78] = species
+				# sequence
+				vdj_seq = re.sub('-','',record[12])
+				seq_parts = record[1].split(vdj_seq)
+				try:
+					this_data[79] = record[12] + seq_parts[1]
 				except:
-					Isotype = 'Unknown'
+					print('sequence potential error')
+					print(record[1])
+					print(record[12])
+					this_data[79] = record[12]
+				this_data[80] = record[13]
+
+				this_data[86] = "Specificity"
+				this_data[87] = "Subspecificity"
+				this_data[88] = "0"
+				this_data[89] = "0"
+
+				this_data[93] = now
+
+				# identify isotype
+				if this_data[2] == 'Heavy':
+					IsoSeq = record[1]
+					IsoSeq = IsoSeq[int(record[73]):]
+					try:
+						IsoSeq = IsoSeq.strip('N')
+						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+							if species == 'Human':
+								Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							elif species == 'Mouse':
+								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+							else:
+								Msg = 'Your current species is: ' + species + \
+								      '\nWe do not support this species!'
+								return Msg
+						else:
+							if len(IsoSeq) > 2:
+								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+									Isotype = 'IgG'
+								elif IsoSeq[:3] == 'CAT':
+									Isotype = 'IgA'
+								elif IsoSeq[:3] == 'GGA':
+									Isotype = 'IgM'
+								elif IsoSeq[:3] == 'CAC':
+									Isotype = 'IgD'
+								else:
+									Isotype = IsoSeq
+							else:
+								Isotype = 'Unknown'
+					except:
+						Isotype = 'Unknown'
+				else:
+					if this_data[2] == 'Kappa':
+						Isotype = 'Kappa'
+					elif this_data[2] == 'Lambda':
+						Isotype = 'Lambda'
+				this_data[101] = Isotype
+
+				# import CDR3
+				CDR3_NT = record[46]
+				CDR3_AA = record[47]
+				CDR3_len = len(CDR3_AA)
+				CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+				CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+				this_data[81] = CDR3_NT
+				this_data[82] = CDR3_AA
+				this_data[83] = CDR3_len
+				this_data[99] = str(CDR3_MW)
+				this_data[100] = str(CDR3_pI)
+				try:
+					this_data[84] = str(int(record[88]) - int(record[64]) + 1)
+					this_data[85] = str(int(record[89]) - int(record[64]) + 1)
+				except:
+					this_data[84] = 'NA'
+					this_data[85] = 'NA'
+
+				# import mutation
+				mAb_seq = record[12]
+				germline_seq = record[13]
+				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+				this_data[57] = str(num_mut)
+				this_data[96] = str(num_mut)
+				this_data[97] = mut
 			else:
-				if this_data[2] == 'Kappa':
-					Isotype = 'Kappa'
-				elif this_data[2] == 'Lambda':
-					Isotype = 'Lambda'
-			this_data[101] = Isotype
+				if record[5] == '':
+					this_data[14] = 'N/A'
+				else:
+					if record[5] == 'T':
+						this_data[14] = 'Yes'
+					elif record[5] == 'F':
+						this_data[14] = 'No'
+					else:
+						this_data[14] = record[5]
 
-			# import CDR3
-			CDR3_NT = record[45]
-			CDR3_AA = record[46]
-			CDR3_len = len(CDR3_AA)
-			CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
-			CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+				if record[6] == 'F':
+					this_data[15] = '+'
+				else:
+					this_data[15] = '-'
 
-			this_data[81] = CDR3_NT
-			this_data[82] = CDR3_AA
-			this_data[83] = CDR3_len
-			this_data[99] = str(CDR3_MW)
-			this_data[100] = str(CDR3_pI)
-			try:
-				this_data[84] = str(int(record[87]) - int(record[63]) + 1)
-				this_data[85] = str(int(record[88]) - int(record[63]) + 1)
-			except:
-				this_data[84] = 'NA'
-				this_data[85] = 'NA'
+				this_data[59] = record[65]
+				this_data[60] = record[66]
+				this_data[61] = record[69]
+				this_data[62] = record[70]
+				this_data[63] = ''
+				this_data[64] = ''
+				this_data[65] = record[73]
+				this_data[66] = record[74]
 
-			# import mutation
-			mAb_seq = record[11]
-			germline_seq = record[12]
-			mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
-			this_data[57] = str(num_mut)
-			this_data[96] = str(num_mut)
-			this_data[97] = mut
+				this_data[67] = record[15]
+				this_data[68] = record[16]
+				this_data[69] = record[17]
+				this_data[70] = record[18]
+				this_data[71] = ''
+				this_data[72] = ''
+				this_data[73] = record[19]
+				this_data[74] = record[20]
+
+				# identify grouping
+				if project == 'ByFunction':
+					this_data[75] = this_data[2]
+					if this_data[14] == "Yes":
+						this_data[76] = 'Functional'
+					else:
+						this_data[76] = 'Nonfunctional'
+					this_data[77] = this_data[13]
+				else:
+					this_data[75] = project
+					this_data[76] = grouping
+					this_data[77] = subgroup
+
+				this_data[78] = species
+				# sequence
+				vdj_seq = re.sub('-', '', record[11])
+				seq_parts = record[1].split(vdj_seq)
+				try:
+					this_data[79] = record[11] + seq_parts[1]
+				except:
+					print('sequence potential error')
+					print(record[1])
+					print(record[11])
+					this_data[79] = record[11]
+				this_data[80] = record[12]
+
+				this_data[86] = "Specificity"
+				this_data[87] = "Subspecificity"
+				this_data[88] = "0"
+				this_data[89] = "0"
+
+				this_data[93] = now
+
+				# identify isotype
+				if this_data[2] == 'Heavy':
+					IsoSeq = record[1]
+					IsoSeq = IsoSeq[int(record[72]):]
+					try:
+						IsoSeq = IsoSeq.strip('N')
+						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+							if species == 'Human':
+								Isotype = VGenesSeq.CallIsotype(IsoSeq)
+							elif species == 'Mouse':
+								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+							else:
+								Msg = 'Your current species is: ' + species + \
+								      '\nWe do not support this species!'
+								return Msg
+						else:
+							if len(IsoSeq) > 2:
+								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+									Isotype = 'IgG'
+								elif IsoSeq[:3] == 'CAT':
+									Isotype = 'IgA'
+								elif IsoSeq[:3] == 'GGA':
+									Isotype = 'IgM'
+								elif IsoSeq[:3] == 'CAC':
+									Isotype = 'IgD'
+								else:
+									Isotype = IsoSeq
+							else:
+								Isotype = 'Unknown'
+					except:
+						Isotype = 'Unknown'
+				else:
+					if this_data[2] == 'Kappa':
+						Isotype = 'Kappa'
+					elif this_data[2] == 'Lambda':
+						Isotype = 'Lambda'
+				this_data[101] = Isotype
+
+				# import CDR3
+				CDR3_NT = record[45]
+				CDR3_AA = record[46]
+				CDR3_len = len(CDR3_AA)
+				CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+				CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+				this_data[81] = CDR3_NT
+				this_data[82] = CDR3_AA
+				this_data[83] = CDR3_len
+				this_data[99] = str(CDR3_MW)
+				this_data[100] = str(CDR3_pI)
+				try:
+					this_data[84] = str(int(record[87]) - int(record[63]) + 1)
+					this_data[85] = str(int(record[88]) - int(record[63]) + 1)
+				except:
+					this_data[84] = 'NA'
+					this_data[85] = 'NA'
+
+				# import mutation
+				mAb_seq = record[11]
+				germline_seq = record[12]
+				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+				this_data[57] = str(num_mut)
+				this_data[96] = str(num_mut)
+				this_data[97] = mut
 
 			DATA.append(this_data)
 		line_id += 1
