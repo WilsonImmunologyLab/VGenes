@@ -1545,6 +1545,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -1593,6 +1594,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="readOnly">
@@ -1718,6 +1720,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="readOnly">
@@ -1736,6 +1739,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="readOnly">
@@ -1865,6 +1869,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2130,6 +2135,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
@@ -2163,6 +2169,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
@@ -2196,6 +2203,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
@@ -2229,6 +2237,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
@@ -2275,6 +2284,7 @@
                     <property name="font">
                      <font>
                       <family>Lucida Grande</family>
+                      <pointsize>15</pointsize>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
@@ -2299,6 +2309,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="readOnly">
@@ -2329,6 +2340,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2362,6 +2374,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2395,6 +2408,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2487,6 +2501,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2520,6 +2535,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2553,6 +2569,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2586,6 +2603,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                    <weight>75</weight>
                    <bold>true</bold>
                   </font>
@@ -2624,6 +2642,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2731,6 +2750,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2780,6 +2800,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -2869,7 +2890,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
-                   <pointsize>11</pointsize>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="readOnly">
@@ -2928,6 +2949,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3035,6 +3057,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3068,6 +3091,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3101,6 +3125,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3376,6 +3401,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3409,6 +3435,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3442,6 +3469,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3475,7 +3503,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
-                   <pointsize>13</pointsize>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3497,6 +3525,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="readOnly">
@@ -3515,6 +3544,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="readOnly">
@@ -3887,6 +3917,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3915,6 +3946,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3930,6 +3962,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -3974,6 +4007,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
@@ -4015,6 +4049,7 @@
                  <property name="font">
                   <font>
                    <family>Lucida Grande</family>
+                   <pointsize>15</pointsize>
                   </font>
                  </property>
                  <property name="toolTip">
