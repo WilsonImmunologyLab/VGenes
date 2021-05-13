@@ -6882,6 +6882,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.CopyDNA.clicked.connect(self.copySelDNA)
 		self.ui.pushButtonDeleteThis.clicked.connect(self.deleteThis)
 		self.ui.pushButtonDeleteThese.clicked.connect(self.deleteThese)
+		self.ui.pushButtonDeleteBad.clicked.connect(self.deleteBad)
 		self.ui.pushButtonDeleteAll.clicked.connect(self.deleteAll)
 		self.ui.tableWidgetHC.cellClicked.connect(self.matchSelection)
 		self.ui.tableWidgetLC.cellClicked.connect(self.matchSelection)
@@ -7045,6 +7046,55 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("black")))
 		for index in range(self.ui.tableWidgetLC.rowCount()):
 			self.ui.tableWidgetLC.item(index, 0).setForeground(QBrush(QColor("black")))
+		self.resizeUI()
+
+	def deleteBad(self):
+		# get all HC barcode and LC barcode
+		HC_barcode_dict = {'barcode': 0}
+		LC_barcode_dict = {'barcode': 0}
+		# check HC first
+		if self.ui.tableWidgetHC.rowCount() > 0:
+			self.ui.tableWidgetHC.clearSelection()
+			for index in range(self.ui.tableWidgetHC.rowCount()):
+				hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
+				if hc_barcode in HC_barcode_dict.keys():
+					HC_barcode_dict[hc_barcode] += 1
+				else:
+					HC_barcode_dict[hc_barcode] = 1
+		# check LC
+		if self.ui.tableWidgetLC.rowCount() > 0:
+			self.ui.tableWidgetLC.clearSelection()
+			for index in range(self.ui.tableWidgetLC.rowCount()):
+				lc_barcode = self.ui.tableWidgetLC.item(index, 7).text()
+				if lc_barcode in LC_barcode_dict.keys():
+					LC_barcode_dict[lc_barcode] += 1
+				else:
+					LC_barcode_dict[lc_barcode] = 1
+		# get good barcode for HC and LC
+		HC_good = []
+		LC_good = []
+		for (barcode, num) in HC_barcode_dict.items():
+			if num == 1:
+				HC_good.append(barcode)
+		for (barcode, num) in LC_barcode_dict.items():
+			if num == 1:
+				LC_good.append(barcode)
+		good_barcodes = list(set(HC_good).intersection(set(LC_good)))
+
+		# delete bad records in HC table
+		for index in reversed(range(self.ui.tableWidgetHC.rowCount())):
+			barcode = self.ui.tableWidgetHC.item(index, 8).text()
+			if barcode not in good_barcodes:
+				self.ui.tableWidgetHC.removeRow(index)
+		# delete bad records in LC table
+		for index in reversed(range(self.ui.tableWidgetLC.rowCount())):
+			barcode = self.ui.tableWidgetLC.item(index, 7).text()
+			if barcode not in good_barcodes:
+				self.ui.tableWidgetLC.removeRow(index)
+
+		Msg = 'All improper HC/LC pairs have been removed!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		# resize UI
 		self.resizeUI()
 
 	def deleteThis(self):

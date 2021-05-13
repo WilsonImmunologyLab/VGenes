@@ -9753,6 +9753,13 @@ If the J-end is off the J gene end may need adjusted</string>
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="pushButtonDeleteBad">
+            <property name="text">
+             <string>Remove bad pairs</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButtonDeleteThis">
             <property name="text">
              <string>Delete this record</string>
