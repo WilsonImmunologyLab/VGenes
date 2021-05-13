@@ -7011,6 +7011,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_pushButtonCheckHCLC_clicked(self):
+		'''
 		if self.ui.tableWidgetHC.rowCount() > 0:
 			self.ui.tableWidgetHC.clearSelection()
 			pass_sign = True
@@ -7034,11 +7035,61 @@ class VGenesForm(QtWidgets.QMainWindow):
 				if match_num != 1:
 					self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("red")))
 					pass_sign = False
+		'''
+		# get all HC barcode and LC barcode
+		HC_barcode_dict = {'barcode': 0}
+		LC_barcode_dict = {'barcode': 0}
+		# check HC first
+		if self.ui.tableWidgetHC.rowCount() > 0:
+			self.ui.tableWidgetHC.clearSelection()
+			for index in range(self.ui.tableWidgetHC.rowCount()):
+				hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
+				if hc_barcode in HC_barcode_dict.keys():
+					HC_barcode_dict[hc_barcode] += 1
+				else:
+					HC_barcode_dict[hc_barcode] = 1
+		# check LC
+		if self.ui.tableWidgetLC.rowCount() > 0:
+			self.ui.tableWidgetLC.clearSelection()
+			for index in range(self.ui.tableWidgetLC.rowCount()):
+				lc_barcode = self.ui.tableWidgetLC.item(index, 7).text()
+				if lc_barcode in LC_barcode_dict.keys():
+					LC_barcode_dict[lc_barcode] += 1
+				else:
+					LC_barcode_dict[lc_barcode] = 1
+		# get good barcode for HC and LC
+		HC_good = []
+		LC_good = []
+		for (barcode, num) in HC_barcode_dict.items():
+			if num == 1:
+				HC_good.append(barcode)
+		for (barcode, num) in LC_barcode_dict.items():
+			if num == 1:
+				LC_good.append(barcode)
+		good_barcodes = list(set(HC_good).intersection(set(LC_good)))
+		
+		# bad count
+		bad_count = 0
+		# highlight bad records in HC table
+		for index in reversed(range(self.ui.tableWidgetHC.rowCount())):
+			barcode = self.ui.tableWidgetHC.item(index, 8).text()
+			if barcode not in good_barcodes:
+				self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("red")))
+				bad_count += 1
+		# highlight bad records in LC table
+		for index in reversed(range(self.ui.tableWidgetLC.rowCount())):
+			barcode = self.ui.tableWidgetLC.item(index, 7).text()
+			if barcode not in good_barcodes:
+				self.ui.tableWidgetLC.item(index, 0).setForeground(QBrush(QColor("red")))
+				bad_count += 1
+
 		self.resizeUI()
-		if pass_sign == True:
+
+		if bad_count == 0:
 			Msg = 'All HCs and LCs are correctly paired!'
-			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
-			return
+		else:
+			Msg = 'All improper paired HCs and LCs are highlighted in red!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	@pyqtSlot()
 	def on_pushButtonClearHL_clicked(self):
@@ -7081,21 +7132,28 @@ class VGenesForm(QtWidgets.QMainWindow):
 				LC_good.append(barcode)
 		good_barcodes = list(set(HC_good).intersection(set(LC_good)))
 
+		# bad count
+		bad_count = 0
 		# delete bad records in HC table
 		for index in reversed(range(self.ui.tableWidgetHC.rowCount())):
 			barcode = self.ui.tableWidgetHC.item(index, 8).text()
 			if barcode not in good_barcodes:
 				self.ui.tableWidgetHC.removeRow(index)
+				bad_count += 1
 		# delete bad records in LC table
 		for index in reversed(range(self.ui.tableWidgetLC.rowCount())):
 			barcode = self.ui.tableWidgetLC.item(index, 7).text()
 			if barcode not in good_barcodes:
 				self.ui.tableWidgetLC.removeRow(index)
-
-		Msg = 'All improper HC/LC pairs have been removed!'
-		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				bad_count += 1
 		# resize UI
 		self.resizeUI()
+
+		if bad_count == 0:
+			Msg = 'All HCs and LCs are correctly paired!'
+		else:
+			Msg = 'All improper HC/LC pairs have been removed!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	def deleteThis(self):
 		if self.clickedTable == 'HC':
