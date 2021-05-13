@@ -6936,6 +6936,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.HTMLviewSHM.resizeSignal.connect(self.resizeHTMLSHM)
 
 		self.AntibodyCandidates = []
+		self.clickedTable = ''
 
 		self.enableEdit = False
 		self.HeatmapList = []
@@ -7047,20 +7048,28 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.resizeUI()
 
 	def deleteThis(self):
-		curTable = self.ui.tabWidget.focusWidget()
-		try:
-			if curTable.rowCount() > 0:
-				row = curTable.currentRow()
-				name = curTable.item(row, 0).text()
-				curTable.removeRow(row)
-				try:
-					self.AntibodyCandidates.remove(name)
-				except:
-					print('opppppps!')
-				self.ui.tableWidgetHC.clearSelection()
-				self.ui.tableWidgetLC.clearSelection()
-		except:
-			pass
+		if self.clickedTable == 'HC':
+			curTable = self.ui.tableWidgetHC
+		elif self.clickedTable == 'LC':
+			curTable = self.ui.tableWidgetLC
+		else:
+			Msg = 'Please click the record you want to delete first!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		self.clickedTable = ''
+
+		if curTable.rowCount() > 0:
+			# delete from table
+			row = curTable.currentRow()
+			name = curTable.item(row, 0).text()
+			curTable.removeRow(row)
+			# delete from candidate list
+			self.AntibodyCandidates.remove(name)
+
+			self.ui.tableWidgetHC.clearSelection()
+			self.ui.tableWidgetLC.clearSelection()
+
 
 	def deleteAll(self):
 		self.ui.tableWidgetHC.setRowCount(0)
@@ -7068,7 +7077,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.AntibodyCandidates = []
 
 	def deleteThese(self):
-		curTable = self.ui.tabWidget.focusWidget()
+		if self.clickedTable == 'HC':
+			curTable = self.ui.tableWidgetHC
+		elif self.clickedTable == 'LC':
+			curTable = self.ui.tableWidgetLC
+		else:
+			Msg = 'Please click the record you want to delete first!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		self.clickedTable = ''
+
 		try:
 			if curTable.rowCount() > 0:
 				# get barcode
@@ -7116,9 +7135,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if curTable.columnCount() == 10:
 			barcode = curTable.item(row, 8).text()
 			self.ui.tableWidgetLC.clearSelection()
+			self.clickedTable = 'HC'
 		else:
 			barcode = curTable.item(row, 7).text()
 			self.ui.tableWidgetHC.clearSelection()
+			self.clickedTable = 'LC'
 
 		# color HC table
 		for index in range(self.ui.tableWidgetHC.rowCount()):
