@@ -10140,6 +10140,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actiontranslate"/>
     <addaction name="actionAnalyze_Isotypes"/>
     <addaction name="actionaddABlist"/>
+    <addaction name="actionSampling"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -10266,6 +10267,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionIsotypes"/>
    <addaction name="separator"/>
    <addaction name="actionAlignmentHTML"/>
+   <addaction name="actionSampling"/>
    <addaction name="separator"/>
    <addaction name="actionPreferences"/>
    <addaction name="action_Help"/>
@@ -10878,6 +10880,18 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>IdentifyPublicClone</string>
+   </property>
+  </action>
+  <action name="actionSampling">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/Flu.png</normaloff>:/PNG-Icons/Flu.png</iconset>
+   </property>
+   <property name="text">
+    <string>Sampling</string>
+   </property>
+   <property name="toolTip">
+    <string>sampling from current selection</string>
    </property>
   </action>
  </widget>

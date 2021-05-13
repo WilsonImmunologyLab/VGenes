@@ -83,6 +83,7 @@ from ui_translate_dialo import Ui_Translate_Dialog
 from ui_gibson_dialog import Ui_GibsonDialog
 from ui_patentdialog import Ui_PatentDialog
 from ui_SHMtabledialog import Ui_SHMtableDialog
+from ui_samplingdialog import Ui_SamplingDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -319,6 +320,53 @@ class Worker(QRunnable):
 			self.signals.result.emit(result)  # Return the result of the processing
 		finally:
 			self.signals.finished.emit()  # Done
+
+class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		super(Ui_SamplingDialog, self).__init__()
+		self.ui = Ui_SamplingDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButtonClose.clicked.connect(self.reject)
+		self.ui.pushButtonSampling.clicked.connect(self.Sampling)
+		self.ui.pushButtonSelect.clicked.connect(self.select)
+		self.ui.radioButtonPrime.clicked.connect(self.clickPrime)
+		self.ui.checkBoxPro.clicked.connect(self.clickGroup)
+		self.ui.checkBoxFix.clicked.connect(self.clickGroup)
+
+		if system() == 'Windows':
+			# set style for windows
+			self.setStyleSheet("QLabel{font-size:18px;}"
+			                   "QTextEdit{font-size:18px;}"
+			                   "QComboBox{font-size:18px;}"
+			                   "QPushButton{font-size:18px;}"
+			                   "QTabWidget{font-size:18px;}"
+			                   "QCommandLinkButton{font-size:18px;}"
+			                   "QRadioButton{font-size:18px;}"
+			                   "QPlainTextEdit{font-size:18px;}"
+			                   "QCheckBox{font-size:18px;}"
+			                   "QTableWidget{font-size:18px;}"
+			                   "QToolBar{font-size:18px;}"
+			                   "QMenuBar{font-size:18px;}"
+			                   "QMenu{font-size:18px;}"
+			                   "QAction{font-size:18px;}"
+			                   "QMainWindow{font-size:18px;}")
+		else:
+			pass
+
+	def Sampling(self):
+		pass
+
+	def select(self):
+		pass
+
+	def clickPrime(self):
+		pass
+
+	def clickGroup(self):
+		pass
+
 
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
 	SHMUpdateSelectionSignal = pyqtSignal(str)
@@ -6970,6 +7018,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			                   "QSpinBox{font-size:18px;}")
 		else:
 			pass
+
+	@pyqtSlot()
+	def on_actionSampling_triggered(self):
+		self.mySamplingDialog = SamplingDialog()
+		self.mySamplingDialog.show()
 
 	def SHMcheck(self):
 		if self.ui.checkBoxSHM_Vregion.isChecked():
