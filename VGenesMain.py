@@ -17,7 +17,7 @@ import pandas as pd
 from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable, QEvent
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon
+from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
 from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
@@ -6987,6 +6987,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.AntibodyCandidates = []
 		self.clickedTable = ''
 
+		self.SamplingType = ''
+		self.SamplingRes = []
+
 		self.enableEdit = False
 		self.HeatmapList = []
 
@@ -7021,7 +7024,32 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_actionSampling_triggered(self):
+		# determine where to fetch data, single mode (bulk data) or pair mode (single cell data)
+		if len(self.AntibodyCandidates) > 0:
+			bad_count = self.detectBad()
+			if bad_count > 0:
+				Msg = 'We found some improper paired HCs and LCs, and have highlighted them in red!\n' \
+				      'Please check and remove those records then re-try sampling again!\n' \
+				      'If you would like to do sampling on individual sequences instead of paired-HC/LCs, ' \
+				      'please clear your antibody candidate list and re-try sampling!'
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			else:
+				self.SamplingType = 'pair'
+		elif len(self.CheckedRecords) > 0:
+			self.SamplingType = 'single'
+		else:
+			Msg = 'You did not either check any records or make a antibody candidate list. ' \
+			      'Please check some records or add some records into your antibody candidate list and then re-try sampling!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		#
+		
+		# constructe dialog
 		self.mySamplingDialog = SamplingDialog()
+		
+		# show dialog
 		self.mySamplingDialog.show()
 
 	def SHMcheck(self):
@@ -7151,6 +7179,56 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for index in range(self.ui.tableWidgetLC.rowCount()):
 			self.ui.tableWidgetLC.item(index, 0).setForeground(QBrush(QColor("black")))
 		self.resizeUI()
+
+	def detectBad(self):
+		# get all HC barcode and LC barcode
+		HC_barcode_dict = {'barcode': 0}
+		LC_barcode_dict = {'barcode': 0}
+		# check HC first
+		if self.ui.tableWidgetHC.rowCount() > 0:
+			self.ui.tableWidgetHC.clearSelection()
+			for index in range(self.ui.tableWidgetHC.rowCount()):
+				hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
+				if hc_barcode in HC_barcode_dict.keys():
+					HC_barcode_dict[hc_barcode] += 1
+				else:
+					HC_barcode_dict[hc_barcode] = 1
+		# check LC
+		if self.ui.tableWidgetLC.rowCount() > 0:
+			self.ui.tableWidgetLC.clearSelection()
+			for index in range(self.ui.tableWidgetLC.rowCount()):
+				lc_barcode = self.ui.tableWidgetLC.item(index, 7).text()
+				if lc_barcode in LC_barcode_dict.keys():
+					LC_barcode_dict[lc_barcode] += 1
+				else:
+					LC_barcode_dict[lc_barcode] = 1
+		# get good barcode for HC and LC
+		HC_good = []
+		LC_good = []
+		for (barcode, num) in HC_barcode_dict.items():
+			if num == 1:
+				HC_good.append(barcode)
+		for (barcode, num) in LC_barcode_dict.items():
+			if num == 1:
+				LC_good.append(barcode)
+		good_barcodes = list(set(HC_good).intersection(set(LC_good)))
+
+		# bad count
+		bad_count = 0
+		# delete bad records in HC table
+		for index in reversed(range(self.ui.tableWidgetHC.rowCount())):
+			barcode = self.ui.tableWidgetHC.item(index, 8).text()
+			if barcode not in good_barcodes:
+				self.ui.tableWidgetHC.item(index, 0).setForeground(QBrush(QColor("red")))
+				bad_count += 1
+		# delete bad records in LC table
+		for index in reversed(range(self.ui.tableWidgetLC.rowCount())):
+			barcode = self.ui.tableWidgetLC.item(index, 7).text()
+			if barcode not in good_barcodes:
+				self.ui.tableWidgetLC.item(index, 0).setForeground(QBrush(QColor("red")))
+				bad_count += 1
+
+		return bad_count
 
 	def deleteBad(self):
 		# get all HC barcode and LC barcode
@@ -25181,6 +25259,26 @@ if __name__ == '__main__':
 	app = QtWidgets.QApplication(sys.argv)
 	if system() == 'Windows':
 		app.setStyle('Fusion')
+
+	# dark theme
+	'''
+	app.setStyle('Fusion')
+	palette = QPalette()
+	palette.setColor(QPalette.Window, QColor(53, 53, 53))
+	palette.setColor(QPalette.WindowText, Qt.white)
+	palette.setColor(QPalette.Base, QColor(15, 15, 15))
+	palette.setColor(QPalette.AlternateBase, QColor(53, 53, 53))
+	palette.setColor(QPalette.ToolTipBase, Qt.white)
+	palette.setColor(QPalette.ToolTipText, Qt.white)
+	palette.setColor(QPalette.Text, Qt.white)
+	palette.setColor(QPalette.Button, QColor(53, 53, 53))
+	palette.setColor(QPalette.ButtonText, Qt.white)
+	palette.setColor(QPalette.BrightText, Qt.red)
+
+	palette.setColor(QPalette.Highlight, QColor(142, 45, 197).lighter())
+	palette.setColor(QPalette.HighlightedText, Qt.black)
+	app.setPalette(palette)
+	'''
 	Vgenes = VGenesForm()
 
 	Vgenes.ApplicationStarted()
