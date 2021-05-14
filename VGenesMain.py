@@ -25179,6 +25179,8 @@ if __name__ == '__main__':
 	import sys
 
 	app = QtWidgets.QApplication(sys.argv)
+	if system() == 'Windows':
+		app.setStyle('Fusion')
 	Vgenes = VGenesForm()
 
 	Vgenes.ApplicationStarted()
