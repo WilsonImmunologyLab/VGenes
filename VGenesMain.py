@@ -335,6 +335,8 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		self.ui.checkBoxPro.clicked.connect(self.clickGroup)
 		self.ui.checkBoxFix.clicked.connect(self.clickGroup)
 
+		self.DBFilename = ''
+
 		if system() == 'Windows':
 			# set style for windows
 			self.setStyleSheet("QLabel{font-size:18px;}"
@@ -356,7 +358,81 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			pass
 
 	def Sampling(self):
-		pass
+		# random sampling
+		if self.ui.toolBox.currentIndex() == 0:
+			try:
+				size = int(self.ui.lineEditSampSize.text())
+			except:
+				Msg = 'Please type a valid sample size (integers only)'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			if self.ui.lineEditMode.text() == 'Individual sequences':
+				if size >= len(self.inputData):
+					Msg = 'Sample size must be smaller than original population size!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+
+				Res = random.sample(self.inputData, size)
+
+				# result
+				self.ui.tableWidgetResult.setRowCount(0)
+				self.ui.tableWidgetResult.setColumnCount(0)
+				Header = ['Name']
+				self.ui.tableWidgetResult.setRowCount(len(Res))
+				self.ui.tableWidgetResult.setColumnCount(len(Header))
+				self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+				for row_index in range(len(Res)):
+					unit = QTableWidgetItem(Res[row_index])
+					self.ui.tableWidgetResult.setItem(row_index, 0, unit)
+				self.ui.tableWidgetResult.resizeColumnsToContents()
+			else:
+				if size >= len(self.inputData)/2:
+					Msg = 'Sample size must be smaller than original population size!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+
+				WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") AND `GeneType` == "Heavy"'
+				SQLStatement = 'SELECT Blank10 FROM vgenesdb' + WHEREStatement
+				DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+				barcodes = [ele[0] for ele in DataIn]
+				Res_barcode = random.sample(barcodes, size)
+				# make res
+				WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(Res_barcode) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+				SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+				DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+				WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(Res_barcode) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+				SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+				DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+				Res = []
+				for index in range(len(DataInHC)):
+					element = (DataInHC[index][0], DataInHC[index][1], DataInLC[index][1])
+					Res.append(element)
+
+				# result
+				self.ui.tableWidgetResult.setRowCount(0)
+				self.ui.tableWidgetResult.setColumnCount(0)
+				Header = ['barcode','HC name','LC name']
+				self.ui.tableWidgetResult.setRowCount(len(Res))
+				self.ui.tableWidgetResult.setColumnCount(len(Header))
+				self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+				for row_index in range(len(Res)):
+					unit1 = QTableWidgetItem(Res[row_index][0])
+					self.ui.tableWidgetResult.setItem(row_index, 0, unit1)
+					unit2 = QTableWidgetItem(Res[row_index][1])
+					self.ui.tableWidgetResult.setItem(row_index, 1, unit2)
+					unit3 = QTableWidgetItem(Res[row_index][2])
+					self.ui.tableWidgetResult.setItem(row_index, 2, unit3)
+				self.ui.tableWidgetResult.resizeColumnsToContents()
+
+		# Stratified sampling
+		elif self.ui.toolBox.currentIndex() == 1:
+			pass
+		# Representative sampling(Cookie)
+		elif self.ui.toolBox.currentIndex() == 2:
+			pass
+		else:
+			pass
 
 	def select(self):
 		pass
@@ -7054,6 +7130,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# constructe dialog
 		self.mySamplingDialog = SamplingDialog()
+		self.mySamplingDialog.DBFilename = DBFilename
 
 		# load data
 		if self.SamplingType == 'single':
@@ -7063,7 +7140,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		elif self.SamplingType == 'pair':
 			self.mySamplingDialog.ui.lineEditMode.setText('Paired sequences')
 			self.mySamplingDialog.inputData = self.AntibodyCandidates
-			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(len(self.AntibodyCandidates)) + ' HC/LC Pairs')
+			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(int(len(self.AntibodyCandidates)/2)) + ' HC/LC Pairs')
 		else:
 			return
 
