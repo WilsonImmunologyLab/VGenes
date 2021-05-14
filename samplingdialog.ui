@@ -6,62 +6,98 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1168</width>
-    <height>797</height>
+    <width>1150</width>
+    <height>777</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
-   <item row="6" column="4">
+   <item row="1" column="0">
+    <widget class="QLabel" name="label_9">
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Mode:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLineEdit" name="lineEditPopuSize">
+     <property name="maximumSize">
+      <size>
+       <width>200</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="maximumSize">
+      <size>
+       <width>200</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Population size:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="4">
     <widget class="QPushButton" name="pushButtonClose">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="5">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="pushButtonSampling">
+     <property name="maximumSize">
+      <size>
+       <width>400</width>
+       <height>16777215</height>
+      </size>
      </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
+     <property name="text">
+      <string>Run sampling</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <pointsize>18</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Sampling from your dataset</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
     </widget>
    </item>
-   <item row="6" column="1" colspan="2">
+   <item row="4" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>298</width>
+       <width>437</width>
        <height>20</height>
       </size>
      </property>
     </spacer>
    </item>
-   <item row="5" column="0">
+   <item row="4" column="3">
+    <widget class="QPushButton" name="pushButtonSelect">
+     <property name="text">
+      <string>Select my sampling results in VGenes</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
     <widget class="QToolBox" name="toolBox">
      <property name="minimumSize">
       <size>
@@ -83,8 +119,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>400</width>
-        <height>503</height>
+        <width>326</width>
+        <height>488</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -113,7 +149,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>421</height>
+           <height>406</height>
           </size>
          </property>
         </spacer>
@@ -190,7 +226,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>315</height>
+           <height>300</height>
           </size>
          </property>
         </spacer>
@@ -202,8 +238,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>400</width>
-        <height>503</height>
+        <width>326</width>
+        <height>488</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -251,61 +287,44 @@
      </widget>
     </widget>
    </item>
-   <item row="6" column="0">
-    <widget class="QPushButton" name="pushButtonSampling">
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="lineEditMode">
      <property name="maximumSize">
       <size>
-       <width>400</width>
+       <width>200</width>
        <height>16777215</height>
       </size>
      </property>
-     <property name="text">
-      <string>Run sampling</string>
-     </property>
     </widget>
    </item>
-   <item row="2" column="0">
-    <widget class="QLabel" name="label_3">
-     <property name="maximumSize">
-      <size>
-       <width>400</width>
-       <height>16777215</height>
-      </size>
+   <item row="0" column="0" colspan="5">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
-     <property name="text">
-      <string>Population size:</string>
-     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Sampling from your dataset</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </widget>
    </item>
-   <item row="6" column="3">
-    <widget class="QPushButton" name="pushButtonSelect">
-     <property name="text">
-      <string>Select my sampling results in VGenes</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QLineEdit" name="lineEditPopuSize">
-     <property name="maximumSize">
-      <size>
-       <width>400</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1" rowspan="3" colspan="4">
-    <widget class="QTableWidget" name="tableWidgetResult"/>
-   </item>
-   <item row="2" column="1" colspan="4">
+   <item row="1" column="2" colspan="3">
     <widget class="QLabel" name="label_8">
      <property name="font">
       <font>
@@ -319,6 +338,9 @@
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
+   </item>
+   <item row="2" column="2" rowspan="2" colspan="3">
+    <widget class="QTableWidget" name="tableWidgetResult"/>
    </item>
   </layout>
  </widget>

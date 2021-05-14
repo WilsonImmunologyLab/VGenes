@@ -7044,11 +7044,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
-		#
-		
 		# constructe dialog
 		self.mySamplingDialog = SamplingDialog()
-		
+
+		# load data
+		if self.SamplingType == 'single':
+			self.mySamplingDialog.inputData = self.CheckedRecords
+			self.mySamplingDialog.ui.lineEditMode.setText('Individual sequences')
+			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(len(self.CheckedRecords)) + ' Sequences')
+		elif self.SamplingType == 'pair':
+			self.mySamplingDialog.ui.lineEditMode.setText('Paired sequences')
+			self.mySamplingDialog.inputData = self.AntibodyCandidates
+			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(len(self.AntibodyCandidates)) + ' HC/LC Pairs')
+		else:
+			return
+
 		# show dialog
 		self.mySamplingDialog.show()
 
