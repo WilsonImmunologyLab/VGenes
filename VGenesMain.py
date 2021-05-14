@@ -7279,12 +7279,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for index in reversed(range(self.ui.tableWidgetHC.rowCount())):
 			barcode = self.ui.tableWidgetHC.item(index, 8).text()
 			if barcode not in good_barcodes:
+				# delete from candidate list
+				name = self.ui.tableWidgetHC.item(index, 0).text()
+				self.AntibodyCandidates.remove(name)
+				# remove row from table
 				self.ui.tableWidgetHC.removeRow(index)
 				bad_count += 1
 		# delete bad records in LC table
 		for index in reversed(range(self.ui.tableWidgetLC.rowCount())):
 			barcode = self.ui.tableWidgetLC.item(index, 7).text()
 			if barcode not in good_barcodes:
+				# delete from candidate list
+				name = self.ui.tableWidgetLC.item(index, 0).text()
+				self.AntibodyCandidates.remove(name)
+				# remove row from table
 				self.ui.tableWidgetLC.removeRow(index)
 				bad_count += 1
 		# resize UI
