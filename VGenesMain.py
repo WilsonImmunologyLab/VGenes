@@ -362,10 +362,18 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		pass
 
 	def clickPrime(self):
-		pass
+		if self.ui.radioButtonPrime.isChecked():
+			self.ui.comboBoxPrime.setEnabled(True)
+			self.ui.labelSample.setText('per PF value')
+		else:
+			self.ui.comboBoxPrime.setEnabled(False)
+			self.ui.labelSample.setText('total')
 
 	def clickGroup(self):
-		pass
+		if self.ui.checkBoxPro.isChecked():
+			self.ui.lineEditGroupSize.setEnabled(False)
+		else:
+			self.ui.lineEditGroupSize.setEnabled(True)
 
 
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
@@ -7058,6 +7066,38 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(len(self.AntibodyCandidates)) + ' HC/LC Pairs')
 		else:
 			return
+
+		# load field values
+		index = [2, 3, 6, 9, 13, 14, 15, 57, 75, 76, 83, 86, 87, 88, 90, 91, 92, 96, 99, 100, 101] + \
+		        list(range(106, 119))
+		if len(FieldList) > 120:
+			index += list(range(120, len(FieldList)))
+		field_value = [FieldList[i] for i in index]
+
+		self.mySamplingDialog.ui.comboBoxGroupField.addItems(field_value)
+		self.mySamplingDialog.ui.comboBoxPrime.addItems(field_value)
+		# field table
+		Header = ['Name','Type','Select','IF']
+		self.mySamplingDialog.ui.tableWidgetCookie.setRowCount(len(field_value))
+		self.mySamplingDialog.ui.tableWidgetCookie.setColumnCount(len(Header))
+		self.mySamplingDialog.ui.tableWidgetCookie.setHorizontalHeaderLabels(Header)
+		for row_index in range(len(field_value)):
+			# col 1
+			unit = QTableWidgetItem(field_value[row_index])
+			self.mySamplingDialog.ui.tableWidgetCookie.setItem(row_index,0,unit)
+			# col2
+			cell_comBox = QtWidgets.QComboBox()
+			cell_comBox.addItems(['Char','Num'])
+			cell_comBox.setMaximumSize(10086, 40)
+			cell_comBox.setMinimumSize(50, 20)
+			cell_comBox.setEditable(True)
+			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 1, cell_comBox)
+			# col3 and 4
+			cell_check1 = QtWidgets.QCheckBox()
+			cell_check2 = QtWidgets.QCheckBox()
+			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 2, cell_check1)
+			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 3, cell_check2)
+		self.mySamplingDialog.ui.tableWidgetCookie.resizeColumnsToContents()
 
 		# show dialog
 		self.mySamplingDialog.show()

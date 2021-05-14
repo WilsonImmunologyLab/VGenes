@@ -112,9 +112,9 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>0</number>
      </property>
-     <widget class="QWidget" name="page">
+     <widget class="QWidget" name="option1">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -156,7 +156,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="page_3">
+     <widget class="QWidget" name="option2">
       <attribute name="icon">
        <iconset>
         <normaloff>Resources/mAB.png</normaloff>Resources/mAB.png</iconset>
@@ -233,7 +233,7 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="page_2">
+     <widget class="QWidget" name="option3">
       <property name="geometry">
        <rect>
         <x>0</x>
@@ -260,6 +260,13 @@
        <item row="0" column="1">
         <widget class="QLineEdit" name="lineEditSampleSize"/>
        </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="labelSample">
+         <property name="text">
+          <string>per PF value</string>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0" colspan="2">
         <widget class="QRadioButton" name="radioButtonPrime">
          <property name="text">
@@ -270,9 +277,6 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QComboBox" name="comboBoxPrime"/>
-       </item>
        <item row="3" column="0" colspan="2">
         <widget class="QLabel" name="label_6">
          <property name="text">
@@ -280,8 +284,11 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="2">
+       <item row="4" column="0" colspan="3">
         <widget class="QTableWidget" name="tableWidgetCookie"/>
+       </item>
+       <item row="2" column="0" colspan="3">
+        <widget class="QComboBox" name="comboBoxPrime"/>
        </item>
       </layout>
      </widget>
