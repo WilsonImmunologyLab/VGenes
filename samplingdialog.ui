@@ -64,19 +64,6 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
-    <widget class="QPushButton" name="pushButtonSampling">
-     <property name="maximumSize">
-      <size>
-       <width>400</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Run sampling</string>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
@@ -84,7 +71,7 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>437</width>
+       <width>443</width>
        <height>20</height>
       </size>
      </property>
@@ -119,7 +106,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>326</width>
+        <width>316</width>
         <height>488</height>
        </rect>
       </property>
@@ -238,7 +225,7 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>326</width>
+        <width>316</width>
         <height>488</height>
        </rect>
       </property>
@@ -302,6 +289,9 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
     </widget>
    </item>
    <item row="0" column="0" colspan="5">
@@ -348,6 +338,19 @@
    </item>
    <item row="2" column="2" rowspan="2" colspan="3">
     <widget class="QTableWidget" name="tableWidgetResult"/>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="QPushButton" name="pushButtonSampling">
+     <property name="maximumSize">
+      <size>
+       <width>400</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Run sampling</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
