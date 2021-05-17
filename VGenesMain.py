@@ -110,7 +110,7 @@ global raxml_path
 global igblast_path
 
 # path setting
-working_prefix = os.path.dirname(os.path.realpath(sys.argv[0])) + '/'
+working_prefix = os.path.dirname(os.path.realpath(sys.argv[0]))
 if system() == 'Darwin':
 	temp_folder = os.path.join(working_prefix, 'Temp')
 	js_folder = os.path.join(working_prefix, 'JS')
