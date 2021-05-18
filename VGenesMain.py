@@ -359,7 +359,10 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			pass
 	def groupChange(self):
 		field_name = self.ui.comboBoxGroupField.currentText()
-		WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+		if self.ui.lineEditMode.text() == 'Individual sequences':
+			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+		else:
+			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") AND `GeneType` == "Heavy"'
 		SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
 		DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 		self.ui.lineEditLevel.setText(str(len(DataIn)))
@@ -437,7 +440,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		elif self.ui.toolBox.currentIndex() == 1:
 			# validate size
 			try:
-				size = int(self.ui.lineEditSampSize.text())
+				size = int(self.ui.lineEditGroupSize.text())
 			except:
 				Msg = 'Please type a valid sample size (integers only)'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -450,10 +453,105 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
 			# Proportionable mode
 			if self.ui.checkBoxPro.isChecked():
-				pass
+				if size >= int(self.ui.lineEditPopuSize.text()):
+					Msg = 'Sample size must be smaller than original population size!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					return
+
 			# Fixed size mode
 			elif self.ui.checkBoxFix.isChecked():
-				pass
+				if self.ui.lineEditMode.text() == 'Individual sequences':
+					Res = []
+					# get all levels
+					field_name = self.ui.comboBoxGroupField.currentText()
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					# sampling in each level
+					for level in DataIn:
+						# get all records in this level
+						WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND ' + field_name + ' = "' + level[0] + '"'
+						SQLStatement = 'SELECT SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
+						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+						SubName = [i[0] for i in SubDataIn]
+						if size >= len(SubName):
+							Res = Res + SubName
+						else:
+							Res = Res + random.sample(SubName, size)
+
+					# result
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(Res) + '") ORDER BY ' + field_name
+					SQLStatement = 'SELECT SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+					self.ui.tableWidgetResult.setRowCount(0)
+					self.ui.tableWidgetResult.setColumnCount(0)
+					Header = ['Name',field_name]
+					self.ui.tableWidgetResult.setRowCount(len(Res))
+					self.ui.tableWidgetResult.setColumnCount(len(Header))
+					self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+					for row_index in range(len(DataIn)):
+						unit = QTableWidgetItem(DataIn[row_index][0])
+						self.ui.tableWidgetResult.setItem(row_index, 0, unit)
+						unit = QTableWidgetItem(DataIn[row_index][1])
+						self.ui.tableWidgetResult.setItem(row_index, 1, unit)
+					self.ui.tableWidgetResult.resizeColumnsToContents()
+				# pair mode
+				else:
+					Res_barcode = []
+					# get all levels
+					field_name = self.ui.comboBoxGroupField.currentText()
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") AND `GeneType` == "Heavy"'
+					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					# sampling in each level
+					for level in DataIn:
+						# get all records in this level
+						WHEREStatement = ' WHERE `SeqName` IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND `' + field_name + '` = "' + level[0] + '" AND `GeneType` == "Heavy"'
+						SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
+						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+						SubName = [i[0] for i in SubDataIn]
+						if size >= len(SubName):
+							Res_barcode = Res_barcode + SubName
+						else:
+							Res_barcode = Res_barcode + random.sample(SubName, size)
+
+					# make res
+					WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
+						Res_barcode) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+					SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesdb' + WHEREStatement
+					DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
+						Res_barcode) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+					SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+					DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					Res = []
+					for index in range(len(DataInHC)):
+						element = (DataInHC[index][0], DataInHC[index][1], DataInLC[index][1], DataInHC[index][2])
+						Res.append(element)
+
+					# result
+					self.ui.tableWidgetResult.setRowCount(0)
+					self.ui.tableWidgetResult.setColumnCount(0)
+					Header = ['barcode', 'HC name', 'LC name', field_name]
+					self.ui.tableWidgetResult.setRowCount(len(Res))
+					self.ui.tableWidgetResult.setColumnCount(len(Header))
+					self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+					for row_index in range(len(Res)):
+						unit1 = QTableWidgetItem(Res[row_index][0])
+						self.ui.tableWidgetResult.setItem(row_index, 0, unit1)
+						unit2 = QTableWidgetItem(Res[row_index][1])
+						self.ui.tableWidgetResult.setItem(row_index, 1, unit2)
+						unit3 = QTableWidgetItem(Res[row_index][2])
+						self.ui.tableWidgetResult.setItem(row_index, 2, unit3)
+						unit4 = QTableWidgetItem(Res[row_index][3])
+						self.ui.tableWidgetResult.setItem(row_index, 3, unit4)
+					self.ui.tableWidgetResult.resizeColumnsToContents()
+
+
+
 			else:
 				Msg = 'Please choose a group size plan!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
