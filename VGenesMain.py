@@ -453,11 +453,120 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
 			# Proportionable mode
 			if self.ui.checkBoxPro.isChecked():
-				if size >= int(self.ui.lineEditPopuSize.text()):
-					Msg = 'Sample size must be smaller than original population size!'
-					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-					return
+				if self.ui.lineEditMode.text() == 'Individual sequences':
+					Res = []
+					if size >= len(self.inputData):
+						Msg = 'Sample size must be smaller than original population size!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+					SamplingRatio = size/len(self.inputData)
+					# get all levels
+					field_name = self.ui.comboBoxGroupField.currentText()
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") GROUP BY ' + field_name
+					SQLStatement = 'SELECT DISTINCT(' + field_name + '),COUNT(*) FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					# CALCULATE Proportionable size
+					Levels = []
+					for record in DataIn:
+						new_size = int(round(record[1]*SamplingRatio))
+						if new_size == 0:
+							new_size = 1
+						Levels.append([record[0],new_size])
+					# sampling in each level
+					for level in Levels:
+						# get all records in this level
+						WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND ' + field_name + ' = "' + level[0] + '"'
+						SQLStatement = 'SELECT SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
+						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+						SubName = [i[0] for i in SubDataIn]
+						if level[1] >= len(SubName):
+							Res = Res + SubName
+						else:
+							Res = Res + random.sample(SubName, level[1])
 
+					# result
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(Res) + '") ORDER BY ' + field_name
+					SQLStatement = 'SELECT SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+					self.ui.tableWidgetResult.setRowCount(0)
+					self.ui.tableWidgetResult.setColumnCount(0)
+					Header = ['Name', field_name]
+					self.ui.tableWidgetResult.setRowCount(len(Res))
+					self.ui.tableWidgetResult.setColumnCount(len(Header))
+					self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+					for row_index in range(len(DataIn)):
+						unit = QTableWidgetItem(DataIn[row_index][0])
+						self.ui.tableWidgetResult.setItem(row_index, 0, unit)
+						unit = QTableWidgetItem(DataIn[row_index][1])
+						self.ui.tableWidgetResult.setItem(row_index, 1, unit)
+					self.ui.tableWidgetResult.resizeColumnsToContents()
+				else:
+					Res_barcode = []
+					if size >= len(self.inputData)/2:
+						Msg = 'Sample size must be smaller than original population size!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+					SamplingRatio = size * 2 / len(self.inputData)
+					# get all levels
+					field_name = self.ui.comboBoxGroupField.currentText()
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(
+						self.inputData) + '") AND `GeneType` == "Heavy" GROUP BY ' + field_name
+					SQLStatement = 'SELECT DISTINCT(' + field_name + '),COUNT(*) FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					# CALCULATE Proportionable size
+					Levels = []
+					for record in DataIn:
+						new_size = int(round(record[1] * SamplingRatio))
+						if new_size == 0:
+							new_size = 1
+						Levels.append([record[0], new_size])
+					# sampling in each level
+					for level in Levels:
+						# get all records in this level
+						WHEREStatement = ' WHERE `SeqName` IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND `' + field_name + '` = "' + level[0] + '" AND `GeneType` == "Heavy"'
+						SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
+						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+						SubName = [i[0] for i in SubDataIn]
+						if level[1] >= len(SubName):
+							Res_barcode = Res_barcode + SubName
+						else:
+							Res_barcode = Res_barcode + random.sample(SubName,  level[1])
+
+					# make res
+					WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
+						Res_barcode) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+					SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesdb' + WHEREStatement
+					DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
+						Res_barcode) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+					SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+					DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					Res = []
+					for index in range(len(DataInHC)):
+						element = (DataInHC[index][0], DataInHC[index][1], DataInLC[index][1], DataInHC[index][2])
+						Res.append(element)
+
+					# result
+					self.ui.tableWidgetResult.setRowCount(0)
+					self.ui.tableWidgetResult.setColumnCount(0)
+					Header = ['barcode', 'HC name', 'LC name', field_name]
+					self.ui.tableWidgetResult.setRowCount(len(Res))
+					self.ui.tableWidgetResult.setColumnCount(len(Header))
+					self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+					for row_index in range(len(Res)):
+						unit1 = QTableWidgetItem(Res[row_index][0])
+						self.ui.tableWidgetResult.setItem(row_index, 0, unit1)
+						unit2 = QTableWidgetItem(Res[row_index][1])
+						self.ui.tableWidgetResult.setItem(row_index, 1, unit2)
+						unit3 = QTableWidgetItem(Res[row_index][2])
+						self.ui.tableWidgetResult.setItem(row_index, 2, unit3)
+						unit4 = QTableWidgetItem(Res[row_index][3])
+						self.ui.tableWidgetResult.setItem(row_index, 3, unit4)
+					self.ui.tableWidgetResult.resizeColumnsToContents()
+					
 			# Fixed size mode
 			elif self.ui.checkBoxFix.isChecked():
 				if self.ui.lineEditMode.text() == 'Individual sequences':
