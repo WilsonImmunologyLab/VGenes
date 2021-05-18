@@ -334,6 +334,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		self.ui.radioButtonPrime.clicked.connect(self.clickPrime)
 		self.ui.checkBoxPro.clicked.connect(self.clickGroup)
 		self.ui.checkBoxFix.clicked.connect(self.clickGroup)
+		self.ui.comboBoxGroupField.currentTextChanged.connect(self.groupChange)
 
 		self.DBFilename = ''
 
@@ -356,10 +357,17 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			                   "QMainWindow{font-size:18px;}")
 		else:
 			pass
-
+	def groupChange(self):
+		field_name = self.ui.comboBoxGroupField.currentText()
+		WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+		SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+		self.ui.lineEditLevel.setText(str(len(DataIn)))
+	
 	def Sampling(self):
 		# random sampling
 		if self.ui.toolBox.currentIndex() == 0:
+			# validate size
 			try:
 				size = int(self.ui.lineEditSampSize.text())
 			except:
@@ -427,7 +435,29 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
 		# Stratified sampling
 		elif self.ui.toolBox.currentIndex() == 1:
-			pass
+			# validate size
+			try:
+				size = int(self.ui.lineEditSampSize.text())
+			except:
+				Msg = 'Please type a valid sample size (integers only)'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			# validate there is a group
+			if self.ui.comboBoxGroupField.currentText() == '':
+				Msg = 'Please choose a group!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			# Proportionable mode
+			if self.ui.checkBoxPro.isChecked():
+				pass
+			# Fixed size mode
+			elif self.ui.checkBoxFix.isChecked():
+				pass
+			else:
+				Msg = 'Please choose a group size plan!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
 		# Representative sampling(Cookie)
 		elif self.ui.toolBox.currentIndex() == 2:
 			pass
