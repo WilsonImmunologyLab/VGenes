@@ -447,9 +447,9 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
 	def clickGroup(self):
 		if self.ui.checkBoxPro.isChecked():
-			self.ui.lineEditGroupSize.setEnabled(False)
+			self.ui.label_Stratified.setText('Total')
 		else:
-			self.ui.lineEditGroupSize.setEnabled(True)
+			self.ui.label_Stratified.setText('per level')
 
 
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):

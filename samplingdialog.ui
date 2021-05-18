@@ -98,6 +98,11 @@
        <height>16777215</height>
       </size>
      </property>
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
      <property name="currentIndex">
       <number>0</number>
      </property>
@@ -107,7 +112,7 @@
         <x>0</x>
         <y>0</y>
         <width>316</width>
-        <height>488</height>
+        <height>482</height>
        </rect>
       </property>
       <attribute name="icon">
@@ -136,7 +141,7 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>406</height>
+           <height>398</height>
           </size>
          </property>
         </spacer>
@@ -152,15 +157,12 @@
        <string>Stratified sampling</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0" colspan="2">
+       <item row="0" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Group field:</string>
+          <string>Group by:</string>
          </property>
         </widget>
-       </item>
-       <item row="1" column="0" colspan="2">
-        <widget class="QComboBox" name="comboBoxGroupField"/>
        </item>
        <item row="2" column="0">
         <widget class="QLabel" name="label_5">
@@ -169,7 +171,7 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="3" column="0" colspan="3">
         <widget class="QCheckBox" name="checkBoxPro">
          <property name="text">
           <string>Proportionable size</string>
@@ -205,6 +207,13 @@
          </property>
         </widget>
        </item>
+       <item row="5" column="2">
+        <widget class="QLabel" name="label_Stratified">
+         <property name="text">
+          <string>Total</string>
+         </property>
+        </widget>
+       </item>
        <item row="6" column="1">
         <spacer name="verticalSpacer_2">
          <property name="orientation">
@@ -213,10 +222,13 @@
          <property name="sizeHint" stdset="0">
           <size>
            <width>20</width>
-           <height>300</height>
+           <height>296</height>
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="1" column="0" colspan="3">
+        <widget class="QComboBox" name="comboBoxGroupField"/>
        </item>
       </layout>
      </widget>
@@ -226,7 +238,7 @@
         <x>0</x>
         <y>0</y>
         <width>316</width>
-        <height>488</height>
+        <height>482</height>
        </rect>
       </property>
       <attribute name="icon">
