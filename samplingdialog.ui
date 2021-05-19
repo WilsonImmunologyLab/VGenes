@@ -64,6 +64,19 @@
      </property>
     </widget>
    </item>
+   <item row="4" column="0" colspan="2">
+    <widget class="QPushButton" name="pushButtonSampling">
+     <property name="maximumSize">
+      <size>
+       <width>400</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Run sampling</string>
+     </property>
+    </widget>
+   </item>
    <item row="4" column="2">
     <spacer name="horizontalSpacer">
      <property name="orientation">
@@ -83,6 +96,64 @@
       <string>Select my sampling results in VGenes</string>
      </property>
     </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QLineEdit" name="lineEditMode">
+     <property name="maximumSize">
+      <size>
+       <width>200</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="5">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="font">
+         <font>
+          <pointsize>18</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Sampling from your dataset</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="2" colspan="3">
+    <widget class="QLabel" name="label_8">
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Sampling results</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" rowspan="2" colspan="3">
+    <widget class="QTableWidget" name="tableWidgetResult"/>
    </item>
    <item row="3" column="0" colspan="2">
     <widget class="QToolBox" name="toolBox">
@@ -276,24 +347,24 @@
        <string>Representative sampling(Cookie)</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_5">
-       <item row="0" column="0">
+       <item row="0" column="0" colspan="2">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>Sample size</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
+       <item row="0" column="2" colspan="2">
         <widget class="QLineEdit" name="lineEditSampleSize"/>
        </item>
-       <item row="0" column="2">
+       <item row="0" column="4">
         <widget class="QLabel" name="labelSample">
          <property name="text">
           <string>per PF level</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="0" colspan="2">
+       <item row="1" column="0" colspan="3">
         <widget class="QRadioButton" name="radioButtonPrime">
          <property name="text">
           <string>Prime factor</string>
@@ -303,92 +374,42 @@
          </property>
         </widget>
        </item>
-       <item row="3" column="0" colspan="2">
+       <item row="2" column="0" colspan="5">
+        <widget class="QComboBox" name="comboBoxPrime"/>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>There are </string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QLineEdit" name="lineEditLevel2">
+         <property name="readOnly">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="3" colspan="2">
+        <widget class="QLabel" name="label_13">
+         <property name="text">
+          <string>distinct levels in this factor</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="5">
+        <widget class="QTableWidget" name="tableWidgetCookie"/>
+       </item>
+       <item row="4" column="0" colspan="5">
         <widget class="QLabel" name="label_6">
          <property name="text">
           <string>Sampling factor</string>
          </property>
         </widget>
        </item>
-       <item row="4" column="0" colspan="3">
-        <widget class="QTableWidget" name="tableWidgetCookie"/>
-       </item>
-       <item row="2" column="0" colspan="3">
-        <widget class="QComboBox" name="comboBoxPrime"/>
-       </item>
       </layout>
      </widget>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QLineEdit" name="lineEditMode">
-     <property name="maximumSize">
-      <size>
-       <width>200</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="5">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-     <layout class="QGridLayout" name="gridLayout">
-      <item row="0" column="0">
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <pointsize>18</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>Sampling from your dataset</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="1" column="2" colspan="3">
-    <widget class="QLabel" name="label_8">
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Sampling results</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2" rowspan="2" colspan="3">
-    <widget class="QTableWidget" name="tableWidgetResult"/>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <widget class="QPushButton" name="pushButtonSampling">
-     <property name="maximumSize">
-      <size>
-       <width>400</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Run sampling</string>
-     </property>
     </widget>
    </item>
   </layout>

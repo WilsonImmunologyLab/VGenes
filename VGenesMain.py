@@ -337,6 +337,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		self.ui.checkBoxPro.clicked.connect(self.clickGroup)
 		self.ui.checkBoxFix.clicked.connect(self.clickGroup)
 		self.ui.comboBoxGroupField.currentTextChanged.connect(self.groupChange)
+		self.ui.comboBoxPrime.currentTextChanged.connect(self.primeChange)
 
 		self.DBFilename = ''
 
@@ -368,6 +369,16 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
 		DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 		self.ui.lineEditLevel.setText(str(len(DataIn)))
+
+	def primeChange(self):
+		field_name = self.ui.comboBoxPrime.currentText()
+		if self.ui.lineEditMode.text() == 'Individual sequences':
+			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+		else:
+			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") AND `GeneType` == "Heavy"'
+		SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+		self.ui.lineEditLevel2.setText(str(len(DataIn)))
 	
 	def Sampling(self):
 		# random sampling
@@ -676,7 +687,128 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
 			# PF mode
 			if self.ui.radioButtonPrime.isChecked():
-				pass
+				# single mode
+				if self.ui.lineEditMode.text() == 'Individual sequences':
+					if size >= len(self.inputData):
+						Msg = 'Sample size must be smaller than original population size!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+					if len(self.inputData) > 1000:
+						question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+						buttons = 'YN'
+						answer = questionMessage(self, question, buttons)
+						if answer == 'No':
+							return
+
+					# fetch data cols
+					data_cols = []
+					field_names = []
+					row_count = self.ui.tableWidgetCookie.rowCount()
+					for index in range(row_count):
+						fieldName = self.ui.tableWidgetCookie.item(index, 0).text()
+						typeCombo = self.ui.tableWidgetCookie.cellWidget(index, 1)
+						selectCheck = self.ui.tableWidgetCookie.cellWidget(index, 2)
+						importCheck = self.ui.tableWidgetCookie.cellWidget(index, 3)
+
+						if selectCheck.isChecked():
+							field_names.append(fieldName)
+							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+
+					# get all levels
+					field_name = self.ui.comboBoxPrime.currentText()
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+					# fetch data in each level
+					Data = []
+					for level in DataIn:
+						field_names_str = ','.join(field_names)
+						WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND ' + field_name + ' = "' + level[0] + '"'
+						SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+						Data.append(SubDataIn)
+					mode = 'single'
+					pf = field_name
+					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					self.CookieworkThread = CookieThread(self)
+					self.CookieworkThread.mode = mode
+					self.CookieworkThread.pf = pf
+					self.CookieworkThread.size = size
+					self.CookieworkThread.data = Data
+					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.start()
+
+					self.CookieworkThread.trigger.connect(self.cookieRes)
+					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+
+					self.progress = ProgressBar(self)
+					self.progress.setLabel('Cookie sampling running ...')
+					self.progress.show()
+				# pair mode
+				else:
+					if size >= len(self.inputData) / 2:
+						Msg = 'Sample size must be smaller than original population size!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+					if len(self.inputData) > 2000:
+						question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+						buttons = 'YN'
+						answer = questionMessage(self, question, buttons)
+						if answer == 'No':
+							return
+
+					# fetch data cols
+					data_cols = []
+					field_names = []
+					row_count = self.ui.tableWidgetCookie.rowCount()
+					for index in range(row_count):
+						fieldName = self.ui.tableWidgetCookie.item(index, 0).text()
+						typeCombo = self.ui.tableWidgetCookie.cellWidget(index, 1)
+						selectCheck = self.ui.tableWidgetCookie.cellWidget(index, 2)
+						importCheck = self.ui.tableWidgetCookie.cellWidget(index, 3)
+
+						if selectCheck.isChecked():
+							field_names.append(fieldName)
+							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+
+					# get all levels
+					field_name = self.ui.comboBoxPrime.currentText()
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND `GeneType` == "Heavy"'
+					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+					# fetch data in each level
+					Data = []
+					for level in DataIn:
+						field_names_str = ','.join(field_names)
+						WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
+						                 + ' AND `GeneType` == "Heavy"' \
+						                 + ' AND ' + field_name + ' = "' + level[0] + '"'
+						SQLStatement = 'SELECT Blank10,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+						Data.append(SubDataIn)
+					mode = 'pair'
+					pf = field_name
+					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					self.CookieworkThread = CookieThread(self)
+					self.CookieworkThread.mode = mode
+					self.CookieworkThread.pf = pf
+					self.CookieworkThread.size = size
+					self.CookieworkThread.data = Data
+					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.start()
+
+					self.CookieworkThread.trigger.connect(self.cookieRes)
+					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+
+					self.progress = ProgressBar(self)
+					self.progress.setLabel('Cookie sampling running ...')
+					self.progress.show()
 			# none-PF mode
 			else:
 				# single mode
@@ -713,7 +845,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 					mode = 'single'
-					pf = False
+					pf = ''
 					#self.cookieSignal.emit(mode, pf, data_cols, DataIn)
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
@@ -763,7 +895,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					SQLStatement = 'SELECT Blank10,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 					mode = 'pair'
-					pf = False
+					pf = ''
 					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
@@ -806,15 +938,17 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		else:
 			self.ui.label_Stratified.setText('per level')
 
-	def cookieRes(self, mode, res, cols):
+	def cookieRes(self, mode, res, cols, pf):
 		if mode == 'single':
 			# make res
 			field_names_str = ','.join(cols)
+			if pf != '':
+				field_names_str = pd + ',' + field_names_str
 			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(res) + '")'
 			SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
 			Res = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
-			# result
+			# show result on table
 			self.ui.tableWidgetResult.setRowCount(0)
 			self.ui.tableWidgetResult.setColumnCount(0)
 			Header = cols
@@ -829,6 +963,8 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		elif mode == 'pair':
 			# make res
 			field_names_str = ','.join(cols)
+			if pf != '':
+				field_names_str = pd + ',' + field_names_str
 			WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
 			SQLStatement = 'SELECT Blank10,SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
 			DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
@@ -840,7 +976,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 				element = [DataInHC[index][0], DataInHC[index][1], DataInLC[index][1]] + DataInHC[index][2:]
 				Res.append(element)
 
-			# result
+			# show result on table
 			self.ui.tableWidgetResult.setRowCount(0)
 			self.ui.tableWidgetResult.setColumnCount(0)
 			Header = ['barcode', 'HC name', 'LC name'] + cols
@@ -7293,7 +7429,7 @@ class CookieThread(QThread):
 
 	def run(self):
 		CookieResults = CookieSampling(self.mode, self.pf, self.size, self.data, self.cols, self.loadProgress)
-		self.trigger.emit(self.mode, CookieResults, self.cols)
+		self.trigger.emit(self.mode, CookieResults, self.cols, self.pf)
 
 class ProgressBar(QtWidgets.QDialog):
 	def __init__(self, parent=None):
@@ -25730,7 +25866,16 @@ def MutMap(Sequence):
 
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, cols, signal):
-	pass
+	time.sleep(2)
+	signal.emit(20, 'Step 1')
+	time.sleep(2)
+	signal.emit(40, 'Step 2')
+	time.sleep(2)
+	signal.emit(60, 'Step 3')
+	time.sleep(2)
+	signal.emit(80, 'Step 4')
+	time.sleep(2)
+	return []
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
