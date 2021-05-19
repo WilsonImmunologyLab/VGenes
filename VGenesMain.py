@@ -25730,7 +25730,7 @@ def MutMap(Sequence):
 
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, cols, signal):
-	
+	pass
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
