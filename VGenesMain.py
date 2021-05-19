@@ -322,6 +322,8 @@ class Worker(QRunnable):
 			self.signals.finished.emit()  # Done
 
 class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
+	cookieSignal = pyqtSignal(str, bool, list, list)
+
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
 		super(Ui_SamplingDialog, self).__init__()
@@ -659,15 +661,98 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						self.ui.tableWidgetResult.setItem(row_index, 3, unit4)
 					self.ui.tableWidgetResult.resizeColumnsToContents()
 
-
-
 			else:
 				Msg = 'Please choose a group size plan!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 		# Representative sampling(Cookie)
 		elif self.ui.toolBox.currentIndex() == 2:
-			pass
+			# validate size
+			try:
+				size = int(self.ui.lineEditSampleSize.text())
+			except:
+				Msg = 'Please type a valid sample size (integers only)'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			# PF mode
+			if self.ui.radioButtonPrime.isChecked():
+				pass
+			# none-PF mode
+			else:
+				# single mode
+				if self.ui.lineEditMode.text() == 'Individual sequences':
+					if size >= len(self.inputData):
+						Msg = 'Sample size must be smaller than original population size!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+					if len(self.inputData) > 1000:
+						question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+						buttons = 'YN'
+						answer = questionMessage(self, question, buttons)
+						if answer == 'No':
+							return
+
+					# fetch data cols
+					data_cols = []
+					field_names = []
+					row_count = self.ui.tableWidgetCookie.rowCount()
+					for index in range(row_count):
+						fieldName = self.ui.tableWidgetCookie.item(index, 0).text()
+						typeCombo = self.ui.tableWidgetCookie.cellWidget(index, 1)
+						selectCheck = self.ui.tableWidgetCookie.cellWidget(index, 2)
+						importCheck = self.ui.tableWidgetCookie.cellWidget(index, 3)
+
+						if selectCheck.isChecked():
+							field_names.append(fieldName)
+							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+
+					# fetch data
+					field_names_str = ','.join(field_names)
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+					SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					mode = 'single'
+					pf = False
+					self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+
+				# pair mode
+				else:
+					if size >= len(self.inputData)/2:
+						Msg = 'Sample size must be smaller than original population size!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+
+					if len(self.inputData) > 2000:
+						question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+						buttons = 'YN'
+						answer = questionMessage(self, question, buttons)
+						if answer == 'No':
+							return
+
+					# fetch data cols
+					data_cols = []
+					field_names = []
+					row_count = self.ui.tableWidgetCookie.rowCount()
+					for index in range(row_count):
+						fieldName = self.ui.tableWidgetCookie.item(index, 0).text()
+						typeCombo = self.ui.tableWidgetCookie.cellWidget(index, 1)
+						selectCheck = self.ui.tableWidgetCookie.cellWidget(index, 2)
+						importCheck = self.ui.tableWidgetCookie.cellWidget(index, 3)
+
+						if selectCheck.isChecked():
+							field_names.append(fieldName)
+							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+
+					# fetch data
+					field_names_str = ','.join(field_names)
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") AND `GeneType` == "Heavy" '
+					SQLStatement = 'SELECT Blank10,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					mode = 'pair'
+					pf = False
+					self.cookieSignal.emit(mode, pf, data_cols, DataIn)
 		else:
 			pass
 
@@ -687,6 +772,56 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			self.ui.label_Stratified.setText('Total')
 		else:
 			self.ui.label_Stratified.setText('per level')
+
+	def cookieRes(self, mode, res, cols):
+		if mode == 'single':
+			# make res
+			field_names_str = ','.join(cols)
+			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(res) + '")'
+			SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
+			Res = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+			# result
+			self.ui.tableWidgetResult.setRowCount(0)
+			self.ui.tableWidgetResult.setColumnCount(0)
+			Header = cols
+			self.ui.tableWidgetResult.setRowCount(len(Res))
+			self.ui.tableWidgetResult.setColumnCount(len(Header))
+			self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+			for row_index in range(len(Res)):
+				for col_index in range(len(Header)):
+					unit = QTableWidgetItem(Res[row_index][col_index])
+					self.ui.tableWidgetResult.setItem(row_index, col_index, unit)
+			self.ui.tableWidgetResult.resizeColumnsToContents()
+		elif mode == 'pair':
+			# make res
+			field_names_str = ','.join(cols)
+			WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+			SQLStatement = 'SELECT Blank10,SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
+			DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+			WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+			SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+			DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+			Res = []
+			for index in range(len(DataInHC)):
+				element = [DataInHC[index][0], DataInHC[index][1], DataInLC[index][1]] + DataInHC[index][2:]
+				Res.append(element)
+
+			# result
+			self.ui.tableWidgetResult.setRowCount(0)
+			self.ui.tableWidgetResult.setColumnCount(0)
+			Header = ['barcode', 'HC name', 'LC name'] + cols
+			self.ui.tableWidgetResult.setRowCount(len(Res))
+			self.ui.tableWidgetResult.setColumnCount(len(Header))
+			self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
+			for row_index in range(len(Res)):
+				for col_index in range(len(Header)):
+					unit = QTableWidgetItem(Res[row_index][col_index])
+					self.ui.tableWidgetResult.setItem(row_index, col_index, unit)
+			self.ui.tableWidgetResult.resizeColumnsToContents()
+
+		else:
+			pass
 
 
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
@@ -7413,6 +7548,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 3, cell_check2)
 		self.mySamplingDialog.ui.tableWidgetCookie.resizeColumnsToContents()
 
+		# bind single
+		self.cookieSignal.connect(self.CookieSampling)
 		# show dialog
 		self.mySamplingDialog.show()
 
@@ -7453,6 +7590,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		offset_pool = [-1, 1]
 		offset = offset_pool[random.randint(0, 1)]
 		self.resize(size_w + offset, size_h + offset)
+
+	# function for cookie sampling
+	def CookieSampling(self, mode, pf, cols, data):
+		pass
+		
 
 	@pyqtSlot()
 	def on_pushButtonCheckHCLC_clicked(self):
