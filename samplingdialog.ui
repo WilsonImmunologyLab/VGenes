@@ -104,7 +104,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>2</number>
      </property>
      <widget class="QWidget" name="option1">
       <property name="geometry">
@@ -194,6 +194,9 @@
        </item>
        <item row="4" column="0" colspan="4">
         <widget class="QCheckBox" name="checkBoxPro">
+         <property name="toolTip">
+          <string>This mode will select at least 1 record from each level</string>
+         </property>
          <property name="text">
           <string>Proportionable size</string>
          </property>
@@ -286,7 +289,7 @@
        <item row="0" column="2">
         <widget class="QLabel" name="labelSample">
          <property name="text">
-          <string>per PF value</string>
+          <string>per PF level</string>
          </property>
         </widget>
        </item>

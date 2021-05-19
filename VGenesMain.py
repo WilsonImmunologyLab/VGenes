@@ -677,7 +677,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 	def clickPrime(self):
 		if self.ui.radioButtonPrime.isChecked():
 			self.ui.comboBoxPrime.setEnabled(True)
-			self.ui.labelSample.setText('per PF value')
+			self.ui.labelSample.setText('per PF level')
 		else:
 			self.ui.comboBoxPrime.setEnabled(False)
 			self.ui.labelSample.setText('total')

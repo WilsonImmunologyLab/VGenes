@@ -180,7 +180,7 @@ class Ui_SamplingDialog(object):
         self.gridLayout_4.addWidget(self.pushButtonSampling, 4, 0, 1, 2)
 
         self.retranslateUi(SamplingDialog)
-        self.toolBox.setCurrentIndex(1)
+        self.toolBox.setCurrentIndex(2)
         QtCore.QMetaObject.connectSlotsByName(SamplingDialog)
 
     def retranslateUi(self, SamplingDialog):
@@ -196,12 +196,13 @@ class Ui_SamplingDialog(object):
         self.label_10.setText(_translate("SamplingDialog", "There are "))
         self.label_11.setText(_translate("SamplingDialog", "distinct levels in this group"))
         self.label_5.setText(_translate("SamplingDialog", "Group size:"))
+        self.checkBoxPro.setToolTip(_translate("SamplingDialog", "This mode will select at least 1 record from each level"))
         self.checkBoxPro.setText(_translate("SamplingDialog", "Proportionable size"))
         self.checkBoxFix.setText(_translate("SamplingDialog", "Fixed size"))
         self.label_Stratified.setText(_translate("SamplingDialog", "Total"))
         self.toolBox.setItemText(self.toolBox.indexOf(self.option2), _translate("SamplingDialog", "Stratified sampling"))
         self.label_7.setText(_translate("SamplingDialog", "Sample size"))
-        self.labelSample.setText(_translate("SamplingDialog", "per PF value"))
+        self.labelSample.setText(_translate("SamplingDialog", "per PF level"))
         self.radioButtonPrime.setText(_translate("SamplingDialog", "Prime factor"))
         self.label_6.setText(_translate("SamplingDialog", "Sampling factor"))
         self.toolBox.setItemText(self.toolBox.indexOf(self.option3), _translate("SamplingDialog", "Representative sampling(Cookie)"))
