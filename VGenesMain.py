@@ -939,11 +939,17 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			self.ui.label_Stratified.setText('per level')
 
 	def cookieRes(self, mode, res, cols, pf):
+		# close progress bar
+		self.progress.FeatProgressBar.setValue(100)
+		self.progress.close()
+		# make res
+		col_names = [i[0] for i in cols]
+		field_names_str = ','.join(col_names)
+		if pf != '':
+			field_names_str = pf + ',' + field_names_str
+
 		if mode == 'single':
-			# make res
-			field_names_str = ','.join(cols)
-			if pf != '':
-				field_names_str = pd + ',' + field_names_str
+			# fetch data
 			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(res) + '")'
 			SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
 			Res = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
@@ -951,7 +957,10 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			# show result on table
 			self.ui.tableWidgetResult.setRowCount(0)
 			self.ui.tableWidgetResult.setColumnCount(0)
-			Header = cols
+			if pf != '':
+				Header = ['SeqName', pf] + col_names
+			else:
+				Header = ['SeqName'] + col_names
 			self.ui.tableWidgetResult.setRowCount(len(Res))
 			self.ui.tableWidgetResult.setColumnCount(len(Header))
 			self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
@@ -961,10 +970,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					self.ui.tableWidgetResult.setItem(row_index, col_index, unit)
 			self.ui.tableWidgetResult.resizeColumnsToContents()
 		elif mode == 'pair':
-			# make res
-			field_names_str = ','.join(cols)
-			if pf != '':
-				field_names_str = pd + ',' + field_names_str
+			# fetch data
 			WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
 			SQLStatement = 'SELECT Blank10,SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
 			DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
@@ -973,13 +979,17 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 			Res = []
 			for index in range(len(DataInHC)):
-				element = [DataInHC[index][0], DataInHC[index][1], DataInLC[index][1]] + DataInHC[index][2:]
+				element = [DataInHC[index][0], DataInHC[index][1], DataInLC[index][1]] + list(DataInHC[index][2:])
 				Res.append(element)
 
 			# show result on table
 			self.ui.tableWidgetResult.setRowCount(0)
 			self.ui.tableWidgetResult.setColumnCount(0)
-			Header = ['barcode', 'HC name', 'LC name'] + cols
+
+			if pf != '':
+				Header = ['barcode', 'HC name', 'LC name', pf] + col_names
+			else:
+				Header = ['barcode', 'HC name', 'LC name'] + col_names
 			self.ui.tableWidgetResult.setRowCount(len(Res))
 			self.ui.tableWidgetResult.setColumnCount(len(Header))
 			self.ui.tableWidgetResult.setHorizontalHeaderLabels(Header)
@@ -7417,7 +7427,7 @@ class WorkThreadIMGTparser(QThread):
 
 class CookieThread(QThread):
 	loadProgress = pyqtSignal(int, str)
-	trigger = pyqtSignal(str, list, list)
+	trigger = pyqtSignal(str, list, list, str)
 
 	def __int__(self):
 		super(CookieThread, self).__init__()
@@ -25866,16 +25876,23 @@ def MutMap(Sequence):
 
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, cols, signal):
-	time.sleep(2)
+	time.sleep(1)
 	signal.emit(20, 'Step 1')
-	time.sleep(2)
+	time.sleep(1)
 	signal.emit(40, 'Step 2')
-	time.sleep(2)
+	time.sleep(1)
 	signal.emit(60, 'Step 3')
-	time.sleep(2)
+	time.sleep(1)
 	signal.emit(80, 'Step 4')
-	time.sleep(2)
-	return []
+	time.sleep(1)
+
+	# test
+	if pf == "":
+		res = [i[0] for i in data]
+		res = random.sample(res, int(len(res)/2))
+	else:
+		res = [i[0] for i in data[0]]
+	return res
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
