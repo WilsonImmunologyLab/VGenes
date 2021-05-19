@@ -22,8 +22,6 @@ added_files = [
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/raxml','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/clustalo','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/muscle','Tools'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/igblastn','Tools'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/igblastp','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/makeblastdb','Tools'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template.html','Data'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Data/template_raxml_tree.html','Data'),
