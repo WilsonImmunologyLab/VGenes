@@ -437,7 +437,6 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					unit3 = QTableWidgetItem(Res[row_index][2])
 					self.ui.tableWidgetResult.setItem(row_index, 2, unit3)
 				self.ui.tableWidgetResult.resizeColumnsToContents()
-
 		# Stratified sampling
 		elif self.ui.toolBox.currentIndex() == 1:
 			# validate size
@@ -715,8 +714,21 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 					mode = 'single'
 					pf = False
-					self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					#self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					self.CookieworkThread = CookieThread(self)
+					self.CookieworkThread.mode = mode
+					self.CookieworkThread.pf = pf
+					self.CookieworkThread.size = 
+					self.CookieworkThread.data = DataIn
+					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.start()
 
+					self.CookieworkThread.trigger.connect(self.cookieRes)
+					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+
+					self.progress = ProgressBar(self)
+					self.progress.setLabel('Cookie sampling running ...')
+					self.progress.show()
 				# pair mode
 				else:
 					if size >= len(self.inputData)/2:
@@ -752,8 +764,28 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 					mode = 'pair'
 					pf = False
-					self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					self.CookieworkThread = CookieThread(self)
+					self.CookieworkThread.mode = mode
+					self.CookieworkThread.pf = pf
+					self.CookieworkThread.data = DataIn
+					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.start()
+
+					self.CookieworkThread.trigger.connect(self.cookieRes)
+					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+
+					self.progress = ProgressBar(self)
+					self.progress.setLabel('Cookie sampling running ...')
+					self.progress.show()
 		else:
+			pass
+
+	def progressLabel(self, pct, label):
+		try:
+			self.progress.setValue(pct)
+			self.progress.setLabel(label)
+		except:
 			pass
 
 	def select(self):
@@ -7246,6 +7278,22 @@ class WorkThreadIMGTparser(QThread):
 		a = IMGTAnalysis
 		self.trigger.emit(self.item)
 
+class CookieThread(QThread):
+	loadProgress = pyqtSignal(int, str)
+	trigger = pyqtSignal(str, list, list)
+
+	def __int__(self):
+		super(CookieThread, self).__init__()
+		self.mode = ''
+		self.pf = ''
+		self.data = []
+		self.cols = []
+		self.size = 0
+
+	def run(self):
+		CookieResults = CookieSampling(self.mode, self.pf, self.size, self.data, self.cols, self.loadProgress)
+		self.trigger.emit(self.mode, CookieResults, self.cols)
+
 class ProgressBar(QtWidgets.QDialog):
 	def __init__(self, parent=None):
 		super(ProgressBar, self).__init__(parent)
@@ -7548,8 +7596,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 3, cell_check2)
 		self.mySamplingDialog.ui.tableWidgetCookie.resizeColumnsToContents()
 
-		# bind single
-		self.cookieSignal.connect(self.CookieSampling)
 		# show dialog
 		self.mySamplingDialog.show()
 
@@ -7590,11 +7636,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		offset_pool = [-1, 1]
 		offset = offset_pool[random.randint(0, 1)]
 		self.resize(size_w + offset, size_h + offset)
-
-	# function for cookie sampling
-	def CookieSampling(self, mode, pf, cols, data):
-		pass
-		
 
 	@pyqtSlot()
 	def on_pushButtonCheckHCLC_clicked(self):
@@ -25685,6 +25726,10 @@ def MutMap(Sequence):
         # i+=1
 
     return features
+
+# function for cookie sampling
+def CookieSampling(mode, pf, size, data, cols, signal):
+	
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
