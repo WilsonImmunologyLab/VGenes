@@ -20516,6 +20516,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.tableWidgetLC.horizontalHeader().setSortIndicatorShown(True)
 			self.ui.tableWidgetLC.horizontalHeader().sectionClicked.connect(self.sortLCtable)
 
+		# switch current tab to antibody candidate tab
+		self.ui.tabWidget.setCurrentIndex(11)
+
 	def sortHCtable(self, index):
 		self.ui.tableWidgetHC.sortByColumn(index, self.ui.tableWidgetHC.horizontalHeader().sortIndicatorOrder())
 
