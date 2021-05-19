@@ -718,7 +718,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
 					self.CookieworkThread.pf = pf
-					self.CookieworkThread.size = 
+					self.CookieworkThread.size = size
 					self.CookieworkThread.data = DataIn
 					self.CookieworkThread.cols = data_cols
 					self.CookieworkThread.start()
@@ -768,6 +768,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
 					self.CookieworkThread.pf = pf
+					self.CookieworkThread.size = size
 					self.CookieworkThread.data = DataIn
 					self.CookieworkThread.cols = data_cols
 					self.CookieworkThread.start()
