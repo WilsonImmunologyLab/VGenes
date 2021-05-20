@@ -1337,7 +1337,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
             selected_list = self.getTreeCheckedChild()
             selected_list = selected_list[3]
 
-        if len(listItems) == 0:
+        if len(selected_list) == 0:
             question = 'You did not select any records, export all?'
             buttons = 'YN'
             answer = questionMessage(self, question, buttons)
