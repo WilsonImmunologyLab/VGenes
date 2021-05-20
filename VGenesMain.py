@@ -714,6 +714,10 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						if selectCheck.isChecked():
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+					if len(data_cols) == 0:
+						Msg = 'Please check some fields first!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
 
 					# fetch data
 					field_name = self.ui.comboBoxPrime.currentText()
@@ -780,6 +784,10 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						if selectCheck.isChecked():
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+					if len(data_cols) == 0:
+						Msg = 'Please check some fields first!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
 
 					# fetch data
 					field_name = self.ui.comboBoxPrime.currentText()
@@ -849,6 +857,10 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						if selectCheck.isChecked():
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+					if len(data_cols) == 0:
+						Msg = 'Please check some fields first!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
 
 					# fetch data
 					field_names_str = ','.join(field_names)
@@ -901,6 +913,10 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						if selectCheck.isChecked():
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
+					if len(data_cols) == 0:
+						Msg = 'Please check some fields first!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
 
 					# fetch data
 					field_names_str = ','.join(field_names)
