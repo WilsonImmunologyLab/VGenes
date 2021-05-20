@@ -715,34 +715,40 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
 
-					# get all levels
+					# fetch data
 					field_name = self.ui.comboBoxPrime.currentText()
-					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
-					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					field_names_str = ','.join(field_names)
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") ORDER BY ' + field_name
+					SQLStatement = 'SELECT SeqName,' + field_name + ',' + field_names_str + ' FROM vgenesDB' + WHEREStatement
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
-					# fetch data in each level
-					Data = []
-					for level in DataIn:
-						field_names_str = ','.join(field_names)
-						WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
-						                 + ' AND ' + field_name + ' = "' + level[0] + '"'
-						SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
-						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
-						Data.append(SubDataIn)
-					mode = 'single'
-					pf = field_name
-					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
+					# get all levels
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
+					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					DataInLevel = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+					# get data index in each level
+					LevelIndex = dict()
+					data_rows = [i[0] for i in DataIn]
+					indexlist = [i[1] for i in DataIn]
+					Data = [i[2:] for i in DataIn]
+					for level in DataInLevel:
+						LevelIndex[level] = find_value_location(indexlist, level[0])
+					mode = 'pair'
+					pf = [field_name, LevelIndex]
+
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
 					self.CookieworkThread.pf = pf
 					self.CookieworkThread.size = size
 					self.CookieworkThread.data = Data
 					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.rows = data_rows
 					self.CookieworkThread.start()
 
 					self.CookieworkThread.trigger.connect(self.cookieRes)
 					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+					self.CookieworkThread.badNews.connect(self.errorMsgFun)
 
 					self.progress = ProgressBar(self)
 					self.progress.setLabel('Cookie sampling running ...')
@@ -775,25 +781,28 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
 
-					# get all levels
+					# fetch data
 					field_name = self.ui.comboBoxPrime.currentText()
+					field_names_str = ','.join(field_names)
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") ORDER BY ' + field_name
+					SQLStatement = 'SELECT Blank10,' + field_name + ',' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+					# get all levels
 					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
 						                 + ' AND `GeneType` == "Heavy"'
 					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
-					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+					DataInLevel = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
-					# fetch data in each level
-					Data = []
-					for level in DataIn:
-						field_names_str = ','.join(field_names)
-						WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
-						                 + ' AND `GeneType` == "Heavy"' \
-						                 + ' AND ' + field_name + ' = "' + level[0] + '"'
-						SQLStatement = 'SELECT Blank10,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
-						SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
-						Data.append(SubDataIn)
+					# get data index in each level
+					LevelIndex = dict()
+					data_rows = [i[0] for i in DataIn]
+					indexlist = [i[1] for i in DataIn]
+					Data = [i[2:] for i in DataIn]
+					for level in DataInLevel:
+						LevelIndex[level] = find_value_location(indexlist, level[0])
 					mode = 'pair'
-					pf = field_name
+					pf = [field_name, LevelIndex]
 					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
@@ -801,10 +810,12 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					self.CookieworkThread.size = size
 					self.CookieworkThread.data = Data
 					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.rows = data_rows
 					self.CookieworkThread.start()
 
 					self.CookieworkThread.trigger.connect(self.cookieRes)
 					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+					self.CookieworkThread.badNews.connect(self.errorMsgFun)
 
 					self.progress = ProgressBar(self)
 					self.progress.setLabel('Cookie sampling running ...')
@@ -851,12 +862,14 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					self.CookieworkThread.mode = mode
 					self.CookieworkThread.pf = pf
 					self.CookieworkThread.size = size
-					self.CookieworkThread.data = DataIn
+					self.CookieworkThread.data = [i[1:] for i in DataIn]
 					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.rows = [i[0] for i in DataIn]
 					self.CookieworkThread.start()
 
 					self.CookieworkThread.trigger.connect(self.cookieRes)
 					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+					self.CookieworkThread.badNews.connect(self.errorMsgFun)
 
 					self.progress = ProgressBar(self)
 					self.progress.setLabel('Cookie sampling running ...')
@@ -901,12 +914,14 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					self.CookieworkThread.mode = mode
 					self.CookieworkThread.pf = pf
 					self.CookieworkThread.size = size
-					self.CookieworkThread.data = DataIn
+					self.CookieworkThread.data = [i[1:] for i in DataIn]
 					self.CookieworkThread.cols = data_cols
+					self.CookieworkThread.rows = [i[0] for i in DataIn]
 					self.CookieworkThread.start()
 
 					self.CookieworkThread.trigger.connect(self.cookieRes)
 					self.CookieworkThread.loadProgress.connect(self.progressLabel)
+					self.CookieworkThread.badNews.connect(self.errorMsgFun)
 
 					self.progress = ProgressBar(self)
 					self.progress.setLabel('Cookie sampling running ...')
@@ -920,6 +935,9 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			self.progress.setLabel(label)
 		except:
 			pass
+
+	def errorMsgFun(self, Msg):
+		QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	def select(self):
 		pass
@@ -7428,6 +7446,7 @@ class WorkThreadIMGTparser(QThread):
 class CookieThread(QThread):
 	loadProgress = pyqtSignal(int, str)
 	trigger = pyqtSignal(str, list, list, str)
+	badNews = pyqtSignal(str)
 
 	def __int__(self):
 		super(CookieThread, self).__init__()
@@ -7435,11 +7454,15 @@ class CookieThread(QThread):
 		self.pf = ''
 		self.data = []
 		self.cols = []
+		self.rows = []
 		self.size = 0
 
 	def run(self):
-		CookieResults = CookieSampling(self.mode, self.pf, self.size, self.data, self.cols, self.loadProgress)
-		self.trigger.emit(self.mode, CookieResults, self.cols, self.pf)
+		runFlag, CookieResults = CookieSampling(self.mode, self.pf, self.size, self.data, self.rows, self.cols, self.loadProgress)
+		if runFlag == True:
+			self.trigger.emit(self.mode, CookieResults, self.cols, self.pf)
+		else:
+			self.badNews.emit(CookieResults)
 
 class ProgressBar(QtWidgets.QDialog):
 	def __init__(self, parent=None):
@@ -25878,7 +25901,7 @@ def MutMap(Sequence):
     return features
 
 # function for cookie sampling
-def CookieSampling(mode, pf, size, data, cols, signal):
+def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	# test progress bar and downstream functions
 	time.sleep(1)
 	signal.emit(20, 'Step 1')
@@ -25895,8 +25918,29 @@ def CookieSampling(mode, pf, size, data, cols, signal):
 		res = random.sample(res, int(len(res)/2))
 	else:
 		res = [i[0] for i in data[0]]
-	return res
+	return True,res
 	# pre-process, validate data type
+	current_progress = 1
+	signal.emit(current_progress, 'Validating your input data and types...')
+	process_step = int(20/len(cols))
+
+	# convert data into pandas data frame
+	DataMatrix = pd.DataFrame(data, index = rows, columns = [i[0] for i in cols])
+
+	for field in cols:
+		signal.emit(current_progress + process_step, 'Validating your input data and types for ' + field[0] + ' ...')
+		if field[1] == 'Num':
+			try:
+				DataMatrix[field] = DataMatrix[field].astype(float)
+			except:
+				ErrMsg = 'Field ' + field[0] + ' is not numerical!'
+				return False, ErrMsg
+		else:
+			try:
+				DataMatrix[field] = DataMatrix[field].astype(str)
+			except:
+				ErrMsg = 'Field ' + field[0] + ' is not Char!'
+				return False, ErrMsg
 
 	# data clean
 
@@ -25920,9 +25964,11 @@ def CookieSampling(mode, pf, size, data, cols, signal):
 		# step 4, handle important factor
 
 	# step 5, return results
-	return SamplingRes
+	return True,SamplingRes
 
-
+def find_value_location(lst,value):
+	result = [i for i in range(len(lst)) if value==lst[i]]
+	return result
 
 
 async def get_json_data(url: str) -> dict:
