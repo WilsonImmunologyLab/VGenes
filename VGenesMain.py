@@ -25879,6 +25879,7 @@ def MutMap(Sequence):
 
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, cols, signal):
+	# test progress bar and downstream functions
 	time.sleep(1)
 	signal.emit(20, 'Step 1')
 	time.sleep(1)
@@ -25889,13 +25890,40 @@ def CookieSampling(mode, pf, size, data, cols, signal):
 	signal.emit(80, 'Step 4')
 	time.sleep(1)
 
-	# test
 	if pf == "":
 		res = [i[0] for i in data]
 		res = random.sample(res, int(len(res)/2))
 	else:
 		res = [i[0] for i in data[0]]
 	return res
+	# pre-process, validate data type
+
+	# data clean
+
+	# step 1, data normalization
+
+	# step 2, distance calculation
+
+	SamplingRes = []
+	# none-PF mode
+	if pf == "":
+		pass
+		# step 3, sampling
+		
+		# step 4, handle important factor
+
+	# PF mode
+	else:
+		pass
+		# step 3, sampling
+
+		# step 4, handle important factor
+
+	# step 5, return results
+	return SamplingRes
+
+
+
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
