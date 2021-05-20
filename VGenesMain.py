@@ -22920,11 +22920,12 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 				this_data[78] = species
 				# sequence
-				vdj_seq = re.sub('-','',record[12])
-				seq_parts = record[1].split(vdj_seq)
 				try:
+					vdj_seq = re.sub('-', '', record[12])
+					seq_parts = record[1].split(vdj_seq)
 					this_data[79] = record[12] + seq_parts[1]
 				except:
+					#this_data[79] = record[1][int(record[64]) - 1:]
 					print('sequence potential error')
 					print(record[1])
 					print(record[12])
@@ -23052,11 +23053,12 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 				this_data[78] = species
 				# sequence
-				vdj_seq = re.sub('-', '', record[11])
-				seq_parts = record[1].split(vdj_seq)
 				try:
+					vdj_seq = re.sub('-', '', record[11])
+					seq_parts = record[1].split(vdj_seq)
 					this_data[79] = record[11] + seq_parts[1]
 				except:
+					#this_data[79] = record[1][int(record[63])-1:]
 					print('sequence potential error')
 					print(record[1])
 					print(record[11])
@@ -23211,20 +23213,32 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 					pass
 				
 				# import V(D)J junction info
-				ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
-				junction = ig_match[0]
-				junction = junction.split('\n')[1]
-				junction_list = junction.split('\t')
-				if DATA[block_id][2] == 'Heavy':
-					DATA[block_id][16] = junction_list[0]
-					DATA[block_id][17] = junction_list[1]
-					DATA[block_id][18] = junction_list[2]
-					DATA[block_id][19] = junction_list[3]
-					DATA[block_id][20] = junction_list[4]
-				else:
-					DATA[block_id][16] = junction_list[0]
-					DATA[block_id][21] = junction_list[1]
-					DATA[block_id][20] = junction_list[2]
+				try:
+					ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
+					junction = ig_match[0]
+					junction = junction.split('\n')[1]
+					junction_list = junction.split('\t')
+					if DATA[block_id][2] == 'Heavy':
+						DATA[block_id][16] = junction_list[0]
+						DATA[block_id][17] = junction_list[1]
+						DATA[block_id][18] = junction_list[2]
+						DATA[block_id][19] = junction_list[3]
+						DATA[block_id][20] = junction_list[4]
+					else:
+						DATA[block_id][16] = junction_list[0]
+						DATA[block_id][21] = junction_list[1]
+						DATA[block_id][20] = junction_list[2]
+				except:
+					if DATA[block_id][2] == 'Heavy':
+						DATA[block_id][16] = 'NA'
+						DATA[block_id][17] = 'NA'
+						DATA[block_id][18] = 'NA'
+						DATA[block_id][19] = 'NA'
+						DATA[block_id][20] = 'NA'
+					else:
+						DATA[block_id][16] = 'NA'
+						DATA[block_id][21] = 'NA'
+						DATA[block_id][20] = 'NA'
 				
 				# import Alignment summary
 				try:
@@ -23334,28 +23348,32 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 					DATA[block_id][56] = 'NA'
 
 				# import Alignment summary
-				ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
-				alignment = ig_match[0]
-				alignment = alignment[1:]
-				alignment = re.sub(r'\n+Lambda[\n\S\s]+','',alignment)
-				DATA[block_id][58] = alignment
+				try:
+					ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+					alignment = ig_match[0]
+					alignment = alignment[1:]
+					alignment = re.sub(r'\n+Lambda[\n\S\s]+','',alignment)
+					DATA[block_id][58] = alignment
 
-				# get ORF info from alignment
-				lines = alignment.split('\n')
-				line_num = 0
-				for line in lines:
-					match = re.match(r'^(\s+)<-+FR1', line)
-					if match:
-						num1 = len(match.group(1))
-						aa_line = lines[line_num + 1]
-						match1 = re.match(r'^\s+', aa_line)
-						num2 = len(match1.group())
-						ORF = num2 - num1 - 1
-						if ORF < 0:
-							ORF = 0
-						DATA[block_id][105] = ORF
-						break
-					line_num += 1
+					# get ORF info from alignment
+					lines = alignment.split('\n')
+					line_num = 0
+					for line in lines:
+						match = re.match(r'^(\s+)<-+FR1', line)
+						if match:
+							num1 = len(match.group(1))
+							aa_line = lines[line_num + 1]
+							match1 = re.match(r'^\s+', aa_line)
+							num2 = len(match1.group())
+							ORF = num2 - num1 - 1
+							if ORF < 0:
+								ORF = 0
+							DATA[block_id][105] = ORF
+							break
+						line_num += 1
+				except:
+					DATA[block_id][58] = 'NA'
+					DATA[block_id][105] = 0
 
 				block_id += 1
 
@@ -25926,6 +25944,7 @@ def MutMap(Sequence):
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	# test progress bar and downstream functions
+	'''
 	time.sleep(1)
 	signal.emit(20, 'Step 1')
 	time.sleep(1)
@@ -25942,6 +25961,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	else:
 		res = [i[0] for i in data[0]]
 	return True,res
+	'''
 	# pre-process, validate data type
 	current_progress = 1
 	signal.emit(current_progress, 'Validating your input data and types...')
@@ -25951,16 +25971,17 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	DataMatrix = pd.DataFrame(data, index = rows, columns = [i[0] for i in cols])
 
 	for field in cols:
-		signal.emit(current_progress + process_step, 'Validating your input data and types for ' + field[0] + ' ...')
+		current_progress = current_progress + process_step
+		signal.emit(current_progress, 'Validating your input data and types for ' + field[0] + ' ...')
 		if field[1] == 'Num':
 			try:
-				DataMatrix[field] = DataMatrix[field].astype(float)
+				DataMatrix[field[0]] = DataMatrix[field[0]].astype(float)
 			except:
 				ErrMsg = 'Field ' + field[0] + ' is not numerical!'
 				return False, ErrMsg
 		else:
 			try:
-				DataMatrix[field] = DataMatrix[field].astype(str)
+				DataMatrix[field[0]] = DataMatrix[field[0]].astype(str)
 			except:
 				ErrMsg = 'Field ' + field[0] + ' is not Char!'
 				return False, ErrMsg
@@ -25968,8 +25989,47 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	# data clean
 
 	# step 1, data normalization
+	for field in cols:
+		current_progress = current_progress + process_step
+		signal.emit(current_progress, 'Normalizing your input data for ' + field[0] + ' ...')
+		if field[1] == 'Num':
+			max = DataMatrix[field[0]].max()
+			min = DataMatrix[field[0]].min()
+			ratio = max - min
+			DataMatrix[field[0]] = DataMatrix[field[0]].map(lambda x: (x-min)/ratio)
 
 	# step 2, distance calculation
+	from pyclustering.cluster.kmedoids import kmedoids
+	from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
+	from pyclustering.cluster import cluster_visualizer
+	from pyclustering.utils import read_sample
+	from pyclustering.samples.definitions import FCPS_SAMPLES
+	sample = read_sample(FCPS_SAMPLES.SAMPLE_TWO_DIAMONDS)
+
+	# Initialize initial medoids using K-Means++ algorithm
+	initial_medoids = kmeans_plusplus_initializer(sample, 2).initialize(return_index=True)
+
+	# Create instance of K-Medoids (PAM) algorithm.
+	kmedoids_instance = kmedoids(sample, initial_medoids)
+
+	# Run cluster analysis and obtain results.
+	kmedoids_instance.process()
+	clusters = kmedoids_instance.get_clusters()
+	medoids = kmedoids_instance.get_medoids()
+
+
+	signal.emit(current_progress + process_step, 'Calculating distance ...')
+	from pyclustering.utils import calculate_distance_matrix
+	from pyclustering.cluster.kmedoids import kmedoids
+	from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
+	DistMatrix = calculate_distance_matrix[DataMatrix]
+	# Initialize initial medoids using K-Means++ algorithm
+	initial_medoids = kmeans_plusplus_initializer(DistMatrix, 2).initialize(return_index=True)
+	# create K-Medoids algorithm for processing distance matrix instead of points
+	kmedoids_instance = kmedoids(DistMatrix, initial_medoids, data_type='distance_matrix')
+	# run cluster analysis and obtain results
+	kmedoids_instance.process()
+	medoids = kmedoids_instance.get_medoids()
 
 	SamplingRes = []
 	# none-PF mode
@@ -25992,7 +26052,6 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 def find_value_location(lst,value):
 	result = [i for i in range(len(lst)) if value==lst[i]]
 	return result
-
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
