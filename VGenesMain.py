@@ -25943,6 +25943,8 @@ def MutMap(Sequence):
 
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, rows, cols, signal):
+	from pyclustering.cluster.kmedoids import kmedoids
+	from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
 	# test progress bar and downstream functions
 	'''
 	time.sleep(1)
@@ -25999,55 +26001,67 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 			DataMatrix[field[0]] = DataMatrix[field[0]].map(lambda x: (x-min)/ratio)
 
 	# step 2, distance calculation
+	'''
 	from pyclustering.cluster.kmedoids import kmedoids
 	from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
 	from pyclustering.cluster import cluster_visualizer
 	from pyclustering.utils import read_sample
 	from pyclustering.samples.definitions import FCPS_SAMPLES
+	from pyclustering.utils import calculate_distance_matrix
 	sample = read_sample(FCPS_SAMPLES.SAMPLE_TWO_DIAMONDS)
 
 	# Initialize initial medoids using K-Means++ algorithm
 	initial_medoids = kmeans_plusplus_initializer(sample, 2).initialize(return_index=True)
-
+	DistMatrix = calculate_distance_matrix(sample)
+	DistMatrix = pd.DataFrame(DistMatrix)
 	# Create instance of K-Medoids (PAM) algorithm.
-	kmedoids_instance = kmedoids(sample, initial_medoids)
+	kmedoids_instance = kmedoids(DistMatrix, initial_medoids, data_type='distance_matrix')
 
 	# Run cluster analysis and obtain results.
 	kmedoids_instance.process()
 	clusters = kmedoids_instance.get_clusters()
 	medoids = kmedoids_instance.get_medoids()
-
-
+	'''
 	signal.emit(current_progress + process_step, 'Calculating distance ...')
-	from pyclustering.utils import calculate_distance_matrix
-	from pyclustering.cluster.kmedoids import kmedoids
-	from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
-	DistMatrix = calculate_distance_matrix[DataMatrix]
-	# Initialize initial medoids using K-Means++ algorithm
-	initial_medoids = kmeans_plusplus_initializer(DistMatrix, 2).initialize(return_index=True)
-	# create K-Medoids algorithm for processing distance matrix instead of points
-	kmedoids_instance = kmedoids(DistMatrix, initial_medoids, data_type='distance_matrix')
-	# run cluster analysis and obtain results
-	kmedoids_instance.process()
-	medoids = kmedoids_instance.get_medoids()
+	DistMatrix = CookieDistance(DataMatrix, [i[1] for i in cols])
 
+
+	# step 3, sampling
 	SamplingRes = []
+	medoids_index = []
+	current_progress = 60
+	signal.emit(current_progress, 'Sampling ...')
 	# none-PF mode
 	if pf == "":
-		pass
-		# step 3, sampling
-		
-		# step 4, handle important factor
-
+		## Initialize initial medoids using K-Means++ algorithm
+		initial_medoids = kmeans_plusplus_initializer(DistMatrix, size).initialize(return_index=True)
+		## create K-Medoids algorithm for processing distance matrix instead of points
+		kmedoids_instance = kmedoids(DistMatrix, initial_medoids, data_type='distance_matrix')
+		## run cluster analysis and obtain results
+		kmedoids_instance.process()
+		medoids_index = kmedoids_instance.get_medoids()
 	# PF mode
 	else:
-		pass
-		# step 3, sampling
+		for subindex in pf[1]:
+			SubDistMatrix = DistMatrix.ix(subindex, subindex)
+			## Initialize initial medoids using K-Means++ algorithm
+			initial_medoids = kmeans_plusplus_initializer(SubDistMatrix, size).initialize(return_index=True)
+			## create K-Medoids algorithm for processing distance matrix instead of points
+			kmedoids_instance = kmedoids(SubDistMatrix, initial_medoids, data_type='distance_matrix')
+			## run cluster analysis and obtain results
+			kmedoids_instance.process()
+			submedoids = kmedoids_instance.get_medoids()
+			medoids_index = medoids_index + [subindex[i] for i in submedoids]
 
-		# step 4, handle important factor
+	# step 4, handle important factor
+	current_progress = 80
+	signal.emit(current_progress, 'Packaging results ...')
 
 	# step 5, return results
-	return True,SamplingRes
+	return True, SamplingRes
+
+def CookieDistance(dataMtx, type):
+	pass
 
 def find_value_location(lst,value):
 	result = [i for i in range(len(lst)) if value==lst[i]]
