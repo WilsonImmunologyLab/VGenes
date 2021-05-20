@@ -687,6 +687,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
 			# PF mode
 			if self.ui.radioButtonPrime.isChecked():
+				PF_field_name = self.ui.comboBoxPrime.currentText()
 				# single mode
 				if self.ui.lineEditMode.text() == 'Individual sequences':
 					if size >= len(self.inputData):
@@ -711,6 +712,9 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						selectCheck = self.ui.tableWidgetCookie.cellWidget(index, 2)
 						importCheck = self.ui.tableWidgetCookie.cellWidget(index, 3)
 
+						if fieldName == PF_field_name:
+							continue
+
 						if selectCheck.isChecked():
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
@@ -720,15 +724,15 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						return
 
 					# fetch data
-					field_name = self.ui.comboBoxPrime.currentText()
+					
 					field_names_str = ','.join(field_names)
-					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") ORDER BY ' + field_name
-					SQLStatement = 'SELECT SeqName,' + field_name + ',' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") ORDER BY ' + PF_field_name
+					SQLStatement = 'SELECT SeqName,' + PF_field_name + ',' + field_names_str + ' FROM vgenesDB' + WHEREStatement
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
 					# get all levels
 					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")'
-					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					SQLStatement = 'SELECT DISTINCT(' + PF_field_name + ') FROM vgenesDB' + WHEREStatement
 					DataInLevel = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
 					# get data index in each level
@@ -739,7 +743,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					for level in DataInLevel:
 						LevelIndex[level] = find_value_location(indexlist, level[0])
 					mode = 'pair'
-					pf = [field_name, LevelIndex]
+					pf = [PF_field_name, LevelIndex]
 
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
@@ -781,6 +785,9 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						selectCheck = self.ui.tableWidgetCookie.cellWidget(index, 2)
 						importCheck = self.ui.tableWidgetCookie.cellWidget(index, 3)
 
+						if fieldName == PF_field_name:
+							continue
+
 						if selectCheck.isChecked():
 							field_names.append(fieldName)
 							data_cols.append([fieldName, typeCombo.currentText(), importCheck.isChecked()])
@@ -792,14 +799,14 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					# fetch data
 					field_name = self.ui.comboBoxPrime.currentText()
 					field_names_str = ','.join(field_names)
-					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") ORDER BY ' + field_name
-					SQLStatement = 'SELECT Blank10,' + field_name + ',' + field_names_str + ' FROM vgenesDB' + WHEREStatement
+					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") ORDER BY ' + PF_field_name
+					SQLStatement = 'SELECT Blank10,' + PF_field_name + ',' + field_names_str + ' FROM vgenesDB' + WHEREStatement
 					DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
 					# get all levels
 					WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
 						                 + ' AND `GeneType` == "Heavy"'
-					SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
+					SQLStatement = 'SELECT DISTINCT(' + PF_field_name + ') FROM vgenesDB' + WHEREStatement
 					DataInLevel = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
 					# get data index in each level
@@ -810,7 +817,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					for level in DataInLevel:
 						LevelIndex[level] = find_value_location(indexlist, level[0])
 					mode = 'pair'
-					pf = [field_name, LevelIndex]
+					pf = [PF_field_name, LevelIndex]
 					# self.cookieSignal.emit(mode, pf, data_cols, DataIn)
 					self.CookieworkThread = CookieThread(self)
 					self.CookieworkThread.mode = mode
