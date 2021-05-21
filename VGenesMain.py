@@ -410,6 +410,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					unit = QTableWidgetItem(Res[row_index])
 					self.ui.tableWidgetResult.setItem(row_index, 0, unit)
 				self.ui.tableWidgetResult.resizeColumnsToContents()
+				self.ui.tableWidgetResult.horizontalHeader().sectionClicked.connect(self.sortTable)
 			else:
 				if size >= len(self.inputData)/2:
 					Msg = 'Sample size must be smaller than original population size!'
@@ -448,6 +449,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					unit3 = QTableWidgetItem(Res[row_index][2])
 					self.ui.tableWidgetResult.setItem(row_index, 2, unit3)
 				self.ui.tableWidgetResult.resizeColumnsToContents()
+				self.ui.tableWidgetResult.horizontalHeader().sectionClicked.connect(self.sortTable)
 		# Stratified sampling
 		elif self.ui.toolBox.currentIndex() == 1:
 			# validate size
@@ -618,6 +620,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						unit = QTableWidgetItem(DataIn[row_index][1])
 						self.ui.tableWidgetResult.setItem(row_index, 1, unit)
 					self.ui.tableWidgetResult.resizeColumnsToContents()
+					self.ui.tableWidgetResult.horizontalHeader().sectionClicked.connect(self.sortTable)
 				# pair mode
 				else:
 					Res_barcode = []
@@ -670,7 +673,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 						unit4 = QTableWidgetItem(Res[row_index][3])
 						self.ui.tableWidgetResult.setItem(row_index, 3, unit4)
 					self.ui.tableWidgetResult.resizeColumnsToContents()
-
+					self.ui.tableWidgetResult.horizontalHeader().sectionClicked.connect(self.sortTable)
 			else:
 				Msg = 'Please choose a group size plan!'
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -979,6 +982,9 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		else:
 			self.ui.label_Stratified.setText('per level')
 
+	def sortTable(self, index):
+		self.ui.tableWidgetResult.sortByColumn(index, self.ui.tableWidgetResult.horizontalHeader().sortIndicatorOrder())
+
 	def cookieRes(self, mode, res, cols, pf):
 		# close progress bar
 		self.progress.FeatProgressBar.setValue(100)
@@ -992,6 +998,8 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		if mode == 'single':
 			# fetch data
 			WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(res) + '")'
+			if pf != '':
+				WHEREStatement += ' ORDER BY ' + pf
 			SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
 			Res = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
@@ -1010,12 +1018,17 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					unit = QTableWidgetItem(Res[row_index][col_index])
 					self.ui.tableWidgetResult.setItem(row_index, col_index, unit)
 			self.ui.tableWidgetResult.resizeColumnsToContents()
+			self.ui.tableWidgetResult.horizontalHeader().sectionClicked.connect(self.sortTable)
 		elif mode == 'pair':
 			# fetch data
 			WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+			#if pf != '':
+			#	WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY ' + pf +',Blank10'
 			SQLStatement = 'SELECT Blank10,SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
 			DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 			WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+			#if pf != '':
+			#	WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` <> "Heavy" ORDER BY ' + pf +',Blank10'
 			SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
 			DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 			Res = []
@@ -1039,7 +1052,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					unit = QTableWidgetItem(Res[row_index][col_index])
 					self.ui.tableWidgetResult.setItem(row_index, col_index, unit)
 			self.ui.tableWidgetResult.resizeColumnsToContents()
-
+			self.ui.tableWidgetResult.horizontalHeader().sectionClicked.connect(self.sortTable)
 		else:
 			pass
 
