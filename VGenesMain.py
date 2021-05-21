@@ -322,7 +322,7 @@ class Worker(QRunnable):
 			self.signals.finished.emit()  # Done
 
 class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
-	cookieSignal = pyqtSignal(str, bool, list, list)
+	cookieSignal = pyqtSignal(str, list)
 
 	def __init__(self, parent=None):
 		QtWidgets.QDialog.__init__(self, parent)
@@ -966,7 +966,20 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	def select(self):
-		pass
+		if self.ui.tableWidgetResult.rowCount() == 0:
+			Msg = 'No sampling result found!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		names = []
+		for index in range(self.ui.tableWidgetResult.rowCount()):
+			name = self.ui.tableWidgetResult.item(index, 0).text()
+			names.append(name)
+
+		if self.ui.lineEditMode.text() == 'Individual sequences':
+			self.cookieSignal.emit('single', names)
+		else:
+			self.cookieSignal.emit('pair', names)
 
 	def clickPrime(self):
 		if self.ui.radioButtonPrime.isChecked():
@@ -7766,10 +7779,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.mySamplingDialog.inputData = self.CheckedRecords
 			self.mySamplingDialog.ui.lineEditMode.setText('Individual sequences')
 			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(len(self.CheckedRecords)) + ' Sequences')
+			self.mySamplingDialog.ui.pushButtonSelect.setText('Select my sampling results in VGenes')
 		elif self.SamplingType == 'pair':
 			self.mySamplingDialog.ui.lineEditMode.setText('Paired sequences')
 			self.mySamplingDialog.inputData = self.AntibodyCandidates
 			self.mySamplingDialog.ui.lineEditPopuSize.setText(str(int(len(self.AntibodyCandidates)/2)) + ' HC/LC Pairs')
+			self.mySamplingDialog.ui.pushButtonSelect.setText('Update candidate list from sampling results')
 		else:
 			return
 
@@ -7804,6 +7819,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 2, cell_check1)
 			self.mySamplingDialog.ui.tableWidgetCookie.setCellWidget(row_index, 3, cell_check2)
 		self.mySamplingDialog.ui.tableWidgetCookie.resizeColumnsToContents()
+
+		# link signal
+		self.mySamplingDialog.cookieSignal.connect(self.updateFromSampling)
 
 		# show dialog
 		self.mySamplingDialog.show()
@@ -7846,6 +7864,81 @@ class VGenesForm(QtWidgets.QMainWindow):
 		offset = offset_pool[random.randint(0, 1)]
 		self.resize(size_w + offset, size_h + offset)
 
+	def updateFromSampling(self, mode, names):
+		if mode == 'single':
+			self.clearTreeChecks()
+			for Seqname in names:
+				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+				for record in found:
+					wasClicked = True
+					record.setCheckState(0, Qt.Checked)
+			Msg = 'Your checked records have been updated according to your sampling!'
+		else:
+			self.AntibodyCandidates = []
+			self.ui.tableWidgetHC.setRowCount(0)
+			self.ui.tableWidgetLC.setRowCount(0)
+
+			notice = 'Sampling results'
+
+			WhereState = 'Blank10 IN ("' + '","'.join(names) + '") ORDER BY Blank10'
+			SQLStatement = 'SELECT SeqName,GeneType,ClonalPool,V1,D1,J1,TotalMuts,Isotype,Blank10 FROM vgenesDB WHERE ' + WhereState
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			for item in DataIn:
+				SeqName = item[0]
+				Genetype = item[1]
+				Clone = item[2]
+				Vgene = item[3]
+				Dgene = item[4]
+				Jgene = item[5]
+				TotalMuts = item[6]
+				Isotype = item[7]
+				barcode = item[8]
+
+				self.AntibodyCandidates.append(SeqName)
+
+				if Genetype == 'Heavy':
+					rowPosition = self.ui.tableWidgetHC.rowCount()
+					self.ui.tableWidgetHC.insertRow(rowPosition)
+					self.ui.tableWidgetHC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+					self.ui.tableWidgetHC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+					self.ui.tableWidgetHC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+					self.ui.tableWidgetHC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 4, QTableWidgetItem(Dgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 5, QTableWidgetItem(Jgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 6, QTableWidgetItem(TotalMuts))
+					self.ui.tableWidgetHC.setItem(rowPosition, 7, QTableWidgetItem(Isotype))
+					self.ui.tableWidgetHC.setItem(rowPosition, 8, QTableWidgetItem(barcode))
+					self.ui.tableWidgetHC.setItem(rowPosition, 9, QTableWidgetItem(notice))
+				else:
+					rowPosition = self.ui.tableWidgetLC.rowCount()
+					self.ui.tableWidgetLC.insertRow(rowPosition)
+					self.ui.tableWidgetLC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+					self.ui.tableWidgetLC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+					self.ui.tableWidgetLC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+					self.ui.tableWidgetLC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+					self.ui.tableWidgetLC.setItem(rowPosition, 4, QTableWidgetItem(Jgene))
+					self.ui.tableWidgetLC.setItem(rowPosition, 5, QTableWidgetItem(TotalMuts))
+					self.ui.tableWidgetLC.setItem(rowPosition, 6, QTableWidgetItem(Isotype))
+					self.ui.tableWidgetLC.setItem(rowPosition, 7, QTableWidgetItem(barcode))
+					self.ui.tableWidgetLC.setItem(rowPosition, 8, QTableWidgetItem(notice))
+
+			self.ui.tableWidgetHC.resizeColumnsToContents()
+			self.ui.tableWidgetHC.horizontalHeader().setSortIndicatorShown(True)
+			self.ui.tableWidgetHC.horizontalHeader().sectionClicked.connect(self.sortHCtable)
+
+			self.ui.tableWidgetLC.resizeColumnsToContents()
+			self.ui.tableWidgetLC.horizontalHeader().setSortIndicatorShown(True)
+			self.ui.tableWidgetLC.horizontalHeader().sectionClicked.connect(self.sortLCtable)
+
+			# switch current tab to antibody candidate tab
+			self.ui.tabWidget.setCurrentIndex(11)
+			
+			Msg = 'Your antibody candidate list/table have been updated according to your sampling!'
+
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+		return
+		
 	@pyqtSlot()
 	def on_pushButtonCheckHCLC_clicked(self):
 		'''
