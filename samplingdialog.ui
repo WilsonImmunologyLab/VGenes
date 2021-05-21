@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Sampling from B cell population</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_4">
    <item row="1" column="0">
@@ -74,6 +74,10 @@
      </property>
      <property name="text">
       <string>Run sampling</string>
+     </property>
+     <property name="icon">
+      <iconset>
+       <normaloff>Resources/play.png</normaloff>Resources/play.png</iconset>
      </property>
     </widget>
    </item>
@@ -175,7 +179,7 @@
       </font>
      </property>
      <property name="currentIndex">
-      <number>2</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="option1">
       <property name="geometry">
