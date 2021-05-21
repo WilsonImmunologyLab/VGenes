@@ -23077,9 +23077,10 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 				# identify isotype
 				if this_data[2] == 'Heavy':
-					IsoSeq = record[1]
-					IsoSeq = IsoSeq[int(record[72]):]
 					try:
+						IsoSeq = record[1]
+						IsoSeq = IsoSeq[int(record[72]):]
+
 						IsoSeq = IsoSeq.strip('N')
 						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
 						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
@@ -26062,8 +26063,33 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 
 	# step 4, handle important factor
 	current_progress = 80
-	signal.emit(current_progress, 'Packaging results ...')
+	signal.emit(current_progress, 'Handling important factors ...')
+	
+	col_idx = 0
+	for col in cols:
+		if col[2] == True:
+			# levels of this factor in original dataset
+			ori_levels = DataMatrix[col[0]].unique()
+			# levels of this factor in sampling results
+			sample_levels = DataMatrix.iloc[medoids_index, col_idx].unique()
 
+			# if important factor has not been fully picked
+			if len(sample_levels) < len(ori_levels):
+				missed_levels = list(set(ori_levels).difference(set(sample_levels)))
+				if len(missed_levels) > 0:
+					for miss_level in missed_levels:
+						# get indexes of all rows have this miss_level
+						#miss_level_index = DataMatrix[DataMatrix[col[0]].isin([miss_level])].index.tolist()
+						miss_level_index = find_value_location(DataMatrix[col[0]].tolist(), miss_level)
+						# get distance of miss_level rows against all picked samples
+						CurDistMtx = DistMatrix.iloc[miss_level_index, medoids_index]
+						# pick the one with largest sum of distance
+						Row_sum = CurDistMtx.apply(lambda x: x.sum(), axis=1)
+						pickID = Row_sum.idxmax()
+						#realPickID = miss_level_index[pickID]
+						# update medoids_index list
+						medoids_index.append(pickID)
+		col_idx += 1
 	# step 5, return results
 	SamplingRes = [rows[i] for i in medoids_index]
 	return True, SamplingRes
