@@ -26025,9 +26025,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	signal.emit(current_progress + process_step, 'Calculating distance ...')
 	DistMatrix = CookieDistance(DataMatrix, [i[1] for i in cols])
 
-
 	# step 3, sampling
-	SamplingRes = []
 	medoids_index = []
 	current_progress = 60
 	signal.emit(current_progress, 'Sampling ...')
@@ -26043,7 +26041,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	# PF mode
 	else:
 		for subindex in pf[1]:
-			SubDistMatrix = DistMatrix.ix(subindex, subindex)
+			SubDistMatrix = DistMatrix.iloc(subindex, subindex)
 			## Initialize initial medoids using K-Means++ algorithm
 			initial_medoids = kmeans_plusplus_initializer(SubDistMatrix, size).initialize(return_index=True)
 			## create K-Medoids algorithm for processing distance matrix instead of points
@@ -26058,10 +26056,48 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	signal.emit(current_progress, 'Packaging results ...')
 
 	# step 5, return results
+	SamplingRes = rows[medoids_index]
 	return True, SamplingRes
 
 def CookieDistance(dataMtx, type):
-	pass
+	# seaprate char and num
+	char_index = find_value_location(type, 'Char')
+	num_index = find_value_location(type, 'Num')
+
+	if len(char_index) > 0:
+		char_dataMtx = dataMtx.iloc[:, char_index]
+	if len(num_index) > 0:
+		num_dataMtx = dataMtx.iloc[:, num_index]
+
+	# calculate distance
+	DistMtx = pd.DataFrame(numpy.full((len(dataMtx), len(dataMtx)),0))
+	for i in range(len(dataMtx)-1):
+		for j in range(1, len(dataMtx)):
+			comp_vector = []
+			# for char part
+			if len(char_index) > 0:
+				char_vector_i = list(char_dataMtx.iloc[i, :])
+				char_vector_j = list(char_dataMtx.iloc[j, :])
+				for iter in range(len(char_index)):
+					if char_vector_i[iter] == char_vector_j[iter]:
+						comp_vector.append(0)
+					else:
+						comp_vector.append(1)
+				
+			# for num part
+			if len(num_index) > 0:
+				num_vector_i = list(num_dataMtx.iloc[i, :])
+				num_vector_j = list(num_dataMtx.iloc[j, :])
+				for iter in range(len(num_index)):
+					res = abs(num_vector_i[iter] - num_vector_j[iter])
+					comp_vector.append(res)
+
+			# get distance
+			DistMtx.iloc[i, j] = numpy.linalg.norm(comp_vector)
+			DistMtx.iloc[j, i] = DistMtx.iloc[i, j]
+
+	# return results
+	return DistMtx
 
 def find_value_location(lst,value):
 	result = [i for i in range(len(lst)) if value==lst[i]]
