@@ -101,7 +101,7 @@ class Ui_SamplingDialog(object):
         spacerItem1 = QtWidgets.QSpacerItem(20, 398, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.gridLayout_2.addItem(spacerItem1, 2, 0, 1, 1)
         icon1 = QtGui.QIcon()
-        icon1.addPixmap(QtGui.QPixmap("Resources/mAB.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon1.addPixmap(QtGui.QPixmap(":/PNG-Icons/mAB.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.toolBox.addItem(self.option1, icon1, "")
         self.option2 = QtWidgets.QWidget()
         self.option2.setObjectName("option2")
