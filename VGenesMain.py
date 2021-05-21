@@ -26044,15 +26044,21 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	# PF mode
 	else:
 		for subindex in pf[1].values():
-			SubDistMatrix = DistMatrix.iloc[subindex, subindex]
-			## Initialize initial medoids using K-Means++ algorithm
-			initial_medoids = kmeans_plusplus_initializer(SubDistMatrix, size).initialize(return_index=True)
-			## create K-Medoids algorithm for processing distance matrix instead of points
-			kmedoids_instance = kmedoids(SubDistMatrix, initial_medoids, data_type='distance_matrix')
-			## run cluster analysis and obtain results
-			kmedoids_instance.process()
-			submedoids = kmedoids_instance.get_medoids()
-			medoids_index = medoids_index + [subindex[i] for i in submedoids]
+			if size < len(subindex):
+				SubDistMatrix = DistMatrix.iloc[subindex, subindex]
+				## Initialize initial medoids using K-Means++ algorithm
+				initial_medoids = kmeans_plusplus_initializer(SubDistMatrix, size).initialize(return_index=True)
+				## create K-Medoids algorithm for processing distance matrix instead of points
+				kmedoids_instance = kmedoids(SubDistMatrix, initial_medoids, data_type='distance_matrix')
+				## run cluster analysis and obtain results
+				try:
+					kmedoids_instance.process()
+					submedoids = kmedoids_instance.get_medoids()
+				except:
+					submedoids = initial_medoids
+				medoids_index = medoids_index + [subindex[i] for i in submedoids]
+			else:
+				medoids_index = medoids_index + subindex
 
 	# step 4, handle important factor
 	current_progress = 80
