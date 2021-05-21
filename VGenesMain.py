@@ -742,7 +742,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 					Data = [i[2:] for i in DataIn]
 					for level in DataInLevel:
 						LevelIndex[level] = find_value_location(indexlist, level[0])
-					mode = 'pair'
+					mode = 'single'
 					pf = [PF_field_name, LevelIndex]
 
 					self.CookieworkThread = CookieThread(self)
@@ -7483,7 +7483,10 @@ class CookieThread(QThread):
 	def run(self):
 		runFlag, CookieResults = CookieSampling(self.mode, self.pf, self.size, self.data, self.rows, self.cols, self.loadProgress)
 		if runFlag == True:
-			self.trigger.emit(self.mode, CookieResults, self.cols, self.pf)
+			if self.pf == '':
+				self.trigger.emit(self.mode, CookieResults, self.cols, self.pf)
+			else:
+				self.trigger.emit(self.mode, CookieResults, self.cols, self.pf[0])
 		else:
 			self.badNews.emit(CookieResults)
 
@@ -26040,8 +26043,8 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 		medoids_index = kmedoids_instance.get_medoids()
 	# PF mode
 	else:
-		for subindex in pf[1]:
-			SubDistMatrix = DistMatrix.iloc(subindex, subindex)
+		for subindex in pf[1].values():
+			SubDistMatrix = DistMatrix.iloc[subindex, subindex]
 			## Initialize initial medoids using K-Means++ algorithm
 			initial_medoids = kmeans_plusplus_initializer(SubDistMatrix, size).initialize(return_index=True)
 			## create K-Medoids algorithm for processing distance matrix instead of points
@@ -26056,7 +26059,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 	signal.emit(current_progress, 'Packaging results ...')
 
 	# step 5, return results
-	SamplingRes = rows[medoids_index]
+	SamplingRes = [rows[i] for i in medoids_index]
 	return True, SamplingRes
 
 def CookieDistance(dataMtx, type):
