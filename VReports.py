@@ -429,7 +429,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         for item in DataIs:
             Seqname = item[0]
             Sequence = item[1]
-            # Sequence  =
+            Sequence = Sequence.replace('-', '')
             AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
 
@@ -470,6 +470,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         for item in DataIs:
             Seqname = item[0]
             Sequence = item[1].upper()
+            Sequence = Sequence.replace('-', '')
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
 
         Pathname = saveFile(self, 'FASTA')
@@ -509,7 +510,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         for item in DataIs:
             Seqname = item[0]
             Sequence = item[1].upper()
-            # Sequence  =
+            Sequence = Sequence.replace('-', '')
             AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
 
