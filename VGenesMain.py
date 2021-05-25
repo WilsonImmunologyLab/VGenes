@@ -330,7 +330,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		self.ui = Ui_SamplingDialog()
 		self.ui.setupUi(self)
 
-		self.ui.pushButtonClose.clicked.connect(self.reject)
+		self.ui.pushButtonClose.clicked.connect(self.closeDialog)
 		self.ui.pushButtonSampling.clicked.connect(self.Sampling)
 		self.ui.pushButtonSelect.clicked.connect(self.select)
 		self.ui.radioButtonPrime.clicked.connect(self.clickPrime)
@@ -340,6 +340,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		self.ui.comboBoxPrime.currentTextChanged.connect(self.primeChange)
 
 		self.DBFilename = ''
+		self.NewSampRes = False
 
 		if system() == 'Windows':
 			# set style for windows
@@ -379,7 +380,20 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		SQLStatement = 'SELECT DISTINCT(' + field_name + ') FROM vgenesDB' + WHEREStatement
 		DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 		self.ui.lineEditLevel2.setText(str(len(DataIn)))
-	
+
+	def closeDialog(self):
+		if self.NewSampRes == True:
+			question = 'You have un-saved sampleing results, do you want to close this dialog anyway?\n'
+			buttons = 'YN'
+			answer = questionMessage(self, question, buttons)
+
+			if answer == 'Yes':
+				self.reject()
+			else:
+				return
+		else:
+			self.reject()
+
 	def Sampling(self):
 		# random sampling
 		if self.ui.toolBox.currentIndex() == 0:
@@ -955,6 +969,8 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		else:
 			pass
 
+		self.NewSampRes = True
+
 	def progressLabel(self, pct, label):
 		try:
 			self.progress.setValue(pct)
@@ -980,6 +996,8 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 			self.cookieSignal.emit('single', names)
 		else:
 			self.cookieSignal.emit('pair', names)
+
+		self.NewSampRes = False
 
 	def clickPrime(self):
 		if self.ui.radioButtonPrime.isChecked():
