@@ -139,7 +139,7 @@ def creatnewDB(DBpathname):
         [116, "Blank17", "Blank17", "Fixed", ""],
         [117, "Blank18", "Blank18", "Fixed", ""],
         [118, "Blank19", "Blank19", "Fixed", ""],
-        [119, "Blank20", "Blank20", "Fixed", ""],
+        [119, "Blank20", "RawSeq", "Fixed", ""],
         [120, "ID", "ID", "Fixed", ""]
     ]
 

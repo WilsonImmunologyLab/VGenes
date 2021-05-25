@@ -7951,11 +7951,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			# switch current tab to antibody candidate tab
 			self.ui.tabWidget.setCurrentIndex(11)
-			
 			Msg = 'Your antibody candidate list/table have been updated according to your sampling!'
-
+		# message
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
-		return
 		
 	@pyqtSlot()
 	def on_pushButtonCheckHCLC_clicked(self):
@@ -22952,321 +22950,320 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 	#with open(igblast_out_fmt19, 'r') as IGBLAST_fmt19:
 	#	result = csv.reader(IGBLAST_fmt19, delimiter="\t")
 	line_id = 0
+	bad_line = []
 	for record in IgBlastOut_fmt19:
 		record = record.split('\t')
 		if line_id == 0:
 			pass
 		else:
-			'''
-			file_handle = open(progressBarFile, 'w')
-			progress = str(int((line_id + 1) * 50 / totel_seq))
-			file_handle.write(progress)
-			file_handle.write(',Step1:' + str(line_id + 1) + '/' + str(totel_seq))
-			file_handle.close()
-			'''
+			try:
+				pct = int((line_id + 1) * 100 / totel_seq)
+				label = 'Step1:' + str(line_id + 1) + '/' + str(totel_seq)
+				signal.emit(pct, label)
 
-			pct = int((line_id + 1) * 100 / totel_seq)
-			label = 'Step1:' + str(line_id + 1) + '/' + str(totel_seq)
-			signal.emit(pct, label)
+				this_data = [''] * 119
 
-			this_data = [''] * 119
+				this_data[0] = record[0]
+				this_data[1] = str(len(record[1]))
 
-			this_data[0] = record[0]
-			this_data[1] = str(len(record[1]))
-			if record[2] == 'IGH':
-				this_data[2] = 'Heavy'
-			elif record[2] == 'IGK':
-				this_data[2] = 'Kappa'
-			elif record[2] == 'IGL':
-				this_data[2] = 'Lambda'
-			else:
-				this_data[2] = 'Unknown'
+				# save raw sequence into table
+				this_data[118] = record[1]
 
-			if record[3] == 'F':
-				this_data[12] = 'No'
-			else:
-				this_data[12] = 'Yes'
-
-			if record[4] == '':
-				this_data[13] = 'N/A'
-			else:
-				if record[4] == 'T':
-					this_data[13] = 'In-frame'
-				elif record[4] == 'F':
-					this_data[13] = 'Out-of-frame'
+				if record[2] == 'IGH':
+					this_data[2] = 'Heavy'
+				elif record[2] == 'IGK':
+					this_data[2] = 'Kappa'
+				elif record[2] == 'IGL':
+					this_data[2] = 'Lambda'
 				else:
-					this_data[13] = record[4]
+					this_data[2] = 'Unknown'
 
-			# because there is an extra column (6th column, v_frameshift) in igblast-Win (fmt19) compared to igblastn-Mac, we have to parse results seapreatly
-			if system() == 'Windows':
-				if record[6] == '':
-					this_data[14] = 'N/A'
+				if record[3] == 'F':
+					this_data[12] = 'No'
 				else:
-					if record[6] == 'T':
-						this_data[14] = 'Yes'
-					elif record[6] == 'F':
-						this_data[14] = 'No'
+					this_data[12] = 'Yes'
+
+				if record[4] == '':
+					this_data[13] = 'N/A'
+				else:
+					if record[4] == 'T':
+						this_data[13] = 'In-frame'
+					elif record[4] == 'F':
+						this_data[13] = 'Out-of-frame'
 					else:
-						this_data[14] = record[6]
+						this_data[13] = record[4]
 
-				if record[7] == 'F':
-					this_data[15] = '+'
-				else:
-					this_data[15] = '-'
-
-				this_data[59] = record[66]
-				this_data[60] = record[67]
-				this_data[61] = record[70]
-				this_data[62] = record[71]
-				this_data[63] = ''
-				this_data[64] = ''
-				this_data[65] = record[74]
-				this_data[66] = record[75]
-
-				this_data[67] = record[16]
-				this_data[68] = record[17]
-				this_data[69] = record[18]
-				this_data[70] = record[19]
-				this_data[71] = ''
-				this_data[72] = ''
-				this_data[73] = record[20]
-				this_data[74] = record[21]
-
-				# identify grouping
-				if project == 'ByFunction':
-					this_data[75] = this_data[2]
-					if this_data[14] == "Yes":
-						this_data[76] = 'Functional'
+				# because there is an extra column (6th column, v_frameshift) in igblast-Win (fmt19) compared to igblastn-Mac, we have to parse results seapreatly
+				if system() == 'Windows':
+					if record[6] == '':
+						this_data[14] = 'N/A'
 					else:
-						this_data[76] = 'Nonfunctional'
-					this_data[77] = this_data[13]
-				else:
-					this_data[75] = project
-					this_data[76] = grouping
-					this_data[77] = subgroup
-
-				this_data[78] = species
-				# sequence
-				try:
-					vdj_seq = re.sub('-', '', record[12])
-					seq_parts = record[1].split(vdj_seq)
-					this_data[79] = record[12] + seq_parts[1]
-				except:
-					#this_data[79] = record[1][int(record[64]) - 1:]
-					print('sequence potential error')
-					print(record[1])
-					print(record[12])
-					this_data[79] = record[12]
-				this_data[80] = record[13]
-
-				this_data[86] = "Specificity"
-				this_data[87] = "Subspecificity"
-				this_data[88] = "0"
-				this_data[89] = "0"
-
-				this_data[93] = now
-
-				# identify isotype
-				if this_data[2] == 'Heavy':
-					IsoSeq = record[1]
-					IsoSeq = IsoSeq[int(record[73]):]
-					try:
-						IsoSeq = IsoSeq.strip('N')
-						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
-						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-							if species == 'Human':
-								Isotype = VGenesSeq.CallIsotype(IsoSeq)
-							elif species == 'Mouse':
-								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
-							else:
-								Msg = 'Your current species is: ' + species + \
-								      '\nWe do not support this species!'
-								return Msg
+						if record[6] == 'T':
+							this_data[14] = 'Yes'
+						elif record[6] == 'F':
+							this_data[14] = 'No'
 						else:
-							if len(IsoSeq) > 2:
-								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
-									Isotype = 'IgG'
-								elif IsoSeq[:3] == 'CAT':
-									Isotype = 'IgA'
-								elif IsoSeq[:3] == 'GGA':
-									Isotype = 'IgM'
-								elif IsoSeq[:3] == 'CAC':
-									Isotype = 'IgD'
-								else:
-									Isotype = IsoSeq
-							else:
-								Isotype = 'Unknown'
-					except:
-						Isotype = 'Unknown'
-				else:
-					if this_data[2] == 'Kappa':
-						Isotype = 'Kappa'
-					elif this_data[2] == 'Lambda':
-						Isotype = 'Lambda'
-				this_data[101] = Isotype
+							this_data[14] = record[6]
 
-				# import CDR3
-				CDR3_NT = record[46]
-				CDR3_AA = record[47]
-				CDR3_len = len(CDR3_AA)
-				CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
-				CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
-
-				this_data[81] = CDR3_NT
-				this_data[82] = CDR3_AA
-				this_data[83] = CDR3_len
-				this_data[99] = str(CDR3_MW)
-				this_data[100] = str(CDR3_pI)
-				try:
-					this_data[84] = str(int(record[88]) - int(record[64]) + 1)
-					this_data[85] = str(int(record[89]) - int(record[64]) + 1)
-				except:
-					this_data[84] = 'NA'
-					this_data[85] = 'NA'
-
-				# import mutation
-				mAb_seq = record[12]
-				germline_seq = record[13]
-				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
-				this_data[57] = str(num_mut)
-				this_data[96] = str(num_mut)
-				this_data[97] = mut
-			else:
-				if record[5] == '':
-					this_data[14] = 'N/A'
-				else:
-					if record[5] == 'T':
-						this_data[14] = 'Yes'
-					elif record[5] == 'F':
-						this_data[14] = 'No'
+					if record[7] == 'F':
+						this_data[15] = '+'
 					else:
-						this_data[14] = record[5]
+						this_data[15] = '-'
 
-				if record[6] == 'F':
-					this_data[15] = '+'
-				else:
-					this_data[15] = '-'
+					this_data[59] = record[66]
+					this_data[60] = record[67]
+					this_data[61] = record[70]
+					this_data[62] = record[71]
+					this_data[63] = ''
+					this_data[64] = ''
+					this_data[65] = record[74]
+					this_data[66] = record[75]
 
-				this_data[59] = record[65]
-				this_data[60] = record[66]
-				this_data[61] = record[69]
-				this_data[62] = record[70]
-				this_data[63] = ''
-				this_data[64] = ''
-				this_data[65] = record[73]
-				this_data[66] = record[74]
+					this_data[67] = record[16]
+					this_data[68] = record[17]
+					this_data[69] = record[18]
+					this_data[70] = record[19]
+					this_data[71] = ''
+					this_data[72] = ''
+					this_data[73] = record[20]
+					this_data[74] = record[21]
 
-				this_data[67] = record[15]
-				this_data[68] = record[16]
-				this_data[69] = record[17]
-				this_data[70] = record[18]
-				this_data[71] = ''
-				this_data[72] = ''
-				this_data[73] = record[19]
-				this_data[74] = record[20]
-
-				# identify grouping
-				if project == 'ByFunction':
-					this_data[75] = this_data[2]
-					if this_data[14] == "Yes":
-						this_data[76] = 'Functional'
-					else:
-						this_data[76] = 'Nonfunctional'
-					this_data[77] = this_data[13]
-				else:
-					this_data[75] = project
-					this_data[76] = grouping
-					this_data[77] = subgroup
-
-				this_data[78] = species
-				# sequence
-				try:
-					vdj_seq = re.sub('-', '', record[11])
-					seq_parts = record[1].split(vdj_seq)
-					this_data[79] = record[11] + seq_parts[1]
-				except:
-					#this_data[79] = record[1][int(record[63])-1:]
-					print('sequence potential error')
-					print(record[1])
-					print(record[11])
-					this_data[79] = record[11]
-				this_data[80] = record[12]
-
-				this_data[86] = "Specificity"
-				this_data[87] = "Subspecificity"
-				this_data[88] = "0"
-				this_data[89] = "0"
-
-				this_data[93] = now
-
-				# identify isotype
-				if this_data[2] == 'Heavy':
-					try:
-						IsoSeq = record[1]
-						IsoSeq = IsoSeq[int(record[72]):]
-
-						IsoSeq = IsoSeq.strip('N')
-						AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
-						if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
-							if species == 'Human':
-								Isotype = VGenesSeq.CallIsotype(IsoSeq)
-							elif species == 'Mouse':
-								Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
-							else:
-								Msg = 'Your current species is: ' + species + \
-								      '\nWe do not support this species!'
-								return Msg
+					# identify grouping
+					if project == 'ByFunction':
+						this_data[75] = this_data[2]
+						if this_data[14] == "Yes":
+							this_data[76] = 'Functional'
 						else:
-							if len(IsoSeq) > 2:
-								if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
-									Isotype = 'IgG'
-								elif IsoSeq[:3] == 'CAT':
-									Isotype = 'IgA'
-								elif IsoSeq[:3] == 'GGA':
-									Isotype = 'IgM'
-								elif IsoSeq[:3] == 'CAC':
-									Isotype = 'IgD'
-								else:
-									Isotype = IsoSeq
-							else:
-								Isotype = 'Unknown'
+							this_data[76] = 'Nonfunctional'
+						this_data[77] = this_data[13]
+					else:
+						this_data[75] = project
+						this_data[76] = grouping
+						this_data[77] = subgroup
+
+					this_data[78] = species
+					# sequence
+					try:
+						vdj_seq = re.sub('-', '', record[12])
+						seq_parts = record[1].split(vdj_seq)
+						this_data[79] = record[12] + seq_parts[1]
 					except:
-						Isotype = 'Unknown'
+						#this_data[79] = record[1][int(record[64]) - 1:]
+						print('sequence potential error')
+						print(record[1])
+						print(record[12])
+						this_data[79] = record[12]
+					this_data[80] = record[13]
+
+					this_data[86] = "Specificity"
+					this_data[87] = "Subspecificity"
+					this_data[88] = "0"
+					this_data[89] = "0"
+
+					this_data[93] = now
+
+					# identify isotype
+					if this_data[2] == 'Heavy':
+						try:
+							IsoSeq = record[1]
+							IsoSeq = IsoSeq[int(record[73]):]
+							IsoSeq = IsoSeq.strip('N')
+							AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+							if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+								if species == 'Human':
+									Isotype = VGenesSeq.CallIsotype(IsoSeq)
+								elif species == 'Mouse':
+									Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+								else:
+									Msg = 'Your current species is: ' + species + \
+									      '\nWe do not support this species!'
+									return Msg
+							else:
+								if len(IsoSeq) > 2:
+									if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+										Isotype = 'IgG'
+									elif IsoSeq[:3] == 'CAT':
+										Isotype = 'IgA'
+									elif IsoSeq[:3] == 'GGA':
+										Isotype = 'IgM'
+									elif IsoSeq[:3] == 'CAC':
+										Isotype = 'IgD'
+									else:
+										Isotype = IsoSeq
+								else:
+									Isotype = 'Unknown'
+						except:
+							Isotype = 'Unknown'
+					else:
+						if this_data[2] == 'Kappa':
+							Isotype = 'Kappa'
+						elif this_data[2] == 'Lambda':
+							Isotype = 'Lambda'
+					this_data[101] = Isotype
+
+					# import CDR3
+					CDR3_NT = record[46]
+					CDR3_AA = record[47]
+					CDR3_len = len(CDR3_AA)
+					CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+					CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+					this_data[81] = CDR3_NT
+					this_data[82] = CDR3_AA
+					this_data[83] = CDR3_len
+					this_data[99] = str(CDR3_MW)
+					this_data[100] = str(CDR3_pI)
+					try:
+						this_data[84] = str(int(record[88]) - int(record[64]) + 1)
+						this_data[85] = str(int(record[89]) - int(record[64]) + 1)
+					except:
+						this_data[84] = 'NA'
+						this_data[85] = 'NA'
+
+					# import mutation
+					mAb_seq = record[12]
+					germline_seq = record[13]
+					mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+					this_data[57] = str(num_mut)
+					this_data[96] = str(num_mut)
+					this_data[97] = mut
 				else:
-					if this_data[2] == 'Kappa':
-						Isotype = 'Kappa'
-					elif this_data[2] == 'Lambda':
-						Isotype = 'Lambda'
-				this_data[101] = Isotype
+					if record[5] == '':
+						this_data[14] = 'N/A'
+					else:
+						if record[5] == 'T':
+							this_data[14] = 'Yes'
+						elif record[5] == 'F':
+							this_data[14] = 'No'
+						else:
+							this_data[14] = record[5]
 
-				# import CDR3
-				CDR3_NT = record[45]
-				CDR3_AA = record[46]
-				CDR3_len = len(CDR3_AA)
-				CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
-				CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+					if record[6] == 'F':
+						this_data[15] = '+'
+					else:
+						this_data[15] = '-'
 
-				this_data[81] = CDR3_NT
-				this_data[82] = CDR3_AA
-				this_data[83] = CDR3_len
-				this_data[99] = str(CDR3_MW)
-				this_data[100] = str(CDR3_pI)
-				try:
-					this_data[84] = str(int(record[87]) - int(record[63]) + 1)
-					this_data[85] = str(int(record[88]) - int(record[63]) + 1)
-				except:
-					this_data[84] = 'NA'
-					this_data[85] = 'NA'
+					this_data[59] = record[65]
+					this_data[60] = record[66]
+					this_data[61] = record[69]
+					this_data[62] = record[70]
+					this_data[63] = ''
+					this_data[64] = ''
+					this_data[65] = record[73]
+					this_data[66] = record[74]
 
-				# import mutation
-				mAb_seq = record[11]
-				germline_seq = record[12]
-				mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
-				this_data[57] = str(num_mut)
-				this_data[96] = str(num_mut)
-				this_data[97] = mut
+					this_data[67] = record[15]
+					this_data[68] = record[16]
+					this_data[69] = record[17]
+					this_data[70] = record[18]
+					this_data[71] = ''
+					this_data[72] = ''
+					this_data[73] = record[19]
+					this_data[74] = record[20]
 
-			DATA.append(this_data)
+					# identify grouping
+					if project == 'ByFunction':
+						this_data[75] = this_data[2]
+						if this_data[14] == "Yes":
+							this_data[76] = 'Functional'
+						else:
+							this_data[76] = 'Nonfunctional'
+						this_data[77] = this_data[13]
+					else:
+						this_data[75] = project
+						this_data[76] = grouping
+						this_data[77] = subgroup
+
+					this_data[78] = species
+					# sequence
+					try:
+						vdj_seq = re.sub('-', '', record[11])
+						seq_parts = record[1].split(vdj_seq)
+						this_data[79] = record[11] + seq_parts[1]
+					except:
+						#this_data[79] = record[1][int(record[63])-1:]
+						print('sequence potential error')
+						print(record[1])
+						print(record[11])
+						this_data[79] = record[11]
+					this_data[80] = record[12]
+
+					this_data[86] = "Specificity"
+					this_data[87] = "Subspecificity"
+					this_data[88] = "0"
+					this_data[89] = "0"
+
+					this_data[93] = now
+
+					# identify isotype
+					if this_data[2] == 'Heavy':
+						try:
+							IsoSeq = record[1]
+							IsoSeq = IsoSeq[int(record[72]):]
+
+							IsoSeq = IsoSeq.strip('N')
+							AGCTs = IsoSeq.count('A') + IsoSeq.count('G') + IsoSeq.count('C') + IsoSeq.count('T')
+							if AGCTs > 5:  # todo decide if can determine isotype from < 5 or need more then
+								if species == 'Human':
+									Isotype = VGenesSeq.CallIsotype(IsoSeq)
+								elif species == 'Mouse':
+									Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
+								else:
+									Msg = 'Your current species is: ' + species + \
+									      '\nWe do not support this species!'
+									return Msg
+							else:
+								if len(IsoSeq) > 2:
+									if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
+										Isotype = 'IgG'
+									elif IsoSeq[:3] == 'CAT':
+										Isotype = 'IgA'
+									elif IsoSeq[:3] == 'GGA':
+										Isotype = 'IgM'
+									elif IsoSeq[:3] == 'CAC':
+										Isotype = 'IgD'
+									else:
+										Isotype = IsoSeq
+								else:
+									Isotype = 'Unknown'
+						except:
+							Isotype = 'Unknown'
+					else:
+						if this_data[2] == 'Kappa':
+							Isotype = 'Kappa'
+						elif this_data[2] == 'Lambda':
+							Isotype = 'Lambda'
+					this_data[101] = Isotype
+
+					# import CDR3
+					CDR3_NT = record[45]
+					CDR3_AA = record[46]
+					CDR3_len = len(CDR3_AA)
+					CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+					CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+					this_data[81] = CDR3_NT
+					this_data[82] = CDR3_AA
+					this_data[83] = CDR3_len
+					this_data[99] = str(CDR3_MW)
+					this_data[100] = str(CDR3_pI)
+					try:
+						this_data[84] = str(int(record[87]) - int(record[63]) + 1)
+						this_data[85] = str(int(record[88]) - int(record[63]) + 1)
+					except:
+						this_data[84] = 'NA'
+						this_data[85] = 'NA'
+
+					# import mutation
+					mAb_seq = record[11]
+					germline_seq = record[12]
+					mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+					this_data[57] = str(num_mut)
+					this_data[96] = str(num_mut)
+					this_data[97] = mut
+				DATA.append(this_data)
+			except:
+				bad_line.append(line_id - 1)
 		line_id += 1
 
 	# parse IgBlast out fmt 3
@@ -23279,14 +23276,11 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 			read_tag = True
 
 			if cur_block != '':
-				'''
-				file_handle = open(progressBarFile, 'w')
-				progress = str(50 + int((block_id + 1) * 50 / totel_seq))
-				file_handle.write(progress)
-				file_handle.write(',Step2:' + str(block_id + 1) + '/' + str(totel_seq))
-				file_handle.close()
-				'''
-
+				if block_id in bad_line:
+					block_id += 1
+					cur_block = ''
+					continue
+				# progress bar signal
 				pct = int((block_id + 1) * 100 / totel_seq)
 				label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
 				signal.emit(pct, label)
@@ -23504,174 +23498,170 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 					DATA[block_id][105] = 0
 
 				block_id += 1
-
 			cur_block = ''
 
 		if read_tag:
 			cur_block += IgLine
-
+	# process the last block
 	if cur_block != '':
-		'''
-		file_handle = open(progressBarFile, 'w')
-		progress = str(50 + int((block_id + 1) * 50 / totel_seq))
-		file_handle.write(progress)
-		file_handle.write(',Step2:' + str(block_id + 1) + '/' + str(totel_seq))
-		file_handle.close()
-		'''
-		pct = int((block_id + 1) * 100 / totel_seq)
-		label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
-		signal.emit(pct, label)
-
-		# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
-		ig_match = re.findall('\nIG[^\n]+', cur_block)
-		## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
-		v_cur_index = 3
-		d_cur_index = 6
-		j_cur_index = 9
-		for line in ig_match[:len(ig_match) - 1]:
-			m = re.search('IG\S+', line)
-			cur_gene = m.group(0)
-			if cur_gene[3] == 'V':
-				DATA[block_id][v_cur_index] = cur_gene
-				v_cur_index += 1
-			elif cur_gene[3] == 'D':
-				DATA[block_id][d_cur_index] = cur_gene
-				d_cur_index += 1
-			else:
-				DATA[block_id][j_cur_index] = cur_gene
-				j_cur_index += 1
-		# V,D,J locus
-		m = re.search('IG\S+', DATA[block_id][3])
-		try:
-			v_locus = m.group(0)
-			v_locus = re.sub('^IG', '', v_locus)
-			v_locus = re.sub('\*.+', '', v_locus)
-			v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
-			DATA[block_id][90] = v_locus
-		except:
-			pass
-
-		m = re.search('IG\S+', DATA[block_id][6])
-		try:
-			d_locus = m.group(0)
-			d_locus = re.sub('^IG', '', d_locus)
-			d_locus = re.sub('\*.+', '', d_locus)
-			d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
-			DATA[block_id][92] = d_locus
-		except:
-			pass
-
-		m = re.search('IG\S+', DATA[block_id][9])
-		try:
-			j_locus = m.group(0)
-			j_locus = re.sub('^IG', '', j_locus)
-			j_locus = re.sub('\*.+', '', j_locus)
-			j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
-			DATA[block_id][91] = j_locus
-		except:
-			pass
-
-		# import V(D)J junction info
-		ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
-		junction = ig_match[0]
-		junction = junction.split('\n')[1]
-		junction_list = junction.split('\t')
-		if DATA[block_id][2] == 'Heavy':
-			DATA[block_id][16] = junction_list[0]
-			DATA[block_id][17] = junction_list[1]
-			DATA[block_id][18] = junction_list[2]
-			DATA[block_id][19] = junction_list[3]
-			DATA[block_id][20] = junction_list[4]
+		if block_id in bad_line:
+			block_id += 1
+			cur_block = ''
 		else:
-			DATA[block_id][16] = junction_list[0]
-			DATA[block_id][21] = junction_list[1]
-			DATA[block_id][20] = junction_list[2]
+			pct = int((block_id + 1) * 100 / totel_seq)
+			label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
+			signal.emit(pct, label)
 
-		# import Alignment summary
-		ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
-		fr1_match = ig_match[0]
-		fr1_match = fr1_match[1:]
-		fr1_match = fr1_match.split('\t')
-		DATA[block_id][22] = 1
-		DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
-		DATA[block_id][24] = fr1_match[3]
-		DATA[block_id][25] = fr1_match[4]
-		DATA[block_id][26] = fr1_match[5]
-		DATA[block_id][27] = fr1_match[6]
-		DATA[block_id][28] = fr1_match[7]
+			# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
+			ig_match = re.findall('\nIG[^\n]+', cur_block)
+			## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
+			v_cur_index = 3
+			d_cur_index = 6
+			j_cur_index = 9
+			for line in ig_match[:len(ig_match) - 1]:
+				m = re.search('IG\S+', line)
+				cur_gene = m.group(0)
+				if cur_gene[3] == 'V':
+					DATA[block_id][v_cur_index] = cur_gene
+					v_cur_index += 1
+				elif cur_gene[3] == 'D':
+					DATA[block_id][d_cur_index] = cur_gene
+					d_cur_index += 1
+				else:
+					DATA[block_id][j_cur_index] = cur_gene
+					j_cur_index += 1
+			# V,D,J locus
+			m = re.search('IG\S+', DATA[block_id][3])
+			try:
+				v_locus = m.group(0)
+				v_locus = re.sub('^IG', '', v_locus)
+				v_locus = re.sub('\*.+', '', v_locus)
+				v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
+				DATA[block_id][90] = v_locus
+			except:
+				pass
 
-		ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
-		cdr1_match = ig_match[0]
-		cdr1_match = cdr1_match[1:]
-		cdr1_match = cdr1_match.split('\t')
-		DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
-		DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
-		DATA[block_id][31] = cdr1_match[3]
-		DATA[block_id][32] = cdr1_match[4]
-		DATA[block_id][33] = cdr1_match[5]
-		DATA[block_id][34] = cdr1_match[6]
-		DATA[block_id][35] = cdr1_match[7]
+			m = re.search('IG\S+', DATA[block_id][6])
+			try:
+				d_locus = m.group(0)
+				d_locus = re.sub('^IG', '', d_locus)
+				d_locus = re.sub('\*.+', '', d_locus)
+				d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
+				DATA[block_id][92] = d_locus
+			except:
+				pass
 
-		ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
-		fr2_match = ig_match[0]
-		fr2_match = fr2_match[1:]
-		fr2_match = fr2_match.split('\t')
-		DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
-		DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
-		DATA[block_id][38] = fr2_match[3]
-		DATA[block_id][39] = fr2_match[4]
-		DATA[block_id][40] = fr2_match[5]
-		DATA[block_id][41] = fr2_match[6]
-		DATA[block_id][42] = fr2_match[7]
+			m = re.search('IG\S+', DATA[block_id][9])
+			try:
+				j_locus = m.group(0)
+				j_locus = re.sub('^IG', '', j_locus)
+				j_locus = re.sub('\*.+', '', j_locus)
+				j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
+				DATA[block_id][91] = j_locus
+			except:
+				pass
 
-		ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
-		cdr2_match = ig_match[0]
-		cdr2_match = cdr2_match[1:]
-		cdr2_match = cdr2_match.split('\t')
-		DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
-		DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
-		DATA[block_id][45] = cdr2_match[3]
-		DATA[block_id][46] = cdr2_match[4]
-		DATA[block_id][47] = cdr2_match[5]
-		DATA[block_id][48] = cdr2_match[6]
-		DATA[block_id][49] = cdr2_match[7]
+			# import V(D)J junction info
+			ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
+			junction = ig_match[0]
+			junction = junction.split('\n')[1]
+			junction_list = junction.split('\t')
+			if DATA[block_id][2] == 'Heavy':
+				DATA[block_id][16] = junction_list[0]
+				DATA[block_id][17] = junction_list[1]
+				DATA[block_id][18] = junction_list[2]
+				DATA[block_id][19] = junction_list[3]
+				DATA[block_id][20] = junction_list[4]
+			else:
+				DATA[block_id][16] = junction_list[0]
+				DATA[block_id][21] = junction_list[1]
+				DATA[block_id][20] = junction_list[2]
 
-		ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
-		fr3_match = ig_match[0]
-		fr3_match = fr3_match[1:]
-		fr3_match = fr3_match.split('\t')
-		DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
-		DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
-		DATA[block_id][52] = fr3_match[3]
-		DATA[block_id][53] = fr3_match[4]
-		DATA[block_id][54] = fr3_match[5]
-		DATA[block_id][55] = fr3_match[6]
-		DATA[block_id][56] = fr3_match[7]
+			# import Alignment summary
+			ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+			fr1_match = ig_match[0]
+			fr1_match = fr1_match[1:]
+			fr1_match = fr1_match.split('\t')
+			DATA[block_id][22] = 1
+			DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][24] = fr1_match[3]
+			DATA[block_id][25] = fr1_match[4]
+			DATA[block_id][26] = fr1_match[5]
+			DATA[block_id][27] = fr1_match[6]
+			DATA[block_id][28] = fr1_match[7]
 
-		# import Alignment summary
-		ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
-		alignment = ig_match[0]
-		alignment = alignment[1:]
-		alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
-		DATA[block_id][58] = alignment
+			ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+			cdr1_match = ig_match[0]
+			cdr1_match = cdr1_match[1:]
+			cdr1_match = cdr1_match.split('\t')
+			DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][31] = cdr1_match[3]
+			DATA[block_id][32] = cdr1_match[4]
+			DATA[block_id][33] = cdr1_match[5]
+			DATA[block_id][34] = cdr1_match[6]
+			DATA[block_id][35] = cdr1_match[7]
 
-		# get ORF info from alignment
-		lines = alignment.split('\n')
-		line_num = 0
-		for line in lines:
-			match = re.match(r'^(\s+)<-+FR1', line)
-			if match:
-				num1 = len(match.group(1))
-				aa_line = lines[line_num + 1]
-				match1 = re.match(r'^\s+', aa_line)
-				num2 = len(match1.group())
-				ORF = num2 - num1 - 1
-				if ORF < 0:
-					ORF = 0
-				DATA[block_id][105] = ORF
-				break
-			line_num += 1
-		block_id += 1
+			ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+			fr2_match = ig_match[0]
+			fr2_match = fr2_match[1:]
+			fr2_match = fr2_match.split('\t')
+			DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][38] = fr2_match[3]
+			DATA[block_id][39] = fr2_match[4]
+			DATA[block_id][40] = fr2_match[5]
+			DATA[block_id][41] = fr2_match[6]
+			DATA[block_id][42] = fr2_match[7]
+
+			ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+			cdr2_match = ig_match[0]
+			cdr2_match = cdr2_match[1:]
+			cdr2_match = cdr2_match.split('\t')
+			DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][45] = cdr2_match[3]
+			DATA[block_id][46] = cdr2_match[4]
+			DATA[block_id][47] = cdr2_match[5]
+			DATA[block_id][48] = cdr2_match[6]
+			DATA[block_id][49] = cdr2_match[7]
+
+			ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+			fr3_match = ig_match[0]
+			fr3_match = fr3_match[1:]
+			fr3_match = fr3_match.split('\t')
+			DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][52] = fr3_match[3]
+			DATA[block_id][53] = fr3_match[4]
+			DATA[block_id][54] = fr3_match[5]
+			DATA[block_id][55] = fr3_match[6]
+			DATA[block_id][56] = fr3_match[7]
+
+			# import Alignment summary
+			ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+			alignment = ig_match[0]
+			alignment = alignment[1:]
+			alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
+			DATA[block_id][58] = alignment
+
+			# get ORF info from alignment
+			lines = alignment.split('\n')
+			line_num = 0
+			for line in lines:
+				match = re.match(r'^(\s+)<-+FR1', line)
+				if match:
+					num1 = len(match.group(1))
+					aa_line = lines[line_num + 1]
+					match1 = re.match(r'^\s+', aa_line)
+					num2 = len(match1.group())
+					ORF = num2 - num1 - 1
+					if ORF < 0:
+						ORF = 0
+					DATA[block_id][105] = ORF
+					break
+				line_num += 1
+			block_id += 1
 
 	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
 	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
@@ -23679,12 +23669,11 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 	# if productive = TRUE, only keep record with V and J
 
-
 	if GetProductive == 0:  # only keep productive
 		# find record
 		del_index = []
 		for index in range(len(DATA)):
-			if DATA[index][14] == 'Yes':
+			if DATA[index][14] != 'Yes':
 				del_index.append(index)
 
 		for i in del_index:
@@ -23697,7 +23686,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 		for index in del_index:
 			del DATA[index - cnt]
 			cnt += 1
-	elif GetProductive == 1:    #only keep V and J
+	elif GetProductive == 1:    #only keep records have V and J
 		# find record
 		del_index = []
 		for index in range(len(DATA)):
@@ -24399,7 +24388,7 @@ def IgBlastParserFastOld(FASTAFile, datalist, signal):
 		# find record
 		del_index = []
 		for index in range(len(DATA)):
-			if DATA[index][14] == 'Yes':
+			if DATA[index][14] != 'Yes':
 				del_index.append(index)
 
 		for i in del_index:
