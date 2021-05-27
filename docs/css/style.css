@@ -58,8 +58,9 @@ img.logo {
     z-index: 9999;
   }
   img.logo {
-  	height: 70px;
-  	width: 80px;
+  	min-width: 50px; 
+  	max-width: 100px;
+  	width: 20%;
   }
 }
 div.bigbox {
@@ -141,12 +142,7 @@ li{
   display: none;
 }
 
-.center {
-  vertical-align: middle;
-  text-align: center;
-  display: inline-block;
-  margin-top: 50%
-}
+
 
 .center span{
   text-align: right;
