@@ -2,14 +2,14 @@
   <img src="/docs/img/logo.png"  width="200">
 </p>
 
-# Librator
+# VGenes
 VGenes, an integrated graphical platform for multimodal analyses of B cell receptor repertoire
 
 Instructions, documentation, and tutorials can be found at:
 
 https://wilsonimmunologylab.github.io/VGenes/
 
-Source coee of Librator is hosted on GitHub, you can view and clone the repository at
+Source coee of VGenes is hosted on GitHub, you can view and clone the repository at
 
 https://github.com/WilsonImmunologyLab/VGenes
 
