@@ -1087,7 +1087,6 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 		else:
 			pass
 
-
 class SHMtableDialog(QtWidgets.QDialog, Ui_SHMtableDialog):
 	SHMUpdateSelectionSignal = pyqtSignal(str)
 
@@ -4925,6 +4924,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
 						pass
+
 	def updateName(self):
 		ori_name = 'clonotype2_consensus_1'
 		rep1 = self.ui.lineEditRep1.text()

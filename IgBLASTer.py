@@ -134,8 +134,8 @@ def ProcessFASTA(FASTAfile, MaxNum):
 				SeqName = FASTAline
 				Sequence = ''
 			else:
-				Sequence += re.sub(r'[^NATCG\-]','',FASTAline.upper())
-
+				#Sequence += re.sub(r'[^NATCG\-]','',FASTAline.upper())
+				Sequence += FASTAline.upper()
 			if MaxNum > 0:
 				if TotSeqs > MaxNum-1:
 					break
