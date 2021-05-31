@@ -522,6 +522,43 @@ def StandardReports(self, option, SequenceName, DBFilename):
             currentfile.write(FASTAFile)
 
         self.ShowVGenesText(Pathname)
+    elif option == 'FASTA raw Nucleotide sequences':
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.getTreeCheckedChild()
+                selected_list = selected_list[3]
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,Blank20 FROM vgenesdb' + WHEREStatement
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        FASTAFile = ''
+        for item in DataIs:
+            Seqname = item[0]
+            Sequence = item[1]
+            FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
+
+        Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
+        with open(Pathname, 'w') as currentfile:
+            currentfile.write(FASTAFile)
+
+        self.ShowVGenesText(Pathname)
     elif option == 'AbVec cloning PCR':
         CloningReport = ''
         CloningReportCSV = ''

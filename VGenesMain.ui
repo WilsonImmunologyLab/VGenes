@@ -698,6 +698,11 @@
             </item>
             <item>
              <property name="text">
+              <string>FASTA raw Nucleotide sequences</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>FASTA Amino Acid file</string>
              </property>
             </item>
