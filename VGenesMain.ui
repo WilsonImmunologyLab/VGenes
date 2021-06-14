@@ -9774,7 +9774,14 @@ If the J-end is off the J gene end may need adjusted</string>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteThese">
             <property name="text">
-             <string>Delete this record and its HC/LCs</string>
+             <string>Delete this and its HC/LCs</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonDeleteBatch">
+            <property name="text">
+             <string>Batch deletion</string>
             </property>
            </widget>
           </item>

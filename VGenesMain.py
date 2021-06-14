@@ -84,6 +84,7 @@ from ui_gibson_dialog import Ui_GibsonDialog
 from ui_patentdialog import Ui_PatentDialog
 from ui_SHMtabledialog import Ui_SHMtableDialog
 from ui_samplingdialog import Ui_SamplingDialog
+from ui_deletedialog import Ui_deleteDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -320,6 +321,50 @@ class Worker(QRunnable):
 			self.signals.result.emit(result)  # Return the result of the processing
 		finally:
 			self.signals.finished.emit()  # Done
+
+class deleteDialog(QtWidgets.QDialog):
+	deleteSignal = pyqtSignal(list)
+	def __init__(self):
+		super(deleteDialog, self).__init__()
+		self.ui = Ui_deleteDialog()
+		self.ui.setupUi(self)
+
+		self.ui.deleteButton.clicked.connect(self.accept)
+		self.ui.cancelButton.clicked.connect(self.reject)
+
+		if system() == 'Windows':
+			# set style for windows
+			self.setStyleSheet("QLabel{font-size:18px;}"
+			                   "QTextEdit{font-size:18px;}"
+			                   "QComboBox{font-size:18px;}"
+			                   "QPushButton{font-size:18px;}"
+			                   "QTabWidget{font-size:18px;}"
+			                   "QCommandLinkButton{font-size:18px;}"
+			                   "QRadioButton{font-size:18px;}"
+			                   "QPlainTextEdit{font-size:18px;}"
+			                   "QCheckBox{font-size:18px;}"
+			                   "QTableWidget{font-size:18px;}"
+			                   "QToolBar{font-size:18px;}"
+			                   "QMenuBar{font-size:18px;}"
+			                   "QMenu{font-size:18px;}"
+			                   "QAction{font-size:18px;}"
+			                   "QMainWindow{font-size:18px;}"
+			                   "QLineEdit{font-size:18px;}"
+			                   "QTreeWidget{font-size:18px;}"
+			                   "QSpinBox{font-size:18px;}")
+		else:
+			pass
+
+	def accept(self):
+		selItems = self.ui.listWidget.selectedItems()
+		if len(selItems) > 0:
+			del_list = []
+			for item in selItems:
+				del_list.append(item.text())
+			self.deleteSignal.emit(del_list)
+			self.close()
+		else:
+			self.reject()
 
 class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 	cookieSignal = pyqtSignal(str, list)
@@ -7674,6 +7719,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.CopyDNA.clicked.connect(self.copySelDNA)
 		self.ui.pushButtonDeleteThis.clicked.connect(self.deleteThis)
 		self.ui.pushButtonDeleteThese.clicked.connect(self.deleteThese)
+		self.ui.pushButtonDeleteBatch.clicked.connect(self.deleteBatch)
 		self.ui.pushButtonDeleteBad.clicked.connect(self.deleteBad)
 		self.ui.pushButtonDeleteAll.clicked.connect(self.deleteAll)
 		self.ui.tableWidgetHC.cellClicked.connect(self.matchSelection)
@@ -8241,7 +8287,48 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.tableWidgetLC.clearSelection()
 		except:
 			print('wrong in delete these!')
-		
+
+	def deleteBatch(self):
+		if self.ui.tableWidgetHC.rowCount() > 0:
+			self.open_delete_dialog()
+
+	def open_delete_dialog(self):
+		list = []
+		for index in range(self.ui.tableWidgetHC.rowCount()):
+			name = self.ui.tableWidgetHC.item(index, 0).text()
+			list.append(name)
+
+		self.modalessDeleteDialog = deleteDialog()
+		self.modalessDeleteDialog.ui.listWidget.addItems(list)
+		self.modalessDeleteDialog.deleteSignal.connect(self.delRecords)
+		self.modalessDeleteDialog.show()
+
+	def delRecords(self, del_list):
+		row_index_list = list(range(self.ui.tableWidgetHC.rowCount()))
+		row_index_list.reverse()
+		for index in row_index_list:
+			name = self.ui.tableWidgetHC.item(index, 0).text()
+			barcode = self.ui.tableWidgetHC.item(index, 8).text()
+			if name in del_list:
+				# delete in HC
+				try:
+					self.AntibodyCandidates.remove(name)
+				except:
+					print('opppppps!')
+				self.ui.tableWidgetHC.removeRow(index)
+				# delete LC
+				LC_row_index_list = list(range(self.ui.tableWidgetLC.rowCount()))
+				LC_row_index_list.reverse()
+				for LC_index in LC_row_index_list:
+					if barcode == self.ui.tableWidgetLC.item(LC_index, 7).text():
+						name = self.ui.tableWidgetLC.item(LC_index, 0).text()
+						try:
+							self.AntibodyCandidates.remove(name)
+						except:
+							print('opppppps!')
+						self.ui.tableWidgetLC.removeRow(LC_index)
+
+
 	def matchSelection(self, row, col):
 		curTable = self.ui.tabWidget.focusWidget()
 		if curTable.columnCount() == 10:
