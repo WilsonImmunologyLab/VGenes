@@ -1911,76 +1911,80 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 
 		To_check_list = []
 
-		# for number fields
-		if self.ui.radioButton.isChecked():
-			# process num part
-			layout = self.ui.gridLayout
-			i = 1
-			new_values = []
-			while i < layout.num_widget:
-				if layout.itemAtPosition(i, 0).widget().isChecked():
-					new_values.append(True)
-				else:
-					new_values.append(False)
-				i += 1
+		try:
+			# for number fields
+			if self.ui.radioButton.isChecked():
+				# process num part
+				layout = self.ui.gridLayout
+				i = 1
+				new_values = []
+				while i < layout.num_widget:
+					if layout.itemAtPosition(i, 0).widget().isChecked():
+						new_values.append(True)
+					else:
+						new_values.append(False)
+					i += 1
 
-			num_list = [self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max]
-			if self.ui.LineEditCutoff.text() == '':
-				pass
-			else:
-				temp_data = self.ui.LineEditCutoff.text().split(',')
-				if len(temp_data) > 0:
-					for ele in temp_data:
-						try:
-							num = float(ele)
-							if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
-								num_list.append(num)
-						except:
-							return
-					# remove redudant and sort
-					num_list = list(set(num_list))
-					num_list.sort()
-			# max value + 1 so that the original max values can be processed correctly
-			num_list[-1] = num_list[-1] + 1
-
-			# start update records
-			field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-			SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement
-			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-			for ele in DataIn:
-				try:
-					cur_value = float(ele[0])
-					cur_id = str(ele[1])
-					for i in range(len(num_list) - 1):
-						if cur_value >= num_list[i] and cur_value < num_list[i + 1]:
-							new_value = new_values[i]
-							if new_value == True:
-								To_check_list.append(cur_id)
-				except:
+				num_list = [self.ui.LineEditCutoff.min, self.ui.LineEditCutoff.max]
+				if self.ui.LineEditCutoff.text() == '':
 					pass
-		# for char fields
-		else:
-			Dict = {}
-			layout = self.ui.gridLayout
-			i = 1
-			while i < layout.num_widget:
-				str1 = layout.itemAtPosition(i, 1).widget().text()
-				if layout.itemAtPosition(i, 0).widget().isChecked():
-					Dict[str1] = 'Checked'
-				i += 1
+				else:
+					temp_data = self.ui.LineEditCutoff.text().split(',')
+					if len(temp_data) > 0:
+						for ele in temp_data:
+							try:
+								num = float(ele)
+								if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+									num_list.append(num)
+							except:
+								return
+						# remove redudant and sort
+						num_list = list(set(num_list))
+						num_list.sort()
+				# max value + 1 so that the original max values can be processed correctly
+				num_list[-1] = num_list[-1] + 1
 
-			if len(Dict) > 0:
+				# start update records
 				field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-				for key in Dict:
-					SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement + ' AND ' + field + ' = "' + key +  '"'
-					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-					for record in DataIn:
-						To_check_list.append(record[1])
-		
-		self.checkList = To_check_list
-		self.StatFig()
-		self.BatchSignal.emit(To_check_list)
+				SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				for ele in DataIn:
+					try:
+						cur_value = float(ele[0])
+						cur_id = str(ele[1])
+						for i in range(len(num_list) - 1):
+							if cur_value >= num_list[i] and cur_value < num_list[i + 1]:
+								new_value = new_values[i]
+								if new_value == True:
+									To_check_list.append(cur_id)
+					except:
+						pass
+			# for char fields
+			else:
+				Dict = {}
+				layout = self.ui.gridLayout
+				i = 1
+				while i < layout.num_widget:
+					str1 = layout.itemAtPosition(i, 1).widget().text()
+					if layout.itemAtPosition(i, 0).widget().isChecked():
+						Dict[str1] = 'Checked'
+					i += 1
+
+				if len(Dict) > 0:
+					field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
+					for key in Dict:
+						SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement + ' AND ' + field + ' = "' + key +  '"'
+						DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+						for record in DataIn:
+							To_check_list.append(record[1])
+
+			self.checkList = To_check_list
+			self.StatFig()
+			self.BatchSignal.emit(To_check_list)
+		except:
+			Msg = 'Nothing to apply!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	def load_data(self, list):
 		layout = self.ui.gridLayout
