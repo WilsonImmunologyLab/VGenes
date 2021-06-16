@@ -10252,6 +10252,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		global LastSelected
 		try:
 			row_index = current.row()
+			# disable auto-update for sequence name
+			if row_index == 0:
+				return
 			fieldName = self.ui.tableWidgetTableView.item(row_index, 0).text()
 			valueis = self.ui.tableWidgetTableView.item(row_index, 2).text()
 			LastSelected = (fieldName, valueis)
