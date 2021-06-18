@@ -7815,6 +7815,100 @@ class VGenesForm(QtWidgets.QMainWindow):
 			                   "QSpinBox{font-size:18px;}")
 		else:
 			pass
+	
+	@pyqtSlot()
+	def on_pushButtonCircos_clicked(self):
+		# pre-check
+		if len(self.AntibodyCandidates) > 0:
+			bad_count = self.detectBad()
+			if bad_count > 0:
+				Msg = 'We found some improper paired HCs and LCs, and have highlighted them in red!\n' \
+				      'Please check and remove those records then re-try!\n'
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+		else:
+			Msg = 'You do not have any records in current antibody candidate list. ' \
+			      'Please add some records into your antibody candidate list and then re-try!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# fetch data
+		barcodes = []
+		for index in range(self.ui.tableWidgetHC.rowCount()):
+			hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
+			barcodes.append(hc_barcode)
+		## HC
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+		SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		## LC
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+		SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		Res = []
+		for index in range(len(DataInHC)):
+			element = (DataInHC[index][1], DataInLC[index][1])
+			Res.append(element)
+		'''
+		# reformat data
+		gene_names, reshaped_data = dataReshape(Res)
+
+		# generate HTML
+		data_file = os.path.join(temp_folder, 'CircosData.js')
+		out_file_handle = open(data_file, 'w')
+		out_file_handle.write('var CHORD1 = [ "CHORD1" , {')
+		out_file_handle.write('			CHORDinnerRadius: 270,')
+		out_file_handle.write('			CHORDouterRadius: 275,')
+		out_file_handle.write('			CHORDFillOpacity:0.67,')
+		out_file_handle.write('			CHORDStrokeColor: "black",')
+		out_file_handle.write('			CHORDStrokeWidth: "1px",')
+		out_file_handle.write('			CHORDPadding:0.06,')
+		out_file_handle.write('			CHORDAutoFillColor: true,')
+		out_file_handle.write('			CHORDouterARC:true,')
+		out_file_handle.write('			CHORDouterARCAutoColor:true,')
+		out_file_handle.write('			CHORDouterARCText:true,')
+		out_file_handle.write('			} , [')
+		# gene names
+		gene_names_str = '[ "' + '","'.join(gene_names) + ' ],'
+		out_file_handle.write(gene_names_str)
+		# data matrix
+		data_matrix_str = '['
+		for i in range(len(reshaped_data)):
+			data_matrix_str += '[' + ','.join(reshaped_data[i]) + '],\n'
+		data_matrix_str += ']\n]];'
+		out_file_handle.write(data_matrix_str)
+		# legend
+		out_file_handle.write('var LEGEND1 = [ "LEGEND1" , {')
+		out_file_handle.write('			x: 300,')
+		out_file_handle.write('			y: -230,')
+		out_file_handle.write('			title: " ",')
+		out_file_handle.write('			titleSize: 20,')
+		out_file_handle.write('			titleWeight: "bold",')
+		out_file_handle.write('			GapBetweenGraphicText:5,')
+		out_file_handle.write('			GapBetweenLines:20')
+		out_file_handle.write('			} , [')
+		HC_label = '				{type: "circle", color:"#1E77B4",opacity:"1.0",circleSize:"8",text: "HC V locus", textSize: "20",textWeight:"normal"},'
+		LC_label = '				{type: "circle", color:"#2AA02B",opacity:"1.0",circleSize:"8",text: "LC V locus", textSize: "20",textWeight:"normal"},'
+		out_file_handle.write(HC_label)
+		out_file_handle.write(LC_label)
+		out_file_handle.write('			]];')
+		'''
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		template_file = os.path.join(working_prefix, 'Data', 'template_circos.html')
+		out_html_file = os.path.join(temp_folder, time_stamp + '.html')
+		shutil.copyfile(template_file, out_html_file)
+
+		# display HTML
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		url = QUrl.fromLocalFile(str(out_html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
 
 	@pyqtSlot()
 	def on_actionSampling_triggered(self):
@@ -26344,6 +26438,9 @@ def CookieDistance(dataMtx, type):
 def find_value_location(lst,value):
 	result = [i for i in range(len(lst)) if value==lst[i]]
 	return result
+
+def dataReshape(data):
+	pass
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:

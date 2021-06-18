@@ -1069,7 +1069,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>11</number>
+       <number>9</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>

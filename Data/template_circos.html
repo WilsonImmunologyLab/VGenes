@@ -1,0 +1,160 @@
+<html>
+<head>  
+        <meta charset="utf-8">  
+        <title>Chord</title>  
+  </head> 
+
+<style>
+
+a {color: #000000;TEXT-DECORATION: none}
+a:active {background: #AFC1DC}
+.DownButtonNormal{
+	height: 18px;
+	line-height: 18px;
+	padding: 0 11px;
+	background: #FFFFFF;
+	border: 1px #D9D9D9 solid;
+	border-radius: 3px;
+	display: inline-block;
+	font-size: 12px;
+	outline: none;
+}
+</style>
+    <body>  
+		<script src="../Js/jquery.js"></script>
+		<script src="../Js/d3.js"></script>
+		<script src="../Js/NGCircos.js"></script>
+		<script src="CircosData.js"></script>
+		
+<!-- 	Download button for png -->
+		<div class="svg-box img-container">
+			<button class="svg-action-btn download-img">Download png ↓</button>
+			<a href="javascript:(function () { var e = document.createElement('script');if (window.location.protocol === 'https:') { e.setAttribute('src', './../Js/svg-crowbar.js'); } else { e.setAttribute('src', './../Js/svg-crowbar.js'); } e.setAttribute('class', 'svg-crowbar'); document.body.appendChild(e); })();" class="DownButtonNormal" >Download svg ↓</a>
+		</div>  
+		
+		<div id="NGCircos"></div>
+		<script>
+
+		var NGCircosGenome = [
+		[
+			["HC",1000],
+			["LC",1000],
+		]
+		];
+
+			
+		NGCircos1 = new NGCircos(CHORD1,LEGEND1,NGCircosGenome,{
+			target:"NGCircos",
+			svgWidth:900,
+			svgHeight:900,
+			svgClassName:"chord",
+			chrPad:0.06,
+			innerRadius:345,
+			outerRadius:350,
+			zoom:true,
+			compareEvent:false,
+			combinationEvent:false,
+			genomeFillColor:["#1E77B4","#2AA02B","#FF7F0B","#FFBB78","#2AA02B","#98DF8A","#D62628","#FF9896","#9467BD","#C5B0D5","#8C564C","#C49C94","#E377C2","#F7B6D2","#7F7F7F","#C7C7C7","#BCBC22","#DADB8D","#19BDCF","#9ED9E5"],
+			ticks:{
+			display:false,
+			len:5,
+			color:"#000",
+			textSize:8,
+			textColor:"#000",
+			scale:50,
+			realLength:true,
+			},
+			genomeLabel:{
+			display:false,
+			textSize:15,
+			textColor:"#000",
+			dx:0.028,
+			dy:"-0.55em",
+			},
+			genomeBorder:{
+			display:false,
+			borderColor:"white",
+			borderSize:0.5,
+			},
+			TEXTModuleDragEvent:false,
+			CHORDMouseEvent : true,
+			CHORDMouseFillColorExcluded:"white",
+			CHORDMouseClickDisplay : false,
+			CHORDMouseClickOpacity : 1.0,
+			CHORDMouseClickStrokeColor : "green",
+			CHORDMouseClickStrokeWidth : 4,
+			CHORDMouseDownDisplay : false,
+			CHORDMouseDownOpacity : 1.0,
+			CHORDMouseDownStrokeColor : "#F26223",
+			CHORDMouseDownStrokeWidth : 4,
+			CHORDMouseEnterDisplay : false,
+			CHORDMouseEnterOpacity : 1.0,
+			CHORDMouseEnterStrokeColor : "#F26223",
+			CHORDMouseEnterStrokeWidth : 4,
+			CHORDMouseLeaveDisplay : false,
+			CHORDMouseLeaveOpacity : 1.0,
+			CHORDMouseLeaveStrokeColor : "#F26223",
+			CHORDMouseLeaveStrokeWidth : 4,
+			CHORDMouseMoveDisplay : false,
+			CHORDMouseMoveOpacity : 1.0,
+			CHORDMouseMoveStrokeColor : "#F26223",
+			CHORDMouseMoveStrokeWidth : 4,
+			CHORDMouseOutDisplay : true,
+			CHORDMouseOutAnimationTime : 500,
+			CHORDMouseOutOpacity : 0.67,
+			CHORDMouseOutStrokeColor : "none",
+			CHORDMouseOutStrokeWidth : 0,
+			CHORDMouseUpDisplay : false,
+			CHORDMouseUpOpacity : 1.0,
+			CHORDMouseUpStrokeColor : "#F26223",
+			CHORDMouseUpStrokeWidth : 4,
+			CHORDMouseOverDisplay : true,
+			CHORDMouseOverOpacity : 0.8,
+			CHORDMouseOverStrokeColor : "#F26223",
+			CHORDMouseOverStrokeWidth : 3,
+			CHORDMouseOverTooltipsHtml01 : "CHORD : ",
+			CHORDMouseOverTooltipsHtml02 : "",
+			CHORDMouseOverTooltipsPosition : "absolute",
+			CHORDMouseOverTooltipsBackgroundColor : "white",
+			CHORDMouseOverTooltipsBorderStyle : "solid",
+			CHORDMouseOverTooltipsBorderWidth : 0,
+			CHORDMouseOverTooltipsPadding : "3px",
+			CHORDMouseOverTooltipsBorderRadius : "3px",
+			CHORDMouseOverTooltipsOpacity : 0.8,
+			
+			});
+
+	
+		NGCircos1.draw_genome(NGCircos1.genomeLength);
+		NGCircos1.draw_genome(NGCircos1.genomeLength2);
+		
+
+		</script>
+
+		<script src=../Js/saveSvgAsPng.js></script>
+		<script>
+						
+			(function(){
+				var downloadImg = getEle(".download-img"),
+					imgName = getEle("."+NGCircos1.svgClassName);
+				
+				//					imgScale = getEle(".img-scale");
+
+				downloadImg.addEventListener("click",function(){
+					var mySvg = getEle("."+NGCircos1.svgClassName),
+						//iImgScale = parseInt(imgScale.value) || 1,
+						oImgName = imgName.value || NGCircos1.svgClassName;
+						
+//					saveSvgAsPng(mySvg, oImgName+".png", iImgScale);
+					saveSvgAsPng(mySvg, oImgName+".png");
+
+				})
+
+				function getEle(obj){
+					var d = document;
+					return d.querySelector(obj);
+				}
+			})()
+		</script>
+    </body>  
+</html>  
