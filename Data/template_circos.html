@@ -25,12 +25,21 @@ a:active {background: #AFC1DC}
 		<script src="../Js/d3.js"></script>
 		<script src="../Js/NGCircos.js"></script>
 		<script src="CircosData.js"></script>
+		<script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 		
 <!-- 	Download button for png -->
-		<div class="svg-box img-container">
-			<button class="svg-action-btn download-img">Download png ↓</button>
-			<a href="javascript:(function () { var e = document.createElement('script');if (window.location.protocol === 'https:') { e.setAttribute('src', './../Js/svg-crowbar.js'); } else { e.setAttribute('src', './../Js/svg-crowbar.js'); } e.setAttribute('class', 'svg-crowbar'); document.body.appendChild(e); })();" class="DownButtonNormal" >Download svg ↓</a>
-		</div>  
+		<script type="text/javascript">
+			$(document).ready(function() {
+				new QWebChannel(qt.webChannelTransport, function(channel) {
+						var my_object = channel.objects.connection;$("#download").click(function(){
+						text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;
+						my_object.download(text);
+					});
+				});
+			});
+		</script>
+
+		<input id="download" type="button" value="Download" style="display:block;"/>
 		
 		<div id="NGCircos"></div>
 		<script>

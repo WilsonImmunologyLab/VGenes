@@ -7910,6 +7910,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		layout.addWidget(view)
 		VGenesTextWindows[window_id].show()
 
+		# build qweb channel
+		channel = QWebChannel(view.page())
+		my_object = MyObjectCls(view)
+		channel.registerObject('connection', my_object)
+		view.page().setWebChannel(channel)
+		my_object.downloadFigSignal.connect(self.downloadSVG)
+
 	@pyqtSlot()
 	def on_pushButtonHeatmap_clicked(self):
 		# pre-check
