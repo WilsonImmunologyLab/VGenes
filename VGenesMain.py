@@ -7993,16 +7993,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# render HTML
 		my_pyecharts = (
 			HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-				.add_xaxis(xaxis_data)
-				.add_yaxis(
+			.add_xaxis(
+				xaxis_data,
+			)
+			.add_yaxis(
 				"My data selection",
 				yaxis_data,
 				data,
 				label_opts=opts.LabelOpts(is_show=False, position="inside"),
 			)
-				.set_global_opts(
+			.set_series_opts()
+			.set_global_opts(
 				title_opts=opts.TitleOpts(title="HeatMap"),
 				visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc', '#006699']),
+				xaxis_opts=opts.AxisOpts(
+					type_="category",
+					axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
+					splitarea_opts=opts.SplitAreaOpts(
+						is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
+					),
+				),
 			)
 		)
 		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
