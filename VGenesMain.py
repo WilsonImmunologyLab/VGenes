@@ -12993,6 +12993,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 					.set_global_opts(
 						title_opts=opts.TitleOpts(title="HeatMap"),
 						visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc','#006699']),
+						xaxis_opts=opts.AxisOpts(
+							type_="category",
+							axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
+							splitarea_opts=opts.SplitAreaOpts(
+								is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1)
+							),
+						),
 					)
 				)
 		# Sankey Diagram
