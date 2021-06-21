@@ -7839,60 +7839,61 @@ class VGenesForm(QtWidgets.QMainWindow):
 			barcodes.append(hc_barcode)
 		## HC
 		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
-		SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
 		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		## LC
 		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
-		SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
 		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		Res = []
 		for index in range(len(DataInHC)):
 			element = (DataInHC[index][1], DataInLC[index][1])
 			Res.append(element)
-		'''
+
 		# reformat data
 		gene_names, reshaped_data = dataReshape(Res)
 
 		# generate HTML
 		data_file = os.path.join(temp_folder, 'CircosData.js')
 		out_file_handle = open(data_file, 'w')
-		out_file_handle.write('var CHORD1 = [ "CHORD1" , {')
-		out_file_handle.write('			CHORDinnerRadius: 270,')
-		out_file_handle.write('			CHORDouterRadius: 275,')
-		out_file_handle.write('			CHORDFillOpacity:0.67,')
-		out_file_handle.write('			CHORDStrokeColor: "black",')
-		out_file_handle.write('			CHORDStrokeWidth: "1px",')
-		out_file_handle.write('			CHORDPadding:0.06,')
-		out_file_handle.write('			CHORDAutoFillColor: true,')
-		out_file_handle.write('			CHORDouterARC:true,')
-		out_file_handle.write('			CHORDouterARCAutoColor:true,')
-		out_file_handle.write('			CHORDouterARCText:true,')
-		out_file_handle.write('			} , [')
+		out_file_handle.write('var CHORD1 = [ "CHORD1" , {\n')
+		out_file_handle.write('			CHORDinnerRadius: 270,\n')
+		out_file_handle.write('			CHORDouterRadius: 275,\n')
+		out_file_handle.write('			CHORDFillOpacity:0.67,\n')
+		out_file_handle.write('			CHORDStrokeColor: "black",\n')
+		out_file_handle.write('			CHORDStrokeWidth: "1px",\n')
+		out_file_handle.write('			CHORDPadding:0.06,\n')
+		out_file_handle.write('			CHORDAutoFillColor: true,\n')
+		out_file_handle.write('			CHORDouterARC:true,\n')
+		out_file_handle.write('			CHORDouterARCAutoColor:true,\n')
+		out_file_handle.write('			CHORDouterARCText:true,\n')
+		out_file_handle.write('			} , [\n')
 		# gene names
-		gene_names_str = '[ "' + '","'.join(gene_names) + ' ],'
+		gene_names_str = '[ "' + '","'.join(gene_names) + '"],\n'
 		out_file_handle.write(gene_names_str)
 		# data matrix
 		data_matrix_str = '['
 		for i in range(len(reshaped_data)):
-			data_matrix_str += '[' + ','.join(reshaped_data[i]) + '],\n'
+			str_line = [str(ele) for ele in reshaped_data[i]]
+			data_matrix_str += '[' + ','.join(str_line) + '],\n'
 		data_matrix_str += ']\n]];'
 		out_file_handle.write(data_matrix_str)
 		# legend
-		out_file_handle.write('var LEGEND1 = [ "LEGEND1" , {')
-		out_file_handle.write('			x: 300,')
-		out_file_handle.write('			y: -230,')
-		out_file_handle.write('			title: " ",')
-		out_file_handle.write('			titleSize: 20,')
-		out_file_handle.write('			titleWeight: "bold",')
-		out_file_handle.write('			GapBetweenGraphicText:5,')
-		out_file_handle.write('			GapBetweenLines:20')
-		out_file_handle.write('			} , [')
-		HC_label = '				{type: "circle", color:"#1E77B4",opacity:"1.0",circleSize:"8",text: "HC V locus", textSize: "20",textWeight:"normal"},'
-		LC_label = '				{type: "circle", color:"#2AA02B",opacity:"1.0",circleSize:"8",text: "LC V locus", textSize: "20",textWeight:"normal"},'
+		out_file_handle.write('var LEGEND1 = [ "LEGEND1" , {\n')
+		out_file_handle.write('			x: 300,\n')
+		out_file_handle.write('			y: -230,\n')
+		out_file_handle.write('			title: " ",\n')
+		out_file_handle.write('			titleSize: 20,\n')
+		out_file_handle.write('			titleWeight: "bold",\n')
+		out_file_handle.write('			GapBetweenGraphicText:5,\n')
+		out_file_handle.write('			GapBetweenLines:20\n')
+		out_file_handle.write('			} , [\n')
+		HC_label = '				{type: "circle", color:"#1E77B4",opacity:"1.0",circleSize:"8",text: "HC V locus", textSize: "20",textWeight:"normal"},\n'
+		LC_label = '				{type: "circle", color:"#2AA02B",opacity:"1.0",circleSize:"8",text: "LC V locus", textSize: "20",textWeight:"normal"},\n'
 		out_file_handle.write(HC_label)
 		out_file_handle.write(LC_label)
-		out_file_handle.write('			]];')
-		'''
+		out_file_handle.write('			]];\n')
+
 		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
 		template_file = os.path.join(working_prefix, 'Data', 'template_circos.html')
 		out_html_file = os.path.join(temp_folder, time_stamp + '.html')
@@ -26605,7 +26606,29 @@ def find_value_location(lst,value):
 	return result
 
 def dataReshape(data):
-	pass
+	df = pd.DataFrame(data, columns=['HC', 'LC'])
+	HC_names = df['HC'].unique()
+	LC_names = df['LC'].unique()
+	HC_names = HC_names.tolist()
+	LC_names = LC_names.tolist()
+	All_names = HC_names + LC_names
+	Matrix = pd.DataFrame(0, index=All_names, columns=All_names)
+
+	gp = df.groupby(by=['HC', 'LC'])
+	newdf = gp.size()
+	newdf = newdf.reset_index(name='times')
+
+	for index in range(len(newdf)):
+		cur_a = newdf['HC'][index]
+		cur_b = newdf['LC'][index]
+		cur_count = newdf['times'][index]
+		Matrix[cur_a][cur_b] = cur_count
+		Matrix[cur_b][cur_a] = cur_count
+
+	train_data = numpy.array(Matrix)
+	Matrix_list = train_data.tolist()
+
+	return All_names, Matrix_list
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
