@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>Cookie.png</file>
+    <file>Circo.png</file>
+    <file>Heatmap.png</file>
     <file>nt2aa.png</file>
     <file>mAB_match.png</file>
     <file>down_checked.png</file>

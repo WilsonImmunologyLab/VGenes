@@ -9831,11 +9831,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/Flu.png</normaloff>:/PNG-Icons/Flu.png</iconset>
+               <normaloff>:/PNG-Icons/Circo.png</normaloff>:/PNG-Icons/Circo.png</iconset>
              </property>
              <property name="iconSize">
               <size>
-               <width>50</width>
+               <width>80</width>
                <height>16</height>
               </size>
              </property>
@@ -9857,7 +9857,7 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
+               <normaloff>:/PNG-Icons/Heatmap.png</normaloff>:/PNG-Icons/Heatmap.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -10949,7 +10949,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionSampling">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/Flu.png</normaloff>:/PNG-Icons/Flu.png</iconset>
+     <normaloff>:/PNG-Icons/Cookie.png</normaloff>:/PNG-Icons/Cookie.png</iconset>
    </property>
    <property name="text">
     <string>Sampling</string>
