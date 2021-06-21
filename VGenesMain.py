@@ -8017,21 +8017,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 		js_line = '<script type="text/javascript" src="' + \
 		          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
 		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
-		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
+		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>' + \
+		          '<style>.download{width:160px;height:25px;border-width:0px;border-radius:3px;background:#1E90FF;cursor:pointer;outline:none;color:white;font-size:17px;}.download:hover{background:#5599FF;}</style>'
 		lines[5] = js_line
 		## edit style line
 		style_line = lines[9]
 		style_pos = style_line.find('style')
-		style_line = style_line[
-		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
-			600) + 'px;"></div>'
+		style_line = style_line[0:style_pos] + \
+		             'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(600) + 'px;"></div>'
 		lines[9] = style_line
 		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
 		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
 		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
 		            'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;my_object.download(text);});$("#update").click(function(){' \
 		            'my_object.updateSelection(text);});});});</script>'
-		insert_btn = '<input id="download" type="button" value="Download" style="display:block;"/>' \
+		insert_btn = '<input id="download" type="button" class="download" value="Download" style="display:block;"/>' \
 		             '<input id="update" type="button" value="" style="display:none;"/>'
 		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
 		content = '\n'.join(lines)

@@ -5,19 +5,20 @@
   </head> 
 
 <style>
+.download {
+	width: 160px; 
+	height: 25px; 
+	border-width: 0px; 
+	border-radius: 3px; 
+	background: #1E90FF; 
+	cursor: pointer; 
+	outline: none; 
+	color: white; 
+	font-size: 17px;
+}
 
-a {color: #000000;TEXT-DECORATION: none}
-a:active {background: #AFC1DC}
-.DownButtonNormal{
-	height: 18px;
-	line-height: 18px;
-	padding: 0 11px;
-	background: #FFFFFF;
-	border: 1px #D9D9D9 solid;
-	border-radius: 3px;
-	display: inline-block;
-	font-size: 12px;
-	outline: none;
+.download:hover { 
+	background: #5599FF;
 }
 </style>
     <body>  
@@ -39,7 +40,7 @@ a:active {background: #AFC1DC}
 			});
 		</script>
 
-		<input id="download" type="button" value="Download" style="display:block;"/>
+		<input id="download" type="button" class="download" value="Download" style="display:block;"/>
 		
 		<div id="NGCircos"></div>
 		<script>
@@ -138,32 +139,6 @@ a:active {background: #AFC1DC}
 		NGCircos1.draw_genome(NGCircos1.genomeLength2);
 		
 
-		</script>
-
-		<script src=../Js/saveSvgAsPng.js></script>
-		<script>
-						
-			(function(){
-				var downloadImg = getEle(".download-img"),
-					imgName = getEle("."+NGCircos1.svgClassName);
-				
-				//					imgScale = getEle(".img-scale");
-
-				downloadImg.addEventListener("click",function(){
-					var mySvg = getEle("."+NGCircos1.svgClassName),
-						//iImgScale = parseInt(imgScale.value) || 1,
-						oImgName = imgName.value || NGCircos1.svgClassName;
-						
-//					saveSvgAsPng(mySvg, oImgName+".png", iImgScale);
-					saveSvgAsPng(mySvg, oImgName+".png");
-
-				})
-
-				function getEle(obj){
-					var d = document;
-					return d.querySelector(obj);
-				}
-			})()
 		</script>
     </body>  
 </html>  
