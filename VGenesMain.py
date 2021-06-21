@@ -7911,6 +7911,147 @@ class VGenesForm(QtWidgets.QMainWindow):
 		VGenesTextWindows[window_id].show()
 
 	@pyqtSlot()
+	def on_pushButtonHeatmap_clicked(self):
+		# pre-check
+		if len(self.AntibodyCandidates) > 0:
+			bad_count = self.detectBad()
+			if bad_count > 0:
+				Msg = 'We found some improper paired HCs and LCs, and have highlighted them in red!\n' \
+				      'Please check and remove those records then re-try!\n'
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+		else:
+			Msg = 'You do not have any records in current antibody candidate list. ' \
+			      'Please add some records into your antibody candidate list and then re-try!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# fetch data
+		barcodes = []
+		for index in range(self.ui.tableWidgetHC.rowCount()):
+			hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
+			barcodes.append(hc_barcode)
+		## HC
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
+		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		## LC
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
+		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		Res = []
+		for index in range(len(DataInHC)):
+			element = (DataInHC[index][1], DataInLC[index][1])
+			Res.append(element)
+
+		# reformat data
+		df = pd.DataFrame(Res, columns=['HC', 'LC'])
+		gp = df.groupby(by=['HC', 'LC'])
+		newdf = gp.size()
+		newdf = newdf.reset_index(name='times')
+
+		xaxis_data = []
+		yaxis_data = []
+		my_dict = dict()
+
+		for index in range(len(newdf)):
+			cur_a = newdf['HC'][index]
+			cur_b = newdf['LC'][index]
+			cur_count = newdf['times'][index]
+			if cur_a not in xaxis_data:
+				xaxis_data.append(cur_a)
+			if cur_b not in yaxis_data:
+				yaxis_data.append(cur_b)
+
+			index_a = xaxis_data.index(cur_a)
+			index_b = yaxis_data.index(cur_b)
+			name = str(index_a) + '|' + str(index_b)
+			my_dict[name] = cur_count
+
+		data = []
+		min_value = 0
+		max_value = 0
+		for i in range(len(xaxis_data)):
+			for j in range(len(yaxis_data)):
+				name = str(i) + '|' + str(j)
+				if name in my_dict.keys():
+					num = int(my_dict[name].astype(numpy.int32))
+					unit = [i, j, num]
+					if num > max_value:
+						max_value = num
+				else:
+					unit = [i, j, 0]
+				data.append(unit)
+
+		# render HTML
+		my_pyecharts = (
+			HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+				.add_xaxis(xaxis_data)
+				.add_yaxis(
+				"My data selection",
+				yaxis_data,
+				data,
+				label_opts=opts.LabelOpts(is_show=False, position="inside"),
+			)
+				.set_global_opts(
+				title_opts=opts.TitleOpts(title="HeatMap"),
+				visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc', '#006699']),
+			)
+		)
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		html_path = os.path.join(temp_folder, time_stamp + '.html')
+		my_pyecharts.render(path=html_path)
+
+		# modify HTML
+		file_handle = open(html_path, 'r')
+		lines = file_handle.readlines()
+		file_handle.close()
+		## edit js line
+		js_line = '<script type="text/javascript" src="' + \
+		          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
+		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
+		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
+		lines[5] = js_line
+		## edit style line
+		style_line = lines[9]
+		style_pos = style_line.find('style')
+		style_line = style_line[
+		             0:style_pos] + 'style="position: fixed; top: 0px; left: 5%;width:90%; height:' + str(
+			600) + 'px;"></div>'
+		lines[9] = style_line
+		insert_js = '<script type="text/javascript">$(document).ready(function() {' \
+		            'new QWebChannel(qt.webChannelTransport, function(channel) {' \
+		            'var my_object = channel.objects.connection;$("#download").click(function(){' \
+		            'text=document.getElementsByTagName("svg")[0].parentNode.innerHTML;my_object.download(text);});$("#update").click(function(){' \
+		            'my_object.updateSelection(text);});});});</script>'
+		insert_btn = '<input id="download" type="button" value="Download" style="display:block;"/>' \
+		             '<input id="update" type="button" value="" style="display:none;"/>'
+		lines = lines[:6] + [insert_js] + lines[6:9] + [insert_btn] + lines[9:]
+		content = '\n'.join(lines)
+		file_handle = open(html_path, 'w')
+		file_handle.write(content)
+		file_handle.close()
+
+		# show local HTML
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		url = QUrl.fromLocalFile(str(html_path))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
+		# build qweb channel
+		channel = QWebChannel(view.page())
+		my_object = MyObjectCls(view)
+		channel.registerObject('connection', my_object)
+		view.page().setWebChannel(channel)
+		my_object.downloadFigSignal.connect(self.downloadSVG)
+
+	@pyqtSlot()
 	def on_actionSampling_triggered(self):
 		# determine where to fetch data, single mode (bulk data) or pair mode (single cell data)
 		if len(self.AntibodyCandidates) > 0:
