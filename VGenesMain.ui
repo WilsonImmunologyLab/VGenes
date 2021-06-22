@@ -9895,17 +9895,7 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
              <item>
               <property name="text">
-               <string>CDR3Length</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
                <string>GeneType</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>TotMut</string>
               </property>
              </item>
              <item>
