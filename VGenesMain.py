@@ -85,6 +85,7 @@ from ui_patentdialog import Ui_PatentDialog
 from ui_SHMtabledialog import Ui_SHMtableDialog
 from ui_samplingdialog import Ui_SamplingDialog
 from ui_deletedialog import Ui_deleteDialog
+from ui_hclctabledialog import Ui_HCLCDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -321,6 +322,34 @@ class Worker(QRunnable):
 			self.signals.result.emit(result)  # Return the result of the processing
 		finally:
 			self.signals.finished.emit()  # Done
+
+class HCLCDialog(QtWidgets.QDialog):
+	deleteSignal = pyqtSignal(list)
+	def __init__(self):
+		super(HCLCDialog, self).__init__()
+		self.ui = Ui_HCLCDialog()
+		self.ui.setupUi(self)
+
+		if system() == 'Windows':
+			# set style for windows
+			self.setStyleSheet("QLabel{font-size:18px;}"
+			                   "QTextEdit{font-size:18px;}"
+			                   "QComboBox{font-size:18px;}"
+			                   "QPushButton{font-size:18px;}"
+			                   "QTabWidget{font-size:18px;}"
+			                   "QCommandLinkButton{font-size:18px;}"
+			                   "QRadioButton{font-size:18px;}"
+			                   "QPlainTextEdit{font-size:18px;}"
+			                   "QCheckBox{font-size:18px;}"
+			                   "QTableWidget{font-size:18px;}"
+			                   "QToolBar{font-size:18px;}"
+			                   "QMenuBar{font-size:18px;}"
+			                   "QMenu{font-size:18px;}"
+			                   "QAction{font-size:18px;}"
+			                   "QMainWindow{font-size:18px;}"
+			                   "QLineEdit{font-size:18px;}"
+			                   "QTreeWidget{font-size:18px;}"
+			                   "QSpinBox{font-size:18px;}")
 
 class deleteDialog(QtWidgets.QDialog):
 	deleteSignal = pyqtSignal(list)
@@ -7792,6 +7821,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.SeqTable.pageSize = 20
 		self.ui.SeqTable.EditTag = False
 
+		self.HCLCDialog = HCLCDialog()
+
 		self.initialHCLCTable()
 
 		if system() == 'Windows':
@@ -7815,7 +7846,122 @@ class VGenesForm(QtWidgets.QMainWindow):
 			                   "QSpinBox{font-size:18px;}")
 		else:
 			pass
-	
+
+
+
+	def on_pushButtonHCLCTable_clicked(self):
+		if self.HCLCDialog.isVisible() == True:
+			pass
+		else:
+			self.loadHCLCtable('')
+			self.HCLCDialog.show()
+
+	def loadHCLCtable(self, SeqName):
+		if SeqName != '':
+			text = 'Details of ' + SeqName
+			# fill table
+			# clear table if table exists
+			if self.HCLCDialog.ui.tableWidget.rowCount() > 0:
+				self.HCLCDialog.ui.tableWidget.setRowCount(0)
+				self.HCLCDialog.ui.tableWidget.setColumnCount(0)
+
+			# fetch data for current record
+			SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + SeqName + '"'
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			if len(DataIn) == 0:
+				return
+			Records = DataIn[0]
+			# make table
+			horizontalHeader = ['Field', 'Field Name', 'Value']
+			num_row = len(FieldList)
+			num_col = len(horizontalHeader)
+			self.HCLCDialog.ui.tableWidget.setRowCount(num_row)
+			self.HCLCDialog.ui.tableWidget.setColumnCount(num_col)
+			self.HCLCDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+			self.HCLCDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+			self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
+			self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+
+			for row_index in range(num_row):
+				print(str(row_index))
+				unit1 = QTableWidgetItem(FieldList[row_index])
+				unit1.setFlags(Qt.ItemIsEnabled)
+				unit2 = QTableWidgetItem(RealNameList[row_index])
+				unit2.setFlags(Qt.ItemIsEnabled)
+				unit3 = QTableWidgetItem(str(Records[row_index]))
+				if row_index == 0:
+					unit3.setFlags(Qt.ItemIsEnabled)
+
+				self.HCLCDialog.ui.tableWidget.setItem(row_index, 0, unit1)
+				self.HCLCDialog.ui.tableWidget.setItem(row_index, 1, unit2)
+				self.HCLCDialog.ui.tableWidget.setItem(row_index, 2, unit3)
+
+			self.HCLCDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+			self.HCLCDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+			self.HCLCDialog.ui.label.setText(text)
+		else:
+			if len(self.AntibodyCandidates) > 0:
+				# find current records in HC table
+				if self.ui.tableWidgetHC.rowCount() > 0:
+					row = self.ui.tableWidgetHC.currentRow()
+					SeqName = self.ui.tableWidgetHC.item(row, 0).text()
+				elif self.ui.tableWidgetLC.rowCount() > 0:
+					row = self.ui.tableWidgetLC.currentRow()
+					SeqName = self.ui.tableWidgetLC.item(row, 0).text()
+
+				# update title
+				if SeqName == '' or SeqName == None:
+					text = 'Please click any records from your HC or LC list to see their details!'
+				else:
+					text = 'Details of ' + SeqName
+
+					# fill table
+					# clear table if table exists
+					if self.HCLCDialog.ui.tableWidget.rowCount() > 0:
+						self.HCLCDialog.ui.tableWidget.setRowCount(0)
+						self.HCLCDialog.ui.tableWidget.setColumnCount(0)
+
+					# fetch data for current record
+					SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + SeqName + '"'
+					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+					if len(DataIn) == 0:
+						return
+					Records = DataIn[0]
+					# make table
+					horizontalHeader = ['Field', 'Field Name', 'Value']
+					num_row = len(FieldList)
+					num_col = len(horizontalHeader)
+					self.HCLCDialog.ui.tableWidget.setRowCount(num_row)
+					self.HCLCDialog.ui.tableWidget.setColumnCount(num_col)
+					self.HCLCDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+					self.HCLCDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+					self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
+					self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+
+					for row_index in range(num_row):
+						print(str(row_index))
+						unit1 = QTableWidgetItem(FieldList[row_index])
+						unit1.setFlags(Qt.ItemIsEnabled)
+						unit2 = QTableWidgetItem(RealNameList[row_index])
+						unit2.setFlags(Qt.ItemIsEnabled)
+						unit3 = QTableWidgetItem(str(Records[row_index]))
+						if row_index == 0:
+							unit3.setFlags(Qt.ItemIsEnabled)
+
+						self.HCLCDialog.ui.tableWidget.setItem(row_index, 0, unit1)
+						self.HCLCDialog.ui.tableWidget.setItem(row_index, 1, unit2)
+						self.HCLCDialog.ui.tableWidget.setItem(row_index, 2, unit3)
+
+					self.HCLCDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+					self.HCLCDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+				self.HCLCDialog.ui.label.setText(text)
+			else:
+				text = 'Please click any records from your HC or LC list to see their details!'
+				self.HCLCDialog.ui.label.setText(text)
+
+
 	@pyqtSlot()
 	def on_pushButtonCircos_clicked(self):
 		# pre-check
@@ -8626,6 +8772,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		if self.ui.radioButtonNavigate.isChecked():
 			self.select_tree_by_name(curTable.item(row, 0).text())
+
+		if self.HCLCDialog.isVisible() == True:
+			self.loadHCLCtable(curTable.item(row, 0).text())
 
 
 	def initialHCLCTable(self):

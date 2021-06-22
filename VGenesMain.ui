@@ -9741,7 +9741,32 @@ If the J-end is off the J gene end may need adjusted</string>
            </widget>
           </item>
           <item>
+           <spacer name="horizontalSpacer_25">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButtonCheckHCLC">
+            <property name="minimumSize">
+             <size>
+              <width>150</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="toolTip">
              <string>Check if there is any HC in candidate list has multiple LC or no LC</string>
             </property>
@@ -9752,6 +9777,18 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonClearHL">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>120</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Clear highlight</string>
             </property>
@@ -9759,6 +9796,18 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteBad">
+            <property name="minimumSize">
+             <size>
+              <width>140</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>140</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Remove bad pairs</string>
             </property>
@@ -9766,6 +9815,18 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteThis">
+            <property name="minimumSize">
+             <size>
+              <width>100</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Delete this</string>
             </property>
@@ -9773,6 +9834,18 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteThese">
+            <property name="minimumSize">
+             <size>
+              <width>200</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>200</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Delete this and its HC/LCs</string>
             </property>
@@ -9780,6 +9853,18 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteBatch">
+            <property name="minimumSize">
+             <size>
+              <width>120</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>120</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
              <string>Batch deletion</string>
             </property>
@@ -9787,8 +9872,20 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonDeleteAll">
+            <property name="minimumSize">
+             <size>
+              <width>80</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>80</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="text">
-             <string>Clear all</string>
+             <string>Clear list</string>
             </property>
            </widget>
           </item>
@@ -9818,11 +9915,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item row="0" column="5">
             <widget class="QPushButton" name="pushButtonCircos">
              <property name="maximumSize">
               <size>
-               <width>100</width>
+               <width>80</width>
                <height>16777215</height>
               </size>
              </property>
@@ -9844,37 +9941,11 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
-            <widget class="QPushButton" name="pushButtonHeatmap">
-             <property name="maximumSize">
-              <size>
-               <width>100</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Heatmap</string>
-             </property>
-             <property name="icon">
-              <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/Heatmap.png</normaloff>:/PNG-Icons/Heatmap.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>50</width>
-               <height>16</height>
-              </size>
-             </property>
-             <property name="flat">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
+           <item row="0" column="4">
             <widget class="QComboBox" name="comboBoxHCLC">
              <property name="maximumSize">
               <size>
-               <width>200</width>
+               <width>100</width>
                <height>16777215</height>
               </size>
              </property>
@@ -9908,6 +9979,72 @@ If the J-end is off the J gene end may need adjusted</string>
                <string>J1</string>
               </property>
              </item>
+            </widget>
+           </item>
+           <item row="0" column="6">
+            <widget class="QPushButton" name="pushButtonHeatmap">
+             <property name="maximumSize">
+              <size>
+               <width>100</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Heatmap</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/Heatmap.png</normaloff>:/PNG-Icons/Heatmap.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>50</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QPushButton" name="pushButtonHCLCTable">
+             <property name="maximumSize">
+              <size>
+               <width>120</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="text">
+              <string>Check details</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>60</width>
+               <height>16</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="3">
+            <widget class="Line" name="line_11">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="Line" name="line_12">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
             </widget>
            </item>
           </layout>
@@ -10371,6 +10508,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionIsotypes"/>
    <addaction name="separator"/>
    <addaction name="actionAlignmentHTML"/>
+   <addaction name="separator"/>
    <addaction name="actionSampling"/>
    <addaction name="separator"/>
    <addaction name="actionPreferences"/>
