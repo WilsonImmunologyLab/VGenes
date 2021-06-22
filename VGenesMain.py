@@ -7837,13 +7837,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for index in range(self.ui.tableWidgetHC.rowCount()):
 			hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
 			barcodes.append(hc_barcode)
+		data_field = self.ui.comboBoxHCLC.currentText()
 		## HC
 		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
-		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
+		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		## LC
 		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
-		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
+		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		Res = []
 		for index in range(len(DataInHC)):
@@ -7939,13 +7940,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for index in range(self.ui.tableWidgetHC.rowCount()):
 			hc_barcode = self.ui.tableWidgetHC.item(index, 8).text()
 			barcodes.append(hc_barcode)
+		data_field = self.ui.comboBoxHCLC.currentText()
 		## HC
 		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
-		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
+		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		## LC
 		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
-		SQLStatement = 'SELECT Blank10,VLocus FROM vgenesdb' + WHEREStatement
+		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		Res = []
 		for index in range(len(DataInHC)):
