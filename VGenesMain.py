@@ -1271,14 +1271,14 @@ class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
 		workingdir = os.path.join(working_prefix, 'IgBlast')
 		os.chdir(workingdir)
 		if species == 'Human':
-			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_HC = os.popen(BLASTCommandLine)
-			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query " + lc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + lc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_LC = os.popen(BLASTCommandLine)
 		elif species == 'Mouse':
-			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_HC = os.popen(BLASTCommandLine)
-			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_LC = os.popen(BLASTCommandLine)
 		
 		Final_data = []
@@ -23423,23 +23423,23 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 	try:
 		start = time.time()
 		if species == 'Human':
-			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 			#BLASTCommandLine = workingdir + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
 			#IgBlastOut_fmt19 = os.system(BLASTCommandLine)
 			#print(BLASTCommandLine)
-			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 		elif species == 'Mouse':
-			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 			#BLASTCommandLine = workingdir + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
 			#IgBlastOut_fmt19 = os.system(BLASTCommandLine)
 			#print(BLASTCommandLine)
-			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 		end = time.time()
@@ -24277,23 +24277,23 @@ def IgBlastParserFastOld(FASTAFile, datalist, signal):
 	try:
 		start = time.time()
 		if species == 'Human':
-			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 			# BLASTCommandLine = workingdir + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
 			# IgBlastOut_fmt19 = os.system(BLASTCommandLine)
 			# print(BLASTCommandLine)
-			BLASTCommandLine = igblast_path + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 		elif species == 'Mouse':
-			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
 			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 			# BLASTCommandLine = workingdir + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
 			# IgBlastOut_fmt19 = os.system(BLASTCommandLine)
 			# print(BLASTCommandLine)
-			BLASTCommandLine = igblast_path + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
 			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
 			print(BLASTCommandLine)
 		end = time.time()
