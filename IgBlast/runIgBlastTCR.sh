@@ -1,0 +1,2 @@
+igblastn -germline_db_V TR/Human/HumanVGenes.nt -germline_db_J TR/Human/HumanJGenes.nt -germline_db_D TR/Human/HumanDGenes.nt -organism human -domain_system imgt -query TCR.fasta -auxiliary_data optional_file/human_gl.aux -show_translation -ig_seqtype TCR -outfmt 3 > TR_fmt3.txt
+igblastn -germline_db_V TR/Human/HumanVGenes.nt -germline_db_J TR/Human/HumanJGenes.nt -germline_db_D TR/Human/HumanDGenes.nt -organism human -domain_system imgt -query TCR.fasta -auxiliary_data optional_file/human_gl.aux -show_translation -ig_seqtype TCR -outfmt 19 > TR_fmt19.tsv
