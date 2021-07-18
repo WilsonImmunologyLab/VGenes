@@ -5438,7 +5438,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			#self.disableWidgets()
 			return
 
-	def InitiateImportFromFasta(self, Filenamed, MaxNum):
+	def InitiateImportFromFasta(self, Filenamed, MaxNum, dataType):
 		self.calling = 2
 
 		# need to transfer species grouping to IgBlaster
@@ -5558,6 +5558,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -5611,6 +5612,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -5656,6 +5658,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -6162,7 +6165,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			# self.disableWidgets()
 			return
 
-	def InitiateImportFromSEQ(self, Filenamed, MaxNum):
+	def InitiateImportFromSEQ(self, Filenamed, MaxNum, dataType):
 		self.calling = 6
 
 		# need to transfer species grouping to IgBlaster
@@ -6276,6 +6279,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -6329,6 +6333,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -6374,6 +6379,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
