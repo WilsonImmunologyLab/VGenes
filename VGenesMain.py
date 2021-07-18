@@ -5191,16 +5191,32 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		else:
 			pass
 
+		# BCR and TCR switch
+		if num in [0,1,6]:
+			self.ui.pushButtonBCR.setEnabled(True)
+			self.ui.pushButtonTCR.setEnabled(True)
+		else:
+			self.ui.pushButtonBCR.setEnabled(False)
+			self.ui.pushButtonTCR.setEnabled(False)
+
+
 	def accept(self):
 		num = self.ui.tabWidget.currentIndex()
 
 		#self.ui.progressBar.setValue(1)
 		#self.ui.labelpct.setText('Start processing and loading...')
 
+		# bcr or tcr switch
+		dataType = 'BCR'
+		if self.ui.pushButtonBCR.isChecked():
+			dataType = 'BCR'
+		else:
+			dataType = 'TCR'
+
 		if num == 0:
-			self.InitiateImportFrom10X('none', 0)
+			self.InitiateImportFrom10X('none', 0, dataType)
 		elif num == 1:
-			self.InitiateImportFromFasta('none', 0)
+			self.InitiateImportFromFasta('none', 0, dataType)
 		elif num == 2:
 			self.InitiateImportFromCSV('none', 0)
 		elif num == 3:
@@ -5210,7 +5226,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		elif num == 5:
 			self.InitiateImportFromIMGT()
 		elif num == 6:
-			self.InitiateImportFromSEQ('none', 0)
+			self.InitiateImportFromSEQ('none', 0, dataType)
 		else:
 			pass
 
@@ -5280,7 +5296,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			csvFile.close()
 		return barcode_dict
 
-	def InitiateImportFrom10X(self, Filenamed, MaxNum):
+	def InitiateImportFrom10X(self, Filenamed, MaxNum, dataType):
 		self.calling = 1
 
 		# need to transfer species grouping to IgBlaster
@@ -5360,6 +5376,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -5404,6 +5421,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
 			workThread.loadProgress.connect(self.progressLabel)
@@ -7424,13 +7442,22 @@ class WorkThread(QThread):
 		self.item = ''
 		self.datalist = ''
 		self.method = 'slow'
+		self.datatype = 'BCR'
 
 	def run(self):
 		global IgBLASTAnalysis
 		if self.method == 'fast':
-			IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist, self.loadProgress)
+			if self.datatype == 'BCR':
+				IgBLASTAnalysis = IgBlastParserFast(self.item, self.datalist, self.loadProgress)
+			elif self.datatype == 'TCR':
+				IgBLASTAnalysis = IgBlastParserFastTCR(self.item, self.datalist, self.loadProgress)
+			else:
+				return
 		else:
-			IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist, self.loadProgress)
+			if self.datatype == 'BCR':
+				IgBLASTAnalysis = IgBLASTer.IgBLASTit(self.item, self.datalist, self.loadProgress)
+			else:
+				return
 
 		self.trigger.emit(self.item)
 
@@ -24213,6 +24240,784 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 	return DATA
 
+
+def IgBlastParserFastTCR(FASTAFile, datalist, signal):
+	import os
+	# todo change to app folder
+	# progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
+	ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+	ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+	ErLog = 'VGenes input beginning at: ' + time.strftime('%c') + '\n'
+	with open(ErlogFile, 'w') as currentFile:  # using with for this automatically closes the file even if you crash
+		currentFile.write(ErLog)
+
+	try:
+		DBpathname = os.path.join(working_prefix, 'Data', 'VDJGenes.db')
+		(dirname, filename) = os.path.split(DBpathname)
+		os.chdir(dirname)
+		GetProductive = False
+		conn = db.connect(DBpathname)
+	except:
+		Msg = 'VDJ DB connect Error!'
+		return Msg
+
+	#  then need to create a cursor that lets you traverse the database
+	cursor = conn.cursor()
+	DATA = []
+	Sequences = {}
+
+	project = datalist[0]
+	grouping = datalist[1]
+	subgroup = datalist[2]
+	species = datalist[3]
+	GetProductive = datalist[4]
+	MaxNum = int(datalist[5])
+
+	ErLog, TotSeqs = IgBLASTer.ProcessFASTA(FASTAFile, MaxNum)
+	workingdir = os.path.join(working_prefix, 'IgBlast')
+	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
+
+	os.chdir(workingdir)
+	Sequences.clear()
+	now = time.strftime('%c')
+	# read input sequence file
+	with open(workingfilename, 'r') as currentFile:  # make dictionary of seqs keyed by name
+		for FASTAline in currentFile:
+			FASTAline = FASTAline.replace('\n', '').replace('\r', '')
+			if FASTAline[0] == '>':
+				# print(FASTAline)
+				SeqNamed = FASTAline[1:]
+				SeqNamed = SeqNamed.strip()
+
+			else:
+				Sequence = FASTAline
+				if Sequence != '':
+					Sequences[SeqNamed] = Sequence
+				SeqNamed = ''
+				Sequence = ''
+
+	totel_seq = len(Sequences)
+
+	# run IgBlast
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	igblast_out_fmt19 = os.path.join(temp_folder, time_stamp + '_igblast_out_fmt19.csv')
+	try:
+		start = time.time()
+		if species == 'Human':
+			BLASTCommandLine = igblast_path + " -germline_db_V TR/Human/HumanVGenes.nt -germline_db_J TR/Human/HumanJGenes.nt -germline_db_D TR/Human/HumanDGenes.nt -organism human -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -ig_seqtype TCR -outfmt 3"
+			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
+			print(BLASTCommandLine)
+			BLASTCommandLine = igblast_path + " -germline_db_V TR/Human/HumanVGenes.nt -germline_db_J TR/Human/HumanJGenes.nt -germline_db_D TR/Human/HumanDGenes.nt -organism human -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -ig_seqtype TCR -outfmt 19"
+			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+			print(BLASTCommandLine)
+		elif species == 'Mouse':
+			BLASTCommandLine = igblast_path + " -germline_db_V TR/Mouse/MouseVGenes.nt -germline_db_J TR/Mouse/MouseJGenes.nt -germline_db_D TR/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -ig_seqtype TCR -outfmt 3"
+			IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
+			print(BLASTCommandLine)
+			BLASTCommandLine = igblast_path + " -germline_db_V TR/Mouse/MouseVGenes.nt -germline_db_J TR/Mouse/MouseJGenes.nt -germline_db_D TR/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -ig_seqtype TCR -outfmt 19"
+			IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+			print(BLASTCommandLine)
+		end = time.time()
+		print('Run time for IgBlast: ' + str(end - start))
+	except:
+		ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+		with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
+			currentFile.write(ErLog)
+		return
+
+	start = time.time()
+	# parse IgBlast out fmt 19
+	# with open(igblast_out_fmt19, 'r') as IGBLAST_fmt19:
+	#	result = csv.reader(IGBLAST_fmt19, delimiter="\t")
+	line_id = 0
+	bad_line = []
+	for record in IgBlastOut_fmt19:
+		record = record.split('\t')
+		if line_id == 0:
+			pass
+		else:
+			try:
+				pct = int((line_id + 1) * 100 / totel_seq)
+				label = 'Step1:' + str(line_id + 1) + '/' + str(totel_seq)
+				signal.emit(pct, label)
+
+				this_data = [''] * 119
+
+				this_data[0] = record[0]
+				this_data[1] = str(len(record[1]))
+
+				# save raw sequence into table
+				this_data[118] = record[1]
+
+				if record[2] == 'TRA':
+					this_data[2] = 'Alpha'
+				elif record[2] == 'TRB':
+					this_data[2] = 'Beta'
+				elif record[2] == 'TRG':
+					this_data[2] = 'Gama'
+				elif record[2] == 'TRD':
+					this_data[2] = 'Delta'
+				else:
+					this_data[2] = 'Unknown'
+
+				if record[3] == 'F':
+					this_data[12] = 'No'
+				else:
+					this_data[12] = 'Yes'
+
+				if record[4] == '':
+					this_data[13] = 'N/A'
+				else:
+					if record[4] == 'T':
+						this_data[13] = 'In-frame'
+					elif record[4] == 'F':
+						this_data[13] = 'Out-of-frame'
+					else:
+						this_data[13] = record[4]
+
+				# because there is an extra column (6th column, v_frameshift) in igblast-Win (fmt19) compared to igblastn-Mac, we have to parse results seapreatly
+				if system() == 'Windows':
+					if record[6] == '':
+						this_data[14] = 'N/A'
+					else:
+						if record[6] == 'T':
+							this_data[14] = 'Yes'
+						elif record[6] == 'F':
+							this_data[14] = 'No'
+						else:
+							this_data[14] = record[6]
+
+					if record[7] == 'F':
+						this_data[15] = '+'
+					else:
+						this_data[15] = '-'
+
+					this_data[59] = record[66]
+					this_data[60] = record[67]
+					this_data[61] = record[70]
+					this_data[62] = record[71]
+					this_data[63] = ''
+					this_data[64] = ''
+					this_data[65] = record[74]
+					this_data[66] = record[75]
+
+					this_data[67] = record[16]
+					this_data[68] = record[17]
+					this_data[69] = record[18]
+					this_data[70] = record[19]
+					this_data[71] = ''
+					this_data[72] = ''
+					this_data[73] = record[20]
+					this_data[74] = record[21]
+
+					# identify grouping
+					if project == 'ByFunction':
+						this_data[75] = this_data[2]
+						if this_data[14] == "Yes":
+							this_data[76] = 'Functional'
+						else:
+							this_data[76] = 'Nonfunctional'
+						this_data[77] = this_data[13]
+					else:
+						this_data[75] = project
+						this_data[76] = grouping
+						this_data[77] = subgroup
+
+					this_data[78] = species
+					# sequence
+					try:
+						vdj_seq = re.sub('-', '', record[12])
+						seq_parts = record[1].split(vdj_seq)
+						this_data[79] = record[12] + seq_parts[1]
+					except:
+						# this_data[79] = record[1][int(record[64]) - 1:]
+						print('sequence potential error')
+						print(record[1])
+						print(record[12])
+						this_data[79] = record[12]
+					this_data[80] = record[13]
+
+					this_data[86] = "Specificity"
+					this_data[87] = "Subspecificity"
+					this_data[88] = "0"
+					this_data[89] = "0"
+
+					this_data[93] = now
+
+					# identify isotype
+					Isotype = 'TCR'
+					this_data[101] = Isotype
+
+					# import CDR3
+					CDR3_NT = record[46]
+					CDR3_AA = record[47]
+					CDR3_len = len(CDR3_AA)
+					CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+					CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+					this_data[81] = CDR3_NT
+					this_data[82] = CDR3_AA
+					this_data[83] = CDR3_len
+					this_data[99] = str(CDR3_MW)
+					this_data[100] = str(CDR3_pI)
+					try:
+						this_data[84] = str(int(record[88]) - int(record[64]) + 1)
+						this_data[85] = str(int(record[89]) - int(record[64]) + 1)
+					except:
+						this_data[84] = 'NA'
+						this_data[85] = 'NA'
+
+					# import mutation
+					mAb_seq = record[12]
+					germline_seq = record[13]
+					mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+					this_data[57] = str(num_mut)
+					this_data[96] = str(num_mut)
+					this_data[97] = mut
+				else:
+					if record[5] == '':
+						this_data[14] = 'N/A'
+					else:
+						if record[5] == 'T':
+							this_data[14] = 'Yes'
+						elif record[5] == 'F':
+							this_data[14] = 'No'
+						else:
+							this_data[14] = record[5]
+
+					if record[6] == 'F':
+						this_data[15] = '+'
+					else:
+						this_data[15] = '-'
+
+					this_data[59] = record[65]
+					this_data[60] = record[66]
+					this_data[61] = record[69]
+					this_data[62] = record[70]
+					this_data[63] = ''
+					this_data[64] = ''
+					this_data[65] = record[73]
+					this_data[66] = record[74]
+
+					this_data[67] = record[15]
+					this_data[68] = record[16]
+					this_data[69] = record[17]
+					this_data[70] = record[18]
+					this_data[71] = ''
+					this_data[72] = ''
+					this_data[73] = record[19]
+					this_data[74] = record[20]
+
+					# identify grouping
+					if project == 'ByFunction':
+						this_data[75] = this_data[2]
+						if this_data[14] == "Yes":
+							this_data[76] = 'Functional'
+						else:
+							this_data[76] = 'Nonfunctional'
+						this_data[77] = this_data[13]
+					else:
+						this_data[75] = project
+						this_data[76] = grouping
+						this_data[77] = subgroup
+
+					this_data[78] = species
+					# sequence
+					try:
+						vdj_seq = re.sub('-', '', record[11])
+						seq_parts = record[1].split(vdj_seq)
+						this_data[79] = record[11] + seq_parts[1]
+					except:
+						# this_data[79] = record[1][int(record[63])-1:]
+						print('sequence potential error')
+						print(record[1])
+						print(record[11])
+						this_data[79] = record[11]
+					this_data[80] = record[12]
+
+					this_data[86] = "Specificity"
+					this_data[87] = "Subspecificity"
+					this_data[88] = "0"
+					this_data[89] = "0"
+
+					this_data[93] = now
+
+					# identify isotype
+					Isotype = 'TCR'
+					this_data[101] = Isotype
+
+					# import CDR3
+					CDR3_NT = record[45]
+					CDR3_AA = record[46]
+					CDR3_len = len(CDR3_AA)
+					CDR3_MW = VGenesSeq.OtherParam(CDR3_AA, 'AAMW', 0, True)
+					CDR3_pI = VGenesSeq.OtherParam(CDR3_AA, 'AApI', 0, True)
+
+					this_data[81] = CDR3_NT
+					this_data[82] = CDR3_AA
+					this_data[83] = CDR3_len
+					this_data[99] = str(CDR3_MW)
+					this_data[100] = str(CDR3_pI)
+					try:
+						this_data[84] = str(int(record[87]) - int(record[63]) + 1)
+						this_data[85] = str(int(record[88]) - int(record[63]) + 1)
+					except:
+						this_data[84] = 'NA'
+						this_data[85] = 'NA'
+
+					# import mutation
+					mAb_seq = record[11]
+					germline_seq = record[12]
+					mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
+					this_data[57] = str(num_mut)
+					this_data[96] = str(num_mut)
+					this_data[97] = mut
+				DATA.append(this_data)
+			except:
+				bad_line.append(line_id - 1)
+		line_id += 1
+
+	# parse IgBlast out fmt 3
+	cur_block = ''
+	block_id = 0
+	read_tag = False
+	for IgLine in IgBlastOut_fmt3:
+		line_match = re.findall(r'^Query', IgLine)
+		if len(line_match) > 0:
+			read_tag = True
+
+			if cur_block != '':
+				if block_id in bad_line:
+					block_id += 1
+					cur_block = ''
+					continue
+				# progress bar signal
+				pct = int((block_id + 1) * 100 / totel_seq)
+				label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
+				signal.emit(pct, label)
+
+				# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
+				ig_match = re.findall('\nTR[^\n]+', cur_block)
+				## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
+				v_cur_index = 3
+				d_cur_index = 6
+				j_cur_index = 9
+				for line in ig_match[:len(ig_match) - 1]:
+					m = re.search('TR\S+', line)
+					cur_gene = m.group(0)
+					if cur_gene[3] == 'V':
+						DATA[block_id][v_cur_index] = cur_gene
+						v_cur_index += 1
+					elif cur_gene[3] == 'D':
+						DATA[block_id][d_cur_index] = cur_gene
+						d_cur_index += 1
+					else:
+						DATA[block_id][j_cur_index] = cur_gene
+						j_cur_index += 1
+				# V,D,J locus
+				m = re.search('TR\S+', DATA[block_id][3])
+				try:
+					v_locus = m.group(0)
+					v_locus = re.sub('^TR', '', v_locus)
+					v_locus = re.sub('\*.+', '', v_locus)
+					v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
+					DATA[block_id][90] = v_locus
+				except:
+					pass
+
+				m = re.search('TR\S+', DATA[block_id][6])
+				try:
+					d_locus = m.group(0)
+					d_locus = re.sub('^TR', '', d_locus)
+					d_locus = re.sub('\*.+', '', d_locus)
+					d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
+					DATA[block_id][92] = d_locus
+				except:
+					pass
+
+				m = re.search('TR\S+', DATA[block_id][9])
+				try:
+					j_locus = m.group(0)
+					j_locus = re.sub('^TR', '', j_locus)
+					j_locus = re.sub('\*.+', '', j_locus)
+					j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
+					DATA[block_id][91] = j_locus
+				except:
+					pass
+
+				# import V(D)J junction info
+				try:
+					ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
+					junction = ig_match[0]
+					junction = junction.split('\n')[1]
+					junction_list = junction.split('\t')
+					if DATA[block_id][2] in ['Beta', 'Delta']:
+						DATA[block_id][16] = junction_list[0]
+						DATA[block_id][17] = junction_list[1]
+						DATA[block_id][18] = junction_list[2]
+						DATA[block_id][19] = junction_list[3]
+						DATA[block_id][20] = junction_list[4]
+					else:
+						DATA[block_id][16] = junction_list[0]
+						DATA[block_id][21] = junction_list[1]
+						DATA[block_id][20] = junction_list[2]
+				except:
+					if DATA[block_id][2] in ['Beta', 'Delta']:
+						DATA[block_id][16] = 'NA'
+						DATA[block_id][17] = 'NA'
+						DATA[block_id][18] = 'NA'
+						DATA[block_id][19] = 'NA'
+						DATA[block_id][20] = 'NA'
+					else:
+						DATA[block_id][16] = 'NA'
+						DATA[block_id][21] = 'NA'
+						DATA[block_id][20] = 'NA'
+
+				# import Alignment summary
+				try:
+					ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+					fr1_match = ig_match[0]
+					fr1_match = fr1_match[1:]
+					fr1_match = fr1_match.split('\t')
+					DATA[block_id][22] = 1
+					DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][24] = fr1_match[3]
+					DATA[block_id][25] = fr1_match[4]
+					DATA[block_id][26] = fr1_match[5]
+					DATA[block_id][27] = fr1_match[6]
+					DATA[block_id][28] = fr1_match[7]
+				except:
+					print(DATA[block_id][0])
+					DATA[block_id][22] = 'NA'
+					DATA[block_id][23] = 'NA'
+					DATA[block_id][24] = 'NA'
+					DATA[block_id][25] = 'NA'
+					DATA[block_id][26] = 'NA'
+					DATA[block_id][27] = 'NA'
+					DATA[block_id][28] = 'NA'
+
+				try:
+					ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+					cdr1_match = ig_match[0]
+					cdr1_match = cdr1_match[1:]
+					cdr1_match = cdr1_match.split('\t')
+					DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][31] = cdr1_match[3]
+					DATA[block_id][32] = cdr1_match[4]
+					DATA[block_id][33] = cdr1_match[5]
+					DATA[block_id][34] = cdr1_match[6]
+					DATA[block_id][35] = cdr1_match[7]
+				except:
+					DATA[block_id][29] = 'NA'
+					DATA[block_id][30] = 'NA'
+					DATA[block_id][31] = 'NA'
+					DATA[block_id][32] = 'NA'
+					DATA[block_id][33] = 'NA'
+					DATA[block_id][34] = 'NA'
+					DATA[block_id][35] = 'NA'
+
+				try:
+					ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+					fr2_match = ig_match[0]
+					fr2_match = fr2_match[1:]
+					fr2_match = fr2_match.split('\t')
+					DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][38] = fr2_match[3]
+					DATA[block_id][39] = fr2_match[4]
+					DATA[block_id][40] = fr2_match[5]
+					DATA[block_id][41] = fr2_match[6]
+					DATA[block_id][42] = fr2_match[7]
+				except:
+					DATA[block_id][36] = 'NA'
+					DATA[block_id][37] = 'NA'
+					DATA[block_id][38] = 'NA'
+					DATA[block_id][39] = 'NA'
+					DATA[block_id][40] = 'NA'
+					DATA[block_id][41] = 'NA'
+					DATA[block_id][42] = 'NA'
+
+				try:
+					ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+					cdr2_match = ig_match[0]
+					cdr2_match = cdr2_match[1:]
+					cdr2_match = cdr2_match.split('\t')
+					DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][45] = cdr2_match[3]
+					DATA[block_id][46] = cdr2_match[4]
+					DATA[block_id][47] = cdr2_match[5]
+					DATA[block_id][48] = cdr2_match[6]
+					DATA[block_id][49] = cdr2_match[7]
+				except:
+					DATA[block_id][43] = 'NA'
+					DATA[block_id][44] = 'NA'
+					DATA[block_id][45] = 'NA'
+					DATA[block_id][46] = 'NA'
+					DATA[block_id][47] = 'NA'
+					DATA[block_id][48] = 'NA'
+					DATA[block_id][49] = 'NA'
+
+				try:
+					ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+					fr3_match = ig_match[0]
+					fr3_match = fr3_match[1:]
+					fr3_match = fr3_match.split('\t')
+					DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+					DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+					DATA[block_id][52] = fr3_match[3]
+					DATA[block_id][53] = fr3_match[4]
+					DATA[block_id][54] = fr3_match[5]
+					DATA[block_id][55] = fr3_match[6]
+					DATA[block_id][56] = fr3_match[7]
+				except:
+					DATA[block_id][50] = 'NA'
+					DATA[block_id][51] = 'NA'
+					DATA[block_id][52] = 'NA'
+					DATA[block_id][53] = 'NA'
+					DATA[block_id][54] = 'NA'
+					DATA[block_id][55] = 'NA'
+					DATA[block_id][56] = 'NA'
+
+				# import Alignment summary
+				try:
+					ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+					alignment = ig_match[0]
+					alignment = alignment[1:]
+					alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
+					DATA[block_id][58] = alignment
+
+					# get ORF info from alignment
+					lines = alignment.split('\n')
+					line_num = 0
+					for line in lines:
+						match = re.match(r'^(\s+)<-+FR1', line)
+						if match:
+							num1 = len(match.group(1))
+							aa_line = lines[line_num + 1]
+							match1 = re.match(r'^\s+', aa_line)
+							num2 = len(match1.group())
+							ORF = num2 - num1 - 1
+							if ORF < 0:
+								ORF = 0
+							DATA[block_id][105] = ORF
+							break
+						line_num += 1
+				except:
+					DATA[block_id][58] = 'NA'
+					DATA[block_id][105] = 0
+
+				block_id += 1
+			cur_block = ''
+
+		if read_tag:
+			cur_block += IgLine
+	# process the last block
+	if cur_block != '':
+		if block_id in bad_line:
+			block_id += 1
+			cur_block = ''
+		else:
+			pct = int((block_id + 1) * 100 / totel_seq)
+			label = 'Step2:' + str(block_id + 1) + '/' + str(totel_seq)
+			signal.emit(pct, label)
+
+			# import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
+			ig_match = re.findall('\nIG[^\n]+', cur_block)
+			## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
+			v_cur_index = 3
+			d_cur_index = 6
+			j_cur_index = 9
+			for line in ig_match[:len(ig_match) - 1]:
+				m = re.search('TR\S+', line)
+				cur_gene = m.group(0)
+				if cur_gene[3] == 'V':
+					DATA[block_id][v_cur_index] = cur_gene
+					v_cur_index += 1
+				elif cur_gene[3] == 'D':
+					DATA[block_id][d_cur_index] = cur_gene
+					d_cur_index += 1
+				else:
+					DATA[block_id][j_cur_index] = cur_gene
+					j_cur_index += 1
+			# V,D,J locus
+			m = re.search('TR\S+', DATA[block_id][3])
+			try:
+				v_locus = m.group(0)
+				v_locus = re.sub('^TR', '', v_locus)
+				v_locus = re.sub('\*.+', '', v_locus)
+				v_locus = v_locus[1] + v_locus[0] + v_locus[2:]
+				DATA[block_id][90] = v_locus
+			except:
+				pass
+
+			m = re.search('TR\S+', DATA[block_id][6])
+			try:
+				d_locus = m.group(0)
+				d_locus = re.sub('^TR', '', d_locus)
+				d_locus = re.sub('\*.+', '', d_locus)
+				d_locus = d_locus[1] + d_locus[0] + d_locus[2:]
+				DATA[block_id][92] = d_locus
+			except:
+				pass
+
+			m = re.search('TR\S+', DATA[block_id][9])
+			try:
+				j_locus = m.group(0)
+				j_locus = re.sub('^TR', '', j_locus)
+				j_locus = re.sub('\*.+', '', j_locus)
+				j_locus = j_locus[1] + j_locus[0] + j_locus[2:]
+				DATA[block_id][91] = j_locus
+			except:
+				pass
+
+			# import V(D)J junction info
+			ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
+			junction = ig_match[0]
+			junction = junction.split('\n')[1]
+			junction_list = junction.split('\t')
+			if DATA[block_id][2] in ['Beta', 'Delta']:
+				DATA[block_id][16] = junction_list[0]
+				DATA[block_id][17] = junction_list[1]
+				DATA[block_id][18] = junction_list[2]
+				DATA[block_id][19] = junction_list[3]
+				DATA[block_id][20] = junction_list[4]
+			else:
+				DATA[block_id][16] = junction_list[0]
+				DATA[block_id][21] = junction_list[1]
+				DATA[block_id][20] = junction_list[2]
+
+			# import Alignment summary
+			ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+			fr1_match = ig_match[0]
+			fr1_match = fr1_match[1:]
+			fr1_match = fr1_match.split('\t')
+			DATA[block_id][22] = 1
+			DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][24] = fr1_match[3]
+			DATA[block_id][25] = fr1_match[4]
+			DATA[block_id][26] = fr1_match[5]
+			DATA[block_id][27] = fr1_match[6]
+			DATA[block_id][28] = fr1_match[7]
+
+			ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+			cdr1_match = ig_match[0]
+			cdr1_match = cdr1_match[1:]
+			cdr1_match = cdr1_match.split('\t')
+			DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][31] = cdr1_match[3]
+			DATA[block_id][32] = cdr1_match[4]
+			DATA[block_id][33] = cdr1_match[5]
+			DATA[block_id][34] = cdr1_match[6]
+			DATA[block_id][35] = cdr1_match[7]
+
+			ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+			fr2_match = ig_match[0]
+			fr2_match = fr2_match[1:]
+			fr2_match = fr2_match.split('\t')
+			DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][38] = fr2_match[3]
+			DATA[block_id][39] = fr2_match[4]
+			DATA[block_id][40] = fr2_match[5]
+			DATA[block_id][41] = fr2_match[6]
+			DATA[block_id][42] = fr2_match[7]
+
+			ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+			cdr2_match = ig_match[0]
+			cdr2_match = cdr2_match[1:]
+			cdr2_match = cdr2_match.split('\t')
+			DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][45] = cdr2_match[3]
+			DATA[block_id][46] = cdr2_match[4]
+			DATA[block_id][47] = cdr2_match[5]
+			DATA[block_id][48] = cdr2_match[6]
+			DATA[block_id][49] = cdr2_match[7]
+
+			ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+			fr3_match = ig_match[0]
+			fr3_match = fr3_match[1:]
+			fr3_match = fr3_match.split('\t')
+			DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+			DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+			DATA[block_id][52] = fr3_match[3]
+			DATA[block_id][53] = fr3_match[4]
+			DATA[block_id][54] = fr3_match[5]
+			DATA[block_id][55] = fr3_match[6]
+			DATA[block_id][56] = fr3_match[7]
+
+			# import Alignment summary
+			ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+			alignment = ig_match[0]
+			alignment = alignment[1:]
+			alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
+			DATA[block_id][58] = alignment
+
+			# get ORF info from alignment
+			lines = alignment.split('\n')
+			line_num = 0
+			for line in lines:
+				match = re.match(r'^(\s+)<-+FR1', line)
+				if match:
+					num1 = len(match.group(1))
+					aa_line = lines[line_num + 1]
+					match1 = re.match(r'^\s+', aa_line)
+					num2 = len(match1.group())
+					ORF = num2 - num1 - 1
+					if ORF < 0:
+						ORF = 0
+					DATA[block_id][105] = ORF
+					break
+				line_num += 1
+			block_id += 1
+
+	ErLog = '\nVGenes input ended at: ' + time.strftime('%c')
+	with open(ErlogFile2, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
+		currentFile.write(ErLog)
+
+	# if productive = TRUE, only keep record with V and J
+
+	if GetProductive == 0:  # only keep productive
+		# find record
+		del_index = []
+		for index in range(len(DATA)):
+			if DATA[index][14] != 'Yes':
+				del_index.append(index)
+
+		for i in del_index:
+			ErLog = DATA[i][0] + ' was not a productive rearrangement\n'
+			with open(ErlogFile, 'a') as currentfile:
+				currentfile.write(ErLog)
+
+		# delete record
+		cnt = 0
+		for index in del_index:
+			del DATA[index - cnt]
+			cnt += 1
+	elif GetProductive == 1:  # only keep records have V and J
+		# find record
+		del_index = []
+		for index in range(len(DATA)):
+			if DATA[index][90] == '' or DATA[index][91] == '':
+				del_index.append(index)
+
+		for i in del_index:
+			ErLog = DATA[i][0] + ' missed V or J\n'
+			with open(ErlogFile, 'a') as currentfile:
+				currentfile.write(ErLog)
+		# delete record
+		cnt = 0
+		for index in del_index:
+			del DATA[index - cnt]
+			cnt += 1
+
+	end = time.time()
+	print('Run time for fast mode: ' + str(end - start))
+
+	return DATA
 
 def IgBlastParserFastOld(FASTAFile, datalist, signal):
 	import os
