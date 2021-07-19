@@ -21183,7 +21183,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# get notice for this batch
-		notice = VGenesDialogues.setText(self, 'Please write notes for these sequences, e.g. clones', '')
+		notice = VGenesDialogues.setText(self, 'Please write notes for this batch of sequences, e.g. clones', '')
 		if notice == 'Cancelled Action':
 			return
 
@@ -21214,7 +21214,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				Isotype = item[7]
 				barcode = item[8]
 
-				if Genetype == 'Heavy':
+				if Genetype in ['Heavy', 'Beta', 'Delta']:
 					rowPosition = self.ui.tableWidgetHC.rowCount()
 					self.ui.tableWidgetHC.insertRow(rowPosition)
 					self.ui.tableWidgetHC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
