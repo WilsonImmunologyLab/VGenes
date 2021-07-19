@@ -8041,11 +8041,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			barcodes.append(hc_barcode)
 		data_field = self.ui.comboBoxHCLC.currentText()
 		## HC
-		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` IN ("Heavy","Beta","Delta") ORDER BY Blank10'
 		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		## LC
-		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` NOT IN ("Heavy","Beta","Delta") ORDER BY Blank10'
 		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		Res = []
@@ -8144,11 +8144,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			barcodes.append(hc_barcode)
 		data_field = self.ui.comboBoxHCLC.currentText()
 		## HC
-		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` IN ("Heavy","Beta","Delta") ORDER BY Blank10'
 		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		## LC
-		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
+		WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` NOT IN ("Heavy","Beta","Delta") ORDER BY Blank10'
 		SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
 		DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		Res = []
@@ -8836,7 +8836,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def initialHCLCTable(self):
 		# setup HC table
 		num_row = 0
-		horizontalHeader = ['SeqName','GeneType','ClonalPool','Vgene','Dgene','Jgene','TotalMuts','Tsotype','Barcode', 'Notes']
+		horizontalHeader = ['SeqName','GeneType','ClonalPool','Vgene','Dgene','Jgene','TotalMuts','Isotype','Barcode', 'Notes']
 		num_col = len(horizontalHeader)
 		self.ui.tableWidgetHC.setRowCount(num_row)
 		self.ui.tableWidgetHC.setColumnCount(num_col)
@@ -8849,7 +8849,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# setup LC table
 		num_row = 0
-		horizontalHeader = ['SeqName', 'GeneType', 'ClonalPool', 'Vgene', 'Jgene', 'TotalMuts', 'Tsotype', 'Barcode', 'Notes']
+		horizontalHeader = ['SeqName', 'GeneType', 'ClonalPool', 'Vgene', 'Jgene', 'TotalMuts', 'Isotype', 'Barcode', 'Notes']
 		num_col = len(horizontalHeader)
 		self.ui.tableWidgetLC.setRowCount(num_row)
 		self.ui.tableWidgetLC.setColumnCount(num_col)
