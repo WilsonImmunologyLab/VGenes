@@ -49,6 +49,9 @@
         <property name="autoExclusive">
          <bool>true</bool>
         </property>
+        <property name="autoDefault">
+         <bool>false</bool>
+        </property>
         <property name="flat">
          <bool>true</bool>
         </property>
@@ -61,7 +64,7 @@
         </property>
         <property name="icon">
          <iconset>
-          <normaloff>Resources/TCR1.png</normaloff>Resources/TCR1.png</iconset>
+          <normaloff>Resources/TCR.png</normaloff>Resources/TCR.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -74,6 +77,9 @@
         </property>
         <property name="autoExclusive">
          <bool>true</bool>
+        </property>
+        <property name="autoDefault">
+         <bool>false</bool>
         </property>
         <property name="flat">
          <bool>true</bool>

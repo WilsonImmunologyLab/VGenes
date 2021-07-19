@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>BCR.png</file>
+    <file>TCR.png</file>
+    <file>BCRgray.png</file>
+    <file>TCRgray.png</file>
     <file>Cookie.png</file>
     <file>Circo.png</file>
     <file>Heatmap.png</file>

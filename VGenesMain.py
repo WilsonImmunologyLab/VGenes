@@ -4666,6 +4666,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.listWidgetCSV.itemDoubleClicked.connect(self.removeSel)
 		self.ui.listWidgetFasta.itemDoubleClicked.connect(self.removeSel)
 		self.ui.listWidgetSEQ.itemDoubleClicked.connect(self.removeSel)
+
+		# unknown bug for this function, the icon doesn't update well
+		#self.ui.pushButtonBCR.clicked.connect(self.setIcon)
+		#self.ui.pushButtonTCR.clicked.connect(self.setIcon)
+
 		#self.ui.radioButtonAllcontig.clicked.connect(self.update10x)
 		#self.ui.radioButtonConsensus.clicked.connect(self.update10x)
 		#self.ui.radioButtonFiltercontig.clicked.connect(self.update10x)
@@ -4694,6 +4699,24 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			                   "QMenu{font-size:18px;}"
 			                   "QAction{font-size:18px;}"
 			                   "QMainWindow{font-size:18px;}")
+		else:
+			pass
+
+	def setIcon(self):
+		if self.ui.pushButtonBCR.isChecked():
+			icon = QIcon()
+			icon.addPixmap(QPixmap(":/PNG-Icons/BCR.png"), QIcon.Normal, QIcon.Off)
+			icon1 = QIcon()
+			icon1.addPixmap(QPixmap(":/PNG-Icons/TCRgray.png"), QIcon.Normal, QIcon.Off)
+			self.ui.pushButtonBCR.setIcon(icon)
+			self.ui.pushButtonTCR.setIcon(icon1)
+		elif self.ui.pushButtonTCR.isChecked():
+			icon = QIcon()
+			icon.addPixmap(QPixmap(":/PNG-Icons/BCRgray.png"), QIcon.Normal, QIcon.Off)
+			icon1 = QIcon()
+			icon1.addPixmap(QPixmap(":/PNG-Icons/TCR.png"), QIcon.Normal, QIcon.Off)
+			self.ui.pushButtonBCR.setIcon(icon)
+			self.ui.pushButtonTCR.setIcon(icon1)
 		else:
 			pass
 
