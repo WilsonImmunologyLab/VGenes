@@ -9406,7 +9406,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						ErrMsgType2 += "For " + item + ", did not find any Heavy/Light chain using same barcode!\n"
 						continue
 					else:
-						ErrMsgType3 += "For " + item + ", find " + str(i) +  "Heavy/Light chain using same barcode!\n"
+						ErrMsgType3 += "For " + item + ", find " + str(i) +  " Heavy/Light chain using same barcode!\n"
 						for record in DataIn:
 							Seqname = record[0]
 							if Seqname in checkedItemsAll:
@@ -9423,11 +9423,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
 			with open(ErlogFile, 'w') as currentFile:
 				currentFile.write('Running finished!\n')
-				currentFile.write('\nThese records have paired HC/LC:\n')
+				currentFile.write('\nThe following records have paired HC/LC:\n')
 				currentFile.write(ErrMsgType3)
-				currentFile.write('\nThese records do not have barcode information:\n')
+				currentFile.write('\nThe following records do not have barcode information:\n')
 				currentFile.write(ErrMsgType1)
-				currentFile.write('\nThese records do not have any paired HC/LC:\n')
+				currentFile.write('\nThe following records do not have any paired HC/LC:\n')
 				currentFile.write(ErrMsgType2)
 			self.ShowVGenesText(ErlogFile)
 		# if users didn't check any records, will search paired HC/LC for current selection
@@ -9526,7 +9526,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						ErrMsgType2 += "For " + item + ", did not find any Heavy/Light chain using same barcode!\n"
 						continue
 					else:
-						ErrMsgType3 += "For " + item + ", find " + str(i) + "Heavy/Light chain using same barcode!\n"
+						ErrMsgType3 += "For " + item + ", find " + str(i) + " Heavy/Light chain using same barcode!\n"
 						for record in DataIn:
 							Seqname = record[0]
 							if Seqname in checkedItemsAll:
