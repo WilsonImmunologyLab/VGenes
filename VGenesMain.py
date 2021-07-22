@@ -19929,7 +19929,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		CW2 = '{message: <{width}}'.format(message='CDR2', width=CDR2len)
 		FW3 = '{message: <{width}}'.format(message='FWR3', width=FW3len)
 		CW3 = '{message: <{width}}'.format(message='CDR3', width=CDR3len)
-		FW4 = '{message: <{width}}'.format(message='FWR4', width=FW4len+1)
+		FW4 = '{message: <{width}}'.format(message='FWR4', width=FW4len)
 		HeaderLine = nameIS + ' | ' + FW1 + ' | ' + CW1 + ' | ' + FW2 + ' | ' + CW2 + ' | ' + FW3 + ' | ' + CW3 + ' | ' + FW4 + ' |\n'
 
 		HLen = len(HeaderLine)
@@ -20618,38 +20618,47 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for item in HydroPhob:
 				FinalMap.append(item)
 
+			testS = FinalDoc[CurPos]
 			CurPos += PhobCurPos
 			Scale = PhobScale
 
+			testS = FinalDoc[CurPos]
 			self.DecorateText(FinalMap, Scale, CurPos, cursor)
 			CurPos += len(FinalMap)
 			testS = FinalDoc[CurPos]
 			while testS != '|':
 				testS = FinalDoc[CurPos]
 				CurPos += 1
-			CurPos += 1
+			CurPos += 1 # the space line
 
+			testS = FinalDoc[CurPos]
 			FinalMap.clear()
 
 		if self.ui.chkHydrophilicity.isChecked() == True:
 
 			for i in range(0, 16):
 				FinalMap.append(0)
-				# CurPos += 1
 
 			for item in HydroPhil:
 				FinalMap.append(item)
 
-			testLen = len(FinalMap)
-			CurPos += PhilCurPos
+			testS = FinalDoc[CurPos]
+			if CurPos == 0:
+				CurPos += PhilCurPos
+			else:
+				CurPos += PhilCurPos - 1
 			Scale = PhilScale
 
+			testS = FinalDoc[CurPos]
 			self.DecorateText(FinalMap, Scale, CurPos, cursor)
+			CurPos += len(FinalMap)
 			testS = FinalDoc[CurPos]
 			while testS != '|':
 				testS = FinalDoc[CurPos]
 				CurPos += 1
-			CurPos += 1
+			CurPos += 1 # the space line
+
+			testS = FinalDoc[CurPos]
 			FinalMap.clear()
 
 		if self.ui.chkFlexibility.isChecked() == True:
@@ -20660,10 +20669,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for item in flexi:
 				FinalMap.append(item)
 
-			CurPos += FlexCurPos
+			if CurPos == 0:
+				CurPos += FlexCurPos
+			else:
+				CurPos += PhilCurPos - 1
 			Scale = FlexScale
 
 			self.DecorateText(FinalMap, Scale, CurPos, cursor)
+			CurPos += len(FinalMap)
 			testS = FinalDoc[CurPos]
 			while testS != '|':
 				testS = FinalDoc[CurPos]
@@ -20679,10 +20692,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for item in surface:
 				FinalMap.append(item)
 
-			CurPos += SurfCurPos
+			if CurPos == 0:
+				CurPos += SurfCurPos
+			else:
+				CurPos += SurfCurPos - 1
 			Scale = SurfScale
 
 			self.DecorateText(FinalMap, Scale, CurPos, cursor)
+			CurPos += len(FinalMap)
 			testS = FinalDoc[CurPos]
 			while testS != '|':
 				testS = FinalDoc[CurPos]
@@ -20692,16 +20709,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		if self.ui.chkpI.isChecked() == True:
 
-			for i in range(0, 24):
+			for i in range(0, 25):
 				FinalMap.append(0)
 
 			for item in pI:
 				FinalMap.append(item)
 
-			CurPos += pICurPos
+			if CurPos == 0:
+				CurPos += pICurPos
+			else:
+				CurPos += pICurPos - 1
 			Scale = pIScale
 
 			self.DecorateText(FinalMap, Scale, CurPos, cursor)
+			CurPos += len(FinalMap)
 			testS = FinalDoc[CurPos]
 			while testS != '|':
 				testS = FinalDoc[CurPos]
@@ -20717,17 +20738,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 			for item in Instab:
 				FinalMap.append(item)
 
-			CurPos += InsCurPos
+			if CurPos == 0:
+				CurPos += InsCurPos
+			else:
+				CurPos += InsCurPos - 1
 			Scale = InsScale
 
 			self.DecorateText(FinalMap, Scale, CurPos, cursor)
-			testS = FinalDoc[CurPos]
-			while testS != '|':
-				testS = FinalDoc[CurPos]
-				CurPos += 1
-			CurPos += 1
+			#CurPos += len(FinalMap)
+			#testS = FinalDoc[CurPos]
+			#while testS != '|':
+			#	testS = FinalDoc[CurPos]
+			#	CurPos += 1
+			#CurPos += 1
 			FinalMap.clear()
 
+		# Decorate the scale
 		Scale = (-5, 5)
 		CurPos = len(FinalDoc) - 55
 		# 'Scale: Low-> -5|-4|-3|-2|-1| 0 |+1|+2|+3|+4|+5  ->high'
