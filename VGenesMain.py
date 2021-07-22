@@ -19666,6 +19666,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 		SQLStatement = VGenesSQL.MakeSQLStatementNew(self, fields, data[0])
 		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
+		# filter out bad sequences
+		FilterDataIs = []
+		badNumber = 0
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		with open(ErlogFile2, 'w') as currentFile:
+			for record in DataIs:
+				try:
+					tmpRes = int(record[4]) + int(record[5]) + int(record[6]) + int(record[7]) + int(record[8])
+					FilterDataIs.append(record)
+				except:
+					errMsg = 'Sequence ' + record[0] + ' is incomplete and has been removed from current analysis!\n'
+					currentFile.write(errMsg)
+					badNumber += 1
+
+		if badNumber > 0:
+			self.ShowVGenesText(ErlogFile2)
+
 		#  make array of fixed seqs to decorate
 		# then run through DNASeq and make arrays for each decoration
 		# build document with delineated regions and header line...need to run through
@@ -19690,7 +19707,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		AllSeqs = []
 
 		# SeqArray has: SeqName, CDR1beg, CDR1end, CDR2beg, CDR2end, CDR3beg, CDR3end,
-		for item in DataIs:
+		for item in FilterDataIs:
 			SeqArray.clear()
 			SeqName = item[0]
 			SeqArray.append(SeqName)
@@ -19912,7 +19929,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		CW2 = '{message: <{width}}'.format(message='CDR2', width=CDR2len)
 		FW3 = '{message: <{width}}'.format(message='FWR3', width=FW3len)
 		CW3 = '{message: <{width}}'.format(message='CDR3', width=CDR3len)
-		FW4 = '{message: <{width}}'.format(message='FWR4', width=FW4len)
+		FW4 = '{message: <{width}}'.format(message='FWR4', width=FW4len+1)
 		HeaderLine = nameIS + ' | ' + FW1 + ' | ' + CW1 + ' | ' + FW2 + ' | ' + CW2 + ' | ' + FW3 + ' | ' + CW3 + ' | ' + FW4 + ' |\n'
 
 		HLen = len(HeaderLine)
@@ -20582,7 +20599,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			FinalDoc += 'Instability:\n' + SeqSet + '\n'
 
 		FinalDoc += 'Scale: Low-> -5|-4|-3|-2|-1| 0 |+1|+2|+3|+4|+5  ->high'
-
+		
+		# load doc text into text editor
 		if self.ui.chkShowInEditor.isChecked() == True:
 			Style = 'ProteinReport'
 			self.ShowVGenesTextEdit(FinalDoc, Style)
@@ -20591,6 +20609,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.txtProtein.setText(FinalDoc)
 			cursor = self.ui.txtProtein.textCursor()
 
+		# color decorate
 		if self.ui.chkHydrophobicity.isChecked() == True:
 
 			for i in range(0, 16):
