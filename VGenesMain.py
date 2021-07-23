@@ -19920,9 +19920,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			AllSeqs.append(tuple(SeqArray))
 
-		# Make HTML viewers from current data
-		pass
-
+		# Step 3: Make HTML viewers from current data
 		## copy protein viewer template
 		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
 		out_html_file = os.path.join(temp_folder, time_stamp + '.html')
@@ -19968,7 +19966,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		out_file_handle.write(html_content)
 		out_file_handle.close()
 
-		# show HTML on VGenes or pop-up window
+		# Step 4: show HTML on VGenes or pop-up window
 		if self.ui.chkShowInEditor.isChecked():
 			# display
 			window_id = int(time.time() * 100)
@@ -28064,7 +28062,7 @@ def makeProteinHTML(dataArray, index):
 			cur_aa = record[8][sub_index]
 			#color = str(record[index][sub_index])
 			color = 'col' + str(random.randint(1, 11))
-		out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 	out_str += '</p>\n'
 	out_str += '</div>\n'
 

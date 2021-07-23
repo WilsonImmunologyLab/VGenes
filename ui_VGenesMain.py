@@ -2663,7 +2663,7 @@ class Ui_MainWindow(object):
         self.gridLayout_21.addWidget(self.groupBox_5, 0, 0, 1, 1)
         self.groupBox_4 = QtWidgets.QGroupBox(self.tabProtein)
         self.groupBox_4.setMinimumSize(QtCore.QSize(0, 100))
-        self.groupBox_4.setMaximumSize(QtCore.QSize(16777215, 100))
+        self.groupBox_4.setMaximumSize(QtCore.QSize(300, 100))
         font = QtGui.QFont()
         font.setPointSize(15)
         self.groupBox_4.setFont(font)
@@ -4580,7 +4580,7 @@ class Ui_MainWindow(object):
         self.toolBar.addAction(self.actionclearTrash)
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(5)
+        self.tabWidget.setCurrentIndex(1)
         self.tabWidgetFig.setCurrentIndex(0)
         self.tabWidgetTree.setCurrentIndex(2)
         self.tabWidgetClone.setCurrentIndex(0)
