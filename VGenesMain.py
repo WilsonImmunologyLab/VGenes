@@ -19932,32 +19932,32 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if self.ui.chkHydrophobicity.isChecked() == True:
 
 			html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
-			html_content += makeProteinHTML(AllSeqs, 9)
+			html_content += makeProteinHTML(AllSeqs, 9, PhobScale)
 			html_content += '</li>\n\n'
 
 		if self.ui.chkHydrophilicity.isChecked() == True:
 			html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
-			html_content += makeProteinHTML(AllSeqs, 10)
+			html_content += makeProteinHTML(AllSeqs, 10, PhilScale)
 			html_content += '</li>\n\n'
 
 		if self.ui.chkFlexibility.isChecked() == True:
 			html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
-			html_content += makeProteinHTML(AllSeqs, 11)
+			html_content += makeProteinHTML(AllSeqs, 11, FlexScale)
 			html_content += '</li>\n\n'
 
 		if self.ui.chkSurface.isChecked() == True:
 			html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
-			html_content += makeProteinHTML(AllSeqs, 12)
+			html_content += makeProteinHTML(AllSeqs, 12, SurfScale)
 			html_content += '</li>\n\n'
 
 		if self.ui.chkpI.isChecked() == True:
 			html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
-			html_content += makeProteinHTML(AllSeqs, 13)
+			html_content += makeProteinHTML(AllSeqs, 13, pIScale)
 			html_content += '</li>\n\n'
 
 		if self.ui.chkInstability.isChecked() == True:
 			html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
-			html_content += makeProteinHTML(AllSeqs, 14)
+			html_content += makeProteinHTML(AllSeqs, 14, InsScale)
 			html_content += '</li>\n\n'
 		
 		html_content += '</ul>\n</body>\n</html>\n'
@@ -28009,7 +28009,12 @@ def dataReshape(data):
 
 	return All_names, Matrix_list
 
-def makeProteinHTML(dataArray, index):
+def makeProteinHTML(dataArray, index, scale):
+	scaleMin = scale[0]
+	scaleMax = scale[1]
+	scaleRange = scaleMax - scaleMin
+	scaleIncreament = scaleRange / 11
+
 	out_str = '<div class="reportBox" >\n'
 	
 	# Seq Name
@@ -28024,8 +28029,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(0, record[1]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1,11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -28036,8 +28048,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(record[1], record[2]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1, 11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -28048,8 +28067,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(record[2], record[3]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1, 11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -28060,8 +28086,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(record[3], record[4]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1, 11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 	out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -28072,8 +28105,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(record[4], record[5]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1, 11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -28084,8 +28124,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(record[5], record[6]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1, 11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -28096,8 +28143,15 @@ def makeProteinHTML(dataArray, index):
 		out_str += '<p>'
 		for sub_index in range(record[6], record[7]):
 			cur_aa = record[8][sub_index]
-			#color = str(record[index][sub_index])
-			color = 'col' + str(random.randint(1, 11))
+			if sub_index < 2:
+				color = 'col6'
+			elif sub_index > len(record[index]) - 1:
+				color = 'col6'
+			else:
+				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+				if colorLevel > 11:
+					colorLevel = 11
+				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'

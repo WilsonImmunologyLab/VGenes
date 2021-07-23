@@ -96,7 +96,7 @@
 	border-top: none;
 	border-bottom: none;
 	border-left: none;
-	border-right: 8px solid #9bdf70;
+	border-right: none;
 	display: flex;
 	height:100%;
 	overflow:hidden;
@@ -136,6 +136,24 @@
 	text-align: center;
 	font-weight: bold; 
 }
+
+/* The following CSS code for button from https://blog.csdn.net/wangjingqiannihao/article/details/76152593 */
+
+.button {
+	width: 170px; 
+	height: 25px;
+	border-width: 0px;
+	border-radius: 0px;
+	background: #1E90FF;
+	cursor: pointer; 
+	outline: none; 
+	font-family: Microsoft YaHei;
+	color: white; 
+	font-size: 17px; 
+}
+.button:hover { 
+	background: #5599FF;
+}
 </style>
 
 
@@ -152,13 +170,24 @@ $(document).ready(function(){
   });
 
 });
+
+function myFunction() {
+  var legend = $("#legend");
+  if(legend.css('display') == 'none') {
+  	legend.css('display', 'block')
+  	$(".seq_container").css('margin-top','40px')
+  } else {
+  	legend.css('display', 'none')
+  	$(".seq_container").css('margin-top','0px')
+  }
+}
 </script> 
 
 <body style="margin-left: 0px;">
 
-	<h2 style="margin-left: 20px;">Protein properties report:</h2>
+	<p style="margin-left: 20px;"><b style="font-size: 20px">Protein properties report:</b>  <button class="button" onclick="myFunction()" style="margin-left: 100px;">Show/Hide legend</button></p>
 
-	<div class="header_div" style="margin-top: 70px; height: 30px; padding-top: 10px;padding-bottom: 0px; font-weight: bold;">
+	<div id="legend"  class="header_div" style="margin-top: 50px; height: 30px; padding-top: 10px;padding-bottom: 0px; font-weight: bold;">
 		<span class="unit_long" style="width: 60px;">Scale:</span>
 		Low-> 
 		<span class="unit_long col1" style="width: 20px;">-5</span>
