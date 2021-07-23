@@ -7863,6 +7863,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.gridLayoutSHM.addWidget(self.ui.HTMLviewSHM)
 		self.ui.HTMLviewSHM.resizeSignal.connect(self.resizeHTMLSHM)
 
+		self.ui.HTMLViewProtein = QWebEngineView()
+		self.ui.gridLayoutProtein.addWidget(self.ui.HTMLViewProtein)
+
 		self.AntibodyCandidates = []
 		self.clickedTable = ''
 
@@ -16702,6 +16705,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			#self.ui.tableView.setFont(font)
 			# self.ui.tableView.resizeColumnsToContents()
 		elif self.ui.tabWidget.currentIndex() == 4:
+			pass
 			FontIs = self.ui.txtProtein.currentFont()
 			FontSize = int(FontIs.pointSize())
 			if FontSize < 36:
@@ -16746,6 +16750,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			# self.ui.tableView.resizeColumnsToContents()
 		elif self.ui.tabWidget.currentIndex() == 4:
+			pass
 			FontIs = self.ui.txtProtein.currentFont()
 			FontSize = int(FontIs.pointSize())
 			if FontSize > 7:
@@ -19733,36 +19738,38 @@ class VGenesForm(QtWidgets.QMainWindow):
 				GCDRs = IgBLASTer.GetGLCDRs(GDNAseq, item[13])
 
 			if int(item[4]) != 0:
-				SeqArray.append((int(item[4]) - 1) / 3)  # 'c1b'
+				SeqArray.append(int((int(item[4]) - 1) / 3))  # 'c1b'
 			else:
-				SeqArray.append((int(GCDRs[2]) - 1) / 3)
+				SeqArray.append(int((int(GCDRs[2]) - 1) / 3))
+
 			if int(item[5]) != 0:
-				SeqArray.append((int(item[5])) / 3)  # c1e
+				SeqArray.append(int((int(item[5])) / 3))  # c1e
 			else:
-				SeqArray.append(int(GCDRs[3]) / 3)
+				SeqArray.append(int(int(GCDRs[3]) / 3))
 
 			if int(item[6]) != 0:
-				SeqArray.append((int(item[6]) - 1) / 3)
+				SeqArray.append(int((int(item[6]) - 1) / 3))
 			else:
-				SeqArray.append((int(GCDRs[6]) - 1) / 3)
+				SeqArray.append(int((int(GCDRs[6]) - 1) / 3))
 
 			if int(item[7]) != 0:
-				SeqArray.append((int(item[7])) / 3)
+				SeqArray.append(int((int(item[7])) / 3))
 			else:
-				SeqArray.append(int(GCDRs[7]) / 3)
+				SeqArray.append(int(int(GCDRs[7]) / 3))
 
 			if int(item[8]) != 0:
-				SeqArray.append((int(item[8])) / 3)
+				SeqArray.append(int((int(item[8])) / 3))
 			else:
-				SeqArray.append(int(GCDRs[9]) / 3)
+				SeqArray.append(int(int(GCDRs[9]) / 3))
 
 			if int(item[9]) != 0:
-				SeqArray.append((int(item[9])) / 3)
+				SeqArray.append(int((int(item[9])) / 3))
 			else:
 				SeqArray.append(len(GAASeq))
 
 			if int(item[9]) != 0:
-				Jend = int(item[14]) / 3
+				Jend = int(int(item[14]) / 3)
+				SeqArray.append(Jend)
 			else:
 				SeqArray.append(len(GAASeq))
 			# SeqArray has: SeqName, CDR1beg, CDR1end, CDR2beg, CDR2end, CDR3beg, CDR3end,
@@ -19915,11 +19922,77 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# Make HTML viewers from current data
 		pass
+
+		## copy protein viewer template
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		out_html_file = os.path.join(temp_folder, time_stamp + '.html')
+		header_file = os.path.join(working_prefix, 'Data', 'template_ProteinViewer.html')
+		shutil.copyfile(header_file, out_html_file)
+		
+		html_content = '<ul class = "seq_container" style="margin-top: 40px; padding-top: 10px;">\n'
+		## make HTML for each report type
+		if self.ui.chkHydrophobicity.isChecked() == True:
+
+			html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
+			html_content += makeProteinHTML(AllSeqs, 9)
+			html_content += '</li>\n\n'
+
+		if self.ui.chkHydrophilicity.isChecked() == True:
+			html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
+			html_content += makeProteinHTML(AllSeqs, 10)
+			html_content += '</li>\n\n'
+
+		if self.ui.chkFlexibility.isChecked() == True:
+			html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
+			html_content += makeProteinHTML(AllSeqs, 11)
+			html_content += '</li>\n\n'
+
+		if self.ui.chkSurface.isChecked() == True:
+			html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
+			html_content += makeProteinHTML(AllSeqs, 12)
+			html_content += '</li>\n\n'
+
+		if self.ui.chkpI.isChecked() == True:
+			html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
+			html_content += makeProteinHTML(AllSeqs, 13)
+			html_content += '</li>\n\n'
+
+		if self.ui.chkInstability.isChecked() == True:
+			html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
+			html_content += makeProteinHTML(AllSeqs, 14)
+			html_content += '</li>\n\n'
+		
+		html_content += '</ul>\n</body>\n</html>\n'
+		## write content to HTML file
+		out_file_handle = open(out_html_file, 'a')
+		out_file_handle.write(html_content)
+		out_file_handle.close()
+
 		# show HTML on VGenes or pop-up window
-		pass
+		if self.ui.chkShowInEditor.isChecked():
+			# display
+			window_id = int(time.time() * 100)
+			VGenesTextWindows[window_id] = htmlDialog()
+			VGenesTextWindows[window_id].id = window_id
+			layout = QGridLayout(VGenesTextWindows[window_id])
+			view = QWebEngineView(self)
+			#view.load(QUrl("file://" + out_html_file))
+			url = QUrl.fromLocalFile(str(out_html_file))
+			view.load(url)
+			view.show()
+			layout.addWidget(view)
+			VGenesTextWindows[window_id].show()
+		else:
+			# display
+			url = QUrl.fromLocalFile(str(out_html_file))
+			self.ui.HTMLViewProtein.load(url)
+			self.ui.HTMLViewProtein.show()
 
 	@pyqtSlot()
 	def on_btnGenerateReport_clicked(self):
+		self.proteinFunctions()
+
+	def proteinFunctionsOld(self):
 		# get info and seqs from checked
 		# build text file and colormap to decorate or just CSV of colormap...
 		# use 'repaired' aa sequence for color mapping...see decoratepeptide for example
@@ -27937,6 +28010,102 @@ def dataReshape(data):
 	Matrix_list = train_data.tolist()
 
 	return All_names, Matrix_list
+
+def makeProteinHTML(dataArray, index):
+	out_str = '<div class="reportBox" >\n'
+	
+	# Seq Name
+	out_str += '<div class="virtcalBox">\n<p class="centerText name_section">Sequence Name</p>\n'
+	for record in dataArray:
+		out_str += '<p>' + record[0] + '</p>\n'
+	out_str += '</div>\n'
+
+	# FWR1
+	out_str += '<div class="virtcalBox">\n<p class="centerText fwr_section">FWR1</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(0, record[1]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1,11))
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+		out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	# CDR1
+	out_str += '<div class="virtcalBox">\n<p class="centerText cdr_section">CDR1</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(record[1], record[2]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1, 11))
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+		out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	# FWR2
+	out_str += '<div class="virtcalBox">\n<p class="centerText fwr_section">FWR2</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(record[2], record[3]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1, 11))
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+		out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	# CDR2
+	out_str += '<div class="virtcalBox">\n<p class="centerText cdr_section">CDR2</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(record[3], record[4]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1, 11))
+		out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+	out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	# FWR3
+	out_str += '<div class="virtcalBox">\n<p class="centerText fwr_section">FWR3</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(record[4], record[5]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1, 11))
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+		out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	# CDR3
+	out_str += '<div class="virtcalBox">\n<p class="centerText cdr_section">CDR3</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(record[5], record[6]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1, 11))
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+		out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	# FWR4
+	out_str += '<div class="virtcalBox">\n<p class="centerText fwr_section">FWR4</p>\n'
+	for record in dataArray:
+		out_str += '<p>'
+		for sub_index in range(record[6], record[7]):
+			cur_aa = record[8][sub_index]
+			#color = str(record[index][sub_index])
+			color = 'col' + str(random.randint(1, 11))
+			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
+		out_str += '</p>\n'
+	out_str += '</div>\n'
+
+	out_str += '</div>\n'
+	return out_str
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:

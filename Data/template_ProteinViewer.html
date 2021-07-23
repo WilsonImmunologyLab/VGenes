@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<head>
+<!--<script src="../JS/jquery.js"></script>-->
+<script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.8.0.js"></script>
+</head>
+<html>
+
+<style>
+.unit_long {
+  position: relative;
+  display: inline-block;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.header_div {
+	padding:5px;
+	border:1px solid #96c2f1;
+	background:#eff7ff; 
+	width:96%;
+	height: 90px;
+	border-radius: 5px;
+	position: fixed;
+	left:0; top:0; right:0; bottom: 0; margin: auto; 
+}
+
+.col1 {
+	color: white;
+	background-color: #FF0000FF;
+}
+
+.col2 {
+	color: white;
+	background-color: #FF7600FF;
+}
+
+.col3 {
+	color: black;
+	background-color: #FFEB00FF;
+}
+
+.col4 {
+	color: black;
+	background-color: #9DFF00FF;
+}
+
+.col5 {
+	color: black;
+	background-color: #27FF00FF;
+}
+
+.col6 {
+	color: black;
+	background-color: white;
+}
+
+.col7 {
+	color: black;
+	background-color: #00FFC4FF;
+}
+
+.col8 {
+	color: black;
+	background-color: #00C4FFFF;
+}
+
+.col9 {
+	color: white;
+	background-color: #004EFFFF;
+}
+
+.col10 {
+	color: white;
+	background-color: #2700FFFF;
+}
+
+.col11 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+
+.title0 {
+  background: #A6CDE7;
+  border-radius: 0px;
+  display:block;
+  width: 90%;
+  padding: 12px;
+  padding-left: 25px;
+  border: 3px solid black;
+}
+
+.reportBox {
+	margin-left: 20px;
+	border-top: none;
+	border-bottom: none;
+	border-left: none;
+	border-right: 8px solid #9bdf70;
+	display: flex;
+	height:100%;
+	overflow:hidden;
+	min-width: 2200px;
+}
+
+.virtcalBox {
+	border-top: none;
+	border-bottom: none;
+	border-left: 8px solid #9bdf70;
+	border-right: none;
+	margin: 0px;
+	width:fit-content;
+	width:-webkit-fit-content;
+	width:-moz-fit-content;
+	min-width: 100px;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.name_section {
+	background: #F7D6CB;
+	opacity: 1;
+}
+
+.fwr_section {
+	background: #CBCFF7;
+	opacity: 1;
+}
+
+.cdr_section {
+	background: #F7F5CB;
+	opacity: 1;
+}
+
+.centerText {
+	text-align: center;
+	font-weight: bold; 
+}
+</style>
+
+
+<script type="text/javascript"> 
+$(document).ready(function(){
+  $('.title0').click(function(){
+    var father = $(this).parent('li');
+    var display = father.children(".reportBox").css('display');
+    if(display == 'none'){
+      father.children(".reportBox").css('display','flex');
+    } else {
+      father.children(".reportBox").css('display','none');
+    }
+  });
+
+});
+</script> 
+
+<body style="margin-left: 0px;">
+
+	<h2 style="margin-left: 20px;">Protein properties report:</h2>
+
+	<div class="header_div" style="margin-top: 70px; height: 30px; padding-top: 10px;padding-bottom: 0px; font-weight: bold;">
+		<span class="unit_long" style="width: 60px;">Scale:</span>
+		Low-> 
+		<span class="unit_long col1" style="width: 20px;">-5</span>
+		<span class="unit_long col2" style="width: 20px;">-4</span>
+		<span class="unit_long col3" style="width: 20px;">-3</span>
+		<span class="unit_long col4" style="width: 20px;">-2</span>
+		<span class="unit_long col5" style="width: 20px;">-1</span>
+		<span class="unit_long col6" style="width: 20px;">0</span>
+		<span class="unit_long col7" style="width: 20px;">+1</span>
+		<span class="unit_long col8" style="width: 20px;">+2</span>
+		<span class="unit_long col9" style="width: 20px;">+3</span>
+		<span class="unit_long col10" style="width: 20px;">+4</span>
+		<span class="unit_long col11" style="width: 20px;">+5</span>
+		 ->High
+	</div>
