@@ -19640,6 +19640,284 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.chkpI.setChecked(False)
 			self.ui.chkSurface.setChecked(False)
 
+	def proteinFunctions(self):
+		# make array of fixed seqs to decorate
+		# then run through DNASeq and make arrays for each decoration
+		# build document with delineated regions and header line...need to run through
+		# datais first to see where regions begin and end to get proper spacing...highest for each section (devided by 3)
+
+		# step 1: fetch data
+		fields = ['SeqName', 'Sequence', 'GermlineSequence', 'CDR3Length', 'CDR1From', 'CDR1To', 'CDR2From', 'CDR2To',
+		          'CDR3beg', 'CDR3end', 'Mutations', 'IDEvent', 'ID', 'Species', 'Jend']
+
+		checkedItems = self.getTreeCheckedChild()
+		checkedItems = checkedItems[3]
+		if len(checkedItems) == 0:
+			Msg = 'Please check at least one sequence!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		elif len(checkedItems) > 100:
+			Msg = 'You checked too many sequences!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		SQLStatement = VGenesSQL.MakeSQLStatementNew(self, fields, data[0])
+		DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		## filter out bad sequences
+		FilterDataIs = []
+		badNumber = 0
+		ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
+		with open(ErlogFile2, 'w') as currentFile:
+			for record in DataIs:
+				try:
+					tmpRes = int(record[4]) + int(record[5]) + int(record[6]) + int(record[7]) + int(record[8])
+					FilterDataIs.append(record)
+				except:
+					errMsg = 'Sequence ' + record[0] + ' is incomplete and has been removed from current analysis!\n'
+					currentFile.write(errMsg)
+					badNumber += 1
+
+		if badNumber > 0:
+			self.ShowVGenesText(ErlogFile2)
+		
+		# Step 2: make sequences, scores, details
+		CDR1beg = 0
+		CDR1end = 0
+		CDR2beg = 0
+		CDR2end = 0
+		CDR3beg = 0
+		CDR3end = 0
+		CDR1len = 0
+		CDR2len = 0
+		CDR3len = 0
+		FW1len = 0
+		FW2len = 0
+		FW3len = 0
+		FW4len = 0
+
+		NameLength = 0
+		SeqLength = 0
+		SeqArray = []
+		AllSeqs = []
+
+		# SeqArray has: SeqName, CDR1beg, CDR1end, CDR2beg, CDR2end, CDR3beg, CDR3end,
+		for item in FilterDataIs:
+			SeqArray.clear()
+			SeqName = item[0]
+			SeqArray.append(SeqName)
+
+			# make CDR1beg, CDR1end, just 3 Cs and NameLength
+			DNASeq = item[1]
+			GDNAseq = item[2]
+			mutations = item[10]
+			IDEvents = item[11]
+
+			# unfixed version
+			AASeq, ErMessage = VGenesSeq.Translator(DNASeq, 0)
+
+			if IDEvents == 'Insertion' or IDEvents == 'Both':
+				mutate = mutations
+				mutations = mutate.split(',')
+				for mut in mutations:
+					if mut[:9] == 'Insertion':
+						Ievent = mut
+						Iparts = Ievent.split('-')
+						AddAt = int(Iparts[1])
+						SeqToAdd = Iparts[2]
+						GDNAseq = GDNAseq[:AddAt] + SeqToAdd + GDNAseq[AddAt:]
+
+			GAASeq, ErMessage = VGenesSeq.Translator(GDNAseq, 0)
+
+			if int(item[4]) == 0 or int(item[5]) == 0 or int(item[6]) == 0 or int(item[7]) == 0 or int(item[8]) == 0:
+				GCDRs = IgBLASTer.GetGLCDRs(GDNAseq, item[13])
+
+			if int(item[4]) != 0:
+				SeqArray.append((int(item[4]) - 1) / 3)  # 'c1b'
+			else:
+				SeqArray.append((int(GCDRs[2]) - 1) / 3)
+			if int(item[5]) != 0:
+				SeqArray.append((int(item[5])) / 3)  # c1e
+			else:
+				SeqArray.append(int(GCDRs[3]) / 3)
+
+			if int(item[6]) != 0:
+				SeqArray.append((int(item[6]) - 1) / 3)
+			else:
+				SeqArray.append((int(GCDRs[6]) - 1) / 3)
+
+			if int(item[7]) != 0:
+				SeqArray.append((int(item[7])) / 3)
+			else:
+				SeqArray.append(int(GCDRs[7]) / 3)
+
+			if int(item[8]) != 0:
+				SeqArray.append((int(item[8])) / 3)
+			else:
+				SeqArray.append(int(GCDRs[9]) / 3)
+
+			if int(item[9]) != 0:
+				SeqArray.append((int(item[9])) / 3)
+			else:
+				SeqArray.append(len(GAASeq))
+
+			if int(item[9]) != 0:
+				Jend = int(item[14]) / 3
+			else:
+				SeqArray.append(len(GAASeq))
+			# SeqArray has: SeqName, CDR1beg, CDR1end, CDR2beg, CDR2end, CDR3beg, CDR3end,
+
+			CDR1beg = int(SeqArray[1])
+			CDR1end = int(SeqArray[2])
+			CDR2beg = int(SeqArray[3])
+			CDR2end = int(SeqArray[4])
+			CDR3beg = int(SeqArray[5])
+			CDR3end = int(SeqArray[6])
+
+			if len(SeqName) > NameLength: NameLength = len(SeqName)
+
+			if len(AASeq) > len(GAASeq):
+				LenTo = len(GAASeq)
+				AASeq = AASeq[:LenTo]
+			else:
+				LenTo = len(AASeq)
+
+			SeqArray.append(AASeq)  # place original sequence without bad germ and seq regions for alignment
+
+			for i in range(0, LenTo - 1):  # first replace bad codons with germline codons
+				if AASeq[i] == GAASeq[i]:
+					if AASeq[i] == '.' or AASeq[i] == '~':
+						AASeq = AASeq[:i] + AASeq[i + 1:] + '.'
+						GAASeq = GAASeq[:i] + GAASeq[i + 1:] + '.'
+
+			for i in range(0, LenTo - 1):
+				if AASeq[i] != GAASeq[i]:
+					if AASeq[i] == '.' or AASeq[i] == '~' or AASeq[i] == '*':
+						AASeq = AASeq[:i] + GAASeq[i] + AASeq[i + 1:]
+
+			AASeq = AASeq.replace('~', '').replace('.', '')
+
+			if len(AASeq) > SeqLength: SeqLength = len(AASeq)
+
+			if CDR1beg > FW1len: FW1len = CDR1beg
+			if (CDR1end - CDR1beg) > CDR1len: CDR1len = (CDR1end - CDR1beg)
+			if (CDR2beg - CDR1end) > FW2len: FW2len = (CDR2beg - CDR1end)
+			if (CDR2end - CDR2beg) > CDR2len: CDR2len = (CDR2end - CDR2beg)
+			if (CDR3beg - CDR2end) > FW3len: FW3len = (CDR3beg - CDR2end)
+			if (CDR3end - CDR3beg) > CDR3len: CDR3len = (CDR3end - CDR3beg)
+			if (Jend - CDR3end) > FW4len: FW4len = (Jend - CDR3end)
+
+			if self.ui.chkHydrophobicity.isChecked() == True:
+
+				WindowSize = self.ui.spnHydrophobicity.value()
+				if WindowSize < 2:
+					WindowSize = 2
+					self.ui.spnHydrophobicity.setValue(2)
+				elif WindowSize > len(AASeq) - 1:
+					WindowSize = len(AASeq) - 1
+					self.ui.spnHydrophobicity.setValue(len(AASeq) - 1)
+				PhobCurPos = (WindowSize // 2)
+				ColorMap = VGenesSeq.OtherParam(AASeq, 'Hydrophobicity', WindowSize, True)
+
+				PhobScale = (-4.5, 4.5)  # based on tests paramators
+
+				SeqArray.append(ColorMap)
+			else:
+				SeqArray.append('None')
+
+			if self.ui.chkHydrophilicity.isChecked() == True:
+				WindowSize = self.ui.spnHydrophilicity.value()
+				if WindowSize < 2:
+					WindowSize = 2
+					self.ui.spnHydrophilicity.setValue(2)
+				elif WindowSize > len(AASeq) - 1:
+					WindowSize = len(AASeq) - 1
+					self.ui.spnHydrophilicity.setValue(len(AASeq) - 1)
+
+				PhilCurPos = (WindowSize // 2)
+				ColorMap = VGenesSeq.OtherParam(AASeq, 'Hydrophilicity', WindowSize, True)
+
+				PhilScale = (-3.4, 3.0)  # based on tests paramators
+				SeqArray.append(ColorMap)
+			else:
+				SeqArray.append('None')
+
+			if self.ui.chkFlexibility.isChecked() == True:
+				WindowSize = self.ui.spnFlexibility.value()
+				if WindowSize < 9:
+					WindowSize = 9
+					self.ui.spnFlexibility.setValue(9)
+				elif WindowSize > len(AASeq) - 1:
+					WindowSize = len(AASeq) - 1
+					self.ui.spnFlexibility.setValue(len(AASeq) - 1)
+				FlexCurPos = (WindowSize // 2)
+				ColorMap = VGenesSeq.OtherParam(AASeq, 'Flexibility', WindowSize, True)
+
+				FlexScale = (0.904, 1.102)  # based on tests paramators
+				SeqArray.append(ColorMap)
+			else:
+				SeqArray.append('None')
+
+			if self.ui.chkSurface.isChecked() == True:
+				WindowSize = self.ui.spnSurface.value()
+				if WindowSize < 2:
+					WindowSize = 2
+					self.ui.spnSurface.setValue(2)
+				elif WindowSize > len(AASeq) - 1:
+					WindowSize = len(AASeq) - 1
+					self.ui.spnSurface.setValue(len(AASeq) - 1)
+				SurfCurPos = (WindowSize // 2)
+				ColorMap = VGenesSeq.OtherParam(AASeq, 'Surface', WindowSize, True)
+
+				SurfScale = (0.394, 1.545)  # based on tests paramators
+				SeqArray.append(ColorMap)
+			else:
+				SeqArray.append('None')
+
+			if self.ui.chkpI.isChecked() == True:
+				WindowSize = self.ui.spnpI.value()
+				if WindowSize < 2:
+					WindowSize = 2
+					self.ui.spnpI.setValue(2)
+				elif WindowSize > len(AASeq) - 1:
+					WindowSize = len(AASeq) - 1
+					self.ui.spnpI.setValue(len(AASeq) - 1)
+				pICurPos = (WindowSize // 2)
+				ColorMap = VGenesSeq.OtherParam(AASeq, 'MapAApI', WindowSize, True)
+
+				pIScale = (0, 14)  # based on tests paramators
+				SeqArray.append(ColorMap)
+			else:
+				SeqArray.append('None')
+
+			if self.ui.chkInstability.isChecked() == True:
+				WindowSize = self.ui.spnInstability.value()
+				if WindowSize < 8:
+					WindowSize = 8
+					self.ui.spnInstability.setValue(8)
+				elif WindowSize > len(AASeq) - 1:
+					WindowSize = len(AASeq) - 1
+					self.ui.spnInstability.setValue(len(AASeq) - 1)
+				InsCurPos = (WindowSize // 2)
+				ColorMap = VGenesSeq.OtherParam(AASeq, 'MapInstability', WindowSize, True)
+
+				# for this need to scale relatively but so that anything>40 is in the red  as 40+ = unstable
+				if ColorMap != 0:
+					Highest = max(ColorMap)
+					Lowest = min(ColorMap)
+					maxi = ((40 - Lowest) / 8) * 11
+					InsScale = (Lowest, maxi)  # based on tests paramators
+				SeqArray.append(ColorMap)
+			else:
+				SeqArray.append('None')
+
+			AllSeqs.append(tuple(SeqArray))
+
+		# Make HTML viewers from current data
+		pass
+		# show HTML on VGenes or pop-up window
+		pass
+
 	@pyqtSlot()
 	def on_btnGenerateReport_clicked(self):
 		# get info and seqs from checked
