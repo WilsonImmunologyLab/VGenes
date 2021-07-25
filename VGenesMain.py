@@ -28029,6 +28029,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(0, record[1]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
@@ -28048,6 +28049,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(record[1], record[2]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
@@ -28067,6 +28069,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(record[2], record[3]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
@@ -28086,6 +28089,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(record[3], record[4]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
@@ -28105,6 +28109,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(record[4], record[5]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
@@ -28124,6 +28129,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(record[5], record[6]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
@@ -28143,6 +28149,7 @@ def makeProteinHTML(dataArray, index, scale):
 		out_str += '<p>'
 		for sub_index in range(record[6], record[7]):
 			cur_aa = record[8][sub_index]
+			# first 2 AAs and last 2 AAs don't have score, set color to neutral
 			if sub_index < 2:
 				color = 'col6'
 			elif sub_index > len(record[index]) - 1:
