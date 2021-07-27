@@ -5142,20 +5142,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxGroup.setEnabled(True)
 			self.ui.comboBoxSubgroup.setEnabled(True)
 			self.ui.txtComment.setEnabled(True)
-		elif num == 2:
-			self.ui.radioButtonHuman.setEnabled(False)
-			self.ui.radioButtonMouse.setEnabled(False)
-			self.ui.rdoProductive.setEnabled(False)
-			self.ui.rdoVandJ.setEnabled(False)
-			self.ui.rdoFunction.setEnabled(False)
-			self.ui.rdoAll.setEnabled(False)
-			self.ui.rdoChoose.setEnabled(False)
-			self.ui.rdoProductive.setEnabled(False)
-			self.ui.checkBoxFileStruc.setEnabled(False)
-			self.ui.comboBoxProject.setEnabled(False)
-			self.ui.comboBoxGroup.setEnabled(False)
-			self.ui.comboBoxSubgroup.setEnabled(False)
-			self.ui.txtComment.setEnabled(False)
 		elif num == 3:
 			self.ui.radioButtonHuman.setEnabled(False)
 			self.ui.radioButtonMouse.setEnabled(False)
@@ -5171,6 +5157,20 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxSubgroup.setEnabled(False)
 			self.ui.txtComment.setEnabled(False)
 		elif num == 4:
+			self.ui.radioButtonHuman.setEnabled(False)
+			self.ui.radioButtonMouse.setEnabled(False)
+			self.ui.rdoProductive.setEnabled(False)
+			self.ui.rdoVandJ.setEnabled(False)
+			self.ui.rdoFunction.setEnabled(False)
+			self.ui.rdoAll.setEnabled(False)
+			self.ui.rdoChoose.setEnabled(False)
+			self.ui.rdoProductive.setEnabled(False)
+			self.ui.checkBoxFileStruc.setEnabled(False)
+			self.ui.comboBoxProject.setEnabled(False)
+			self.ui.comboBoxGroup.setEnabled(False)
+			self.ui.comboBoxSubgroup.setEnabled(False)
+			self.ui.txtComment.setEnabled(False)
+		elif num == 5:
 			self.ui.radioButtonHuman.setEnabled(True)
 			self.ui.radioButtonMouse.setEnabled(True)
 			self.ui.rdoProductive.setEnabled(True)
@@ -5184,7 +5184,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxGroup.setEnabled(True)
 			self.ui.comboBoxSubgroup.setEnabled(True)
 			self.ui.txtComment.setEnabled(True)
-		elif num == 5:
+		elif num == 6:
 			self.ui.radioButtonHuman.setEnabled(False)
 			self.ui.radioButtonMouse.setEnabled(False)
 			self.ui.rdoVandJ.setEnabled(False)
@@ -5197,7 +5197,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.ui.comboBoxGroup.setEnabled(True)
 			self.ui.comboBoxSubgroup.setEnabled(True)
 			self.ui.txtComment.setEnabled(True)
-		elif num == 6:
+		elif num == 2:
 			self.ui.radioButtonHuman.setEnabled(True)
 			self.ui.radioButtonMouse.setEnabled(True)
 			self.ui.rdoProductive.setEnabled(True)
@@ -5215,7 +5215,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			pass
 
 		# BCR and TCR switch
-		if num in [0,1,6]:
+		if num in [0,1,2]:
 			self.ui.pushButtonBCR.setEnabled(True)
 			self.ui.pushButtonTCR.setEnabled(True)
 		else:
