@@ -4668,8 +4668,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		self.ui.listWidgetSEQ.itemDoubleClicked.connect(self.removeSel)
 
 		# unknown bug for this function, the icon doesn't update well
-		#self.ui.pushButtonBCR.clicked.connect(self.setIcon)
-		#self.ui.pushButtonTCR.clicked.connect(self.setIcon)
+		self.ui.pushButtonBCR.clicked.connect(self.setIcon)
+		self.ui.pushButtonTCR.clicked.connect(self.setIcon)
+
+		self.iconBCR = QIcon(QPixmap(":/PNG-Icons/BCR.png"))
+		self.iconBCRgray = QIcon(QPixmap(":/PNG-Icons/BCRgray.png"))
+		self.iconTCR = QIcon(QPixmap(":/PNG-Icons/TCR.png"))
+		self.iconTCRgray= QIcon(QPixmap(":/PNG-Icons/TCRgray.png"))
 
 		#self.ui.radioButtonAllcontig.clicked.connect(self.update10x)
 		#self.ui.radioButtonConsensus.clicked.connect(self.update10x)
@@ -4704,21 +4709,20 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
 	def setIcon(self):
 		if self.ui.pushButtonBCR.isChecked():
-			icon = QIcon()
-			icon.addPixmap(QPixmap(":/PNG-Icons/BCR.png"), QIcon.Normal, QIcon.Off)
-			icon1 = QIcon()
-			icon1.addPixmap(QPixmap(":/PNG-Icons/TCRgray.png"), QIcon.Normal, QIcon.Off)
-			self.ui.pushButtonBCR.setIcon(icon)
-			self.ui.pushButtonTCR.setIcon(icon1)
+			self.ui.pushButtonBCR.setIcon(self.iconBCR)
+			self.ui.pushButtonTCR.setIcon(self.iconTCRgray)
 		elif self.ui.pushButtonTCR.isChecked():
-			icon = QIcon()
-			icon.addPixmap(QPixmap(":/PNG-Icons/BCRgray.png"), QIcon.Normal, QIcon.Off)
-			icon1 = QIcon()
-			icon1.addPixmap(QPixmap(":/PNG-Icons/TCR.png"), QIcon.Normal, QIcon.Off)
-			self.ui.pushButtonBCR.setIcon(icon)
-			self.ui.pushButtonTCR.setIcon(icon1)
+			self.ui.pushButtonBCR.setIcon(self.iconBCRgray)
+			self.ui.pushButtonTCR.setIcon(self.iconTCR)
 		else:
 			pass
+
+		size_w = self.size().width()
+		size_h = self.size().height()
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
+
 
 	def progressLabel(self, pct, label):
 		try:
