@@ -5395,10 +5395,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast1.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -5440,10 +5443,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast1.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -7470,7 +7476,7 @@ class WorkThread(QThread):
 		self.parent = parent
 		self.item = ''
 		self.datalist = ''
-		self.method = 'slow'
+		self.method = 'fast'
 		self.datatype = 'BCR'
 
 	def run(self):
