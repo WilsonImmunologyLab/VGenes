@@ -4926,7 +4926,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
 						pass
-			elif self.ui.tabWidget.currentIndex() == 4:
+			elif self.ui.tabWidget.currentIndex() == 5:
 				if self.pathIgBlast == '':
 					return
 				else:
@@ -4957,7 +4957,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
 						pass
-			elif self.ui.tabWidget.currentIndex() == 5:
+			elif self.ui.tabWidget.currentIndex() == 6:
 				if self.pathIMGT == '':
 					return
 				else:
@@ -4990,7 +4990,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 						self.ui.comboBoxProject.setCurrentText(project)
 					else:
 						pass
-			elif self.ui.tabWidget.currentIndex() == 6:
+			elif self.ui.tabWidget.currentIndex() == 2:
 				if self.ui.listWidgetSEQ.count() == 0:
 					return
 				else:
@@ -5240,15 +5240,15 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			self.InitiateImportFrom10X('none', 0, dataType)
 		elif num == 1:
 			self.InitiateImportFromFasta('none', 0, dataType)
-		elif num == 2:
-			self.InitiateImportFromCSV('none', 0)
 		elif num == 3:
-			self.InitiateImportFromVDB('none', 0)
+			self.InitiateImportFromCSV('none', 0)
 		elif num == 4:
-			self.InitiateImportFromIgBlast('none', 0)
+			self.InitiateImportFromVDB('none', 0)
 		elif num == 5:
-			self.InitiateImportFromIMGT()
+			self.InitiateImportFromIgBlast('none', 0)
 		elif num == 6:
+			self.InitiateImportFromIMGT()
+		elif num == 2:
 			self.InitiateImportFromSEQ('none', 0, dataType)
 		else:
 			pass
@@ -5583,10 +5583,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast2.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -5637,10 +5640,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast2.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -5683,10 +5689,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast2.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -6304,10 +6313,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast2.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -6358,10 +6370,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast2.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
@@ -6404,10 +6419,13 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			workThread = WorkThread(self)
 			workThread.item = seq_pathname
 			workThread.datalist = datalist
+			'''
 			if self.ui.radioButtonFast2.isChecked():
 				workThread.method = 'fast'
 			else:
 				workThread.method = 'slow'
+			'''
+			workThread.method = 'fast'
 			workThread.datatype = dataType
 			workThread.start()
 			workThread.trigger.connect(self.multi_callback)
