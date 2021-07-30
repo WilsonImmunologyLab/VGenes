@@ -9332,7 +9332,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		num_col = len(horizontalHeader)
 		num_row = len(Content)
 
-		self.annoDialog.ui.tableWidget.setRowCount(num_row)
+		self.annoDialog.ui.tableWidget.setRowCount(num_row + 1) # +1 because the 1st row is empty for users to type col names
 		self.annoDialog.ui.tableWidget.setColumnCount(num_col)
 		self.annoDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
 		self.annoDialog.header = horizontalHeader
