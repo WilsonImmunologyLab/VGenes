@@ -13547,6 +13547,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		                                                      options=options)
 
 		try:
+			if msg[5] != 'x':
+				svg_header = '<svg xmlns="http://www.w3.org/2000/svg" version="1.1" baseProfile="full"'
+				msg = svg_header + msg[4:]
 			file_handle = open(save_file_name, 'w')
 			file_handle.write(msg)
 			file_handle.close()
