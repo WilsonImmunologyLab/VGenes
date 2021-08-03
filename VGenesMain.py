@@ -11756,8 +11756,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for element in DataIn:
 					data.append(element[0])
 				result = Counter(data)
-				labels = result.keys()
-				values = result.values()
+				labels = sorted(result.keys())
+				values = [result[i] for i in labels]
 				colors = sns.color_palette("hls", len(values))
 
 				font_size = 30/len(labels)
@@ -11785,8 +11785,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for element in DataIn:
 					data.append(element[0])
 				result = Counter(data)
-				labels = result.keys()
-				values = result.values()
+				labels = sorted(result.keys())
+				values = [result[i] for i in labels]
 	
 				my_pyecharts = (
 					Pie(init_opts=opts.InitOpts(width= str(self.ui.HTMLview.w) + "px", height= str(self.ui.HTMLview.h) + "px", renderer='svg'))
