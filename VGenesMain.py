@@ -12237,6 +12237,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					result = Counter(label_data)
 					labels = list(result.keys())
+					labels.sort()
 
 					g2_dict = {}
 					i = 0
@@ -12247,6 +12248,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							g2_dict[ele] = [i]
 						i += 1
 					g2_dict_keys = list(g2_dict.keys())
+					g2_dict_keys.sort()
 
 					my_bar = Boxplot(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
 						.add_xaxis(labels)\
@@ -12305,6 +12307,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					result = Counter(data)
 					labels = list(result.keys())
+					labels.sort()
 
 					my_dict = {}
 					i = 0
