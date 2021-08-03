@@ -11920,20 +11920,44 @@ class VGenesForm(QtWidgets.QMainWindow):
 								self.ui.figure.ax.bar(x - width*(len(dic_keys)-1)/2 + i*width, sub_data, width, label=sub_label)
 								i += 1
 						else:
-							width = 0.8
-							bottom_list = [0] * len(labels)
-							for sub_label in dic_keys:
-								sub_data = []
-								for label in labels:
-									sub_data.append(data[sub_label].count(label))
-								self.ui.figure.ax.bar(x , sub_data, width, bottom=bottom_list, label=sub_label)
-								for i in range(len(sub_data)):
-									bottom_list[i] = bottom_list[i] + sub_data[i]
+							if self.ui.checkBoxBarPct.isChecked():
+								# count each label
+								label_count = {}
+								for ele in labels:
+									this_ele_count = 0
+									for sub_label in dic_keys:
+										cur_data = data[sub_label]
+										this_ele_count += cur_data.count(ele)
+									label_count[ele] = this_ele_count
+
+								width = 0.8
+								bottom_list = [0] * len(labels)
+								for sub_label in dic_keys:
+									sub_data = []
+									for label in labels:
+										cur_data_count = data[sub_label].count(label) / label_count[label] * 100
+										sub_data.append(cur_data_count)
+									self.ui.figure.ax.bar(x, sub_data, width, bottom=bottom_list, label=sub_label)
+									for i in range(len(sub_data)):
+										bottom_list[i] = bottom_list[i] + sub_data[i]
+							else:
+								width = 0.8
+								bottom_list = [0] * len(labels)
+								for sub_label in dic_keys:
+									sub_data = []
+									for label in labels:
+										sub_data.append(data[sub_label].count(label))
+									self.ui.figure.ax.bar(x, sub_data, width, bottom=bottom_list, label=sub_label)
+									for i in range(len(sub_data)):
+										bottom_list[i] = bottom_list[i] + sub_data[i]
 						self.ui.figure.ax.legend(prop={'size': font_size}, ncol = col_num)
 						self.ui.figure.ax.set_xticks(x)
 						self.ui.figure.ax.set_xticklabels(labels)
 						self.ui.figure.ax.tick_params(labelsize=lab_size)
-						self.ui.figure.ax.set_ylabel('Count')
+						if self.ui.checkBoxBarPct.isChecked():
+							self.ui.figure.ax.set_ylabel('Percent (%)')
+						else:
+							self.ui.figure.ax.set_ylabel('Count')
 						self.ui.F.draw()
 				else:
 					data = []

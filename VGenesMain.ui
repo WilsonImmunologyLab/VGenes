@@ -7843,9 +7843,6 @@ If the J-end is off the J gene end may need adjusted</string>
               <property name="autoExclusive">
                <bool>false</bool>
               </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_3</string>
-              </attribute>
              </widget>
             </item>
             <item row="0" column="4">
@@ -7889,9 +7886,6 @@ If the J-end is off the J gene end may need adjusted</string>
               <property name="autoExclusive">
                <bool>false</bool>
               </property>
-              <attribute name="buttonGroup">
-               <string notr="true">buttonGroup_3</string>
-              </attribute>
              </widget>
             </item>
            </layout>
@@ -11113,6 +11107,5 @@ If the J-end is off the J gene end may need adjusted</string>
  <buttongroups>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>
