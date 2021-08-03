@@ -11844,6 +11844,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							QMessageBox.warning(self, 'Warning', 'Some values of your field2 are not numbers!',
 							                    QMessageBox.Ok, QMessageBox.Ok)
 							return
+						labels.sort()
 
 						colors = sns.color_palette("hls", len(values))
 
@@ -11875,6 +11876,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						result = Counter(label_data)
 						labels = list(result.keys())
 						values = list(result.values())
+						labels.sort()
 
 						data = {}
 						for element in DataIn:
@@ -11968,6 +11970,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					labels = list(result.keys())
 					values = list(result.values())
 					colors = sns.color_palette("hls", len(values))
+					labels.sort()
 
 					font_size = 30/len(labels)
 					if font_size > 8:
@@ -12002,6 +12005,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					result = Counter(label_data)
 					labels = list(result.keys())
 					values = list(result.values())
+					labels.sort()
 
 					if self.ui.checkBoxY.isChecked():
 						labels = []
@@ -12072,8 +12076,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 									group_data.append(cur_data_count)
 								my_bar.add_yaxis(group, group_data, stack=stack)
 
-							my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"),
-							                       tooltip_opts=opts.TooltipOpts(formatter=" {b}: {c} %"))
+							my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {a}: {c}"),
+							                       tooltip_opts=opts.TooltipOpts(formatter=" {a}: {c} %"))
 						else:
 							my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
 								.add_xaxis(labels)\
@@ -12111,6 +12115,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					result = Counter(data)
 					labels = list(result.keys())
 					values = list(result.values())
+					labels.sort()
 
 					my_pyecharts = (
 						Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
