@@ -11756,8 +11756,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for element in DataIn:
 					data.append(element[0])
 				result = Counter(data)
-				labels = sorted(result.keys())
-				values = [result[i] for i in labels]
+				if self.ui.checkBoxPieOrderLabel.isChecked():
+					labels = sorted(result.keys())
+					values = [result[i] for i in labels]
+				else:
+					sorted_list =  sorted(result.items(), key=lambda x: x[1], reverse=True)
+					labels = [x[0] for x in sorted_list]
+					values = [x[1] for x in sorted_list]
+
 				colors = sns.color_palette("hls", len(values))
 
 				font_size = 30/len(labels)
@@ -11785,8 +11791,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for element in DataIn:
 					data.append(element[0])
 				result = Counter(data)
-				labels = sorted(result.keys())
-				values = [result[i] for i in labels]
+				if self.ui.checkBoxPieOrderLabel.isChecked():
+					labels = sorted(result.keys())
+					values = [result[i] for i in labels]
+				else:
+					sorted_list = sorted(result.items(), key=lambda x: x[1], reverse=True)
+					labels = [x[0] for x in sorted_list]
+					values = [x[1] for x in sorted_list]
 	
 				my_pyecharts = (
 					Pie(init_opts=opts.InitOpts(width= str(self.ui.HTMLview.w) + "px", height= str(self.ui.HTMLview.h) + "px", renderer='svg'))
