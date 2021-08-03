@@ -27,6 +27,7 @@ from PyQt5.QtWebChannel import *
 from pyecharts.charts import *
 from pyecharts import options as opts
 from pyecharts.globals import SymbolType
+from pyecharts.commons.utils import JsCode
 from weblogo import read_seq_data, LogoData, LogoOptions, LogoFormat, eps_formatter, svg_formatter
 from PIL import Image
 import statistics
@@ -7805,6 +7806,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.radioButtonVD.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxLocus.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxGene.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxBarPct.clicked.connect(self.GenerateFigure)
 		self.ui.pushButtonNT.clicked.connect(self.makeNTLogo)
 		self.ui.pushButtonAA.clicked.connect(self.makeAALogo)
 		self.ui.toolButtonIgphyml.clicked.connect(self.loadIgphyml)
@@ -12009,10 +12011,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 							else:
 								data[element[1]] = [element[0]]
 						dic_keys = list(data.keys())
-
-						my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
-							.add_xaxis(labels)\
-							.set_global_opts(
+						if self.ui.checkBoxBarPct.isChecked():  # scale to 100%
+							my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg')) \
+								.add_xaxis(labels) \
+								.set_global_opts(
 								title_opts=opts.TitleOpts(title=""),
 								legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
 								xaxis_opts=opts.AxisOpts(
@@ -12021,19 +12023,58 @@ class VGenesForm(QtWidgets.QMainWindow):
 									name_gap=30,
 								),
 								yaxis_opts=opts.AxisOpts(
-									name='Count',
+									name='Percent (%)',
 									name_location='center',
 									name_gap=30,
 								),
 							)
-
-						for group in dic_keys:
-							cur_data = data[group]
-							group_data = []
+							
+							# count each label
+							label_count = {}
 							for ele in labels:
-								group_data.append(cur_data.count(ele))
-							my_bar.add_yaxis(group, group_data,stack=stack)
-						my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
+								this_ele_count = 0
+								for group in dic_keys:
+									cur_data = data[group]
+									this_ele_count += cur_data.count(ele)
+								label_count[ele] = this_ele_count
+
+							# make data
+							for group in dic_keys:
+								cur_data = data[group]
+								group_data = []
+								group_sum = 0
+								for ele in labels:
+									cur_data_count = cur_data.count(ele) / label_count[ele] * 100
+									group_data.append(cur_data_count)
+								my_bar.add_yaxis(group, group_data, stack=stack)
+
+							my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"),
+							                       tooltip_opts=opts.TooltipOpts(formatter=" {b}: {c} %"))
+						else:
+							my_bar = Bar(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+								.add_xaxis(labels)\
+								.set_global_opts(
+									title_opts=opts.TitleOpts(title=""),
+									legend_opts=opts.LegendOpts(is_show=self.ui.checkBoxFigLegend.isChecked()),
+									xaxis_opts=opts.AxisOpts(
+										name=field1,
+										name_location='center',
+										name_gap=30,
+									),
+									yaxis_opts=opts.AxisOpts(
+										name='Count',
+										name_location='center',
+										name_gap=30,
+									),
+								)
+
+							for group in dic_keys:
+								cur_data = data[group]
+								group_data = []
+								for ele in labels:
+									group_data.append(cur_data.count(ele))
+								my_bar.add_yaxis(group, group_data,stack=stack)
+							my_bar.set_series_opts(label_opts=opts.LabelOpts(is_show=False, formatter=" {b}: {c}"))
 
 						my_pyecharts = (
 							my_bar

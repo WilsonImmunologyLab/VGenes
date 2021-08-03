@@ -4539,7 +4539,7 @@
              <x>0</x>
              <y>0</y>
              <width>1226</width>
-             <height>748</height>
+             <height>750</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_56">
@@ -7808,13 +7808,10 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>Bar Chart</string>
            </attribute>
            <layout class="QGridLayout" name="gridLayout_30">
-            <item row="0" column="4">
-             <widget class="QComboBox" name="comboBoxCol2">
-              <property name="minimumSize">
-               <size>
-                <width>200</width>
-                <height>0</height>
-               </size>
+            <item row="0" column="3">
+             <widget class="QLabel" name="label_30">
+              <property name="text">
+               <string>Select Field 2 (optional):</string>
               </property>
              </widget>
             </item>
@@ -7838,6 +7835,29 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
+            <item row="2" column="5">
+             <widget class="QCheckBox" name="checkBoxY">
+              <property name="text">
+               <string>Use value of field2 as Y</string>
+              </property>
+              <property name="autoExclusive">
+               <bool>false</bool>
+              </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_3</string>
+              </attribute>
+             </widget>
+            </item>
+            <item row="0" column="4">
+             <widget class="QComboBox" name="comboBoxCol2">
+              <property name="minimumSize">
+               <size>
+                <width>200</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
             <item row="0" column="1">
              <widget class="QComboBox" name="comboBoxCol1">
               <property name="minimumSize">
@@ -7848,7 +7868,7 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </widget>
             </item>
-            <item row="0" column="6">
+            <item row="0" column="7">
              <spacer name="horizontalSpacer_11">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -7861,18 +7881,17 @@ If the J-end is off the J gene end may need adjusted</string>
               </property>
              </spacer>
             </item>
-            <item row="0" column="3">
-             <widget class="QLabel" name="label_30">
+            <item row="0" column="6">
+             <widget class="QCheckBox" name="checkBoxBarPct">
               <property name="text">
-               <string>Select Field 2 (optional):</string>
+               <string>Pct (%)</string>
               </property>
-             </widget>
-            </item>
-            <item row="1" column="5">
-             <widget class="QCheckBox" name="checkBoxY">
-              <property name="text">
-               <string>Use value of field2 as Y</string>
+              <property name="autoExclusive">
+               <bool>false</bool>
               </property>
+              <attribute name="buttonGroup">
+               <string notr="true">buttonGroup_3</string>
+              </attribute>
              </widget>
             </item>
            </layout>
@@ -11094,5 +11113,6 @@ If the J-end is off the J gene end may need adjusted</string>
  <buttongroups>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>
