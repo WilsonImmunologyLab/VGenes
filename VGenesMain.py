@@ -12732,6 +12732,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					result = Counter(group_data)
 					groups = list(result.keys())
+					groups.sort()
 					colors = sns.color_palette("hls", len(groups))
 
 					self.ui.figure.clf()
@@ -12874,6 +12875,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					'''
 					group_result = Counter(group_data)
 					groups = list(group_result.keys())
+					groups.sort()
 
 					for group in groups:
 						sub_x_data = []
