@@ -7795,6 +7795,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxStack.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxStack.clicked.connect(self.enableMoreOptionBar1)
 		self.ui.checkBoxY.clicked.connect(self.enableMoreOptionBar2)
+		self.ui.checkBoxScatterValueColor.clicked.connect(self.enableMoreOptionScatter)
 		self.ui.radioButtonOriginal.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog10.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog2.clicked.connect(self.GenerateFigure)
@@ -7937,6 +7938,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 			                   "QSpinBox{font-size:18px;}")
 		else:
 			pass
+
+	def enableMoreOptionScatter(self):
+		if self.ui.checkBoxScatterValueColor.isChecked():
+			self.ui.label_15.setEnabled(True)
+			self.ui.lineEditScatterMin.setEnabled(True)
+			self.ui.lineEditScatterMax.setEnabled(True)
+		else:
+			self.ui.label_15.setEnabled(False)
+			self.ui.lineEditScatterMin.setEnabled(False)
+			self.ui.lineEditScatterMax.setEnabled(False)
 
 	def enableMoreOptionBar1(self):
 		if self.ui.checkBoxStack.isChecked():
