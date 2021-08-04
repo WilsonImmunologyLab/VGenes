@@ -12717,9 +12717,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 						try:
 							x = float(d[0])
 							y = float(d[1])
+							if self.ui.checkBoxScatterValueColor.isChecked():
+								z = float(d[2])
+							else:
+								z = d[2]
 							x_data.append(x)
 							y_data.append(y)
-							group_data.append(d[2])
+							group_data.append(z)
 						except:
 							err = True
 					if err == True:
@@ -12730,48 +12734,89 @@ class VGenesForm(QtWidgets.QMainWindow):
 						                    QMessageBox.Ok, QMessageBox.Ok)
 						return
 
-					result = Counter(group_data)
-					groups = list(result.keys())
-					groups.sort()
-					colors = sns.color_palette("hls", len(groups))
+					if self.ui.checkBoxScatterValueColor.isChecked():
+						if self.ui.lineEditScatterMin.text() == '' and self.ui.lineEditScatterMax.text() == '':
+							self.ui.figure.clf()
+							# self.ui.figure.ax.remove()
+							self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+							self.ui.figure.ax.scatter(x_data, y_data, c=group_data, s=15, alpha=0.8, edgecolors='black',
+							                          cmap='viridis')
+							self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
+							self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
+							self.ui.figure.ax.set_ylim(min(y_data), max(y_data))
+							self.ui.figure.ax.set_xlim(min(x_data), max(x_data))
+							#self.ui.figure.colorbar(self.ui.figure.ax.pcolor(group_data))
+							self.ui.figure.ax.set_xlabel(self.ui.comboBoxScatterX.currentText(), size=6)
+							self.ui.figure.ax.set_ylabel(self.ui.comboBoxScatterY.currentText(), size=6)
+							self.ui.figure.ax.tick_params(labelsize=6)
+							self.ui.figure.ax.grid(True)
+							self.ui.F.draw()
+						else:
+							try:
+								scatterMin = float(self.ui.lineEditScatterMin.text())
+								scatterMax = float(self.ui.lineEditScatterMax.text())
+							except:
+								Msg = 'Please determine both min and max value! Must be numbers!'
+								QMessageBox.warning(self, 'warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+								return
 
-					self.ui.figure.clf()
-					# self.ui.figure.ax.remove()
-					self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-					index = 0
-					for group in groups:
-						cur_x = []
-						cur_y = []
-						for i in range(len(group_data)):
-							if group_data[i] == group:
-								cur_x.append(x_data[i])
-								cur_y.append(y_data[i])
-						self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=15, alpha=0.8, edgecolors='black', label=group)
-						index += 1
-
-					font_size = 30 / len(groups)
-					if font_size > 8:
-						font_size = 8
-					elif font_size < 4:
-						font_size = 4
+							self.ui.figure.clf()
+							# self.ui.figure.ax.remove()
+							self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+							self.ui.figure.ax.scatter(x_data, y_data, c=group_data, s=15, alpha=0.8, edgecolors='black',cmap='viridis', vmin=scatterMin, vmax=scatterMax)
+							self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
+							self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
+							self.ui.figure.ax.set_ylim(min(y_data), max(y_data))
+							self.ui.figure.ax.set_xlim(min(x_data), max(x_data))
+							#self.ui.figure.colorbar(self.ui.figure.ax.pcolor(group_data))
+							self.ui.figure.ax.set_xlabel(self.ui.comboBoxScatterX.currentText(), size=6)
+							self.ui.figure.ax.set_ylabel(self.ui.comboBoxScatterY.currentText(), size=6)
+							self.ui.figure.ax.tick_params(labelsize=6)
+							self.ui.figure.ax.grid(True)
+							self.ui.F.draw()
 					else:
-						font_size = int(font_size)
+						result = Counter(group_data)
+						groups = list(result.keys())
+						groups.sort()
+						colors = sns.color_palette("hls", len(groups))
 
-					col_num = int(len(groups) / 20)
-					if col_num == 0:
-						col_num = 1
+						self.ui.figure.clf()
+						# self.ui.figure.ax.remove()
+						self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
+						index = 0
+						for group in groups:
+							cur_x = []
+							cur_y = []
+							for i in range(len(group_data)):
+								if group_data[i] == group:
+									cur_x.append(x_data[i])
+									cur_y.append(y_data[i])
+							self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=15, alpha=0.8, edgecolors='black', label=group)
+							index += 1
 
-					self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
-					self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
-					self.ui.figure.ax.set_ylim(min(y_data), max(y_data))
-					self.ui.figure.ax.set_xlim(min(x_data), max(x_data))
-					self.ui.figure.ax.legend(groups, loc="center left", bbox_to_anchor=(1, 0, 0.5, 1),
-					                        prop={'size': font_size}, ncol=col_num)
-					self.ui.figure.ax.set_xlabel(self.ui.comboBoxScatterX.currentText(), size=6)
-					self.ui.figure.ax.set_ylabel(self.ui.comboBoxScatterY.currentText(), size=6)
-					self.ui.figure.ax.tick_params(labelsize=6)
-					self.ui.figure.ax.grid(True)
-					self.ui.F.draw()
+						font_size = 30 / len(groups)
+						if font_size > 8:
+							font_size = 8
+						elif font_size < 4:
+							font_size = 4
+						else:
+							font_size = int(font_size)
+
+						col_num = int(len(groups) / 20)
+						if col_num == 0:
+							col_num = 1
+
+						self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
+						self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
+						self.ui.figure.ax.set_ylim(min(y_data), max(y_data))
+						self.ui.figure.ax.set_xlim(min(x_data), max(x_data))
+						self.ui.figure.ax.legend(groups, loc="center left", bbox_to_anchor=(1, 0, 0.5, 1),
+						                        prop={'size': font_size}, ncol=col_num)
+						self.ui.figure.ax.set_xlabel(self.ui.comboBoxScatterX.currentText(), size=6)
+						self.ui.figure.ax.set_ylabel(self.ui.comboBoxScatterY.currentText(), size=6)
+						self.ui.figure.ax.tick_params(labelsize=6)
+						self.ui.figure.ax.grid(True)
+						self.ui.F.draw()
 			else:
 				# create figure
 				if self.ui.checkBoxScatterValueColor.isChecked():
