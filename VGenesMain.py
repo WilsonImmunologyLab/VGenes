@@ -12774,9 +12774,70 @@ class VGenesForm(QtWidgets.QMainWindow):
 					self.ui.F.draw()
 			else:
 				# create figure
-				my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
-					.set_series_opts(label_opts=opts.LabelOpts(is_show=False))\
-					.set_global_opts(
+				if self.ui.checkBoxScatterValueColor.isChecked():
+					if self.ui.lineEditScatterMin.text() == '' and self.ui.lineEditScatterMax.text() == '':
+						my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))\
+							.set_series_opts(label_opts=opts.LabelOpts(is_show=False))\
+							.set_global_opts(
+								xaxis_opts=opts.AxisOpts(
+									type_="value",
+									splitline_opts=opts.SplitLineOpts(is_show=False),
+									name=dim1,
+									name_location='center',
+									name_gap=30,
+								),
+								yaxis_opts=opts.AxisOpts(
+									type_="value",
+									name=dim2,
+									name_location='center',
+									name_gap=30,
+									axistick_opts=opts.AxisTickOpts(is_show=True),
+									splitline_opts=opts.SplitLineOpts(is_show=False),
+								),
+								tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+								legend_opts=opts.LegendOpts(
+									is_show=self.ui.checkBoxFigLegend.isChecked()
+								),
+								visualmap_opts=opts.VisualMapOpts(dimension=2),
+							)
+					else:
+						try:
+							scatterMin = float(self.ui.lineEditScatterMin.text())
+							scatterMax = float(self.ui.lineEditScatterMax.text())
+						except:
+							Msg = 'Please determine both min and max value! Must be numbers!'
+							QMessageBox.warning(self, 'warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+							return
+
+						my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg')) \
+							.set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
+							.set_global_opts(
+							xaxis_opts=opts.AxisOpts(
+								type_="value",
+								splitline_opts=opts.SplitLineOpts(is_show=False),
+								name=dim1,
+								name_location='center',
+								name_gap=30,
+							),
+							yaxis_opts=opts.AxisOpts(
+								type_="value",
+								name=dim2,
+								name_location='center',
+								name_gap=30,
+								axistick_opts=opts.AxisTickOpts(is_show=True),
+								splitline_opts=opts.SplitLineOpts(is_show=False),
+							),
+							tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+							legend_opts=opts.LegendOpts(
+								is_show=self.ui.checkBoxFigLegend.isChecked()
+							),
+							visualmap_opts=opts.VisualMapOpts(min_=scatterMin, max_=scatterMax, dimension=2),
+						)
+
+				else:
+					my_scatter = Scatter(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg')) \
+						.set_series_opts(label_opts=opts.LabelOpts(is_show=False)) \
+						.set_global_opts(
 						xaxis_opts=opts.AxisOpts(
 							type_="value",
 							splitline_opts=opts.SplitLineOpts(is_show=False),
@@ -12850,9 +12911,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 						try:
 							x = float(d[0])
 							y = float(d[1])
+							if self.ui.checkBoxScatterValueColor.isChecked():
+								z = float(d[2])
+							else:
+								z = d[2]
 							x_data.append(x)
 							y_data.append(y)
-							group_data.append(d[2])
+							group_data.append(z)
 						except:
 							err = True
 					if err == True:
@@ -12873,21 +12938,29 @@ class VGenesForm(QtWidgets.QMainWindow):
 						                    QMessageBox.Ok, QMessageBox.Ok)
 						return
 					'''
-					group_result = Counter(group_data)
-					groups = list(group_result.keys())
-					groups.sort()
-
-					for group in groups:
-						sub_x_data = []
-						sub_y_data = []
-						for i in range(0, len(group_data)):
-							if group_data[i] == group:
-								sub_x_data.append(x_data[i])
-								sub_y_data.append(y_data[i])
-
+					if self.ui.checkBoxScatterValueColor.isChecked():
 						# attach data
-						my_scatter.add_xaxis(xaxis_data=sub_x_data)
-						my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data,label_opts=opts.LabelOpts(is_show=False))
+						my_scatter.add_xaxis(xaxis_data=x_data)
+						my_scatter.add_yaxis(series_name=group,
+						                     y_axis=[list(z) for z in zip(y_data, group_data)],
+						                     label_opts=opts.LabelOpts(is_show=False),
+						                     )
+					else:
+						group_result = Counter(group_data)
+						groups = list(group_result.keys())
+						groups.sort()
+
+						for group in groups:
+							sub_x_data = []
+							sub_y_data = []
+							for i in range(0, len(group_data)):
+								if group_data[i] == group:
+									sub_x_data.append(x_data[i])
+									sub_y_data.append(y_data[i])
+
+							# attach data
+							my_scatter.add_xaxis(xaxis_data=sub_x_data)
+							my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data, label_opts=opts.LabelOpts(is_show=False))
 
 				my_pyecharts = (
 					my_scatter
