@@ -12079,6 +12079,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 									name='Percent (%)',
 									name_location='center',
 									name_gap=30,
+									max_=100,
+									min_=0,
 								),
 							)
 							
