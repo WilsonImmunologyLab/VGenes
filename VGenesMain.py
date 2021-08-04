@@ -7793,6 +7793,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.pushButtonDraw.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxFigLegend.clicked.connect(self.GenerateFigure)
 		self.ui.checkBoxStack.clicked.connect(self.GenerateFigure)
+		self.ui.checkBoxStack.clicked.connect(self.enableMoreOptionBar1)
+		self.ui.checkBoxY.clicked.connect(self.enableMoreOptionBar2)
 		self.ui.radioButtonOriginal.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog10.clicked.connect(self.GenerateFigure)
 		self.ui.radioButtonLog2.clicked.connect(self.GenerateFigure)
@@ -7936,7 +7938,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 		else:
 			pass
 
+	def enableMoreOptionBar1(self):
+		if self.ui.checkBoxStack.isChecked():
+			self.ui.checkBoxBarPct.setEnabled(True)
+		else:
+			self.ui.checkBoxBarPct.setEnabled(False)
 
+	def enableMoreOptionBar2(self):
+		if self.ui.checkBoxY.isChecked():
+			self.ui.checkBoxBarPct.setEnabled(False)
+			self.ui.checkBoxStack.setEnabled(False)
+		else:
+			self.ui.checkBoxBarPct.setEnabled(True)
+			self.ui.checkBoxStack.setEnabled(True)
 
 	def on_pushButtonHCLCTable_clicked(self):
 		if self.HCLCDialog.isVisible() == True:
