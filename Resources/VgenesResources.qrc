@@ -1,5 +1,7 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>HC.png</file>
+    <file>LC.png</file>
     <file>BCR.png</file>
     <file>TCR.png</file>
     <file>BCRgray.png</file>
