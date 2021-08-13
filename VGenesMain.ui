@@ -9170,66 +9170,28 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_53">
-           <item row="0" column="0" colspan="3">
-            <layout class="QHBoxLayout" name="horizontalLayout_9">
-             <item>
-              <widget class="QLabel" name="label_63">
-               <property name="text">
-                <string>Clone:</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneName">
-               <property name="font">
-                <font>
-                 <pointsize>15</pointsize>
-                </font>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_64">
-               <property name="text">
-                <string>Gene Type</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneType">
-               <property name="font">
-                <font>
-                 <pointsize>15</pointsize>
-                </font>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLabel" name="label_65">
-               <property name="text">
-                <string>Number of Seq</string>
-               </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QLineEdit" name="lineEditCloneNum">
-               <property name="font">
-                <font>
-                 <pointsize>15</pointsize>
-                </font>
-               </property>
-               <property name="readOnly">
-                <bool>true</bool>
-               </property>
-              </widget>
-             </item>
-            </layout>
+           <item row="5" column="0">
+            <widget class="QPushButton" name="pushButtonCheckCloone">
+             <property name="text">
+              <string>Check this clone</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QListWidget" name="listWidgetCloneMember">
+             <property name="maximumSize">
+              <size>
+               <width>250</width>
+               <height>16777215</height>
+              </size>
+             </property>
+             <property name="font">
+              <font>
+               <family>Lucida Grande</family>
+               <pointsize>15</pointsize>
+              </font>
+             </property>
+            </widget>
            </item>
            <item row="1" column="0" colspan="3">
             <layout class="QHBoxLayout" name="horizontalLayout_10">
@@ -9311,24 +9273,99 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
             </layout>
            </item>
-           <item row="2" column="0" colspan="2">
-            <widget class="QLabel" name="label_76">
-             <property name="font">
-              <font>
-               <pointsize>15</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Sequences in this clone:</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2" rowspan="3">
+           <item row="2" column="2" rowspan="4">
             <widget class="QGroupBox" name="groupBox_11">
              <property name="title">
               <string/>
              </property>
              <layout class="QGridLayout" name="gridLayout_52">
+              <item row="0" column="1">
+               <layout class="QVBoxLayout" name="verticalLayout">
+                <item>
+                 <widget class="QPushButton" name="pushButtonDrawClone">
+                  <property name="minimumSize">
+                   <size>
+                    <width>90</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>130</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Draw        </string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="Resources/VgenesResources.qrc">
+                    <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="pushButtonDownloadClone">
+                  <property name="minimumSize">
+                   <size>
+                    <width>90</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>130</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="text">
+                   <string>Download</string>
+                  </property>
+                  <property name="icon">
+                   <iconset resource="Resources/VgenesResources.qrc">
+                    <normaloff>:/PNG-Icons/cloud_download.png</normaloff>:/PNG-Icons/cloud_download.png</iconset>
+                  </property>
+                  <property name="iconSize">
+                   <size>
+                    <width>30</width>
+                    <height>30</height>
+                   </size>
+                  </property>
+                  <property name="flat">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QCheckBox" name="checkBoxFigLegendClone">
+                  <property name="maximumSize">
+                   <size>
+                    <width>130</width>
+                    <height>20</height>
+                   </size>
+                  </property>
+                  <property name="toolTip">
+                   <string extracomment="Display Figure legend">Display Figure legend</string>
+                  </property>
+                  <property name="text">
+                   <string extracomment="Display Figure legend">Legend</string>
+                  </property>
+                  <property name="checked">
+                   <bool>true</bool>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
+              </item>
               <item row="1" column="0" colspan="2">
                <layout class="QGridLayout" name="gridLayoutClone"/>
               </item>
@@ -9510,123 +9547,103 @@ If the J-end is off the J gene end may need adjusted</string>
                 </widget>
                </widget>
               </item>
-              <item row="0" column="1">
-               <layout class="QVBoxLayout" name="verticalLayout">
-                <item>
-                 <widget class="QPushButton" name="pushButtonDrawClone">
-                  <property name="minimumSize">
-                   <size>
-                    <width>90</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>130</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Draw        </string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="Resources/VgenesResources.qrc">
-                    <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="pushButtonDownloadClone">
-                  <property name="minimumSize">
-                   <size>
-                    <width>90</width>
-                    <height>0</height>
-                   </size>
-                  </property>
-                  <property name="maximumSize">
-                   <size>
-                    <width>130</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="text">
-                   <string>Download</string>
-                  </property>
-                  <property name="icon">
-                   <iconset resource="Resources/VgenesResources.qrc">
-                    <normaloff>:/PNG-Icons/cloud_download.png</normaloff>:/PNG-Icons/cloud_download.png</iconset>
-                  </property>
-                  <property name="iconSize">
-                   <size>
-                    <width>30</width>
-                    <height>30</height>
-                   </size>
-                  </property>
-                  <property name="flat">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QCheckBox" name="checkBoxFigLegendClone">
-                  <property name="maximumSize">
-                   <size>
-                    <width>130</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                  <property name="toolTip">
-                   <string extracomment="Display Figure legend">Display Figure legend</string>
-                  </property>
-                  <property name="text">
-                   <string extracomment="Display Figure legend">Legend</string>
-                  </property>
-                  <property name="checked">
-                   <bool>true</bool>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
-              </item>
              </layout>
             </widget>
            </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QListWidget" name="listWidgetCloneMember">
-             <property name="maximumSize">
-              <size>
-               <width>250</width>
-               <height>16777215</height>
-              </size>
-             </property>
+           <item row="0" column="0" colspan="3">
+            <layout class="QHBoxLayout" name="horizontalLayout_9">
+             <item>
+              <widget class="QLabel" name="label_63">
+               <property name="text">
+                <string>Clone:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneName">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_64">
+               <property name="text">
+                <string>Gene Type</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneType">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_65">
+               <property name="text">
+                <string>Number of Seq</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="lineEditCloneNum">
+               <property name="font">
+                <font>
+                 <pointsize>15</pointsize>
+                </font>
+               </property>
+               <property name="readOnly">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QLabel" name="label_76">
              <property name="font">
               <font>
-               <family>Lucida Grande</family>
                <pointsize>15</pointsize>
               </font>
+             </property>
+             <property name="text">
+              <string>Sequences in this clone:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QRadioButton" name="radioButtonExclusive">
+             <property name="text">
+              <string>Exclusively</string>
              </property>
             </widget>
            </item>
            <item row="4" column="0">
-            <widget class="QPushButton" name="pushButtonCheckCloone">
+            <widget class="QPushButton" name="pushButtonRemoveFromClone">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
              <property name="text">
-              <string>Check this clone</string>
+              <string>Delete member</string>
              </property>
             </widget>
            </item>
            <item row="4" column="1">
-            <widget class="QRadioButton" name="radioButtonExclusive">
+            <widget class="QCheckBox" name="radioButtonEnableEditClone">
              <property name="text">
-              <string>Exclusively</string>
+              <string>Enable edit</string>
              </property>
             </widget>
            </item>

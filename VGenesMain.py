@@ -7963,6 +7963,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.checkBoxBarPct.setEnabled(True)
 			self.ui.checkBoxStack.setEnabled(True)
 
+	@pyqtSlot()
+	def on_pushButtonRemoveFromClone_clicked(self):
+		if self.ui.radioButtonEnableEditClone.isChecked():
+			SeqName = self.ui.listWidgetCloneMember.currentItem().text()
+			CurVal = '0'
+			col_name = 'ClonalPool'
+			self.UpdateSeq(SeqName, CurVal, col_name)
+
+			self.ui.listWidgetCloneMember.takeItem(self.ui.listWidgetCloneMember.currentRow())
+			Msg = SeqName + ' has been removed from current clone!'
+		else:
+			Msg = 'Please enable edit first (check the radio button)!'
+
+		QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+	def on_radioButtonEnableEditClone_clicked(self):
+		if self.ui.radioButtonEnableEditClone.isChecked():
+			self.ui.pushButtonRemoveFromClone.setEnabled(True)
+		else:
+			self.ui.pushButtonRemoveFromClone.setEnabled(False)
+
 	def on_pushButtonHCLCTable_clicked(self):
 		if self.HCLCDialog.isVisible() == True:
 			pass
