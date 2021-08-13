@@ -9792,7 +9792,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		clone_name = re.sub('Clone','',tmp[1])
 
 		WHEREStatement = 'WHERE ClonalPool = "' + clone_name + '"'
-		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB ' + WHEREStatement
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 		if len(DataIn) < 3:
@@ -9855,6 +9855,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		for item in DataIn:
 			SeqName = item[0]
 			Sequence = item[1]
+			try:
+				Vbeg = int(item[3]) - 1
+			except:
+				Vbeg = 0
+
+			try:
+				Jend = int(item[4])
+			except:
+				Jend = len(Sequence)
+
+			VDJSequence = Sequence[Vbeg:Jend]
 
 			# parse seq name
 			SeqName = re.sub(r'[^\w\d\/\>]', '_', SeqName)
@@ -9862,7 +9873,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 			SeqName = SeqName.strip('_')
 
 			out_handle.write('>' + SeqName + '\n')
-			out_handle.write(Sequence + '\n')
+			out_handle.write(VDJSequence + '\n')
 		out_handle.close()
 
 		# alignment
