@@ -9785,7 +9785,133 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for i in range(layout.count()):
 					layout.removeWidget(layout.itemAt(i).widget())
 			layout.addWidget(view)
-	
+
+	@pyqtSlot()
+	def on_pushButtonAlignHC_clicked(self):
+		global VGenesTextWindows
+
+		if self.ui.tableWidgetHC.rowCount() < 1:
+			Msg = 'Too few sequences selected! At least one sequences required!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# fetch data
+		WHEREStatement = 'WHERE SeqName IN ("'
+		seq_list = []
+		for row in range(self.ui.tableWidgetHC.rowCount()):
+			seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
+		WHEREStatement += '","'.join(seq_list) + '")'
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		
+		AlignIn = []
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1].upper()
+			GL_Sequence = item[2].upper()
+			try:
+				Vbeg = int(item[3]) - 1
+			except:
+				Vbeg = 0
+			try:
+				Jend = int(item[4])
+			except:
+				Jend = len(Sequence)
+			VDJSequence = Sequence[Vbeg:Jend]
+			#Sequence = Sequence.replace("-", "")
+			EachIn = (SeqName, VDJSequence)
+			GLEachIn = ("GL_" + SeqName, GL_Sequence)
+			AlignIn.append(EachIn)
+			AlignIn.append(GLEachIn)
+		# make HTML
+		html_file = AlignSequencesHTML(AlignIn, '')
+		if html_file[0] == 'W':
+			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		# delete close window objects
+		del_list = []
+		for id, obj in VGenesTextWindows.items():
+			if obj.isVisible() == False:
+				del_list.append(id)
+		for id in del_list:
+			del_obj = VGenesTextWindows.pop(id)
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		# view.load(QUrl("file://" + html_file))
+		url = QUrl.fromLocalFile(str(html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
+	@pyqtSlot()
+	def on_pushButtonAlignLC_clicked(self):
+		global VGenesTextWindows
+
+		if self.ui.tableWidgetLC.rowCount() < 1:
+			Msg = 'Too few sequences selected! At least one sequences required!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# fetch data
+		WHEREStatement = 'WHERE SeqName IN ("'
+		seq_list = []
+		for row in range(self.ui.tableWidgetLC.rowCount()):
+			seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
+		WHEREStatement += '","'.join(seq_list) + '")'
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		AlignIn = []
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1].upper()
+			GL_Sequence = item[2].upper()
+			try:
+				Vbeg = int(item[3]) - 1
+			except:
+				Vbeg = 0
+			try:
+				Jend = int(item[4])
+			except:
+				Jend = len(Sequence)
+			VDJSequence = Sequence[Vbeg:Jend]
+			# Sequence = Sequence.replace("-", "")
+			EachIn = (SeqName, VDJSequence)
+			GLEachIn = ("GL_" + SeqName, GL_Sequence)
+			AlignIn.append(EachIn)
+			AlignIn.append(GLEachIn)
+		# make HTML
+		html_file = AlignSequencesHTML(AlignIn, '')
+		if html_file[0] == 'W':
+			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		# delete close window objects
+		del_list = []
+		for id, obj in VGenesTextWindows.items():
+			if obj.isVisible() == False:
+				del_list.append(id)
+		for id in del_list:
+			del_obj = VGenesTextWindows.pop(id)
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		# view.load(QUrl("file://" + html_file))
+		url = QUrl.fromLocalFile(str(html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
 	@pyqtSlot()
 	def on_pushButtonTreeHC_clicked(self):
 		if self.ui.tableWidgetHC.rowCount() < 3:
