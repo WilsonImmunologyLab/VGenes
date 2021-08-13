@@ -9785,6 +9785,312 @@ class VGenesForm(QtWidgets.QMainWindow):
 				for i in range(layout.count()):
 					layout.removeWidget(layout.itemAt(i).widget())
 			layout.addWidget(view)
+	
+	@pyqtSlot()
+	def on_pushButtonTreeHC_clicked(self):
+		if self.ui.tableWidgetHC.rowCount() < 3:
+			Msg = 'Too few sequences selected! At least three sequences required!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# fetch data
+		WHEREStatement = 'WHERE SeqName IN ("'
+		seq_list = []
+		for row in range(self.ui.tableWidgetHC.rowCount()):
+			seq_list.append(self.ui.tableWidgetHC.item(row,0).text())
+		WHEREStatement += '","'.join(seq_list) + '")'
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		# write sequences into file
+		time_stamp = str(int(time.time() * 100))
+		this_folder = os.path.join(temp_folder, time_stamp)
+		cmd = 'mkdir ' + this_folder
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to make temp folder!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# alignment
+		aafilename = this_folder + "/input.fas"
+		outfilename = this_folder + "/alignment.fas"
+		treefilename = 'tree'
+		out_handle = open(aafilename, 'w')
+
+		# make a consensus germline seq and write to file
+		GermSequences = [item[2] for item in DataIn]
+		GermConsensusSeq = CalConsensus(GermSequences)
+		## if the length of those germline sequences are not same, which is unlikely
+		if GermConsensusSeq == 'bad':
+			print('align germline seq...')
+			ConRawfilename = this_folder + "/con_raw_input.fas"
+			Conoutfilename = this_folder + "/con_alignment.fas"
+			with open(ConRawfilename, 'w') as f:
+				for item in DataIn:
+					f.write('>' + item[0] + '\n')
+					f.write(item[2] + '\n')
+
+			# align all consensus seqs
+			cmd = muscle_path
+			cmd += " -in " + ConRawfilename + " -out " + Conoutfilename
+			try:
+				os.system(cmd)
+			except:
+				Msg = 'Fail to run muscle! Check your muscle path!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			if os.path.exists(Conoutfilename) == False:
+				Msg = 'Fail to run muscle! Check your muscle path!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			ConAli = ReadFasta(Conoutfilename)
+			GermSequences = [item[1] for item in ConAli]
+			GermConsensusSeq = CalConsensus(GermSequences)
+
+		out_handle.write('>Germline_consensus\n')
+		out_handle.write(GermConsensusSeq + '\n')
+		# write sequences into file
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1]
+			try:
+				Vbeg = int(item[3]) - 1
+			except:
+				Vbeg = 0
+
+			try:
+				Jend = int(item[4])
+			except:
+				Jend = len(Sequence)
+
+			VDJSequence = Sequence[Vbeg:Jend]
+
+			# parse seq name
+			SeqName = re.sub(r'[^\w\d\/\>]', '_', SeqName)
+			SeqName = re.sub(r'_+', '_', SeqName)
+			SeqName = SeqName.strip('_')
+
+			out_handle.write('>' + SeqName + '\n')
+			out_handle.write(VDJSequence + '\n')
+		out_handle.close()
+
+		# alignment
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# generate tree
+		cmd = 'cd ' + this_folder + ';'
+		cmd += raxml_path
+		cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+
+		os.system(cmd)
+		print("tree done!")
+
+		# generate html page
+		treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
+		if os.path.exists(treefile):
+			pass
+		else:
+			QMessageBox.warning(self, 'Warning', 'Fail to generate tree!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			ErlogFile = os.path.join(this_folder, 'RAxML_info.tree')
+			if os.path.exists(ErlogFile):
+				self.ShowVGenesText(ErlogFile)
+			return
+
+		f = open(treefile, 'r')
+		tree_str = f.readline()
+		f.close()
+		tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
+
+		out_html_file = os.path.join(this_folder, 'tree.html')
+		header_file = os.path.join(working_prefix, 'Data', 'template_raxml_tree.html')
+		shutil.copyfile(header_file, out_html_file)
+
+		foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+		       '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+		       'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+		       '});\n</script>\n</body>\n</html>'
+		out_file_handle = open(out_html_file, 'a')
+		out_file_handle.write(tree_str)
+		out_file_handle.write(foot)
+		out_file_handle.close()
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		# view.load(QUrl("file://" + out_html_file))
+		url = QUrl.fromLocalFile(str(out_html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
+
+	def on_pushButtonTreeLC_clicked(self):
+		if self.ui.tableWidgetLC.rowCount() < 3:
+			Msg = 'Too few sequences selected! At least three sequences required!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# fetch data
+		WHEREStatement = 'WHERE SeqName IN ("'
+		seq_list = []
+		for row in range(self.ui.tableWidgetLC.rowCount()):
+			seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
+		WHEREStatement += '","'.join(seq_list) + '")'
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+		# write sequences into file
+		time_stamp = str(int(time.time() * 100))
+		this_folder = os.path.join(temp_folder, time_stamp)
+		cmd = 'mkdir ' + this_folder
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to make temp folder!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# alignment
+		aafilename = this_folder + "/input.fas"
+		outfilename = this_folder + "/alignment.fas"
+		treefilename = 'tree'
+		out_handle = open(aafilename, 'w')
+
+		# make a consensus germline seq and write to file
+		GermSequences = [item[2] for item in DataIn]
+		GermConsensusSeq = CalConsensus(GermSequences)
+		## if the length of those germline sequences are not same, which is unlikely
+		if GermConsensusSeq == 'bad':
+			print('align germline seq...')
+			ConRawfilename = this_folder + "/con_raw_input.fas"
+			Conoutfilename = this_folder + "/con_alignment.fas"
+			with open(ConRawfilename, 'w') as f:
+				for item in DataIn:
+					f.write('>' + item[0] + '\n')
+					f.write(item[2] + '\n')
+
+			# align all consensus seqs
+			cmd = muscle_path
+			cmd += " -in " + ConRawfilename + " -out " + Conoutfilename
+			try:
+				os.system(cmd)
+			except:
+				Msg = 'Fail to run muscle! Check your muscle path!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			if os.path.exists(Conoutfilename) == False:
+				Msg = 'Fail to run muscle! Check your muscle path!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
+			ConAli = ReadFasta(Conoutfilename)
+			GermSequences = [item[1] for item in ConAli]
+			GermConsensusSeq = CalConsensus(GermSequences)
+
+		out_handle.write('>Germline_consensus\n')
+		out_handle.write(GermConsensusSeq + '\n')
+		# write sequences into file
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1]
+			try:
+				Vbeg = int(item[3]) - 1
+			except:
+				Vbeg = 0
+
+			try:
+				Jend = int(item[4])
+			except:
+				Jend = len(Sequence)
+
+			VDJSequence = Sequence[Vbeg:Jend]
+
+			# parse seq name
+			SeqName = re.sub(r'[^\w\d\/\>]', '_', SeqName)
+			SeqName = re.sub(r'_+', '_', SeqName)
+			SeqName = SeqName.strip('_')
+
+			out_handle.write('>' + SeqName + '\n')
+			out_handle.write(VDJSequence + '\n')
+		out_handle.close()
+
+		# alignment
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+		# generate tree
+		cmd = 'cd ' + this_folder + ';'
+		cmd += raxml_path
+		cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+
+		os.system(cmd)
+		print("tree done!")
+
+		# generate html page
+		treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
+		if os.path.exists(treefile):
+			pass
+		else:
+			QMessageBox.warning(self, 'Warning', 'Fail to generate tree!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			ErlogFile = os.path.join(this_folder, 'RAxML_info.tree')
+			if os.path.exists(ErlogFile):
+				self.ShowVGenesText(ErlogFile)
+			return
+
+		f = open(treefile, 'r')
+		tree_str = f.readline()
+		f.close()
+		tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
+
+		out_html_file = os.path.join(this_folder, 'tree.html')
+		header_file = os.path.join(working_prefix, 'Data', 'template_raxml_tree.html')
+		shutil.copyfile(header_file, out_html_file)
+
+		foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+		       '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+		       'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+		       '});\n</script>\n</body>\n</html>'
+		out_file_handle = open(out_html_file, 'a')
+		out_file_handle.write(tree_str)
+		out_file_handle.write(foot)
+		out_file_handle.close()
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		# view.load(QUrl("file://" + out_html_file))
+		url = QUrl.fromLocalFile(str(out_html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
 
 	def buildCloneTree(self):
 		clone_name = self.ui.comboBoxTree.currentText()
