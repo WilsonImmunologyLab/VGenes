@@ -10753,6 +10753,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionIncrease_font_size"/>
    <addaction name="actionDecrease_font_size"/>
    <addaction name="separator"/>
+   <addaction name="actionBatchChangeName"/>
    <addaction name="actionDelete_record"/>
    <addaction name="separator"/>
    <addaction name="actionclearTrash"/>
@@ -11370,6 +11371,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="toolTip">
     <string>sampling from current selection</string>
+   </property>
+  </action>
+  <action name="actionBatchChangeName">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/network.png</normaloff>:/PNG-Icons/network.png</iconset>
+   </property>
+   <property name="text">
+    <string>BatchChangeName</string>
    </property>
   </action>
  </widget>

@@ -18,7 +18,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter, QListWidget
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
@@ -87,6 +87,7 @@ from ui_SHMtabledialog import Ui_SHMtableDialog
 from ui_samplingdialog import Ui_SamplingDialog
 from ui_deletedialog import Ui_deleteDialog
 from ui_hclctabledialog import Ui_HCLCDialog
+from ui_rename_dialog import Ui_RenameDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -323,6 +324,130 @@ class Worker(QRunnable):
 			self.signals.result.emit(result)  # Return the result of the processing
 		finally:
 			self.signals.finished.emit()  # Done
+
+class MyQList(QListWidget):
+    def __init__(self):
+        super().__init__()
+        self.setAcceptDrops(True)
+
+    def dragEnterEvent(self, event):
+	    if event.mimeData().hasUrls:
+		    event.accept()
+	    else:
+		    event.ignore()
+
+    def dragMoveEvent(self, event):
+	    if event.mimeData().hasUrls:
+		    try:
+			    event.setDropAction(Qt.CopyAction)
+		    except Exception as e:
+			    print(e)
+		    event.accept()
+	    else:
+		    event.ignore()
+
+    def dropEvent(self, event):
+	    try:
+		    if event.mimeData().hasUrls:
+			    event.setDropAction(Qt.CopyAction)
+			    event.accept()
+			    links = []
+			    for url in event.mimeData().urls():
+				    links.append(str(url.toLocalFile()))
+			    self.addItems(links)
+		    else:
+			    event.ignore()
+	    except Exception as e:
+		    print(e)
+
+class RenameDialog(QtWidgets.QDialog):
+	def __init__(self):
+		super(RenameDialog, self).__init__()
+		self.ui = Ui_RenameDialog()
+		self.ui.setupUi(self)
+		self.FileList = MyQList()
+		self.ui.gridLayoutRename.addWidget(self.FileList)
+
+		self.FileList.itemDoubleClicked.connect(self.removeSel)
+		self.ui.pushButtonEdit.clicked.connect(self.editFun)
+
+		if system() == 'Windows':
+			# set style for windows
+			self.setStyleSheet("QLabel{font-size:18px;}"
+			                   "QTextEdit{font-size:18px;}"
+			                   "QComboBox{font-size:18px;}"
+			                   "QPushButton{font-size:18px;}"
+			                   "QTabWidget{font-size:18px;}"
+			                   "QCommandLinkButton{font-size:18px;}"
+			                   "QRadioButton{font-size:18px;}"
+			                   "QPlainTextEdit{font-size:18px;}"
+			                   "QCheckBox{font-size:18px;}"
+			                   "QTableWidget{font-size:18px;}"
+			                   "QToolBar{font-size:18px;}"
+			                   "QMenuBar{font-size:18px;}"
+			                   "QMenu{font-size:18px;}"
+			                   "QAction{font-size:18px;}"
+			                   "QMainWindow{font-size:18px;}"
+			                   "QLineEdit{font-size:18px;}"
+			                   "QTreeWidget{font-size:18px;}"
+			                   "QSpinBox{font-size:18px;}")
+
+	def removeSel(self):
+		listRow = self.FileList.currentRow()
+		if listRow > -1:
+			self.FileList.takeItem(listRow)
+			
+	def editFun(self):
+		if self.FileList.count() > 0:
+			new_file_list = []
+			fail_list = []
+			offset = self.ui.spinBox.value()
+			if offset > 0:
+				for row in range(self.FileList.count()):
+					cur_file = self.FileList.item(row).text()
+					file_path, original_name = os.path.split(cur_file)
+					tmp_list = original_name.split('.')
+					if len(tmp_list) > 1:
+						original_name = tmp_list[0]
+						filetype = tmp_list[1]
+
+					if len(original_name) > offset:
+						if self.ui.radioButtonFront.isChecked():
+							modified_name = original_name[offset:]
+						else:
+							modified_name = original_name[:-offset]
+						if len(tmp_list) > 1:
+							new_file = os.path.join(file_path, modified_name + '.' + filetype)
+						else:
+							new_file = os.path.join(file_path, modified_name)
+
+						if os.path.exists(new_file):
+							new_file_list.append(cur_file)
+							fail_list.append(cur_file)
+						else:
+							os.rename(cur_file, new_file)
+							new_file_list.append(new_file)
+					else:
+						new_file_list.append(cur_file)
+						fail_list.append(cur_file)
+
+				self.FileList.clear()
+				self.FileList.addItems(new_file_list)
+
+				Msg = 'File names updated!'
+				if len(fail_list) > 0:
+					Msg += '\n\nThe following files can not be renamed because the name already exist:\n' + '\n'.join(fail_list)
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			else:
+				Msg = 'Offset can not be 0!'
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+		else:
+			Msg = 'Please drap and drop some files in the list first!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 
 class HCLCDialog(QtWidgets.QDialog):
 	deleteSignal = pyqtSignal(list)
@@ -11866,6 +11991,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.EditLock.setText('Edit locked')
 			self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
 			self.ui.SeqTable.EditTag = False
+
+	@pyqtSlot()
+	def on_actionBatchChangeName_triggered(self):
+		self.renameDialog = RenameDialog()
+		self.renameDialog.show()
 
 	@pyqtSlot()
 	def on_actionIdentifyPublicClone_triggered(self):
