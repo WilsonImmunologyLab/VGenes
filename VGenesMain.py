@@ -425,8 +425,9 @@ class RenameDialog(QtWidgets.QDialog):
 							new_file_list.append(cur_file)
 							fail_list.append(cur_file)
 						else:
-							os.rename(cur_file, new_file)
-							new_file_list.append(new_file)
+							if os.path.exists(cur_file):
+								os.rename(cur_file, new_file)
+								new_file_list.append(new_file)
 					else:
 						new_file_list.append(cur_file)
 						fail_list.append(cur_file)
