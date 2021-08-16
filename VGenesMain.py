@@ -329,6 +329,10 @@ class MyQList(QListWidget):
     def __init__(self):
         super().__init__()
         self.setAcceptDrops(True)
+        self.cur_list = []
+        self.old_list = []
+        self.new_list = []
+        self.hide = True
 
     def dragEnterEvent(self, event):
 	    if event.mimeData().hasUrls:
@@ -353,7 +357,16 @@ class MyQList(QListWidget):
 			    event.accept()
 			    links = []
 			    for url in event.mimeData().urls():
-				    links.append(str(url.toLocalFile()))
+				    cur_file = str(url.toLocalFile())
+				    if cur_file in self.cur_list:
+					    pass
+				    else:
+					    self.cur_list.append(cur_file)
+					    if self.hide == True:
+						    my_path, my_file = os.path.split(cur_file)
+						    links.append(my_file)
+					    else:
+					        links.append(cur_file)
 			    self.addItems(links)
 		    else:
 			    event.ignore()
@@ -367,9 +380,11 @@ class RenameDialog(QtWidgets.QDialog):
 		self.ui.setupUi(self)
 		self.FileList = MyQList()
 		self.ui.gridLayoutRename.addWidget(self.FileList)
+		self.FileList.hide = True
 
 		self.FileList.itemDoubleClicked.connect(self.removeSel)
 		self.ui.pushButtonEdit.clicked.connect(self.editFun)
+		self.ui.radioButtonHidePath.clicked.connect(self.changeHide)
 
 		if system() == 'Windows':
 			# set style for windows
@@ -391,6 +406,22 @@ class RenameDialog(QtWidgets.QDialog):
 			                   "QLineEdit{font-size:18px;}"
 			                   "QTreeWidget{font-size:18px;}"
 			                   "QSpinBox{font-size:18px;}")
+
+	def changeHide(self):
+		if self.ui.radioButtonHidePath.isChecked():
+			self.FileList.hide = True
+		else:
+			self.FileList.hide = False
+
+		self.FileList.clear()
+		file_names = []
+		for cur_file in self.FileList.cur_list:
+			if self.FileList.hide == True:
+				cur_path, cur_name = os.path.split(cur_file)
+				file_names.append(cur_name)
+			else:
+				file_names.append(cur_file)
+		self.FileList.addItems(file_names)
 
 	def removeSel(self):
 		listRow = self.FileList.currentRow()
