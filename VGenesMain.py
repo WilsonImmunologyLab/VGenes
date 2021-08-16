@@ -427,6 +427,7 @@ class RenameDialog(QtWidgets.QDialog):
 		listRow = self.FileList.currentRow()
 		if listRow > -1:
 			self.FileList.takeItem(listRow)
+			del self.FileList.cur_list[listRow]
 			
 	def editFun(self):
 		if self.FileList.count() > 0:
