@@ -385,6 +385,7 @@ class RenameDialog(QtWidgets.QDialog):
 		self.FileList.itemDoubleClicked.connect(self.removeSel)
 		self.ui.pushButtonEdit.clicked.connect(self.editFun)
 		self.ui.radioButtonHidePath.clicked.connect(self.changeHide)
+		self.ui.pushButtonClearList.clicked.connect(self.clearList)
 
 		if system() == 'Windows':
 			# set style for windows
@@ -406,6 +407,10 @@ class RenameDialog(QtWidgets.QDialog):
 			                   "QLineEdit{font-size:18px;}"
 			                   "QTreeWidget{font-size:18px;}"
 			                   "QSpinBox{font-size:18px;}")
+
+	def clearList(self):
+		self.FileList.clear()
+		self.FileList.cur_list.clear()
 
 	def changeHide(self):
 		if self.ui.radioButtonHidePath.isChecked():
