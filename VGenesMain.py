@@ -386,6 +386,7 @@ class RenameDialog(QtWidgets.QDialog):
 		self.ui.pushButtonEdit.clicked.connect(self.editFun)
 		self.ui.radioButtonHidePath.clicked.connect(self.changeHide)
 		self.ui.pushButtonClearList.clicked.connect(self.clearList)
+		self.ui.pushButtonUndo.clicked.connect(self.undoEdit)
 
 		if system() == 'Windows':
 			# set style for windows
@@ -407,6 +408,32 @@ class RenameDialog(QtWidgets.QDialog):
 			                   "QLineEdit{font-size:18px;}"
 			                   "QTreeWidget{font-size:18px;}"
 			                   "QSpinBox{font-size:18px;}")
+
+	def undoEdit(self):
+		# change each file back to old name
+		for index in range(len(self.FileList.new_list)):
+			name_from = self.FileList.new_list[index]
+			name_to = self.FileList.old_list[index]
+			try:
+				os.rename(name_from, name_to)
+				ele_index = self.FileList.cur_list.index(name_from)
+				self.FileList.cur_list[ele_index] = name_to
+			except:
+				pass
+
+		# update display
+		self.FileList.new_list.clear()
+		self.FileList.old_list.clear()
+		self.changeHide()
+
+		# refresh UI
+		self.ui.pushButtonUndo.setEnabled(False)
+		size_w = self.size().width()
+		size_h = self.size().height()
+		offset_pool = [-1, 1]
+		offset = offset_pool[random.randint(0, 1)]
+		self.resize(size_w + offset, size_h + offset)
+
 
 	def clearList(self):
 		self.FileList.clear()
@@ -440,8 +467,10 @@ class RenameDialog(QtWidgets.QDialog):
 			fail_list = []
 			offset = self.ui.spinBox.value()
 			if offset > 0:
-				for row in range(self.FileList.count()):
-					cur_file = self.FileList.item(row).text()
+				self.FileList.old_list.clear()
+				self.FileList.new_list.clear()
+
+				for cur_file in self.FileList.cur_list:
 					file_path, original_name = os.path.split(cur_file)
 					tmp_list = original_name.split('.')
 					if len(tmp_list) > 1:
@@ -465,12 +494,18 @@ class RenameDialog(QtWidgets.QDialog):
 							if os.path.exists(cur_file):
 								os.rename(cur_file, new_file)
 								new_file_list.append(new_file)
+
+								self.FileList.old_list.append(cur_file)
+								self.FileList.new_list.append(new_file)
 					else:
 						new_file_list.append(cur_file)
 						fail_list.append(cur_file)
 
+				self.FileList.cur_list = new_file_list
 				self.FileList.clear()
-				self.FileList.addItems(new_file_list)
+				#self.FileList.addItems(new_file_list)
+				self.changeHide()
+				self.ui.pushButtonUndo.setEnabled(True)
 
 				Msg = 'File names updated!'
 				if len(fail_list) > 0:
