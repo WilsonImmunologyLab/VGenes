@@ -14,7 +14,40 @@
    <string>Edit file names in batches</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="2" column="0" colspan="2">
+   <item row="1" column="0" colspan="3">
+    <layout class="QGridLayout" name="gridLayoutRename"/>
+   </item>
+   <item row="2" column="2">
+    <widget class="QPushButton" name="pushButtonClearList">
+     <property name="text">
+      <string>Clear list</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="2">
+    <widget class="QPushButton" name="pushButtonEdit">
+     <property name="maximumSize">
+      <size>
+       <width>150</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Edit file name</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="QRadioButton" name="radioButtonHidePath">
+     <property name="text">
+      <string>hide file path</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="3">
     <widget class="QFrame" name="frame">
      <property name="maximumSize">
       <size>
@@ -79,23 +112,17 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="1">
-    <widget class="QPushButton" name="pushButtonEdit">
-     <property name="maximumSize">
-      <size>
-       <width>150</width>
-       <height>16777215</height>
-      </size>
+   <item row="4" column="0">
+    <widget class="QPushButton" name="pushButtonUndo">
+     <property name="enabled">
+      <bool>false</bool>
      </property>
      <property name="text">
-      <string>Edit file name</string>
+      <string>Undo last edits</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayoutRename"/>
-   </item>
-   <item row="0" column="0" colspan="2">
+   <item row="0" column="0" colspan="3">
     <widget class="QLabel" name="label">
      <property name="maximumSize">
       <size>
@@ -112,6 +139,19 @@
       <string>Drag and drop files below:</string>
      </property>
     </widget>
+   </item>
+   <item row="4" column="1">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>
