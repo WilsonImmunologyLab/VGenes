@@ -8654,93 +8654,10 @@ If the J-end is off the J gene end may need adjusted</string>
         <string>SeqLogo</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_38">
-        <item row="0" column="0">
-         <widget class="QPushButton" name="pushButtonAA">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Generate peptide sequence logo</string>
-          </property>
-          <property name="text">
-           <string>Peptide logo</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/MKPR.png</normaloff>:/PNG-Icons/MKPR.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>60</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPushButton" name="pushButtonNT">
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>0</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Generate nucleotide sequence logo</string>
-          </property>
-          <property name="text">
-           <string>Nucleotide logo</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/ATCG.png</normaloff>:/PNG-Icons/ATCG.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QRadioButton" name="radioButtonPop">
-          <property name="text">
-           <string>Open Alignment Logo on a pop-up page</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <spacer name="horizontalSpacer_17">
+        <item row="0" column="9">
+         <widget class="Line" name="line_14">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>322</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="0" colspan="5">
-         <widget class="QGroupBox" name="groupBoxLogo">
-          <property name="font">
-           <font>
-            <pointsize>15</pointsize>
-           </font>
-          </property>
-          <property name="title">
-           <string>Sequence Logo</string>
+           <enum>Qt::Vertical</enum>
           </property>
          </widget>
         </item>
@@ -8802,6 +8719,172 @@ If the J-end is off the J gene end may need adjusted</string>
             <string>FWR3</string>
            </property>
           </item>
+         </widget>
+        </item>
+        <item row="0" column="10">
+         <widget class="QRadioButton" name="radioButtonPop">
+          <property name="text">
+           <string>Open Alignment Logo on a pop-up page</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" colspan="12">
+         <widget class="QGroupBox" name="groupBoxLogo">
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+           </font>
+          </property>
+          <property name="title">
+           <string>Sequence Logo</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="label_106">
+          <property name="text">
+           <string>AA</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QPushButton" name="pushButtonAA">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Generate peptide sequence logo</string>
+          </property>
+          <property name="text">
+           <string>AA logo</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/MKPR.png</normaloff>:/PNG-Icons/MKPR.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>60</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="3">
+         <widget class="Line" name="line_13">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="11">
+         <spacer name="horizontalSpacer_17">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>322</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="8">
+         <widget class="QComboBox" name="comboBoxLogoColorNT">
+          <item>
+           <property name="text">
+            <string>Base Pairing</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Classic</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Monochrome</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="QPushButton" name="pushButtonNT">
+          <property name="minimumSize">
+           <size>
+            <width>100</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Generate nucleotide sequence logo</string>
+          </property>
+          <property name="text">
+           <string>NT logo</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/ATCG.png</normaloff>:/PNG-Icons/ATCG.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7">
+         <widget class="QLabel" name="label_107">
+          <property name="text">
+           <string>NT</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="6">
+         <widget class="QComboBox" name="comboBoxLogoColorAA">
+          <item>
+           <property name="text">
+            <string>Hydrophobicity</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Chemistry</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Charge</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>Monochrome</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_108">
+          <property name="font">
+           <font>
+            <pointsize>15</pointsize>
+           </font>
+          </property>
+          <property name="text">
+           <string>Color Scheme:</string>
+          </property>
          </widget>
         </item>
        </layout>
