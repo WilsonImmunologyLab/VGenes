@@ -8487,6 +8487,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 			.set_series_opts()
 			.set_global_opts(
 				title_opts=opts.TitleOpts(title="HeatMap"),
+				tooltip_opts=opts.TooltipOpts(
+					formatter=JsCode("""
+									function(params) {
+										mydata = params.data;
+										return Labels[0] + ': ' + XdataName[mydata[0]] + '<br>' + Labels[1] + ': ' + YdataName[mydata[1]] + '<br>Count: ' + mydata[2];
+									}	
+								""")
+				),
 				visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc', '#006699']),
 				xaxis_opts=opts.AxisOpts(
 					type_="category",
@@ -8511,7 +8519,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
 		          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>' + \
 		          '<style>.download{width:160px;height:25px;border-width:0px;border-radius:3px;background:#1E90FF;cursor:pointer;outline:none;color:white;font-size:17px;}.download:hover{background:#5599FF;}</style>'
-		lines[5] = js_line
+		SeqdataLine = '<script>XdataName=["'
+		SeqdataLine += '","'.join(xaxis_data)
+		SeqdataLine += '"]</script>\n'
+		SeqdataLine += '<script>YdataName=["'
+		SeqdataLine += '","'.join(yaxis_data)
+		SeqdataLine += '"]</script>\n'
+		SeqdataLine += '<script>Labels=["' + 'HC ' + data_field + '","' + 'LC ' + data_field + '"]</script>\n'
+		lines[5] = js_line + "\n" + SeqdataLine
 		## edit style line
 		style_line = lines[9]
 		style_pos = style_line.find('style')
@@ -14306,6 +14321,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 					)
 					.set_global_opts(
 						title_opts=opts.TitleOpts(title="HeatMap"),
+						tooltip_opts=opts.TooltipOpts(
+							formatter=JsCode("""
+												function(params) {
+													mydata = params.data;
+													return XdataName[mydata[0]] + '<br>' + YdataName[mydata[1]] + '<br>Count: ' + mydata[2];
+												}	
+											""")
+						),
 						visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=max_value, range_color=['#ffffcc','#006699']),
 						xaxis_opts=opts.AxisOpts(
 							type_="category",
@@ -14401,7 +14424,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 			          os.path.join(js_folder, 'echarts.js') + '"></script>' + \
 			          '<script src="' + os.path.join(js_folder, 'jquery.js') + '"></script>' + \
 			          '<script src="qrc:///qtwebchannel/qwebchannel.js"></script>'
-			lines[5] = js_line
+			if self.ui.tabWidgetFig.currentIndex() == 8:
+				SeqdataLine = '<script>XdataName=["'
+				SeqdataLine += '","'.join(xaxis_data)
+				SeqdataLine += '"]</script>\n'
+				SeqdataLine += '<script>YdataName=["'
+				SeqdataLine += '","'.join(yaxis_data)
+				SeqdataLine += '"]</script>\n'
+				lines[5] = js_line + "\n" + SeqdataLine
+			else:
+				lines[5] = js_line
 			# edit style line
 			style_line = lines[9]
 			style_pos = style_line.find('style')
