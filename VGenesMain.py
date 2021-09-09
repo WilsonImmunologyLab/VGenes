@@ -16951,21 +16951,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 		QApplication.setOverrideCursor(Qt.WaitCursor)
 
 		if DataIn == 'none':
-			fields = ['SeqName', 'Sequence']
+			fields = ['SeqName', 'Sequence', 'GermlineSequence']
 			# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
 			SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-			DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
+			DataIsTMP = VGenesSQL.RunSQL(DBFilename, SQLStatement)  # returns list of tuples where seqname is first
+
+			DataIs = [(ele[0],ele[1]) for ele in DataIsTMP]
 
 			if len(DataIs) == 1:
 				self.ui.actionGL.setChecked(True)
 				GLMsg = True
-				GermSeq = data[80].upper()
+				GermSeq = DataIsTMP[0][2].upper()
 				Germline = ('Germline', GermSeq)
 				DataIs.append(Germline)
 			else:
 				if self.ui.actionGL.isChecked() == True:
 					GLMsg = True
-					GermSeq = data[80].upper()
+					GermSeq = DataIsTMP[0][2].upper()
 					Germline = ('Germline', GermSeq)
 					DataIs.append(Germline)
 		elif DataIn == 'edit':
