@@ -20975,16 +20975,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 					f.write('\n</body>\n</html>')
 
 				# display
-				view = QWebEngineView()
-				# view.load(QUrl("file://" + out_svg))
 				url = QUrl.fromLocalFile(str(out_svg))
-				view.load(url)
-				view.show()
-
-				layout = self.ui.gridLayoutClone.layout()
-				for i in range(layout.count()):
-					layout.removeWidget(layout.itemAt(i).widget())
-				layout.addWidget(view)
+				self.ui.HTMLviewClone.load(url)
+				self.ui.HTMLviewClone.html = ''
+				self.ui.HTMLviewClone.show()
 			except:
 				error = 1
 
@@ -21009,16 +21003,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 						f.write('</p>')
 						f.write('\n</body>\n</html>')
 
-					view = QWebEngineView()
-					# view.load(QUrl("file://" + out_svg))
 					url = QUrl.fromLocalFile(str(out_html))
-					view.load(url)
-					view.show()
-
-					layout = self.ui.gridLayoutClone.layout()
-					for i in range(layout.count()):
-						layout.removeWidget(layout.itemAt(i).widget())
-					layout.addWidget(view)
+					self.ui.HTMLviewClone.load(url)
+					self.ui.HTMLviewClone.html = ''
+					self.ui.HTMLviewClone.show()
 				except:
 					eps = eps_formatter(data, format)
 					if system() == 'Windows':
@@ -21230,16 +21218,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 					f.write('\n</body>\n</html>')
 
 				# display
-				view = QWebEngineView()
-				# view.load(QUrl("file://" + out_svg))
 				url = QUrl.fromLocalFile(str(out_svg))
-				view.load(url)
-				view.show()
-
-				layout = self.ui.gridLayoutClone.layout()
-				for i in range(layout.count()):
-					layout.removeWidget(layout.itemAt(i).widget())
-				layout.addWidget(view)
+				self.ui.HTMLviewClone.load(url)
+				self.ui.HTMLviewClone.html = ''
+				self.ui.HTMLviewClone.show()
 			except:
 				error = 1
 
@@ -21264,16 +21246,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 						f.write('</p>')
 						f.write('\n</body>\n</html>')
 
-					view = QWebEngineView()
-					# view.load(QUrl("file://" + out_svg))
 					url = QUrl.fromLocalFile(str(out_html))
-					view.load(url)
-					view.show()
-
-					layout = self.ui.gridLayoutClone.layout()
-					for i in range(layout.count()):
-						layout.removeWidget(layout.itemAt(i).widget())
-					layout.addWidget(view)
+					self.ui.HTMLviewClone.load(url)
+					self.ui.HTMLviewClone.html = ''
+					self.ui.HTMLviewClone.show()
 				except:
 					eps = eps_formatter(data, format)
 					if system() == 'Windows':
