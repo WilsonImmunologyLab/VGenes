@@ -10886,6 +10886,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# determine gene region
 				if field == 'V gene':
 					field = 'Sequence,Vbeg,Vend'
+				elif field == 'V(D)J':
+					field = 'Sequence,Vbeg,Jend'
 				elif field == 'J gene':
 					field = 'Sequence,Jbeg,Jend'
 				elif field == 'FWR1':
@@ -11143,6 +11145,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# determine gene region
 				if field == 'V gene':
 					field = 'Sequence,Vbeg,Vend'
+				elif field == 'V(D)J':
+					field = 'Sequence,Vbeg,Jend'
 				elif field == 'J gene':
 					field = 'Sequence,Jbeg,Jend'
 				elif field == 'FWR1':
@@ -20838,6 +20842,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# determine gene region
 				if field == 'V gene':
 					field = 'Sequence,Vbeg,Vend'
+				elif field == 'V(D)J':
+					field = 'Sequence,Vbeg,Jend'
 				elif field == 'J gene':
 					field = 'Sequence,Jbeg,Jend'
 				elif field == 'FWR1':
@@ -21091,6 +21097,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 				# determine gene region
 				if field == 'V gene':
 					field = 'Sequence,Vbeg,Vend'
+				elif field == 'V(D)J':
+					field = 'Sequence,Vbeg,Jend'
 				elif field == 'J gene':
 					field = 'Sequence,Jbeg,Jend'
 				elif field == 'FWR1':

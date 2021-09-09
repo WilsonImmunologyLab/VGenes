@@ -8676,6 +8676,11 @@ If the J-end is off the J gene end may need adjusted</string>
           </item>
           <item>
            <property name="text">
+            <string>V(D)J</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
             <string>CDR3DNA</string>
            </property>
           </item>
@@ -9892,6 +9897,11 @@ If the J-end is off the J gene end may need adjusted</string>
                     <item>
                      <property name="text">
                       <string>Sequence</string>
+                     </property>
+                    </item>
+                    <item>
+                     <property name="text">
+                      <string>V(D)J</string>
                      </property>
                     </item>
                     <item>
