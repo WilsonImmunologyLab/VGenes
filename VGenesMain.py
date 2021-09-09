@@ -8143,6 +8143,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.pushButtonDrawClone.setEnabled(False)
 			self.ui.pushButtonDownloadClone.setEnabled(False)
 			self.ui.checkBoxFigLegendClone.setEnabled(False)
+		elif self.ui.tabWidgetClone.currentIndex() == 4:
+			self.ui.pushButtonDrawClone.setEnabled(False)
+			self.ui.pushButtonDownloadClone.setEnabled(False)
+			self.ui.checkBoxFigLegendClone.setEnabled(False)
 		else:
 			self.ui.pushButtonDrawClone.setEnabled(True)
 			self.ui.pushButtonDownloadClone.setEnabled(True)
