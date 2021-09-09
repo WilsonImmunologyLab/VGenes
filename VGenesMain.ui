@@ -9979,7 +9979,7 @@ If the J-end is off the J gene end may need adjusted</string>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
-                      <width>316</width>
+                      <width>333</width>
                       <height>17</height>
                      </size>
                     </property>
@@ -9996,6 +9996,13 @@ If the J-end is off the J gene end may need adjusted</string>
                    <widget class="QPushButton" name="pushButtonCloneAlignTXT">
                     <property name="text">
                      <string>Alignment(txt)</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="0">
+                   <widget class="QLabel" name="label_111">
+                    <property name="text">
+                     <string>Options for this function is on the toolbar</string>
                     </property>
                    </widget>
                   </item>
