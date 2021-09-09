@@ -8053,6 +8053,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.checkBoxSHM_CDR2.clicked.connect(self.SHMcheck1)
 		self.ui.spinBoxMinCloneSize.valueChanged.connect(self.initial_Clone)
 		self.ui.radioButtonHConly.clicked.connect(self.initial_Clone)
+		self.ui.tabWidgetClone.currentChanged['int'].connect(self.updateUIclone)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -8136,6 +8137,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 			                   "QSpinBox{font-size:18px;}")
 		else:
 			pass
+
+	def updateUIclone(self):
+		if self.ui.tabWidgetClone.currentIndex() == 3:
+			self.ui.pushButtonDrawClone.setEnabled(False)
+			self.ui.pushButtonDownloadClone.setEnabled(False)
+			self.ui.checkBoxFigLegendClone.setEnabled(False)
+		else:
+			self.ui.pushButtonDrawClone.setEnabled(True)
+			self.ui.pushButtonDownloadClone.setEnabled(True)
+			self.ui.checkBoxFigLegendClone.setEnabled(True)
 
 	def enableMoreOptionScatter(self):
 		if self.ui.checkBoxScatterValueColor.isChecked():
@@ -20782,6 +20793,265 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.ui.chkInstability.setChecked(False)
 			self.ui.chkpI.setChecked(False)
 			self.ui.chkSurface.setChecked(False)
+
+	@pyqtSlot()
+	def on_pushButtonAAlogoClone_clicked(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
+		# fetch sequence names of this clone
+		member_names = []
+		n_member = self.ui.listWidgetCloneMember.count()
+		for i in range(n_member):
+			item = self.ui.listWidgetCloneMember.item(i)
+			member_names.append(item.text())
+
+		WhereState = ''
+		# if not listItems: do nothing
+		DataSet = []
+		if n_member < 1:
+			msg = 'Please select(check) at one clone first!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		else:
+			WhereState = 'SeqName IN ("' + '","'.join(member_names) + '")'
+			# i = 1
+			# for item in listItems:
+			#	WhereState += 'SeqName = "' + item + '"'
+			#	if NumSeqs > i:
+			#		WhereState += ' OR '
+			#	i += 1
+
+			field = self.ui.comboBoxClonelogo.currentText()
+			if field in FieldList:
+				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				for item in DataIn:
+					SeqName = item[0]
+					Sequence = item[1]
+
+					AAseq, msg = VGenesSeq.Translator(Sequence, 0)
+					AAseq = AAseq.upper()
+					EachIn = (SeqName, AAseq)
+					DataSet.append(EachIn)
+			else:
+				# determine gene region
+				if field == 'V gene':
+					field = 'Sequence,Vbeg,Vend'
+				elif field == 'J gene':
+					field = 'Sequence,Jbeg,Jend'
+				elif field == 'FWR1':
+					field = 'Sequence,FR1From,FR1To'
+				elif field == 'CDR1':
+					field = 'Sequence,CDR1From,CDR1To'
+				elif field == 'FWR2':
+					field = 'Sequence,FR2From,FR2To'
+				elif field == 'CDR2':
+					field = 'Sequence,CDR2From,CDR2To'
+				elif field == 'FWR3':
+					field = 'Sequence,FR3From,FR3To'
+				else:
+					return
+
+				# make sequences
+				SQLStatement = 'SELECT SeqName, ' + field + ' FROM vgenesDB WHERE ' + WhereState
+				DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+				for item in DataIn:
+					SeqName = item[0]
+					Sequence = item[1]
+					SeqFrom = int(item[2])
+					SeqTo = int(item[3])
+					Sequence = Sequence[SeqFrom - 1:SeqTo]
+					AAseq, msg = VGenesSeq.Translator(Sequence, 0)
+					AAseq = AAseq.upper()
+					EachIn = (SeqName, AAseq)
+					DataSet.append(EachIn)
+
+		# align selected sequences using muscle
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
+		aafilename = os.path.join(temp_folder, "in-" + time_stamp + ".fas")
+		if len(DataSet) == 1:
+			SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+			SeqName = SeqName.strip()
+			AAseq = DataSet[0][1]
+
+			out_handle = open(outfilename, 'w')
+			out_handle.write('>' + SeqName + '\n')
+			out_handle.write(AAseq)
+			out_handle.close()
+		else:
+			aa_handle = open(aafilename, 'w')
+			for record in DataSet:
+				SeqName = record[0].replace('\n', '').replace('\r', '')
+				SeqName = SeqName.strip()
+				AAseq = record[1]
+				aa_handle.write('>' + SeqName + '\n')
+				aa_handle.write(AAseq + '\n')
+			aa_handle.close()
+
+			if system() == 'Windows':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			elif system() == 'Darwin':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			elif system() == 'Linux':
+				cmd = muscle_path
+				cmd += " -in " + aafilename + " -out " + outfilename
+			else:
+				cmd = ''
+			try:
+				os.system(cmd)
+			except:
+				QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!',
+				                    QMessageBox.Ok,
+				                    QMessageBox.Ok)
+				return
+
+		# start web logo
+		f = open(outfilename)
+		seqs = read_seq_data(f)
+		data = LogoData.from_seqs(seqs)
+
+		options = LogoOptions()
+		options.resolution = 300
+		options.fineprint = 'VGene Generated by WebLogo 3.7'
+		colorscheme = logoColorSchemeAA(self.ui.comboBoxClonelogoAAColor.currentText())
+		if colorscheme != "default":
+			options.color_scheme = colorscheme
+		options.fineprint = 'VGene Generated by WebLogo 3.7'
+		format = LogoFormat(data, options)
+
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+
+		if self.ui.radioButtonClonePop.isChecked():
+			eps = eps_formatter(data, format)
+			if system() == 'Windows':
+				options = QtWidgets.QFileDialog.Options()
+				out_eps, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+				                                                   "New AA logo",
+				                                                   "New AA logo",
+				                                                   "Encapsulated PostScript Files (*.eps);;All Files (*)",
+				                                                   options=options)
+				if out_eps != 'none':
+					with open(out_eps, 'wb') as f:
+						f.write(eps)
+
+					Msg = 'You sequence logo EPS file has been saved at ' + out_eps
+					QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+			elif system() == 'Darwin':
+				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+				with open(out_eps, 'wb') as f:
+					f.write(eps)
+				cmd = 'open ' + out_eps  # mac
+			elif system() == 'Linux':
+				out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+				with open(out_eps, 'wb') as f:
+					f.write(eps)
+				cmd = 'nautilus' + out_eps  # Linux
+			else:
+				cmd = ''
+			bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+			             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+		else:
+			error = 0
+			try:
+				svg = svg_formatter(data, format)
+				svg = svg.decode("utf-8")
+
+				out_svg = os.path.join(temp_folder, "out-" + time_stamp + ".html")
+				with open(out_svg, 'w') as f:
+					f.write('<!DOCTYPE html>\n<html>\n<body style="margin-left: 0px;\n">')
+					f.write(svg)
+					f.write('\n</body>\n</html>')
+
+				# display
+				view = QWebEngineView()
+				# view.load(QUrl("file://" + out_svg))
+				url = QUrl.fromLocalFile(str(out_svg))
+				view.load(url)
+				view.show()
+
+				layout = self.ui.gridLayoutClone.layout()
+				for i in range(layout.count()):
+					layout.removeWidget(layout.itemAt(i).widget())
+				layout.addWidget(view)
+			except:
+				error = 1
+
+			if error == 1:
+				try:
+					# generate eps and png
+					eps = eps_formatter(data, format)
+					out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+					with open(out_eps, 'wb') as f:
+						f.write(eps)
+
+					im = Image.open(out_eps)
+					im.load(scale=4)
+					out_png = os.path.join(temp_folder, "out-" + time_stamp + ".png")
+					im.save(out_png)
+
+					# load png to HMTL
+					out_html = os.path.join(temp_folder, "out-" + time_stamp + ".html")
+					with open(out_html, 'w') as f:
+						f.write('<!DOCTYPE html>\n<html>\n<body style="margin-left: 0px;\n">')
+						f.write('<p><img src="' + out_png + '" width="960">')
+						f.write('</p>')
+						f.write('\n</body>\n</html>')
+
+					view = QWebEngineView()
+					# view.load(QUrl("file://" + out_svg))
+					url = QUrl.fromLocalFile(str(out_html))
+					view.load(url)
+					view.show()
+
+					layout = self.ui.gridLayoutClone.layout()
+					for i in range(layout.count()):
+						layout.removeWidget(layout.itemAt(i).widget())
+					layout.addWidget(view)
+				except:
+					eps = eps_formatter(data, format)
+					if system() == 'Windows':
+						options = QtWidgets.QFileDialog.Options()
+						out_eps, _ = QtWidgets.QFileDialog.getSaveFileName(self,
+						                                                   "New AA logo",
+						                                                   "New AA logo",
+						                                                   "Encapsulated PostScript Files (*.eps);;All Files (*)",
+						                                                   options=options)
+						if out_eps != 'none':
+							with open(out_eps, 'wb') as f:
+								f.write(eps)
+
+							Msg = 'You sequence logo EPS file has been saved at ' + out_eps
+							QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+						return
+					elif system() == 'Darwin':
+						out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+						with open(out_eps, 'wb') as f:
+							f.write(eps)
+						cmd = 'open ' + out_eps  # mac
+						bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+						             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+						Msg = 'Supporting package missed! Will show sequence logo in a file!\n' + out_eps
+						QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					elif system() == 'Linux':
+						out_eps = os.path.join(temp_folder, "out-" + time_stamp + ".eps")
+						with open(out_eps, 'wb') as f:
+							f.write(eps)
+						cmd = 'nautilus' + out_eps  # Linux
+						bot1 = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE, shell=True,
+						             env={"LANG": "en_US.UTF-8", "LC_ALL": "en_US.UTF-8"})
+					else:
+						return
+
+	@pyqtSlot()
+	def on_pushButtonNTlogoClone_clicked(self):
+		pass
 
 	def proteinFunctions(self):
 		# make array of fixed seqs to decorate
