@@ -9965,67 +9965,39 @@ If the J-end is off the J gene end may need adjusted</string>
                   <string>Alignment</string>
                  </attribute>
                  <layout class="QGridLayout" name="gridLayout_66">
-                  <item row="0" column="0">
-                   <widget class="QCheckBox" name="checkBoxCloneDNA">
-                    <property name="text">
-                     <string>DNA</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="1">
-                   <widget class="QCheckBox" name="checkBoxCloneAA">
-                    <property name="text">
-                     <string>AA</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QCheckBox" name="checkBoxCloneGL">
-                    <property name="text">
-                     <string>GL</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QCheckBox" name="checkBoxCloneIsotypes">
-                    <property name="text">
-                     <string>Isotypes</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="4">
-                   <widget class="QPushButton" name="pushButtonCloneAlignTXT">
-                    <property name="text">
-                     <string>Alignment(txt)</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0" rowspan="2" colspan="5">
-                   <widget class="Line" name="line_16">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="4" rowspan="2">
+                  <item row="2" column="2" rowspan="2">
                    <widget class="QPushButton" name="pushButtonCloneAlignHTML">
                     <property name="text">
                      <string>Alignment(HTML)</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="3" column="0" colspan="4">
+                  <item row="3" column="0" colspan="2">
                    <spacer name="horizontalSpacer_26">
                     <property name="orientation">
                      <enum>Qt::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
-                      <width>333</width>
-                      <height>11</height>
+                      <width>316</width>
+                      <height>17</height>
                      </size>
                     </property>
                    </spacer>
+                  </item>
+                  <item row="1" column="0" rowspan="2" colspan="3">
+                   <widget class="Line" name="line_16">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QPushButton" name="pushButtonCloneAlignTXT">
+                    <property name="text">
+                     <string>Alignment(txt)</string>
+                    </property>
+                   </widget>
                   </item>
                  </layout>
                 </widget>

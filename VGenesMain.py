@@ -17259,6 +17259,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		print('done')
 
+	@pyqtSlot()
+	def on_pushButtonCloneAlignTXT_clicked(self):
+		# fetch sequence names of this clone
+		member_names = []
+		n_member = self.ui.listWidgetCloneMember.count()
+		if n_member == 0:
+			Msg = 'Please select at lease one clone!'
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		for i in range(n_member):
+			item = self.ui.listWidgetCloneMember.item(i)
+			member_names.append(item.text())
+
+		WhereState = 'SeqName IN ("' + '","'.join(member_names) + '")'
+
+		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB WHERE ' + WhereState
+		DataIsTMP = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		DataIs = [(ele[0], ele[1]) for ele in DataIsTMP]
+
+		if len(DataIs) == 1:
+			self.ui.actionGL.setChecked(True)
+			GLMsg = True
+			GermSeq = DataIsTMP[0][2].upper()
+			Germline = ('Germline', GermSeq)
+			DataIs.append(Germline)
+		else:
+			if self.ui.actionGL.isChecked() == True:
+				GLMsg = True
+				GermSeq = DataIsTMP[0][2].upper()
+				Germline = ('Germline', GermSeq)
+				DataIs.append(Germline)
+
+		# run alignment
+		self.AlignSequences(DataIs)
+
 	def getTreeSelected(self):
 		root = self.ui.treeWidget.invisibleRootItem()
 		ListSelected = []
