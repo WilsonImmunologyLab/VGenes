@@ -21125,17 +21125,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# display
-		window_id = int(time.time() * 100)
-		VGenesTextWindows[window_id] = htmlDialog()
-		VGenesTextWindows[window_id].id = window_id
-		layout = QGridLayout(VGenesTextWindows[window_id])
-		view = QWebEngineView(self)
-		# view.load(QUrl("file://" + html_file))
-		url = QUrl.fromLocalFile(str(html_file))
-		view.load(url)
-		view.show()
-		layout.addWidget(view)
-		VGenesTextWindows[window_id].show()
+		if self.ui.radioButtonCloneMSA.isChecked():
+			window_id = int(time.time() * 100)
+			VGenesTextWindows[window_id] = htmlDialog()
+			VGenesTextWindows[window_id].id = window_id
+			layout = QGridLayout(VGenesTextWindows[window_id])
+			view = QWebEngineView(self)
+			# view.load(QUrl("file://" + html_file))
+			url = QUrl.fromLocalFile(str(html_file))
+			view.load(url)
+			view.show()
+			layout.addWidget(view)
+			VGenesTextWindows[window_id].show()
+		else:
+			url = QUrl.fromLocalFile(str(html_file))
+			self.ui.HTMLviewClone.load(url)
+			self.ui.HTMLviewClone.html = ''
+			self.ui.HTMLviewClone.show()
 
 
 	@pyqtSlot()
