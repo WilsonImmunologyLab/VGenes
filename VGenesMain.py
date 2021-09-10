@@ -21085,6 +21085,60 @@ class VGenesForm(QtWidgets.QMainWindow):
 						return
 
 	@pyqtSlot()
+	def on_pushButtonCloneAlignHTML_clicked(self):
+		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+			return
+
+		# fetch sequence names of this clone
+		member_names = []
+		n_member = self.ui.listWidgetCloneMember.count()
+		for i in range(n_member):
+			item = self.ui.listWidgetCloneMember.item(i)
+			member_names.append(item.text())
+
+		# fetch sequence data
+		DataSet = []
+		if n_member < 1:
+			msg = 'Please select(check) at one clone first!'
+			QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		else:
+			WhereState = 'SeqName IN ("' + '","'.join(member_names) + '")'
+			field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+			for item in DataIn:
+				SeqName = item[0]
+				Sequence = item[1]
+				SeqFrom = int(item[2])
+				SeqTo = int(item[14])
+				Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+				Sequence = Sequence.upper()
+				EachIn = (SeqName, Sequence, item[2], item[3], item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11],item[12],item[13],item[14],item[15],item[16])
+				DataSet.append(EachIn)
+
+		# make HTML
+		html_file = AlignSequencesHTMLBCR(DataSet, '')
+		if html_file[0] == 'W':
+			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		# view.load(QUrl("file://" + html_file))
+		url = QUrl.fromLocalFile(str(html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
+
+	@pyqtSlot()
 	def on_pushButtonNTlogoClone_clicked(self):
 		if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
 			return
@@ -26346,7 +26400,6 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
 	return DATA
 
-
 def IgBlastParserFastTCR(FASTAFile, datalist, signal):
 	import os
 	# todo change to app folder
@@ -28995,6 +29048,352 @@ def MakeSeqWithInseetion(class_name,id,AAseq,info):
 	div_seq += '</div>'
 
 	return div_seq
+
+def AlignSequencesHTMLBCR(DataSet, template):
+	#######################################
+	# input DataSet format
+	# 0: SeqName
+	# 1: Sequence
+	# 2: FR1From
+	# 3: FR1To
+	# 4: CDR1From
+	# 5: CDR1To
+	# 6: FR2From
+	# 7: FR2To
+	# 8: CDR2From
+	# 9: CDR2To
+	# 10: FR3From
+	# 11: FR3To
+	# 12: CDR3From
+	# 13: CDR3To
+	# 14: Jend
+	# 15: GermlineSequence
+	# 16: ORF
+	#######################################
+
+	# import tempfile
+	import os
+	TupData = ()
+	global GLMsg
+	global working_prefix
+	global clustal_path
+	global temp_folder
+	global VGenesTextWindows
+	global muscle_path
+
+	# align selected sequences (AA) using muscle
+	all = dict()
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
+	aafilename = os.path.join(temp_folder, "in-" + time_stamp + ".fas")
+	if len(DataSet) == 1:
+		SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+		SeqName = SeqName.strip()
+		NTseq = DataSet[0][1]
+		if isinstance(DataSet[0][16], int):
+			ORF = DataSet[0][16]
+		else:
+			ORF = 0
+
+		# sequence check for NT seq
+		pattern = re.compile(r'[^ATCGUatcgu]')
+		cur_strange = pattern.findall(NTseq)
+		cur_strange = list(set(cur_strange))
+		if len(cur_strange) > 0:
+			ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
+			         '\nPlease remove those Unlawful nucleotide!'
+			return ErrMsg
+
+		AAseq, ErMessage = Translator(NTseq, ORF)
+		all[SeqName] = [NTseq[ORF:], AAseq]
+
+		out_handle = open(outfilename,'w')
+		out_handle.write('>' + SeqName + '\n')
+		out_handle.write(AAseq)
+		out_handle.close()
+	else:
+		aa_handle = open(aafilename,'w')
+		for record in DataSet:
+			SeqName = record[0].replace('\n', '').replace('\r', '')
+			SeqName = SeqName.strip()
+			NTseq = record[1]
+			if isinstance(record[16], int):
+				ORF = record[16]
+			else:
+				ORF = 0
+
+			# sequence check for NT seq
+			pattern = re.compile(r'[^ATCGUatcgu]')
+			cur_strange = pattern.findall(NTseq)
+			cur_strange = list(set(cur_strange))
+			if len(cur_strange) > 0:
+				ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
+				         '\nPlease remove those Unlawful nucleotide!'
+				return ErrMsg
+
+			AAseq, ErMessage = Translator(NTseq[ORF:], ORF)
+			AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
+			all[SeqName] = [NTseq[ORF:], AAseq]
+			aa_handle.write('>' + SeqName + '\n')
+			aa_handle.write(AAseq + '\n')
+		aa_handle.close()
+
+		if system() == 'Windows':
+			cmd = muscle_path
+			cmd += " -in " + aafilename + " -out " + outfilename
+		elif system() == 'Darwin':
+			cmd = muscle_path
+			cmd += " -in " + aafilename + " -out " + outfilename
+		elif system() == 'Linux':
+			cmd = muscle_path
+			cmd += " -in " + aafilename + " -out " + outfilename
+		else:
+			cmd = ''
+		try:
+			os.system(cmd)
+		except:
+			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
+			                    QMessageBox.Ok)
+			return
+
+	# read alignment file, make alignment NT and AA sequences
+	SeqName = ''
+	AAseq = ''
+	if os.path.isfile(outfilename):
+		currentfile = open(outfilename, 'r')
+		lines = currentfile.readlines()
+		for line in lines:
+			Readline = line.replace('\n', '').replace('\r', '')
+			Readline = Readline.strip()
+			if Readline[0] == '>':
+				if SeqName != '':
+					AAseq, NTseq = BuildNTalignment(AAseq, all[SeqName][0])
+					all[SeqName] = [NTseq, AAseq]
+				SeqName = Readline[1:]
+				AAseq = ''
+			else:
+				AAseq += Readline
+		AAseq, NTseq = BuildNTalignment(AAseq, all[SeqName][0])
+		all[SeqName] = [NTseq, AAseq]
+	else:
+		return
+
+	# generate consnesus sequences (AA and NT)
+	if len(all) == 1:
+		for key in all:
+			consensusDNA = all[key][0]
+			consensusAA = all[key][1]
+	else:
+		firstOne = all[SeqName]
+		seqlen = len(firstOne[0])
+
+		consensusDNA = ''
+		conserveDNA = []
+		for i in range(seqlen):
+			tester = ''
+			for key in all:
+				try:
+					seq = all[key][0]
+					tester += seq[i]
+				except:
+					Msg = 'We find sequence error in ' + key + ', please check your sequence!'
+					return Msg
+
+			frequencies = [(c, tester.count(c)) for c in set(tester)]
+			Cnuc = max(frequencies, key=lambda x: x[1])
+			conserveDNA.append(Cnuc[1]/len(tester))
+			consensusDNA += Cnuc[0]
+
+
+		consensusAA = ''
+		conserveAA = []
+		firstOne = all[SeqName]
+		seqlen = len(firstOne[1])
+		for i in range(seqlen):
+			tester = ''
+			for key in all:
+				seq = all[key][1]
+				tester += seq[i]
+
+			frequencies = [(c, tester.count(c)) for c in set(tester)]
+			Caa = max(frequencies, key=lambda x: x[1])
+			conserveAA.append(Caa[1]/len(tester))
+			consensusAA += Caa[0]
+
+	# align consensus AA sequence with template to generate H1 and H3 numbering
+	compact_consensusAA = consensusAA.replace(' ', '')
+
+	# make legend HTML
+	legend_html = ''
+	'''
+	## H1 numbering:
+	legend_html += '\t<span class="name" style="margin-left:12px;">H1 highlight region:</span>\n'
+	for epitope in H1_epitope_list:
+		epitope_name = EpitopesAnnotateH1[epitope]
+		str_len = len(epitope_name)*5 + 30
+		legend_html += '\t<span class="unit_long ' \
+		               + epitope + '" style="width: ' \
+		               + str(str_len) + 'px">' \
+		               + epitope_name + '</span>\n'
+	legend_html += '\t<br>\n'
+	## H3 numbering:
+	legend_html += '\t<span class="name" style="margin-left:12px;">H3 highlight region:</span>\n'
+	for epitope in H3_epitope_list:
+		epitope_name = EpitopesAnnotateH3[epitope]
+		str_len = len(epitope_name) * 5 + 30
+		legend_html += '\t<span class="unit_long ' \
+		               + epitope + '" style="width: ' \
+		               + str(str_len) + 'px">' \
+		               + epitope_name + '</span>\n'
+	legend_html += '\t<br>\n'
+	## N gly-site
+	legend_html += '\t<span class="name" style="margin-left:12px;">Potential N-Gly site:</span>\n'
+	legend_html += '\t<span class="unit_long NGlyPattern">N-X-S/T</span>\n'
+	legend_html += '</div>\n'
+	'''
+
+	# make header HTML
+	pos_aa_data = [list(range(1,len(compact_consensusAA)+1)),list(range(1,len(compact_consensusAA)+1))]
+	div_pos_aa = MakeDivPosAA('line line_pos_aa', 'Position AA:', 'Original AA position: ', pos_aa_data)
+	div_con_aa = MakeDivAA('line con_aa', 'Template AA:', compact_consensusAA)
+	pos_nt_data = [list(range(1, len(consensusDNA) + 1)), list(range(1, len(consensusDNA) + 1))]
+	div_pos_nt = MakeDivPosNT('line line_pos_nt', 'Position NT:', 'Original NT position: ', pos_nt_data)
+	div_con_nt = MakeDivNT('line con_nt', 'Template NT:', consensusDNA)
+	# SEQ CONSERVE
+	if template == '':
+		div_seqcon_score_aa = MakeConDivAA('line line_pos_aa', 'AA conservation:', conserveAA)
+		div_seqcon_score_nt = MakeConDivNT('line line_pos_nt', 'NT conservation:', conserveDNA)
+
+	# initial and open HTML file
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	out_html_file = os.path.join(temp_folder, time_stamp + '.html')
+	if template == '':
+		header_file = os.path.join(working_prefix, 'Data', 'template.html')
+	else:
+		header_file = os.path.join(working_prefix, 'Data', template + '.html')
+	shutil.copyfile(header_file, out_html_file)
+	out_file_handle = open(out_html_file, 'a')
+
+	width_aa = 14 * len(compact_consensusAA)
+	width_nt = 40 * len(compact_consensusAA)
+	CSSdata = '<style type="text/css">.seq_div {width: ' + str(width_nt) + 'px;}</style>\n'
+	JSdata = '<script type="text/javascript">\n'
+	JSdata += 'var seq_width = [' + str(width_nt) + ',' + str(width_aa) + '];\n'
+	JSdata += 'var data = {\n'
+	JSarray = []
+	JStext = '"Seq0":["Consensus","' + compact_consensusAA + '","' + consensusDNA + '"]'
+	JSarray.append(JStext)
+
+	Optiondata = '<script type="text/javascript">\n'
+	Optiondata += '$("#option").append("<option value =\'Seq0\'>Consensus Sequence</option>");\n'
+
+	name_div = '<div class="name_div">\n'
+	seq_div = '<div class = "seq_div">\n'
+	# write header section
+	name_div += div_pos_aa[0] + '\n'
+	seq_div += div_pos_aa[1] + '\n'
+	name_div += div_con_aa[0] + '\n'
+	seq_div += div_con_aa[1] + '\n'
+	name_div += div_pos_nt[0] + '\n'
+	seq_div += div_pos_nt[1] + '\n'
+	name_div += div_con_nt[0] + '\n'
+	seq_div += div_con_nt[1] + '\n'
+	if template == '':
+		name_div += div_seqcon_score_aa[0] + '\n'
+		seq_div += div_seqcon_score_aa[1] + '\n'
+		name_div += div_seqcon_score_nt[0] + '\n'
+		seq_div += div_seqcon_score_nt[1] + '\n'
+	# make sequence section HTML
+	i = 1
+	for key in all:
+		seq_nick_name = 'Seq' + str(i)
+
+		seq_nt = all[key][0]
+		seq_aa = all[key][1]
+		con_nt = MakeConSeq(seq_nt, consensusDNA)
+		con_aa = MakeConSeq(seq_aa, compact_consensusAA)
+
+		#div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
+		#div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
+		div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
+		div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
+		div_nt = MakeDivNT('line line_nt ' + seq_nick_name, key, seq_nt)
+		div_nt_mut = MakeDivNT('line line_con_nt ' + seq_nick_name, key, con_nt)
+		# write sequence section
+		name_div += div_aa[0] + '\n'
+		seq_div += div_aa[1] + '\n'
+		name_div += div_aa_mut[0] + '\n'
+		seq_div += div_aa_mut[1] + '\n'
+		name_div += div_nt[0] + '\n'
+		seq_div += div_nt[1] + '\n'
+		name_div += div_nt_mut[0] + '\n'
+		seq_div += div_nt_mut[1] + '\n'
+
+		JStext = '"' + seq_nick_name + '":["' + key + '","' + seq_aa + '","' + seq_nt + '"]'
+		JSarray.append(JStext)
+		Optiondata += '$("#option").append("<option value =\'' + seq_nick_name + '\'>' + key + '</option>");\n'
+		i += 1
+
+	JSdata += ',\n'.join(JSarray)
+	JSdata += '\n}\n</script>\n'
+	Optiondata += '</script>\n'
+
+	name_div += '</div>\n'
+	seq_div += '</div>\n'
+
+	out_file_handle.write(legend_html)
+	out_file_handle.write(CSSdata)
+	out_file_handle.write(JSdata)
+	out_file_handle.write(Optiondata)
+	out_file_handle.write('<div class="box">')
+	out_file_handle.write(name_div)
+	out_file_handle.write(seq_div)
+	out_file_handle.write('\n</div>\n</body>\n</html>')
+	out_file_handle.close()
+	return out_html_file
+
+def pct2color(data):
+	if data == 1:
+		color_group = 'con_lvl1'
+	elif data >= 0.75:
+		color_group = 'con_lvl2'
+	elif data >= 0.5:
+		color_group = 'con_lvl3'
+	elif data >= 0.25:
+		color_group = 'con_lvl4'
+	else:
+		color_group = 'con_lvl5'
+
+	return color_group
+
+def MakeConDivNT(class_name, line_name, data):
+	div_name = 	'<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	count = 0
+	for i in range(len(data)):
+		if count == 0:
+			div_seq += '<span class="unit_pack">'
+		elif count%3 == 0:
+			div_seq += '</span><span class="unit_pack">'
+		div_seq += '<span class="unit ' + pct2color(data[i]) + '">&nbsp;</span>'
+		count += 1
+	div_seq += '</span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeConDivAA(class_name, line_name, data):
+	div_name = '<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	for i in range(len(data)):
+		div_seq += '<span class="unit_pack"><span class="insert ' + pct2color(data[i]) + '">&nbsp;</span><span class="unit ' + pct2color(data[i]) + '">&nbsp;</span><span class="insert ' + pct2color(data[i]) + '">&nbsp;</span></span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
 
 def heatmap(data, row_labels, col_labels, ax=None,
             cbar_kw={}, cbarlabel="",lab_size=4, **kwargs):
