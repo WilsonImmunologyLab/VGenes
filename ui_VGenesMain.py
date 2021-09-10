@@ -5267,7 +5267,7 @@ class Ui_MainWindow(object):
         self.tabWidgetClone.setTabText(self.tabWidgetClone.indexOf(self.tab_18), _translate("MainWindow", "SeqLogo"))
         self.label_111.setText(_translate("MainWindow", "Options for this function is on the toolbar"))
         self.pushButtonCloneAlignHTML.setText(_translate("MainWindow", "Alignment(HTML)"))
-        self.radioButtonCloneMSA.setText(_translate("MainWindow", "show MAS on a popup window"))
+        self.radioButtonCloneMSA.setText(_translate("MainWindow", "show MSA on a popup window"))
         self.pushButtonCloneAlignTXT.setText(_translate("MainWindow", "Alignment(txt)"))
         self.tabWidgetClone.setTabText(self.tabWidgetClone.indexOf(self.tab_19), _translate("MainWindow", "Alignment"))
         self.radioButtonExclusive.setText(_translate("MainWindow", "Exclusively"))

@@ -9989,7 +9989,7 @@ If the J-end is off the J gene end may need adjusted</string>
                   <item row="3" column="0">
                    <widget class="QRadioButton" name="radioButtonCloneMSA">
                     <property name="text">
-                     <string>show MAS on a popup window</string>
+                     <string>show MSA on a popup window</string>
                     </property>
                    </widget>
                   </item>

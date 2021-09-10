@@ -29137,11 +29137,20 @@ def AlignSequencesHTMLBCR(DataSet, template):
 				         '\nPlease remove those Unlawful nucleotide!'
 				return ErrMsg
 
-			AAseq, ErMessage = Translator(NTseq[ORF:], ORF)
+			AAseq, ErMessage = Translator(NTseq, 0)
 			AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
 			all[SeqName] = [NTseq[ORF:], AAseq]
 			aa_handle.write('>' + SeqName + '\n')
 			aa_handle.write(AAseq + '\n')
+
+			# add predicted germline sequence
+			GLseq = record[15]
+			SeqName = "GL_" + SeqName
+			AAseqGL, ErMessage = Translator(GLseq, ORF)
+			AAseqGL = AAseq.replace('*', 'X').replace('~', 'Z').replace('.', 'J')
+			all[SeqName] = [GLseq[ORF:], AAseqGL]
+			aa_handle.write('>' + SeqName + '\n')
+			aa_handle.write(AAseqGL + '\n')
 		aa_handle.close()
 
 		if system() == 'Windows':
@@ -29184,7 +29193,7 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	else:
 		return
 
-	# generate consnesus sequences (AA and NT)
+	# generate consnesus sequences (AA and NT), without counting GL sequences
 	if len(all) == 1:
 		for key in all:
 			consensusDNA = all[key][0]
@@ -29198,6 +29207,9 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		for i in range(seqlen):
 			tester = ''
 			for key in all:
+				if key[0:3] == "GL_":
+					continue    # skip all GL sequence for consensus sequence and sequence conservation counting
+
 				try:
 					seq = all[key][0]
 					tester += seq[i]
@@ -29218,6 +29230,8 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		for i in range(seqlen):
 			tester = ''
 			for key in all:
+				if key[0:3] == "GL_":
+					continue    # skip all GL sequence for consensus sequence and sequence conservation counting
 				seq = all[key][1]
 				tester += seq[i]
 
@@ -29313,31 +29327,34 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	i = 1
 	for key in all:
 		seq_nick_name = 'Seq' + str(i)
-
 		seq_nt = all[key][0]
 		seq_aa = all[key][1]
-		con_nt = MakeConSeq(seq_nt, consensusDNA)
-		con_aa = MakeConSeq(seq_aa, compact_consensusAA)
 
-		#div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
-		#div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
-		div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
-		div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
-		div_nt = MakeDivNT('line line_nt ' + seq_nick_name, key, seq_nt)
-		div_nt_mut = MakeDivNT('line line_con_nt ' + seq_nick_name, key, con_nt)
-		# write sequence section
-		name_div += div_aa[0] + '\n'
-		seq_div += div_aa[1] + '\n'
-		name_div += div_aa_mut[0] + '\n'
-		seq_div += div_aa_mut[1] + '\n'
-		name_div += div_nt[0] + '\n'
-		seq_div += div_nt[1] + '\n'
-		name_div += div_nt_mut[0] + '\n'
-		seq_div += div_nt_mut[1] + '\n'
-
+		# output sequence info to JS
 		JStext = '"' + seq_nick_name + '":["' + key + '","' + seq_aa + '","' + seq_nt + '"]'
 		JSarray.append(JStext)
 		Optiondata += '$("#option").append("<option value =\'' + seq_nick_name + '\'>' + key + '</option>");\n'
+
+		if key[0:3] == "GL_":
+			pass    # we don't add GL seuqences in the alignment, but we keep them in the template list
+		else:
+			con_nt = MakeConSeq(seq_nt, consensusDNA)
+			con_aa = MakeConSeq(seq_aa, compact_consensusAA)
+
+			div_aa = MakeDivAA('line line_aa ' + seq_nick_name, key, seq_aa)
+			div_aa_mut = MakeDivAA('line line_con_aa ' + seq_nick_name, key, con_aa)
+			div_nt = MakeDivNT('line line_nt ' + seq_nick_name, key, seq_nt)
+			div_nt_mut = MakeDivNT('line line_con_nt ' + seq_nick_name, key, con_nt)
+			# write sequence section
+			name_div += div_aa[0] + '\n'
+			seq_div += div_aa[1] + '\n'
+			name_div += div_aa_mut[0] + '\n'
+			seq_div += div_aa_mut[1] + '\n'
+			name_div += div_nt[0] + '\n'
+			seq_div += div_nt[1] + '\n'
+			name_div += div_nt_mut[0] + '\n'
+			seq_div += div_nt_mut[1] + '\n'
+
 		i += 1
 
 	JSdata += ',\n'.join(JSarray)
