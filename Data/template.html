@@ -130,7 +130,7 @@
 	border-top: 1px solid #9bdf70;
 	border-bottom:  1px solid #9bdf70;
 	background: #f0fbeb; 
-	margin-top:170px;
+	margin-top:130px;
 	z-index: -1;
 	position: fixed;
 	width: 200px;
@@ -142,7 +142,7 @@
 	border-top: 1px solid #9bdf70;
 	border-bottom:  1px solid #9bdf70;
 	background:#f0fbeb; 
-	margin-top:170px;
+	margin-top:130px;
 	margin-left: 200px;
 	z-index: -2;
 	position: absolute;
@@ -342,6 +342,48 @@
 	border-top: black solid 2px;
 	vertical-align: bottom;
 }
+
+.fwr1{
+	background: #88C5DE;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.fwr2{
+	background: #F37A85;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.fwr3{
+	background: #C59FCA;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.fwr4{
+	background: #EDD91B;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.cdr1{
+	background: #0065AB;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.cdr2{
+	background: #ED1C24;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.cdr3{
+	background: #5D2D8C;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
 </style>
 
 <style>
@@ -427,7 +469,7 @@
 </style>
 <script>
     window.onscroll = function () {
-        var st = -Math.max(document.body.scrollTop, document.documentElement.scrollTop) + 170;
+        var st = -Math.max(document.body.scrollTop, document.documentElement.scrollTop) + 130;
         $(".name_div").css('margin-top',st + 'px');
     }
 </script>
@@ -612,8 +654,8 @@ function MakeDivNT(data){
 
 <div id="indicator" style="display:none;position:absolute;z-index:1;pointer-events: none" class = "help-tip"></div>
 
-<div class = 'header_div' style="margin-top: 10px; height: 65px;">
-	<h3 style="margin-left:12px;margin-top:5px;margin-bottom:5px;">Options:</h3>
+<div class = 'header_div' style="margin-top: 10px; height: 20px;">
+	<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>Options:</b></label>
 	<label class="container">AA
 	  <input id = 'aa' type="checkbox" checked="checked">
 	  <span class="checkmark"></span>
@@ -630,8 +672,8 @@ function MakeDivNT(data){
 -->
 </div>
 
-<div class = 'header_div' style="margin-top: 95px; height: 65px;">
-	<h3 style="margin-left:12px;margin-top:5px;margin-bottom:5px;">Display Mode:</h3>
+<div class = 'header_div' style="margin-top: 50px; height: 20px;">
+	<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>Display Mode:</b></label>
 	<label class="container">Original:
 	  <input id = 'original' type="checkbox" checked="checked">
 	  <span class="checkmark"></span>
@@ -644,3 +686,13 @@ function MakeDivNT(data){
 	</select>
 </div>
 
+<div class = 'header_div' style="margin-top: 90px; height: 25px;">
+	<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>V(D)J structure:</b></label>
+	<span class="unit_long fwr1" style="width: 60px">FWR1</span>
+	<span class="unit_long cdr1" style="width: 60px">CDR1</span>
+	<span class="unit_long fwr2" style="width: 60px">FWR2</span>
+	<span class="unit_long cdr2" style="width: 60px">CDR2</span>
+	<span class="unit_long fwr3" style="width: 60px">FWR3</span>
+	<span class="unit_long cdr3" style="width: 60px">CDR3</span>
+	<span class="unit_long fwr4" style="width: 60px">FWR4</span>
+</div>

@@ -29137,7 +29137,7 @@ def AlignSequencesHTMLBCR(DataSet, template):
 				         '\nPlease remove those Unlawful nucleotide!'
 				return ErrMsg
 
-			AAseq, ErMessage = Translator(NTseq, 0)
+			AAseq, ErMessage = Translator(NTseq, ORF)
 			AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
 			all[SeqName] = [NTseq[ORF:], AAseq]
 			aa_handle.write('>' + SeqName + '\n')
@@ -29243,6 +29243,50 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	# align consensus AA sequence with template to generate H1 and H3 numbering
 	compact_consensusAA = consensusAA.replace(' ', '')
 
+	# identify BCR V(D)J structure
+	vdj_structure = []
+	ruler_records = DataSet[0]
+	ruler_name = ruler_records[0]
+	ruler_original_AA, ErrMsg = Translator(all[ruler_name][0], 0)
+	ruler_aligned_AA = all[ruler_name][1]
+	# range
+	FWR1_end = int(ruler_records[3]) / 3
+	CDR1_end = int(ruler_records[5]) / 3
+	FWR2_end = int(ruler_records[7]) / 3
+	CDR2_end = int(ruler_records[9]) / 3
+	FWR3_end = int(ruler_records[11]) / 3
+	CDR3_end = int(ruler_records[13]) / 3
+
+	cur_pos_map2original_pos = 0
+	last = 'fwr1'
+	for i in range(len(ruler_aligned_AA)):
+		cur_str = compact_consensusAA[i]
+		if cur_str == '-':
+			vdj_structure.append(last)
+		else:
+			if cur_pos_map2original_pos < FWR1_end:
+				vdj_structure.append('fwr1')
+				last = 'fwr1'
+			elif cur_pos_map2original_pos < CDR1_end:
+				vdj_structure.append('cdr1')
+				last = 'cdr1'
+			elif cur_pos_map2original_pos < FWR2_end:
+				vdj_structure.append('fwr2')
+				last = 'fwr2'
+			elif cur_pos_map2original_pos < CDR2_end:
+				vdj_structure.append('cdr2')
+				last = 'cdr2'
+			elif cur_pos_map2original_pos < FWR3_end:
+				vdj_structure.append('fwr3')
+				last = 'fwr3'
+			elif cur_pos_map2original_pos < CDR3_end:
+				vdj_structure.append('cdr3')
+				last = 'cdr3'
+			else:
+				vdj_structure.append('fwr4')
+				last = 'fwr4'
+			cur_pos_map2original_pos += 1
+
 	# make legend HTML
 	legend_html = ''
 	'''
@@ -29283,6 +29327,7 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	if template == '':
 		div_seqcon_score_aa = MakeConDivAA('line line_pos_aa', 'AA conservation:', conserveAA)
 		div_seqcon_score_nt = MakeConDivNT('line line_pos_nt', 'NT conservation:', conserveDNA)
+		div_bcr_section = MakeBCRSection('line line_pos_bcr', 'V(D)J structure:', vdj_structure)
 
 	# initial and open HTML file
 	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
@@ -29323,6 +29368,8 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		seq_div += div_seqcon_score_aa[1] + '\n'
 		name_div += div_seqcon_score_nt[0] + '\n'
 		seq_div += div_seqcon_score_nt[1] + '\n'
+		name_div += div_bcr_section[0] + '\n'
+		seq_div += div_bcr_section[1] + '\n'
 	# make sequence section HTML
 	i = 1
 	for key in all:
@@ -29414,6 +29461,20 @@ def MakeConDivAA(class_name, line_name, data):
 	div_seq = '<div class="' + class_name + ' 2">'
 	for i in range(len(data)):
 		div_seq += '<span class="unit_pack"><span class="insert ' + pct2color(data[i]) + '">&nbsp;</span><span class="unit ' + pct2color(data[i]) + '">&nbsp;</span><span class="insert ' + pct2color(data[i]) + '">&nbsp;</span></span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeBCRSection(class_name, line_name, data):
+	div_name = '<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' + line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	for i in range(len(data)):
+		div_seq += '<span class="unit_pack"><span class="insert ' + data[i] + \
+		           '">&nbsp;</span><span class="unit ' + data[i] + \
+		           '">&nbsp;</span><span class="insert ' + data[i] + \
+		           '">&nbsp;</span></span>'
 	div_seq += '</div>'
 
 	return div_name, div_seq
