@@ -10024,35 +10024,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# fetch data
-		WHEREStatement = 'WHERE SeqName IN ("'
 		seq_list = []
 		for row in range(self.ui.tableWidgetHC.rowCount()):
 			seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
-		WHEREStatement += '","'.join(seq_list) + '")'
-		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+		WhereState = 'SeqName IN ("' + '","'.join(seq_list) + '")'
+		field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-		
-		AlignIn = []
+		DataSet = []
 		for item in DataIn:
 			SeqName = item[0]
-			Sequence = item[1].upper()
-			GL_Sequence = item[2].upper()
-			try:
-				Vbeg = int(item[3]) - 1
-			except:
-				Vbeg = 0
-			try:
-				Jend = int(item[4])
-			except:
-				Jend = len(Sequence)
-			VDJSequence = Sequence[Vbeg:Jend]
-			#Sequence = Sequence.replace("-", "")
-			EachIn = (SeqName, VDJSequence)
-			GLEachIn = ("GL_" + SeqName, GL_Sequence)
-			AlignIn.append(EachIn)
-			AlignIn.append(GLEachIn)
+			Sequence = item[1]
+			SeqFrom = int(item[2])
+			SeqTo = int(item[14])
+			Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+			Sequence = Sequence.upper()
+			EachIn = (
+			SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
+			item[11], item[12], item[13], item[14], item[15], item[16])
+			DataSet.append(EachIn)
 		# make HTML
-		html_file = AlignSequencesHTML(AlignIn, '')
+		html_file = AlignSequencesHTMLBCR(DataSet, '')
 		if html_file[0] == 'W':
 			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
 			return
@@ -10087,35 +10079,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# fetch data
-		WHEREStatement = 'WHERE SeqName IN ("'
 		seq_list = []
 		for row in range(self.ui.tableWidgetLC.rowCount()):
 			seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
-		WHEREStatement += '","'.join(seq_list) + '")'
-		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+		WhereState = 'SeqName IN ("' + '","'.join(seq_list) + '")'
+		field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-		AlignIn = []
+		DataSet = []
 		for item in DataIn:
 			SeqName = item[0]
-			Sequence = item[1].upper()
-			GL_Sequence = item[2].upper()
-			try:
-				Vbeg = int(item[3]) - 1
-			except:
-				Vbeg = 0
-			try:
-				Jend = int(item[4])
-			except:
-				Jend = len(Sequence)
-			VDJSequence = Sequence[Vbeg:Jend]
-			# Sequence = Sequence.replace("-", "")
-			EachIn = (SeqName, VDJSequence)
-			GLEachIn = ("GL_" + SeqName, GL_Sequence)
-			AlignIn.append(EachIn)
-			AlignIn.append(GLEachIn)
+			Sequence = item[1]
+			SeqFrom = int(item[2])
+			SeqTo = int(item[14])
+			Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+			Sequence = Sequence.upper()
+			EachIn = (
+				SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
+				item[11], item[12], item[13], item[14], item[15], item[16])
+			DataSet.append(EachIn)
 		# make HTML
-		html_file = AlignSequencesHTML(AlignIn, '')
+		html_file = AlignSequencesHTMLBCR(DataSet, '')
 		if html_file[0] == 'W':
 			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
 			return
