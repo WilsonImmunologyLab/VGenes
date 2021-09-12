@@ -9903,37 +9903,29 @@ class VGenesForm(QtWidgets.QMainWindow):
 		AlignIn = []
 		listItems = self.getTreeCheckedChild()
 		listItems = listItems[3]
-
-		WhereState = ''
-		NumSeqs = len(listItems)
-
 		if len(listItems) == 0:
 			QMessageBox.warning(self, 'Warning', 'Please check sequence from active sequence panel!',
 			                    QMessageBox.Ok,
 			                    QMessageBox.Ok)
 			return
 		WhereState = 'SeqName IN ("' + '","'.join(listItems) + '")'
-		#i = 1
-		#for item in listItems:
-		#	WhereState += 'SeqName = "' + item + '"'
-		#	if NumSeqs > i:
-		#		WhereState += ' OR '
-		#	i += 1
-
-		SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence FROM vgenesDB WHERE ' + WhereState
+		field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
+		DataSet = []
 		for item in DataIn:
 			SeqName = item[0]
-			Sequence = item[1].upper()
-			GL_Sequence = item[2].upper()
-			Sequence = Sequence.replace("-","")
-			EachIn = (SeqName, Sequence)
-			GLEachIn = ("GL_"+SeqName, GL_Sequence)
-			AlignIn.append(EachIn)
-			AlignIn.append(GLEachIn)
+			Sequence = item[1]
+			SeqFrom = int(item[2])
+			SeqTo = int(item[14])
+			Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+			Sequence = Sequence.upper()
+			EachIn = (
+			SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
+			item[11], item[12], item[13], item[14], item[15], item[16])
+			DataSet.append(EachIn)
 		# make HTML
-		html_file = AlignSequencesHTML(AlignIn, '')
+		html_file = AlignSequencesHTMLBCR(DataSet, '')
 		if html_file[0] == 'W':
 			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
 			return
