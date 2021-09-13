@@ -8250,61 +8250,65 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.HCLCDialog.ui.label.setText(text)
 		else:
 			if len(self.AntibodyCandidates) > 0:
-				# find current records in HC table
-				if self.ui.tableWidgetHC.rowCount() > 0:
-					row = self.ui.tableWidgetHC.currentRow()
-					SeqName = self.ui.tableWidgetHC.item(row, 0).text()
-				elif self.ui.tableWidgetLC.rowCount() > 0:
-					row = self.ui.tableWidgetLC.currentRow()
-					SeqName = self.ui.tableWidgetLC.item(row, 0).text()
+				try:
+					# find current records in HC table
+					if self.clickedTable == 'HC':
+						row = self.ui.tableWidgetHC.currentRow()
+						SeqName = self.ui.tableWidgetHC.item(row, 0).text()
+					else:
+						row = self.ui.tableWidgetLC.currentRow()
+						SeqName = self.ui.tableWidgetLC.item(row, 0).text()
 
-				# update title
-				if SeqName == '' or SeqName == None:
+					# update title
+					if SeqName == '' or SeqName == None:
+						text = 'Please click any records from your HC or LC list to see their details!'
+					else:
+						text = 'Details of ' + SeqName
+
+						# fill table
+						# clear table if table exists
+						if self.HCLCDialog.ui.tableWidget.rowCount() > 0:
+							self.HCLCDialog.ui.tableWidget.setRowCount(0)
+							self.HCLCDialog.ui.tableWidget.setColumnCount(0)
+
+						# fetch data for current record
+						SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + SeqName + '"'
+						DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+						if len(DataIn) == 0:
+							return
+						Records = DataIn[0]
+						# make table
+						horizontalHeader = ['Field', 'Field Name', 'Value']
+						num_row = len(FieldList)
+						num_col = len(horizontalHeader)
+						self.HCLCDialog.ui.tableWidget.setRowCount(num_row)
+						self.HCLCDialog.ui.tableWidget.setColumnCount(num_col)
+						self.HCLCDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+						self.HCLCDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+						self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
+						self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+
+						for row_index in range(num_row):
+							print(str(row_index))
+							unit1 = QTableWidgetItem(FieldList[row_index])
+							unit1.setFlags(Qt.ItemIsEnabled)
+							unit2 = QTableWidgetItem(RealNameList[row_index])
+							unit2.setFlags(Qt.ItemIsEnabled)
+							unit3 = QTableWidgetItem(str(Records[row_index]))
+							if row_index == 0:
+								unit3.setFlags(Qt.ItemIsEnabled)
+
+							self.HCLCDialog.ui.tableWidget.setItem(row_index, 0, unit1)
+							self.HCLCDialog.ui.tableWidget.setItem(row_index, 1, unit2)
+							self.HCLCDialog.ui.tableWidget.setItem(row_index, 2, unit3)
+
+						self.HCLCDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+						self.HCLCDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+					self.HCLCDialog.ui.label.setText(text)
+				except:
 					text = 'Please click any records from your HC or LC list to see their details!'
-				else:
-					text = 'Details of ' + SeqName
-
-					# fill table
-					# clear table if table exists
-					if self.HCLCDialog.ui.tableWidget.rowCount() > 0:
-						self.HCLCDialog.ui.tableWidget.setRowCount(0)
-						self.HCLCDialog.ui.tableWidget.setColumnCount(0)
-
-					# fetch data for current record
-					SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + SeqName + '"'
-					DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-					if len(DataIn) == 0:
-						return
-					Records = DataIn[0]
-					# make table
-					horizontalHeader = ['Field', 'Field Name', 'Value']
-					num_row = len(FieldList)
-					num_col = len(horizontalHeader)
-					self.HCLCDialog.ui.tableWidget.setRowCount(num_row)
-					self.HCLCDialog.ui.tableWidget.setColumnCount(num_col)
-					self.HCLCDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
-					self.HCLCDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
-					self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
-					self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
-
-					for row_index in range(num_row):
-						print(str(row_index))
-						unit1 = QTableWidgetItem(FieldList[row_index])
-						unit1.setFlags(Qt.ItemIsEnabled)
-						unit2 = QTableWidgetItem(RealNameList[row_index])
-						unit2.setFlags(Qt.ItemIsEnabled)
-						unit3 = QTableWidgetItem(str(Records[row_index]))
-						if row_index == 0:
-							unit3.setFlags(Qt.ItemIsEnabled)
-
-						self.HCLCDialog.ui.tableWidget.setItem(row_index, 0, unit1)
-						self.HCLCDialog.ui.tableWidget.setItem(row_index, 1, unit2)
-						self.HCLCDialog.ui.tableWidget.setItem(row_index, 2, unit3)
-
-					self.HCLCDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
-					self.HCLCDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectItems)
-
-				self.HCLCDialog.ui.label.setText(text)
+					self.HCLCDialog.ui.label.setText(text)
 			else:
 				text = 'Please click any records from your HC or LC list to see their details!'
 				self.HCLCDialog.ui.label.setText(text)
