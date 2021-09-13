@@ -11048,13 +11048,13 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionPaste"/>
    <addaction name="separator"/>
    <addaction name="actionmatchHCLC"/>
+   <addaction name="actionaddABlist"/>
    <addaction name="separator"/>
    <addaction name="actionAnalyze_Mutations"/>
    <addaction name="actionFind_Clonal"/>
    <addaction name="actionAlignment"/>
    <addaction name="actionSuggestCanonical"/>
    <addaction name="actiontranslate"/>
-   <addaction name="actionaddABlist"/>
    <addaction name="separator"/>
    <addaction name="actionMultiple_Alignement"/>
    <addaction name="actionDNA"/>
@@ -11063,6 +11063,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionIsotypes"/>
    <addaction name="separator"/>
    <addaction name="actionAlignmentHTML"/>
+   <addaction name="actionSeqSimlarPct"/>
    <addaction name="separator"/>
    <addaction name="actionSampling"/>
    <addaction name="separator"/>
@@ -11699,6 +11700,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>BatchChangeName</string>
+   </property>
+  </action>
+  <action name="actionSeqSimlarPct">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/SeqID.png</normaloff>:/PNG-Icons/SeqID.png</iconset>
+   </property>
+   <property name="text">
+    <string>SeqSimlarPct</string>
    </property>
   </action>
  </widget>
