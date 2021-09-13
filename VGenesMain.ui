@@ -9964,41 +9964,52 @@ If the J-end is off the J gene end may need adjusted</string>
                  <attribute name="title">
                   <string>Alignment</string>
                  </attribute>
-                 <layout class="QGridLayout" name="gridLayout_66">
+                 <layout class="QGridLayout" name="gridLayout_67">
                   <item row="0" column="0">
-                   <widget class="QLabel" name="label_111">
-                    <property name="text">
-                     <string>Options for this function is on the toolbar</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="1" column="0" rowspan="2" colspan="3">
-                   <widget class="Line" name="line_16">
-                    <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="2" column="2" rowspan="2">
-                   <widget class="QPushButton" name="pushButtonCloneAlignHTML">
-                    <property name="text">
-                     <string>Alignment(HTML)</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="3" column="0">
-                   <widget class="QRadioButton" name="radioButtonCloneMSA">
-                    <property name="text">
-                     <string>show MSA on a popup window</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="2">
-                   <widget class="QPushButton" name="pushButtonCloneAlignTXT">
-                    <property name="text">
-                     <string>Alignment(txt)</string>
-                    </property>
-                   </widget>
+                   <layout class="QGridLayout" name="gridLayout_66">
+                    <item row="2" column="1">
+                     <widget class="QPushButton" name="pushButtonSeqIdCloneHTML">
+                      <property name="text">
+                       <string>Seq identity</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="2">
+                     <widget class="QPushButton" name="pushButtonCloneAlignTXT">
+                      <property name="text">
+                       <string>Alignment(txt)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="0">
+                     <widget class="QRadioButton" name="radioButtonCloneMSA">
+                      <property name="text">
+                       <string>show on a popup window</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="2">
+                     <widget class="QPushButton" name="pushButtonCloneAlignHTML">
+                      <property name="text">
+                       <string>Alignment(HTML)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="0" column="0">
+                     <widget class="QLabel" name="label_111">
+                      <property name="text">
+                       <string>Options for this function is on the toolbar</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="1" column="0" colspan="3">
+                     <widget class="Line" name="line_16">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                     </widget>
+                    </item>
+                   </layout>
                   </item>
                  </layout>
                 </widget>
