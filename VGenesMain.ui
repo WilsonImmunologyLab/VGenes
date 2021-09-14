@@ -10945,6 +10945,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionIdentifyPublicClone"/>
     <addaction name="actionCreateVDJdb"/>
     <addaction name="actiontranslate"/>
+    <addaction name="actionStructure"/>
     <addaction name="actionAnalyze_Isotypes"/>
     <addaction name="actionaddABlist"/>
     <addaction name="actionSampling"/>
@@ -11720,6 +11721,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>SeqSimlarPct</string>
+   </property>
+  </action>
+  <action name="actionStructure">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
+   </property>
+   <property name="text">
+    <string>Structure</string>
    </property>
   </action>
  </widget>

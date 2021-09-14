@@ -3979,6 +3979,7 @@ class htmlDialog(QtWidgets.QDialog):
 		super(htmlDialog, self).__init__()
 		self.ui = Ui_htmlDialog()
 		self.ui.setupUi(self)
+		self.resize(1300, 900)
 
 		if system() == 'Windows':
 			# set style for windows
@@ -10077,6 +10078,25 @@ class VGenesForm(QtWidgets.QMainWindow):
 		file_handle = open(html_path, 'w')
 		file_handle.write(content)
 		file_handle.close()
+
+		# show local HTML
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		url = QUrl.fromLocalFile(str(html_path))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
+
+	@pyqtSlot()
+	def on_actionStructure_triggered(self):
+		time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+		html_path = os.path.join(temp_folder, time_stamp + '.html')
+		template_file = os.path.join(working_prefix, 'Data', 'Miew.html')
+		shutil.copyfile(template_file, html_path)
 
 		# show local HTML
 		window_id = int(time.time() * 100)

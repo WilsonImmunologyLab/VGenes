@@ -1,0 +1,296 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Select residues from sequence</title>
+
+  <link rel="stylesheet" href="../Js/Miew.min.css">
+  <script src="../Js/polyfill.min.js"></script>
+  <script src="../Js/lodash.js"></script>
+  <script src="../Js/three.min.js"></script>
+  <script src="../Js/Miew.min.js"></script>
+  <style>
+    .miew-container {
+      width: 900px;
+      height: 900px;
+      float: left;
+    }
+
+    #chains {
+      padding: 30px;
+      margin-left: 640px;
+    }
+
+    .sequence a {
+      color: black;
+      text-decoration: none;
+      font-family: monospace;
+    }
+
+    .sequence {
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+    }
+
+    /* add ZERO WIDTH SPACE for wrapping in IE11, as "break-word" doesn't work between nodes */
+    .sequence a:after { /* stylelint-disable-line selector-pseudo-element-colon-notation */
+      content: "\00200b";
+    }
+
+    .selected {
+      background-color: lime;
+    }
+
+    .option{
+      margin-left: 30px;
+      float: left;
+      width: 250px;
+    }
+  </style>
+</head>
+<body>
+  <div>
+  <div class="miew-container"></div>
+  <div id="chains"></div>
+  <div class='option'>
+    <h3>Type PDB ID and click load</h3>
+    <input id="pdbid" type="text" name="fname" value="5JW5">
+    <button id="load">Load</button> <br>
+    
+    <h3>Control</h3>
+    <button id="rotation">Toggle Rotation</button>
+    <button id="axes">Toggle Axes</button> <br>
+    
+    <h3>Mode</h3>
+    <button id="mode_BS">Balls</button>
+    <button id="mode_CA">Cartoon</button>
+    <button id="mode_CS">Contact Surf</button>
+    <button id="mode_LC">Licorice</button>
+    <button id="mode_LN">Lines</button>
+    <button id="mode_QS">Quick Surf</button>
+    <button id="mode_SA">SAS</button>
+    <button id="mode_SE">SES</button>
+    <button id="mode_TR">Trace</button>
+    <button id="mode_TU">Tube</button>
+    <button id="mode_TX">Text</button>
+    <button id="mode_VW">VDW</button>
+
+    <h3>Color</h3>
+    <button id="color_CB">Carbon</button>
+    <button id="color_CF">Conformation</button>
+    <button id="color_CH">Chain</button>
+    <button id="color_CO">Conditional</button>
+    <button id="color_EL">Element</button>
+    <button id="color_HY">Hydrophobicity</button>
+    <button id="color_MO">Molecule</button>
+    <button id="color_OC">Occupancy</button>
+    <button id="color_RT">Residue</button>
+    <button id="color_SQ">Sequence</button>
+    <button id="color_SS">Structure</button>
+    <button id="color_TM">Temperature</button>
+    <button id="color_UN">Uniform</button>
+  </div>
+
+  <script>
+
+    (function() {
+      var viewer = new Miew({ load: '5JW5' });
+      var sequences = [];
+      var selectState = true;
+
+      if (viewer.init()) {
+        viewer.run();
+      }
+
+      viewer.addEventListener('parsingDone', function(e) {
+        if (e.error) {
+          return;
+        }
+        var div = document.getElementById('chains');
+
+        viewer._forEachComplexVisual(function(visual) {
+          var complex = visual.getComplex();
+          var chains = complex.getChainNames();
+          for (var i = 0; i < chains.length; ++i) {
+            var elem = createChainElement(complex.getChain(chains[i]));
+            div.appendChild(elem);
+          }
+        });
+
+        function isTarget(event) {
+          var target = event.target;
+          return target.dataset && target.dataset.residx !== undefined;
+        }
+
+        div.addEventListener('click', function(event) {
+          if (!isTarget(event)) return;
+          event.preventDefault();
+        });
+
+        div.addEventListener('mousedown', function(event) {
+          if (!isTarget(event)) return;
+
+          selectState = event.target.classList.toggle('selected');
+          viewer.select(buildSelector(), false);
+          event.preventDefault();
+        });
+
+        div.addEventListener('mouseover', function(event) {
+          if ((event.buttons & 1) === 0) return;
+          if (!isTarget(event)) return;
+
+          var classList = event.target.classList;
+          if (classList.contains('selected') !== selectState) {
+            classList.toggle('selected');
+            viewer.select(buildSelector(), false);
+            event.preventDefault();
+          }
+        });
+      });
+
+      viewer.addEventListener('newpick', function() {
+        // clear everything
+        for (var j = 0, m = sequences.length; j < m; ++j) {
+          var seq = sequences[j];
+          for (var i = 0, n = seq.childNodes.length; i < n; ++i) {
+            var node = seq.childNodes[i];
+            if (node.classList) {
+              node.classList.remove('selected');
+            }
+          }
+        }
+
+        // set only selected
+        viewer._forEachComplexVisual(function(visual) {
+          visual.forSelectedResidues(function(residue) {
+            var node = document.getElementById(String(residue._index));
+            if (node && node.classList) {
+              node.classList.add('selected');
+            }
+          });
+        });
+      });
+
+document.getElementById('load').addEventListener('click', function () {
+    var newID = document.getElementById('pdbid').value;
+    viewer.unload();
+    viewer.load(newID);
+  });
+
+      document.getElementById('rotation').addEventListener('click', function () {
+    viewer.set('autoRotation', 0.2 * !viewer.get('autoRotation'));
+  });
+
+  document.getElementById('axes').addEventListener('click', function () {
+    viewer.set({
+      axes: !viewer.get('axes'),
+      fps: !viewer.get('fps'),
+    });
+  });
+
+  // change mode
+  document.getElementById('mode_BS').addEventListener('click', function () {viewer.rep({mode: 'BS',});});
+  document.getElementById('mode_CA').addEventListener('click', function () {viewer.rep({mode: 'CA',});});
+  document.getElementById('mode_CS').addEventListener('click', function () {viewer.rep({mode: 'CS',});});
+  document.getElementById('mode_LC').addEventListener('click', function () {viewer.rep({mode: 'LC',});});
+  document.getElementById('mode_LN').addEventListener('click', function () {viewer.rep({mode: 'LN',});});
+  document.getElementById('mode_QS').addEventListener('click', function () {viewer.rep({mode: 'QS',});});
+  document.getElementById('mode_SA').addEventListener('click', function () {viewer.rep({mode: 'SA',});});
+  document.getElementById('mode_SE').addEventListener('click', function () {viewer.rep({mode: 'SE',});});
+  document.getElementById('mode_TR').addEventListener('click', function () {viewer.rep({mode: 'TR',});});
+  document.getElementById('mode_TU').addEventListener('click', function () {viewer.rep({mode: 'TU',});});
+  document.getElementById('mode_TX').addEventListener('click', function () {viewer.rep({mode: 'TX',});});
+  document.getElementById('mode_VW').addEventListener('click', function () {viewer.rep({mode: 'VW',});});
+
+  // change color
+  document.getElementById('color_CB').addEventListener('click', function () {viewer.rep({colorer: 'CB',});});
+  document.getElementById('color_CF').addEventListener('click', function () {viewer.rep({colorer: 'CF',});});
+  document.getElementById('color_CH').addEventListener('click', function () {viewer.rep({colorer: 'CH',});});
+  document.getElementById('color_CO').addEventListener('click', function () {viewer.rep({colorer: 'CO',});});
+  document.getElementById('color_EL').addEventListener('click', function () {viewer.rep({colorer: 'EL',});});
+  document.getElementById('color_HY').addEventListener('click', function () {viewer.rep({colorer: 'HY',});});
+  document.getElementById('color_MO').addEventListener('click', function () {viewer.rep({colorer: 'MO',});});
+  document.getElementById('color_OC').addEventListener('click', function () {viewer.rep({colorer: 'OC',});});
+  document.getElementById('color_RT').addEventListener('click', function () {viewer.rep({colorer: 'RT',});});
+  document.getElementById('color_SQ').addEventListener('click', function () {viewer.rep({colorer: 'SQ',});});
+  document.getElementById('color_SS').addEventListener('click', function () {viewer.rep({colorer: 'SS',});});
+  document.getElementById('color_TM').addEventListener('click', function () {viewer.rep({colorer: 'TM',});});
+  document.getElementById('color_UN').addEventListener('click', function () {viewer.rep({colorer: 'UN',});});
+
+  // change material
+  document.getElementById('metallic').addEventListener('click', function () {viewer.rep({ material: 'ME' });});
+
+      function createChainElement(chain) {
+        var elem = document.createElement('div');
+
+        // show chain name
+        var nameElem = document.createElement('h2');
+        nameElem.textContent = 'chain ' + chain.getName();
+        elem.appendChild(nameElem);
+
+        // create div
+        var resDiv = document.createElement('div');
+        resDiv.classList.add('sequence');
+
+        // create nested set of residue names
+        chain.forEachResidue(function(res) {
+          var resType = res.getType();
+
+          // skip water
+          if (resType.flags & Miew.chem.ResidueType.Flags.WATER) return;
+
+          // create residue a-element
+          var resElem = document.createElement('a');
+          resElem.id = String(res._index);
+          resElem.textContent = resType.letterCode;
+          resElem.href = '#';
+          resElem.dataset.residx = res._index;
+          resDiv.appendChild(resElem);
+        });
+        sequences.push(resDiv);
+        elem.appendChild(resDiv);
+        return elem;
+      }
+
+      function buildSelector() {
+        var selected = [];
+        for (var j = 0, m = sequences.length; j < m; ++j) {
+          var seq = sequences[j];
+          for (var i = 0, n = seq.childNodes.length; i < n; ++i) {
+            var node = seq.childNodes[i];
+            if (node.classList && node.classList.contains('selected')) {
+              selected.push(Number(node.dataset.residx));
+            }
+          }
+        }
+        selected.sort(function(a, b) { return a - b; });
+        return asSelector(selected);
+      }
+
+      function asSelector(indices) {
+        var ranges = indices.reduce(function(spans, index) {
+          var range = spans.length > 0 && spans[spans.length - 1];
+          var end = range && range.length > 0 && range[range.length - 1];
+
+          if (range && (end === false || end !== false && end + 1 === index)) {
+            range[1] = index;
+          } else {
+            spans.push([index]);
+          }
+
+          return spans;
+        }, []).map(function(range) {
+          return range.join(':');
+        });
+
+        var selector = !ranges.length ? 'none' : 'residx ' + ranges.join(',');
+        console.log(selector);
+        return selector;
+      }
+
+    })();
+  </script>
+  </div>
+</body>
+</html>
