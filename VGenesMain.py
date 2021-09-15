@@ -14,7 +14,7 @@ import pandas as pd
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
 
-from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable, QEvent
+from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable, QEvent, QCoreApplication
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
@@ -30932,6 +30932,9 @@ JMouse = {'IGKJ1*01':8, 'IGKJ1*02':7, 'IGKJ2*01':9, 'IGKJ2*02':9,
 
 if __name__ == '__main__':
 	import sys
+
+	QCoreApplication.setAttribute(Qt.AA_EnableHighDpiScaling)
+	QCoreApplication.setAttribute(Qt.AA_UseHighDpiPixmaps)
 
 	app = QtWidgets.QApplication(sys.argv)
 	if system() == 'Windows':
