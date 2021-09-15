@@ -5,16 +5,7 @@ sys.setrecursionlimit(5000)
 block_cipher = None
 
 added_files = [
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/echarts.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/jquery.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/bootstrap-theme.min.css','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/bootstrap.min.css','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/bootstrap.min.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/d3.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/phylotree.css','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/phylotree.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/underscore-min.js','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/underscore-min.map','Js'),
+             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/*','Js'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/path_setting.txt','Conf'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/RecentPaths.vtx','Conf'),
              ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog.txt','Temp'),
