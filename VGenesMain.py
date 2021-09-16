@@ -29592,6 +29592,9 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		for key in all:
 			consensusDNA = all[key][0]
 			consensusAA = all[key][1]
+
+		conserveDNA = [1] * len(consensusDNA)
+		conserveAA = [1] * len(consensusAA)
 	else:
 		firstOne = all[SeqName]
 		seqlen = len(firstOne[0])
