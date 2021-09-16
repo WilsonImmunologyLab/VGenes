@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<head>
+<script src="../Js/jquery.js"></script>
+</head>
+<html>
+
+<style>
+.insert {
+  position: relative;
+  display: inline-block;
+  width: 13px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+  z-index: -1;
+}
+
+.unit {
+  position: relative;
+  display: inline-block;
+  width: 13px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.unit_long {
+  position: relative;
+  display: inline-block;
+  width: 80px;
+  height: 20px;
+  text-align: center;
+  font-size: 16px;
+}
+
+.unit .unit_tip {
+  visibility: hidden;
+  width: 200px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 5px;
+  font-size: 16px;
+  margin-top: 20px;
+  margin-left: 20px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.unit_pack:hover .unit .unit_tip {
+  visibility: visible;
+}
+.unit_pack:hover .insert{
+  opacity: 0.5;
+}
+.unit_pack:hover .unit{
+  opacity: 0.5;
+}
+
+.unit:hover {
+  opacity: 0.5;
+}
+
+.unit:hover .unit_tip {
+  visibility: visible;
+}
+
+.line {
+	margin-top: 2px;
+	font-size: 0px;
+	height: 20px;
+	margin-left: 12px;
+}
+
+.name {
+	width: 200px;
+	height: 18px;
+	display: inline-block;
+	font-size: 16px;
+	overflow: hidden;
+}
+
+.name .name_tip {
+  visibility: hidden;
+  width: 400px;
+  background-color: black;
+  color: #fff;
+  text-align: center;
+  border-radius: 6px;
+  padding: 5px 5px;
+  font-size: 16px;
+  margin-top: 20px;
+  margin-left: 50px;
+
+  /* Position the tooltip */
+  position: absolute;
+  z-index: 1;
+}
+
+.name:hover .name_tip{
+	visibility: visible;
+}
+
+.name:hover {
+	background-color: silver;
+}
+
+.header_div {
+	padding:5px;
+	border:1px solid #96c2f1;
+	background:#eff7ff; 
+	width:96%;
+	height: 90px;
+	border-radius: 5px;
+	position: fixed;
+	left:0; top:0; right:0; bottom: 0; margin: auto; 
+}
+
+.box {
+	float: left;
+}
+
+.name_div {
+	padding:15px;
+	padding-left: 0px;
+	border-right: 8px solid #9bdf70;
+	border-top: 1px solid #9bdf70;
+	border-bottom:  1px solid #9bdf70;
+	background: #f0fbeb; 
+	margin-top:130px;
+	z-index: -1;
+	position: fixed;
+	width: 200px;
+}
+
+.seq_div {
+	padding:15px;
+	border-left: 8px solid #9bdf70;
+	border-top: 1px solid #9bdf70;
+	border-bottom:  1px solid #9bdf70;
+	background:#f0fbeb; 
+	margin-top:130px;
+	margin-left: 200px;
+	z-index: -2;
+	position: absolute;
+	width: 10000px;
+	display: block;
+	float: left;
+}
+
+.Ca1 {
+	color: white;
+	background-color: fuchsia
+}
+.Ca2 {
+	background-color: yellow
+}
+.Cb {
+	background-color: silver
+}
+.Sa {
+	color: white;
+	background-color: maroon
+}
+.Sb {
+	color: white;
+	background-color: green
+}
+.A {
+	color: white;
+	background-color: green
+}
+.B {
+	color: white;
+	background-color: fuchsia
+}
+.C {
+	background-color: silver
+}
+.D {
+	color: white;
+	background-color: maroon
+}
+.E {
+	color: white;
+	background-color: blue
+}
+
+.Stalk-MN {
+	color: white;
+	background-color: navy
+}
+
+.line_con_aa {
+	display: none;
+}
+
+.line_con_nt {
+	display: none;
+}
+
+.con_nt {
+	display: none;
+}
+
+.con_aa {
+	display: none;
+}
+
+.A.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        green 0, green 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        green 40%, green 65%, #f0fbeb 65%, #f0fbeb 80%, green 80%, green
+      );
+}
+
+.B.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        fuchsia 0, fuchsia 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        fuchsia 40%, fuchsia 65%, #f0fbeb 65%, #f0fbeb 80%, fuchsia 80%, fuchsia
+      );
+}
+
+.C.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        silver 0, silver 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        silver 40%, silver 65%, #f0fbeb 65%, #f0fbeb 80%, silver 80%, silver
+      );
+}
+
+.D.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        maroon 0, maroon 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        maroon 40%, maroon 65%, #f0fbeb 65%, #f0fbeb 80%, maroon 80%, maroon
+      );
+}
+
+.E.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        blue 0, blue 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        blue 40%, blue 65%, #f0fbeb 65%, #f0fbeb 80%, blue 80%, blue
+      );
+}
+
+.Ca1.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        fuchsia 0, fuchsia 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        fuchsia 40%, fuchsia 65%, #f0fbeb 65%, #f0fbeb 80%, fuchsia 80%, fuchsia
+      );
+}
+
+.Ca2.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        yellow 0, yellow 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        yellow 40%, yellow 65%, #f0fbeb 65%, #f0fbeb 80%, yellow 80%, yellow
+      );
+}
+
+.Cb.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        silver 0, silver 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        silver 40%, silver 65%, #f0fbeb 65%, #f0fbeb 80%, silver 80%, silver
+      );
+}
+
+
+.Sa.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+        maroon 0, maroon 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        maroon 40%, maroon 65%, #f0fbeb 65%, #f0fbeb 80%, maroon 80%, maroon
+      );
+}
+
+.Sb.LateralPatch{
+	background: linear-gradient(
+		135deg, 
+       	green 0, green 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        green 40%, green 65%, #f0fbeb 65%, #f0fbeb 80%, green 80%, green
+      );
+}
+
+.LateralPatch{
+	background: linear-gradient(
+		135deg,
+       	gray 0, gray 25%, #f0fbeb 25%, #f0fbeb 40%, 
+        gray 40%, gray 65%, #f0fbeb 65%, #f0fbeb 80%, gray 80%, gray
+      );
+}
+
+.unit_long.LateralPatch{
+	background: linear-gradient(
+		135deg,
+       	gray 0, gray 25%, #eff7ff 25%, #eff7ff 40%, 
+        gray 40%, gray 65%, #eff7ff 65%, #eff7ff 80%, gray 80%, gray
+      );
+}
+
+.con_lvl1{
+	/* 100% conserve */
+	background: #ff0a0a;
+	height: 100%;
+	border-top: black solid 2px;
+	vertical-align: bottom;
+}
+
+.con_lvl2{
+	background: #f2ce02;
+	height: 75%;
+	border-top: black solid 2px;
+	vertical-align: bottom;
+}
+
+.con_lvl3{
+	background: #ebff0a;
+	height: 50%;
+	border-top: black solid 2px;
+	vertical-align: bottom;
+}
+
+.con_lvl4{
+	background: #85e62c;
+	height: 25%;
+	border-top: black solid 2px;
+	vertical-align: bottom;
+}
+
+.con_lvl5{
+	background: #209c05;
+	height: 5%;
+	border-top: black solid 2px;
+	vertical-align: bottom;
+}
+
+.fwr1{
+	background: #88C5DE;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.fwr2{
+	background: #F37A85;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.fwr3{
+	background: #C59FCA;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.fwr4{
+	background: #EDD91B;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.cdr1{
+	background: #0065AB;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.cdr2{
+	background: #ED1C24;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.cdr3{
+	background: #5D2D8C;
+	border-top: black solid 2px;
+	border-bottom: black solid 2px;
+}
+
+.blosum0 {
+	color: white;
+	background-color: #FF0000FF;
+}
+
+.blosum1 {
+	color: white;
+	background-color: #FF0000FF;
+}
+
+.blosum2 {
+	color: white;
+	background-color: #FF7600FF;
+}
+
+.blosum3 {
+	color: black;
+	background-color: #FFEB00FF;
+}
+
+.blosum4 {
+	color: black;
+	background-color: #9DFF00FF;
+}
+
+.blosum5 {
+	color: black;
+	background-color: #27FF00FF;
+}
+
+.blosum6 {
+	color: black;
+	background-color: white;
+}
+
+.blosum7 {
+	color: black;
+	background-color: #00FFC4FF;
+}
+
+.blosum8 {
+	color: black;
+	background-color: #00C4FFFF;
+}
+
+.blosum9 {
+	color: white;
+	background-color: #004EFFFF;
+}
+
+.blosum10 {
+	color: white;
+	background-color: #2700FFFF;
+}
+
+.blosum11 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum12 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum13 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum14 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum15 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum16 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum17 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.blosum11 {
+	color: white;
+	background-color: #9D00FFFF;
+}
+
+.missense {
+	background-color: red;
+}
+
+.nonsense {
+	background-color: #f0fbeb;
+}
+
+.silent {
+	background-color: green;
+}
+
+.WRCY{
+	background-color: green;
+}
+.WRC{
+	background-color: blue;
+}
+.AID-CS{
+	background-color: red;
+}
+.Neutral{
+	background-color: #f0fbeb;
+}
+.WA{
+	background-color: yellow;
+}
+.TW{
+	background-color: orange;
+}
+</style>
+
+<style>
+/* The container */
+.container {
+  display: inline-block;
+  position: relative;
+  padding-left: 35px;
+  margin-left: 12px;
+  margin-right: 35px;
+  cursor: pointer;
+  font-size: 16px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Hide the browser's default checkbox */
+.container input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+/* Create a custom checkbox */
+.checkmark {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 16px;
+  width: 16px;
+  background-color: #eee;
+}
+
+/* On mouse-over, add a grey background color */
+.container:hover input ~ .checkmark {
+  background-color: #ccc;
+}
+
+/* When the checkbox is checked, add a blue background */
+.container input:checked ~ .checkmark {
+  background-color: #2196F3;
+}
+
+/* Create the checkmark/indicator (hidden when not checked) */
+.checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+}
+
+/* Show the checkmark when checked */
+.container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* Style the checkmark/indicator */
+.container .checkmark:after {
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 10px;
+  border: solid white;
+  border-width: 0 3px 3px 0;
+  -webkit-transform: rotate(45deg);
+  -ms-transform: rotate(45deg);
+  transform: rotate(45deg);
+}
+</style>
+
+<style type="text/css">
+    .help-tip {
+        cursor:pointer;
+        text-align: left;
+        font-size: 14px;
+        padding-top: 5px;
+        padding-left: 10px;
+        border: 2px solid red;
+    }
+</style>
+<script>
+    window.onscroll = function () {
+        var st = -Math.max(document.body.scrollTop, document.documentElement.scrollTop) + 130;
+        $(".name_div").css('margin-top',st + 'px');
+    }
+</script>
+
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#aa").click(function(){
+		selectionChange()
+	});
+	$("#nt").click(function(){
+		selectionChange()
+	});
+	$("#Germline").click(function(){
+		selectionChange()
+	});
+	$("#consensus").click(function(){
+		if($("#consensus").is(':checked')){
+			$("#option").css('display','inline-block')
+			$("#original").prop("checked",false)
+		} else {
+			$("#option").css('display','none')
+			$("#original").prop("checked",true)
+		}
+		selectionChange()
+	});
+	$("#original").click(function(){
+		if($("#original").is(':checked')){
+			$("#option").css('display','none')
+			$("#consensus").prop("checked",false)
+		} else {
+			$("#option").css('display','inline-block')
+			$("#consensus").prop("checked",true)
+		}
+		selectionChange()
+	});
+	
+	$('#option').change(function(){
+		var select_val = $("#option").val();
+		var con_aa = data[select_val][1];
+		var con_nt = data[select_val][2];
+
+		var class_name_aa = ".line.con_aa.2";
+		var class_name_nt = ".line.con_nt.2";
+		$(class_name_aa).html(MakeDivAA(con_aa));
+		$(class_name_nt).html(MakeDivNT(con_nt));
+
+		for(var seq in data) {
+			if(seq != 'Seq0'){
+				var class_name_aa = ".line.line_con_aa." + seq + ".2";
+				var class_name_nt = ".line.line_con_nt." + seq + ".2";
+				var cur_con_aa = MakeConSeq(data[seq][1],con_aa);
+				var cur_con_nt = MakeConSeq(data[seq][2],con_nt);
+				$(class_name_aa).html(MakeDivAA(cur_con_aa));
+				$(class_name_nt).html(MakeDivNT(cur_con_nt));
+			}
+		}
+		selectionChange()
+	});
+	$('.unit_pack')
+	.mouseover(function(){
+		onmouseover_help(this,event)
+	})
+	.mouseout(function(){
+    	onmouseout_help(this)
+  	});
+});
+
+function onmouseover_help(ele,event){
+    var left = ele.offsetLeft + ele.offsetParent.offsetLeft + 4
+    var width = ele.offsetWidth - 8
+    var height = ele.offsetParent.clientHeight
+    var top = ele.offsetParent.clientTop + ele.offsetParent.offsetTop
+
+    $("#indicator").css({"display":"block","left":(left+'px'), "top":(top+'px'),"height":(height+'px'),"width":(width+'px')});
+}
+function onmouseout_help(){
+	$("#indicator").css({"display":"none"});
+}
+
+function selectionChange() {
+	if($("#nt").is(':checked')){
+		$(".insert").show()
+		$(".line_pos_nt").show()
+		if($("#consensus").is(':checked')){
+			$(".con_nt").show()
+			$(".line_con_nt").show()
+			$(".line_nt").hide()
+		} else {
+			$(".line_nt").show()
+			$(".con_nt").hide()
+			$(".line_con_nt").hide()
+		}
+	} else {
+		$(".line_nt").hide()
+		$(".con_nt").hide()
+		$(".insert").hide()
+		$(".line_pos_nt").hide()
+		$(".line_con_nt").hide()
+	}
+
+	if($("#aa").is(':checked')){
+		$(".line_pos_aa").show()
+		if($("#consensus").is(':checked')){
+			$(".con_aa").show()
+			$(".line_con_aa").show()
+			$(".line_aa").hide()
+		} else {
+			$(".line_aa").show()
+			$(".con_aa").hide()
+			$(".line_con_aa").hide()
+		}
+	} else {
+		$(".line_aa").hide()
+		$(".con_aa").hide()
+		$(".line_pos_aa").hide()
+		$(".line_con_aa").hide()
+	}
+
+	if($("#aa").is(':checked') && $("#nt").is(':checked')){
+		$(".line_nt.1").find(".name").hide()
+		$(".line_con_nt.1").find(".name").hide()
+	}
+	else if($("#nt").is(':checked')){
+		$(".line_nt.1").find(".name").show()
+		$(".line_con_nt.1").find(".name").show()
+	}
+
+	if($("#Germline").is(':checked')){
+		
+	} else {
+		$(".gl").hide()
+	}
+
+	if($("#nt").is(':checked')){
+		$(".seq_div").css({'width': seq_width[0]+'px'})
+	} else {
+		$(".seq_div").css({'width': seq_width[1]+'px'})
+	}
+}
+
+</script>
+
+<script type="text/javascript">
+function MakeConSeq(seq, con){
+	var seq_len = seq.length;
+	for (var i = 0; i < seq_len; i++) {
+		if(seq[i] == con[i]){
+			seq = seq.substr(0,i) + '.' + seq.substr(i+1,seq_len-i);
+		}
+	}
+	return seq;
+}
+
+function MakeDivAA(data){
+	var div_seq = '';
+	for (var i = 0; i < data.length; i++) {
+		div_seq = div_seq + '<span class="unit_pack"><span class="insert">&nbsp;</span><span class="unit">' + data[i] + '</span><span class="insert">&nbsp;</span></span>';
+	}
+	return div_seq;
+}
+
+function MakeDivNT(data){
+	var div_seq = '';
+	for (var i = 0; i < data.length; i++) {
+		if(i == 0){
+			div_seq = div_seq + '<span class="unit_pack">';
+		} else if(i%3 == 0) {
+			div_seq = div_seq + '</span><span class="unit_pack">';
+		}
+		div_seq = div_seq + '<span class="unit">' + data[i] + '</span>';
+	}
+	div_seq = div_seq + '</span>';
+
+	return div_seq;
+}
+</script>
+
+<body style="margin-left: 0px;">
+
+<div id="indicator" style="display:none;position:absolute;z-index:1;pointer-events: none" class = "help-tip"></div>
+
+<!--<div class = 'header_div' style="margin-top: 10px; height: 20px;">
+	<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>Options:</b></label>
+	<label class="container">AA
+	  <input id = 'aa' type="checkbox" checked="checked">
+	  <span class="checkmark"></span>
+	</label>
+	<label class="container">NT
+	  <input id = 'nt' type="checkbox" checked="checked">
+	  <span class="checkmark"></span>
+	</label>
+	<label class="container">Show Germline sequences in Alignment:
+	  <input id = 'Germline' type="checkbox" checked="checked">
+	  <span class="checkmark"></span>
+	</label>
+</div>-->
+
+
+<div class = 'header_div' style="margin-top: 10px; height: 110px;">
+	
+	<div style="height: 27px;">
+		<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>V(D)J structure:</b></label>
+		<span class="unit_long fwr1" style="width: 60px; margin-left: 52px;">FWR1</span>
+		<span class="unit_long cdr1" style="width: 60px">CDR1</span>
+		<span class="unit_long fwr2" style="width: 60px">FWR2</span>
+		<span class="unit_long cdr2" style="width: 60px">CDR2</span>
+		<span class="unit_long fwr3" style="width: 60px">FWR3</span>
+		<span class="unit_long cdr3" style="width: 60px">CDR3</span>
+		<span class="unit_long fwr4" style="width: 60px">FWR4</span>
+	</div>
+
+	<div style="height: 27px;">
+		<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>Mute Type:</b></label>
+		<span class="unit_long WRCY" style="width: 60px; margin-left: 86px;">WRCY</span>
+		<span class="unit_long WRC" style="width: 60px">WRC</span>
+		<span class="unit_long AID-CS" style="width: 60px">AID-CS</span>
+		<span class="unit_long Neutral" style="width: 60px">Neutral</span>
+		<span class="unit_long WA" style="width: 60px">WA</span>
+		<span class="unit_long TW" style="width: 60px">TW</span>
+	</div>
+
+
+	<div style="height: 27px;">
+		<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>CT Type:</b></label>
+		<span class="unit_long missense" style="width: 60px; margin-left: 100px;">missense</span>
+		<span class="unit_long nonsense" style="width: 60px">nonsense</span>
+		<span class="unit_long silent" style="width: 60px">silent</span>
+	</div>
+
+	<div style="height: 27px;">
+		<label style="margin-left:12px;margin-top:5px;margin-bottom:5px;"><b>RS score:</b></label>
+		<span class="unit_long blosum1" style="width: 20px;margin-left: 100px;">-5</span>
+		<span class="unit_long blosum2" style="width: 20px;">-4</span>
+		<span class="unit_long blosum3" style="width: 20px;">-3</span>
+		<span class="unit_long blosum4" style="width: 20px;">-2</span>
+		<span class="unit_long blosum5" style="width: 20px;">-1</span>
+		<span class="unit_long blosum6" style="width: 20px;">0</span>
+		<span class="unit_long blosum7" style="width: 20px;">+1</span>
+		<span class="unit_long blosum8" style="width: 20px;">+2</span>
+		<span class="unit_long blosum9" style="width: 20px;">+3</span>
+		<span class="unit_long blosum10" style="width: 20px;">+4</span>
+		<span class="unit_long blosum11" style="width: 20px;">+5</span>
+	</div>
+
+</div>

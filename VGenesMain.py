@@ -8314,6 +8314,55 @@ class VGenesForm(QtWidgets.QMainWindow):
 				text = 'Please click any records from your HC or LC list to see their details!'
 				self.HCLCDialog.ui.label.setText(text)
 
+	@pyqtSlot()
+	def on_actionTestMutMap_triggered(self):
+		# fetch data
+		cur_name = self.ui.txtName.toPlainText()
+		WHEREStatement = 'WHERE SeqName IN ("' + cur_name + '")'
+		field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + WHEREStatement
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		DataSet = []
+		for item in DataIn:
+			SeqName = item[0]
+			Sequence = item[1]
+			SeqFrom = int(item[2])
+			SeqTo = int(item[14])
+			Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+			Sequence = Sequence.upper()
+			EachIn = (
+				SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
+				item[11], item[12], item[13], item[14], item[15], item[16])
+			DataSet.append(EachIn)
+
+		# AID targeting
+		AIDres = MutMap(DataSet[0][1])
+
+		# make HTML
+		html_file = AlignSequencesHTMLAID(AIDres, DataSet)
+		if html_file[0] == 'W':
+			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
+			return
+		# delete close window objects
+		del_list = []
+		for id, obj in VGenesTextWindows.items():
+			if obj.isVisible() == False:
+				del_list.append(id)
+		for id in del_list:
+			del_obj = VGenesTextWindows.pop(id)
+
+		# display
+		window_id = int(time.time() * 100)
+		VGenesTextWindows[window_id] = htmlDialog()
+		VGenesTextWindows[window_id].id = window_id
+		layout = QGridLayout(VGenesTextWindows[window_id])
+		view = QWebEngineView(self)
+		# view.load(QUrl("file://" + html_file))
+		url = QUrl.fromLocalFile(str(html_file))
+		view.load(url)
+		view.show()
+		layout.addWidget(view)
+		VGenesTextWindows[window_id].show()
 
 	@pyqtSlot()
 	def on_pushButtonCircos_clicked(self):
@@ -29890,6 +29939,289 @@ def AlignSeqMuscle(data, muscle_path, temp_folder):
 
 	# return results
 	return Alignment
+
+def AlignSequencesHTMLAID(AIDres, DataSet):
+	#######################################
+	# input AIDres format
+	# 0: NT
+	# 1: MUTE TYPE
+	# 2: CT TYPE
+	# 3: RS score
+	# 4: Mut index
+	# 5: TENDA
+	# 6: TENDG
+	# 7: TENDC
+	# 8: TENDT
+	#
+	# input DataSet format
+	# 0: SeqName
+	# 1: Sequence
+	# 2: FR1From
+	# 3: FR1To
+	# 4: CDR1From
+	# 5: CDR1To
+	# 6: FR2From
+	# 7: FR2To
+	# 8: CDR2From
+	# 9: CDR2To
+	# 10: FR3From
+	# 11: FR3To
+	# 12: CDR3From
+	# 13: CDR3To
+	# 14: Jend
+	# 15: GermlineSequence
+	# 16: ORF
+	#######################################
+
+	# import tempfile
+	import os
+	TupData = ()
+	global GLMsg
+	global working_prefix
+	global clustal_path
+	global temp_folder
+	global VGenesTextWindows
+	global muscle_path
+
+	SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+	SeqName = SeqName.strip()
+	NTseq = DataSet[0][1]
+	if isinstance(DataSet[0][16], int):
+		ORF = DataSet[0][16]
+	else:
+		ORF = 0
+
+	# sequence check for NT seq
+	pattern = re.compile(r'[^ATCGUatcgu]')
+	cur_strange = pattern.findall(NTseq)
+	cur_strange = list(set(cur_strange))
+	if len(cur_strange) > 0:
+		ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
+		         '\nPlease remove those Unlawful nucleotide!'
+		return ErrMsg
+
+	AAseq, ErMessage = Translator(NTseq, ORF)
+	compact_consensusAA = AAseq
+	consensusDNA = NTseq[ORF:]
+
+	# identify BCR V(D)J structure
+	vdj_structure = []
+	ruler_records = DataSet[0]
+	ruler_name = ruler_records[0]
+	ruler_aligned_AA = AAseq
+	# range
+	FWR1_end = int(ruler_records[3]) / 3
+	CDR1_end = int(ruler_records[5]) / 3
+	FWR2_end = int(ruler_records[7]) / 3
+	CDR2_end = int(ruler_records[9]) / 3
+	FWR3_end = int(ruler_records[11]) / 3
+	CDR3_end = int(ruler_records[13]) / 3
+
+	cur_pos_map2original_pos = 0
+	last = 'fwr1'
+	for i in range(len(ruler_aligned_AA)):
+		cur_str = compact_consensusAA[i]
+		if cur_str == '-':
+			vdj_structure.append(last)
+		else:
+			if cur_pos_map2original_pos < FWR1_end:
+				vdj_structure.append('fwr1')
+				last = 'fwr1'
+			elif cur_pos_map2original_pos < CDR1_end:
+				vdj_structure.append('cdr1')
+				last = 'cdr1'
+			elif cur_pos_map2original_pos < FWR2_end:
+				vdj_structure.append('fwr2')
+				last = 'fwr2'
+			elif cur_pos_map2original_pos < CDR2_end:
+				vdj_structure.append('cdr2')
+				last = 'cdr2'
+			elif cur_pos_map2original_pos < FWR3_end:
+				vdj_structure.append('fwr3')
+				last = 'fwr3'
+			elif cur_pos_map2original_pos < CDR3_end:
+				vdj_structure.append('cdr3')
+				last = 'cdr3'
+			else:
+				vdj_structure.append('fwr4')
+				last = 'fwr4'
+			cur_pos_map2original_pos += 1
+
+	# make legend HTML
+	legend_html = ''
+	# make header HTML
+	pos_aa_data = [list(range(1,len(compact_consensusAA)+1)),list(range(1,len(compact_consensusAA)+1))]
+	div_pos_aa = MakeDivPosAA('line line_pos_aa', 'Position AA:', 'Original AA position: ', pos_aa_data)
+	div_con_aa = MakeDivAA('line con_aa', 'Template AA:', compact_consensusAA)
+	pos_nt_data = [list(range(1, len(consensusDNA) + 1)), list(range(1, len(consensusDNA) + 1))]
+	div_pos_nt = MakeDivPosNT('line line_pos_nt', 'Position NT:', 'Original NT position: ', pos_nt_data)
+	div_con_nt = MakeDivNT('line con_nt', 'Template NT:', consensusDNA)
+	div_bcr_section = MakeBCRSection('line line_pos_bcr', 'V(D)J structure:', vdj_structure)
+
+	# initial and open HTML file
+	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+	out_html_file = os.path.join(temp_folder, time_stamp + '.html')
+	header_file = os.path.join(working_prefix, 'Data', 'templateAID.html')
+	shutil.copyfile(header_file, out_html_file)
+	out_file_handle = open(out_html_file, 'a')
+
+	width_aa = 14 * len(compact_consensusAA)
+	width_nt = 40 * len(compact_consensusAA)
+	CSSdata = '<style type="text/css">.seq_div {width: ' + str(width_nt) + 'px;}</style>\n'
+	JSdata = '<script type="text/javascript">\n'
+	JSdata += 'var seq_width = [' + str(width_nt) + ',' + str(width_aa) + '];\n'
+	JSdata += '\n</script>\n'
+
+	name_div = '<div class="name_div">\n'
+	seq_div = '<div class = "seq_div">\n'
+	# write header section
+	name_div += div_pos_aa[0] + '\n'
+	seq_div += div_pos_aa[1] + '\n'
+	name_div += div_con_aa[0] + '\n'
+	seq_div += div_con_aa[1] + '\n'
+	name_div += div_pos_nt[0] + '\n'
+	seq_div += div_pos_nt[1] + '\n'
+	name_div += div_con_nt[0] + '\n'
+	seq_div += div_con_nt[1] + '\n'
+	name_div += div_bcr_section[0] + '\n'
+	seq_div += div_bcr_section[1] + '\n'
+
+	# make sequence section HTML
+	div_aa = MakeDivAA('line line_aa', SeqName + ' (AA)', compact_consensusAA)
+	div_nt = MakeDivNT('line line_nt', SeqName + ' (NT)', consensusDNA)
+	name_div += div_aa[0] + '\n'
+	seq_div += div_aa[1] + '\n'
+	name_div += div_nt[0] + '\n'
+	seq_div += div_nt[1] + '\n'
+
+	# make AID label and scoring HTML
+	mute_type_data = [ele[1] for ele in AIDres]
+	mute_type_data = mute_type_data[ORF:]
+	mute_type_div = MakeAIDLabel('line line_nt', 'Mute Type', mute_type_data)
+
+	ct_type_data = [ele[2] for ele in AIDres]
+	ct_type_data = ct_type_data[ORF:]
+	ct_type_div = MakeAIDLabel('line line_nt', 'CT Type', ct_type_data)
+
+	rs_score_data = [ele[3] for ele in AIDres]
+	rs_score_data = rs_score_data[ORF:]
+	rs_score_div = MakeAIDBlosum('line line_nt', 'RS Score', rs_score_data)
+
+	mut_index_data = [ele[4] for ele in AIDres]
+	mut_index_data = mut_index_data[ORF:]
+	mut_index_div = MakeAIDGradient('line line_nt', 'Mute Index', mut_index_data)
+
+	tend_a_data = [ele[5] for ele in AIDres]
+	tend_a_data = tend_a_data[ORF:]
+	tend_a_div = MakeAIDGradient('line line_nt', 'TENDA', tend_a_data)
+
+	tend_g_data = [ele[6] for ele in AIDres]
+	tend_g_data = tend_g_data[ORF:]
+	tend_g_div = MakeAIDGradient('line line_nt', 'TENDG', tend_g_data)
+
+	tend_c_data = [ele[7] for ele in AIDres]
+	tend_c_data = tend_c_data[ORF:]
+	tend_c_div = MakeAIDGradient('line line_nt', 'TENDC', tend_c_data)
+
+	tend_t_data = [ele[8] for ele in AIDres]
+	tend_t_data = tend_t_data[ORF:]
+	tend_t_div = MakeAIDGradient('line line_nt', 'TENDT', tend_t_data)
+
+	name_div += mute_type_div[0] + '\n' + ct_type_div[0] + '\n' + rs_score_div[0] + '\n' + mut_index_div[0] + '\n' + tend_a_div[0] + '\n' + tend_g_div[0] + '\n' + tend_c_div[0] + '\n' + tend_t_div[0] + '\n'
+	seq_div += mute_type_div[1] + '\n' + ct_type_div[1] + '\n' + rs_score_div[1] + '\n' + mut_index_div[1] + '\n' + tend_a_div[1] + '\n' + tend_g_div[1] + '\n' + tend_c_div[1] + '\n' + tend_t_div[1] + '\n'
+
+	name_div += '</div>\n'
+	seq_div += '</div>\n'
+
+	out_file_handle.write(legend_html)
+	out_file_handle.write(CSSdata)
+	out_file_handle.write(JSdata)
+	out_file_handle.write('<div class="box">')
+	out_file_handle.write(name_div)
+	out_file_handle.write(seq_div)
+	out_file_handle.write('\n</div>\n</body>\n</html>')
+	out_file_handle.close()
+	return out_html_file
+
+def MakeAIDLabel(class_name, line_name, data):
+	div_name = 	'<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	count = 0
+	for i in range(len(data)):
+		if count == 0:
+			div_seq += '<span class="unit_pack">'
+		elif count%3 == 0:
+			div_seq += '</span><span class="unit_pack">'
+		div_seq += '<span class="unit ' + data[i] + '">&nbsp;</span>'
+		count += 1
+	div_seq += '</span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeAIDBlosum(class_name, line_name, data):
+	div_name = 	'<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	count = 0
+	for i in range(len(data)):
+		if count == 0:
+			div_seq += '<span class="unit_pack">'
+		elif count%3 == 0:
+			div_seq += '</span><span class="unit_pack">'
+		div_seq += '<span class="unit ' + blosum2color(data[i]) + '">&nbsp;</span>'
+		count += 1
+	div_seq += '</span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+def MakeAIDGradient(class_name, line_name, data):
+	div_name = 	'<div class="' + class_name + ' 1">'
+	div_name += '<span class="name">' + line_name + '<span class ="name_tip">' +  line_name + '</span></span>'
+	div_name += '</div>'
+	div_seq = '<div class="' + class_name + ' 2">'
+	count = 0
+	for i in range(len(data)):
+		if count == 0:
+			div_seq += '<span class="unit_pack">'
+		elif count%3 == 0:
+			div_seq += '</span><span class="unit_pack">'
+		div_seq += '<span class="unit ' + gradient2color(data[i]) + '">&nbsp;</span>'
+		count += 1
+	div_seq += '</span>'
+	div_seq += '</div>'
+
+	return div_name, div_seq
+
+
+def gradient2color(data):
+	data = data/6
+
+	if data >= 0.8:
+		color_group = 'con_lvl1'
+	elif data >= 0.6:
+		color_group = 'con_lvl2'
+	elif data >= 0.4:
+		color_group = 'con_lvl3'
+	elif data >= 0.2:
+		color_group = 'con_lvl4'
+	else:
+		color_group = 'con_lvl5'
+
+	return color_group
+
+def blosum2color(data):
+	try:
+		data = int(data) + 6
+		color_group = 'blosum' + str(data)
+	except:
+		color_group = ''
+
+	return color_group
 
 def SequenceIdentity(seq1, seq2):
 	long = len(seq1)
