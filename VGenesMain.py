@@ -21839,7 +21839,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# step 1: fetch data
 		fields = ['SeqName', 'Sequence', 'GermlineSequence', 'CDR3Length', 'CDR1From', 'CDR1To', 'CDR2From', 'CDR2To',
-		          'CDR3beg', 'CDR3end', 'Mutations', 'IDEvent', 'ID', 'Species', 'Jend']
+		          'CDR3beg', 'CDR3end', 'Mutations', 'IDEvent', 'ID', 'Species', 'Jend', 'Blank7']
 
 		checkedItems = self.getTreeCheckedChild()
 		checkedItems = checkedItems[3]
@@ -21903,6 +21903,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			GDNAseq = item[2]
 			mutations = item[10]
 			IDEvents = item[11]
+
+			try:
+				ORF = int(item[15])
+			except:
+				ORF = 0
 
 			# unfixed version
 			AASeq, ErMessage = VGenesSeq.Translator(DNASeq, 0)
@@ -22100,6 +22105,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					Lowest = min(ColorMap)
 					maxi = ((40 - Lowest) / 8) * 11
 					InsScale = (Lowest, maxi)  # based on tests paramators
+				else:
+					InsScale = (0, 1)
 				SeqArray.append(ColorMap)
 			else:
 				SeqArray.append('None')
@@ -30996,15 +31003,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(0, record[1]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+						colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+						if colorLevel > 11:
+							colorLevel = 11
+						color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -31016,15 +31026,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(record[1], record[2]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+					colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+					if colorLevel > 11:
+						colorLevel = 11
+					color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -31036,15 +31049,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(record[2], record[3]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+					colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+					if colorLevel > 11:
+						colorLevel = 11
+					color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -31056,15 +31072,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(record[3], record[4]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+					colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+					if colorLevel > 11:
+						colorLevel = 11
+					color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 	out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -31076,15 +31095,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(record[4], record[5]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+					colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+					if colorLevel > 11:
+						colorLevel = 11
+					color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -31096,15 +31118,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(record[5], record[6]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+					colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+					if colorLevel > 11:
+						colorLevel = 11
+					color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
@@ -31116,15 +31141,18 @@ def makeProteinHTML(dataArray, index, scale):
 		for sub_index in range(record[6], record[7]):
 			cur_aa = record[8][sub_index]
 			# first 2 AAs and last 2 AAs don't have score, set color to neutral
-			if sub_index < 2:
+			try:
+				if sub_index < 2:
+					color = 'col6'
+				elif sub_index > len(record[index]) - 1:
+					color = 'col6'
+				else:
+					colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
+					if colorLevel > 11:
+						colorLevel = 11
+					color = 'col' + str(colorLevel)
+			except:
 				color = 'col6'
-			elif sub_index > len(record[index]) - 1:
-				color = 'col6'
-			else:
-				colorLevel = math.ceil((record[index][sub_index] - scaleMin) / scaleIncreament)
-				if colorLevel > 11:
-					colorLevel = 11
-				color = 'col' + str(colorLevel)
 			out_str += '<span class="' + color + '">' + cur_aa + '</span>'
 		out_str += '</p>\n'
 	out_str += '</div>\n'
