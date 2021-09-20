@@ -29967,9 +29967,9 @@ def AlignSequencesHTMLAID(AIDres, DataSet):
 	SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
 	SeqName = SeqName.strip()
 	NTseq = DataSet[0][1]
-	if isinstance(DataSet[0][16], int):
-		ORF = DataSet[0][16]
-	else:
+	try:
+		ORF = int(DataSet[0][16])
+	except:
 		ORF = 0
 
 	# sequence check for NT seq
