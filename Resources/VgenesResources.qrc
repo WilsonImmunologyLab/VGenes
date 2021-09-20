@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>check.png</file>
     <file>SeqID.png</file>
     <file>HC.png</file>
     <file>LC.png</file>
