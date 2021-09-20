@@ -29542,13 +29542,15 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
 	outfilename = os.path.join(temp_folder, "out-" + time_stamp + ".fas")
 	aafilename = os.path.join(temp_folder, "in-" + time_stamp + ".fas")
-	if len(DataSet) == 1:
-		SeqName = DataSet[0][0].replace('\n', '').replace('\r', '')
+
+	aa_handle = open(aafilename,'w')
+	for record in DataSet:
+		SeqName = record[0].replace('\n', '').replace('\r', '')
 		SeqName = SeqName.strip()
-		NTseq = DataSet[0][1]
-		if isinstance(DataSet[0][16], int):
-			ORF = DataSet[0][16]
-		else:
+		NTseq = record[1]
+		try:
+			ORF = int(DataSet[0][16])
+		except:
 			ORF = 0
 
 		# sequence check for NT seq
@@ -29561,65 +29563,37 @@ def AlignSequencesHTMLBCR(DataSet, template):
 			return ErrMsg
 
 		AAseq, ErMessage = Translator(NTseq, ORF)
+		AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
 		all[SeqName] = [NTseq[ORF:], AAseq]
+		aa_handle.write('>' + SeqName + '\n')
+		aa_handle.write(AAseq + '\n')
 
-		out_handle = open(outfilename,'w')
-		out_handle.write('>' + SeqName + '\n')
-		out_handle.write(AAseq)
-		out_handle.close()
+		# add predicted germline sequence
+		GLseq = record[15]
+		SeqName = "GL_" + SeqName
+		AAseqGL, ErMessage = Translator(GLseq, 0)
+		AAseqGL = AAseqGL.replace('*', 'X').replace('~', 'Z').replace('.', 'J')
+		all[SeqName] = [GLseq, AAseqGL]
+		aa_handle.write('>' + SeqName + '\n')
+		aa_handle.write(AAseqGL + '\n')
+	aa_handle.close()
+
+	if system() == 'Windows':
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
+	elif system() == 'Darwin':
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
+	elif system() == 'Linux':
+		cmd = muscle_path
+		cmd += " -in " + aafilename + " -out " + outfilename
 	else:
-		aa_handle = open(aafilename,'w')
-		for record in DataSet:
-			SeqName = record[0].replace('\n', '').replace('\r', '')
-			SeqName = SeqName.strip()
-			NTseq = record[1]
-			if isinstance(record[16], int):
-				ORF = record[16]
-			else:
-				ORF = 0
-
-			# sequence check for NT seq
-			pattern = re.compile(r'[^ATCGUatcgu]')
-			cur_strange = pattern.findall(NTseq)
-			cur_strange = list(set(cur_strange))
-			if len(cur_strange) > 0:
-				ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
-				         '\nPlease remove those Unlawful nucleotide!'
-				return ErrMsg
-
-			AAseq, ErMessage = Translator(NTseq, ORF)
-			AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
-			all[SeqName] = [NTseq[ORF:], AAseq]
-			aa_handle.write('>' + SeqName + '\n')
-			aa_handle.write(AAseq + '\n')
-
-			# add predicted germline sequence
-			GLseq = record[15]
-			SeqName = "GL_" + SeqName
-			AAseqGL, ErMessage = Translator(GLseq, ORF)
-			AAseqGL = AAseq.replace('*', 'X').replace('~', 'Z').replace('.', 'J')
-			all[SeqName] = [GLseq[ORF:], AAseqGL]
-			aa_handle.write('>' + SeqName + '\n')
-			aa_handle.write(AAseqGL + '\n')
-		aa_handle.close()
-
-		if system() == 'Windows':
-			cmd = muscle_path
-			cmd += " -in " + aafilename + " -out " + outfilename
-		elif system() == 'Darwin':
-			cmd = muscle_path
-			cmd += " -in " + aafilename + " -out " + outfilename
-		elif system() == 'Linux':
-			cmd = muscle_path
-			cmd += " -in " + aafilename + " -out " + outfilename
-		else:
-			cmd = ''
-		try:
-			os.system(cmd)
-		except:
-			QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
-			                    QMessageBox.Ok)
-			return
+		cmd = ''
+	try:
+		os.system(cmd)
+	except:
+		ErrMsg = 'We failed to run muscle! Check your muscle path!'
+		return ErrMsg
 
 	# read alignment file, make alignment NT and AA sequences
 	SeqName = ''
