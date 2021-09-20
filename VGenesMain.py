@@ -21910,7 +21910,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				ORF = 0
 
 			# unfixed version
-			AASeq, ErMessage = VGenesSeq.Translator(DNASeq, 0)
+			AASeq, ErMessage = VGenesSeq.Translator(DNASeq, ORF)
 
 			if IDEvents == 'Insertion' or IDEvents == 'Both':
 				mutate = mutations
@@ -21923,7 +21923,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						SeqToAdd = Iparts[2]
 						GDNAseq = GDNAseq[:AddAt] + SeqToAdd + GDNAseq[AddAt:]
 
-			GAASeq, ErMessage = VGenesSeq.Translator(GDNAseq, 0)
+			GAASeq, ErMessage = VGenesSeq.Translator(GDNAseq, ORF)
 
 			if int(item[4]) == 0 or int(item[5]) == 0 or int(item[6]) == 0 or int(item[7]) == 0 or int(item[8]) == 0:
 				GCDRs = IgBLASTer.GetGLCDRs(GDNAseq, item[13])
@@ -24570,6 +24570,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				ORF = int(data[105])
 			except:
 				ORF = 0
+
 			if StartSel - ORF > 0:
 				AAStartSel = math.floor((StartSel - ORF) / 3)
 			else:
