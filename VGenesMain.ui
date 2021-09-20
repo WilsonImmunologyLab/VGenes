@@ -9967,6 +9967,13 @@ If the J-end is off the J gene end may need adjusted</string>
                  <layout class="QGridLayout" name="gridLayout_67">
                   <item row="0" column="0">
                    <layout class="QGridLayout" name="gridLayout_66">
+                    <item row="1" column="0" colspan="3">
+                     <widget class="Line" name="line_16">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                     </widget>
+                    </item>
                     <item row="2" column="1">
                      <widget class="QPushButton" name="pushButtonSeqIdCloneHTML">
                       <property name="text">
@@ -9978,6 +9985,13 @@ If the J-end is off the J gene end may need adjusted</string>
                      <widget class="QPushButton" name="pushButtonCloneAlignTXT">
                       <property name="text">
                        <string>Alignment(txt)</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item row="2" column="3">
+                     <widget class="QPushButton" name="pushButtonCloneProtein">
+                      <property name="text">
+                       <string>Protein</string>
                       </property>
                      </widget>
                     </item>
@@ -9999,13 +10013,6 @@ If the J-end is off the J gene end may need adjusted</string>
                      <widget class="QLabel" name="label_111">
                       <property name="text">
                        <string>Options for this function is on the toolbar</string>
-                      </property>
-                     </widget>
-                    </item>
-                    <item row="1" column="0" colspan="3">
-                     <widget class="Line" name="line_16">
-                      <property name="orientation">
-                       <enum>Qt::Horizontal</enum>
                       </property>
                      </widget>
                     </item>
@@ -10607,6 +10614,10 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
             <property name="text">
              <string>Clear list</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
             </property>
            </widget>
           </item>
