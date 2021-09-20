@@ -1069,7 +1069,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>11</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -4439,6 +4439,19 @@
             </widget>
            </item>
            <item>
+            <spacer name="horizontalSpacer_26">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
             <widget class="QPushButton" name="btnMatchHL">
              <property name="enabled">
               <bool>true</bool>
@@ -6406,6 +6419,9 @@
                <height>16777215</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Generate protein report</string>
+             </property>
              <property name="text">
               <string>Generate report</string>
              </property>
@@ -6414,7 +6430,7 @@
            <item row="1" column="0">
             <widget class="QCheckBox" name="chkShowInEditor">
              <property name="text">
-              <string>Show in popup</string>
+              <string>Show in pop-up</string>
              </property>
              <property name="checked">
               <bool>false</bool>
@@ -8764,7 +8780,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <string>Generate peptide sequence logo</string>
           </property>
           <property name="text">
-           <string>AA logo</string>
+           <string/>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -8832,7 +8848,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <string>Generate nucleotide sequence logo</string>
           </property>
           <property name="text">
-           <string>NT logo</string>
+           <string/>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -10212,48 +10228,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_59">
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_90">
-             <property name="font">
-              <font>
-               <pointsize>18</pointsize>
-              </font>
-             </property>
-             <property name="text">
-              <string>Antibody candidates</string>
-             </property>
-             <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <widget class="QPushButton" name="pushButtonCircos">
-             <property name="maximumSize">
-              <size>
-               <width>80</width>
-               <height>16777215</height>
-              </size>
-             </property>
-             <property name="text">
-              <string>Circos</string>
-             </property>
-             <property name="icon">
-              <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/Circo.png</normaloff>:/PNG-Icons/Circo.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>80</width>
-               <height>16</height>
-              </size>
-             </property>
-             <property name="flat">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="4">
+           <item row="0" column="6">
             <widget class="QComboBox" name="comboBoxHCLC">
              <property name="maximumSize">
               <size>
@@ -10293,16 +10268,34 @@ If the J-end is off the J gene end may need adjusted</string>
              </item>
             </widget>
            </item>
-           <item row="0" column="6">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_90">
+             <property name="font">
+              <font>
+               <pointsize>18</pointsize>
+              </font>
+             </property>
+             <property name="text">
+              <string>Antibody candidates</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="9">
             <widget class="QPushButton" name="pushButtonHeatmap">
              <property name="maximumSize">
               <size>
-               <width>100</width>
-               <height>16777215</height>
+               <width>50</width>
+               <height>32</height>
               </size>
              </property>
+             <property name="toolTip">
+              <string>Heatmap plot for HCs and LCs</string>
+             </property>
              <property name="text">
-              <string>Heatmap</string>
+              <string/>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -10310,8 +10303,8 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
              <property name="iconSize">
               <size>
-               <width>50</width>
-               <height>16</height>
+               <width>32</width>
+               <height>32</height>
               </size>
              </property>
              <property name="flat">
@@ -10319,7 +10312,7 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="2">
+           <item row="0" column="3">
             <widget class="QPushButton" name="pushButtonHCLCTable">
              <property name="maximumSize">
               <size>
@@ -10345,19 +10338,75 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="3">
+           <item row="0" column="4">
             <widget class="Line" name="line_11">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
             </widget>
            </item>
-           <item row="0" column="1">
+           <item row="0" column="8">
+            <widget class="QPushButton" name="pushButtonCircos">
+             <property name="maximumSize">
+              <size>
+               <width>50</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="toolTip">
+              <string>Circos plot for HCs and LCs</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/Circo.png</normaloff>:/PNG-Icons/Circo.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>32</width>
+               <height>32</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="7">
+            <widget class="QLabel" name="label_112">
+             <property name="text">
+              <string>of paired HC and LC: </string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
             <widget class="Line" name="line_12">
              <property name="orientation">
               <enum>Qt::Vertical</enum>
              </property>
             </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QLabel" name="label_111">
+             <property name="text">
+              <string>Check </string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer_27">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
            </item>
           </layout>
          </widget>
@@ -10418,12 +10467,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonCheckHC">
             <property name="maximumSize">
              <size>
-              <width>80</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Check the following HCs exclusively</string>
+            </property>
             <property name="text">
-             <string>Check</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10444,12 +10496,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonProteinHC">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Protein report for HCs</string>
+            </property>
             <property name="text">
-             <string>Protein</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10470,12 +10525,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonAlignHC">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Multiple sequence alignment for HCs (HTML)</string>
+            </property>
             <property name="text">
-             <string>Alignment</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10496,12 +10554,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonTreeHC">
             <property name="maximumSize">
              <size>
-              <width>70</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Phylogenetic tree for HCs</string>
+            </property>
             <property name="text">
-             <string>Tree</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10576,12 +10637,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonCheckLC">
             <property name="maximumSize">
              <size>
-              <width>80</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Check the following LCs exclusively</string>
+            </property>
             <property name="text">
-             <string>Check</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10602,12 +10666,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonProteinLC">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Protein report for LCs</string>
+            </property>
             <property name="text">
-             <string>Protein</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10628,12 +10695,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonAlignLC">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Multiple sequence alignment for LCs (HTML)</string>
+            </property>
             <property name="text">
-             <string>Alignment</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10654,12 +10724,15 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonTreeLC">
             <property name="maximumSize">
              <size>
-              <width>70</width>
+              <width>50</width>
               <height>32</height>
              </size>
             </property>
+            <property name="toolTip">
+             <string>Phylogenetic tree for LCs</string>
+            </property>
             <property name="text">
-             <string>Tree</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
