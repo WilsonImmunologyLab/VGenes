@@ -9482,8 +9482,27 @@ If the J-end is off the J gene end may need adjusted</string>
            </item>
            <item row="5" column="0">
             <widget class="QPushButton" name="pushButtonCheckCloone">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>32</height>
+              </size>
+             </property>
              <property name="text">
               <string>Check this clone</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/check.png</normaloff>:/PNG-Icons/check.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -10280,6 +10299,32 @@ If the J-end is off the J gene end may need adjusted</string>
            </spacer>
           </item>
           <item>
+           <widget class="QPushButton" name="pushButtonCheckHC">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Check</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/check.png</normaloff>:/PNG-Icons/check.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>25</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButtonAlignHC">
             <property name="maximumSize">
              <size>
@@ -10384,6 +10429,32 @@ If the J-end is off the J gene end may need adjusted</string>
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pushButtonCheckLC">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Check</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/check.png</normaloff>:/PNG-Icons/check.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>25</width>
+              <height>25</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="pushButtonAlignLC">

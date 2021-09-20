@@ -9445,6 +9445,40 @@ class VGenesForm(QtWidgets.QMainWindow):
 		Msg = 'All members of this clone were checked!'
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
+	@pyqtSlot()
+	def on_pushButtonCheckHC_clicked(self):
+		seq_list = []
+		for row in range(self.ui.tableWidgetHC.rowCount()):
+			seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
+
+		self.clearTreeChecks()
+		for cur_name in seq_list:
+			found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+			if len(found) > 0:
+				for item in found:
+					item.setCheckState(0, Qt.Checked)
+		self.match_tree_to_table()
+
+		Msg = 'All members of this HC table were checked!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+	@pyqtSlot()
+	def on_pushButtonCheckLC_clicked(self):
+		seq_list = []
+		for row in range(self.ui.tableWidgetLC.rowCount()):
+			seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
+
+		self.clearTreeChecks()
+		for cur_name in seq_list:
+			found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+			if len(found) > 0:
+				for item in found:
+					item.setCheckState(0, Qt.Checked)
+		self.match_tree_to_table()
+
+		Msg = 'All members of this LC table were checked!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
 	def initial_Clone(self):
 		self.ui.listWidgetClone.clear()
 		self.ui.listWidgetCloneMember.clear()
