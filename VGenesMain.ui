@@ -12051,7 +12051,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionStructure">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
+     <normaloff>:/PNG-Icons/structure.png</normaloff>:/PNG-Icons/structure.png</iconset>
    </property>
    <property name="text">
     <string>Structure</string>

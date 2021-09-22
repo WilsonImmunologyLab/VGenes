@@ -8400,11 +8400,16 @@ class VGenesForm(QtWidgets.QMainWindow):
 			Res.append(element)
 
 		# reformat data
-		gene_names, reshaped_data = dataReshape(Res)
+		gene_names, reshaped_data, HC_names, LC_names = dataReshape(Res)
+		step = 4
+		hc_len = 178 + (len(HC_names) - 1) * step
+		lc_len = 178 + (len(LC_names) - 1) * step
 
 		# generate HTML
 		data_file = os.path.join(temp_folder, 'CircosData.js')
 		out_file_handle = open(data_file, 'w')
+
+		out_file_handle.write('var NGCircosGenome = [[["HC",' + str(hc_len) + '],["LC",' + str(lc_len) + '],]];\n\n')
 		out_file_handle.write('var CHORD1 = [ "CHORD1" , {\n')
 		out_file_handle.write('			CHORDinnerRadius: 270,\n')
 		out_file_handle.write('			CHORDouterRadius: 275,\n')
@@ -31941,7 +31946,7 @@ def dataReshape(data):
 	train_data = numpy.array(Matrix)
 	Matrix_list = train_data.tolist()
 
-	return All_names, Matrix_list
+	return All_names, Matrix_list, HC_names, LC_names
 
 def makeProteinHTML(dataArray, index, scale):
 	scaleMin = scale[0]
