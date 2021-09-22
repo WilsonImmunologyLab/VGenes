@@ -8401,9 +8401,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		# reformat data
 		gene_names, reshaped_data, HC_names, LC_names = dataReshape(Res)
-		step = 4
-		hc_len = 178 + (len(HC_names) - 1) * step
-		lc_len = 178 + (len(LC_names) - 1) * step
+		step = 3
+		hc_len = (360 - len(gene_names) * step) / 2 + (len(HC_names) - 1) * step
+		lc_len = (360 - len(gene_names) * step) / 2 + (len(LC_names) - 1) * step
+		# hc_len = 178 + (len(HC_names) - 1) * step
+		# lc_len = 178 + (len(LC_names) - 1) * step
 
 		# generate HTML
 		data_file = os.path.join(temp_folder, 'CircosData.js')
