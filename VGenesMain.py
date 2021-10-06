@@ -393,7 +393,7 @@ class HCLC_thread(QThread):
         except:
             Msg = 'Can not save file in this path! You do not have write permission!'
             sign = 1
-            self.HCLC_finish.emit([sign, Msg])
+            self.HCLC_finish.emit([sign, Msg, self.Pathname])
         # Step 2: search on new DB
         Good_list = []
         if len(self.checkRecords) == 0:
@@ -433,14 +433,14 @@ class HCLC_thread(QThread):
 	        SQLStatement = 'DELETE FROM vgenesdb WHERE Blank10 NOT IN ' + list_str
 	        VGenesSQL.RunUpdateSQL(self.Pathname, SQLStatement)
 
-	        Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
+	        Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found!'
 	        sign = 0
         else:
 	        Msg = 'Did not find any HC/LC pair in your current DB!'
 	        sign = 1
 
 		# Step 4: send signal to VGenes
-        self.HCLC_finish.emit([sign, Msg])
+        self.HCLC_finish.emit([sign, Msg, self.Pathname])
 
 class RenameDialog(QtWidgets.QDialog):
 	def __init__(self):
@@ -8569,7 +8569,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.HCLC_Thread.Pathname = Pathname
 		self.HCLC_Thread.checkRecords = listItems
 		self.HCLC_Thread.HCLC_progress.connect(self.result_display)
-		self.HCLC_Thread.HCLC_finish.connect(self.ShowMessageBox)
+		self.HCLC_Thread.HCLC_finish.connect(self.HCLC_finish_process)
 		self.HCLC_Thread.start()
 
 		self.progress = ProgressBar(self)
@@ -9363,6 +9363,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 			self.progress.setLabel(label)
 		except:
 			pass
+
+	def HCLC_finish_process(self, data):
+		try:
+			self.progress.FeatProgressBar.setValue(100)
+			self.progress.close()
+		except:
+			pass
+
+		if data[0] == 0:
+			question = data[1] + '\nThey have been saved in file' + data[2] + ' \nDo you want to open it?\n'
+			buttons = 'YN'
+			answer = questionMessage(self, question, buttons)
+
+			if answer == 'Yes':
+				if os.path.isfile(data[2]):
+					self.LoadDB(data[2])
+					QMessageBox.information(self, 'Information', 'New DB opened!', QMessageBox.Ok, QMessageBox.Ok)
+					self.UpdateRecentList(data[2], True)
+		else:
+			QMessageBox.warning(self, 'Warning', data[1], QMessageBox.Ok, QMessageBox.Ok)
 
 	def ShowMessageBox(self, data):
 		try:
@@ -19150,19 +19170,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 		views.append(view)
 		view.setModel(model)
 
-	def LoadDB(self, DBFilename):
+	def LoadDB(self, inputDBFilename):
 		time_start = time.time()
+		global DBFilename
 		global FieldList
 		global FieldCommentList
 		global FieldTypeList
 		global RealNameList
 
-		if not self.createConnection(DBFilename):
+		if not self.createConnection(inputDBFilename):
 			sys.exit(1)
 
-		VGenesSQL.checkFieldTable(DBFilename)
+		DBFilename = inputDBFilename
+		VGenesSQL.checkFieldTable(inputDBFilename)
 		SQLSATEMENT = 'SELECT * FROM fieldsname ORDER BY ID'
-		Records = VGenesSQL.RunSQL(DBFilename, SQLSATEMENT)
+		Records = VGenesSQL.RunSQL(inputDBFilename, SQLSATEMENT)
 
 		FieldList = [i[1] for i in Records]
 		RealNameList = [i[2] for i in Records]
@@ -19179,7 +19201,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.OnOpen()
 		time_end = time.time()
 		print('Load DB, step2 time cost: ', time_end - time_start, 's')
-		titletext = 'VGenes - ' + DBFilename
+		titletext = 'VGenes - ' + inputDBFilename
 		self.setWindowTitle(titletext)
 
 		#self.load_table()
