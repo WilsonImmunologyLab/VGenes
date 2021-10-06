@@ -11386,6 +11386,7 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionmatchHCLC"/>
    <addaction name="actionaddABlist"/>
    <addaction name="actionTestMutMap"/>
+   <addaction name="actionPairToNewDB"/>
    <addaction name="separator"/>
    <addaction name="actionAnalyze_Mutations"/>
    <addaction name="actionFind_Clonal"/>
@@ -12064,6 +12065,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>TestMutMap</string>
+   </property>
+  </action>
+  <action name="actionPairToNewDB">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/CopyDB.png</normaloff>:/PNG-Icons/CopyDB.png</iconset>
+   </property>
+   <property name="text">
+    <string>PairToNewDB</string>
    </property>
   </action>
  </widget>

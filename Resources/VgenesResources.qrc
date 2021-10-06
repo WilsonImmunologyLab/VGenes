@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>CopyDB.png</file>
     <file>structure.png</file>
     <file>check.png</file>
     <file>SeqID.png</file>

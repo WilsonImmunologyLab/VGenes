@@ -373,6 +373,75 @@ class MyQList(QListWidget):
 	    except Exception as e:
 		    print(e)
 
+class HCLC_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list)
+
+    def __int__(self):
+        super(HCLC_thread, self).__init__()
+        self.DBFilename = ''
+        self.Pathname = ''
+        self.checkRecords = []
+
+    def run(self):
+        Msg = ''
+        sign = 0
+        # Step 1: Copy current DB to new DB
+        self.HCLC_progress.emit(0, 1000, 1)
+        try:
+            shutil.copy(self.DBFilename, self.Pathname)
+		except:
+            Msg = 'Can not save file in this path! You do not have write permission!'
+            sign = 1
+            self.HCLC_finish.emit([sign, Msg])
+        # Step 2: search on new DB
+        Good_list = []
+        if len(self.checkRecords) == 0:
+            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE GeneType = "Heavy"'
+            DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+        else:
+            list_str = '("' + '","'.join(self.checkRecords) + '")'
+            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE SeqName IN ' + list_str
+            DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+
+        if len(DataIn) < 2:
+            Msg = 'Your VGene DB do not have any barcode information!'
+            sign = 1
+        else:
+            seq_num = 0
+            progress = 0
+            for record in DataIn:
+                barcode = record[0]
+                if barcode == 'Blank10' or barcode == '':
+                    pass
+                else:
+                    SQLStatement1 = 'SELECT SeqName FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Heavy","Beta","Delta")'
+                    DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
+                    SQLStatement2 = 'SELECT SeqName FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType NOT IN ("Heavy","Beta","Delta")'
+                    DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
+                    if len(DataIn1) == 1 and len(DataIn2) == 1:
+	                    Good_list.append(barcode)
+
+                self.HCLC_progress.emit(progress, len(DataIn), int(progress / len(DataIn) * 100))
+                progress += 1
+
+		# Step 3: delete all incomplete BCR and duplicate BCRs
+        seq_num = len(Good_list)
+        if seq_num > 0:
+	        # edit on new DB
+	        list_str = '("' + '","'.join(Good_list) + '")'
+	        SQLStatement = 'DELETE FROM vgenesdb WHERE Blank10 NOT IN ' + list_str
+	        VGenesSQL.RunUpdateSQL(self.Pathname, SQLStatement)
+
+	        Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found and exported!'
+	        sign = 0
+        else:
+	        Msg = 'Did not find any HC/LC pair in your current DB!'
+	        sign = 1
+
+		# Step 4: send signal to VGenes
+        self.HCLC_finish.emit([sign, Msg])
+
 class RenameDialog(QtWidgets.QDialog):
 	def __init__(self):
 		super(RenameDialog, self).__init__()
@@ -8473,6 +8542,35 @@ class VGenesForm(QtWidgets.QMainWindow):
 		channel.registerObject('connection', my_object)
 		view.page().setWebChannel(channel)
 		my_object.downloadFigSignal.connect(self.downloadSVG)
+
+	@pyqtSlot()
+	def on_actionPairToNewDB_triggered(self):
+		Pathname = saveFile(self.parent(), 'db')
+		if Pathname == None:
+			return
+
+		if self.ui.checkBoxAll.isChecked():
+			listItems = []
+		else:
+			listItems = self.getTreeCheckedChild()
+			listItems = listItems[3]
+			if len(listItems) == 0:
+				pass
+			else:
+				mode = 1
+				msg = 'You selected part of records, will only identify HC/LC pairs for your selected records!'
+				QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+
+		self.HCLC_Thread = HCLC_thread(self)
+		self.HCLC_Thread.DBFilename = DBFilename
+		self.HCLC_Thread.Pathname = Pathname
+		self.HCLC_Thread.checkRecords = listItems
+		self.HCLC_Thread.HCLC_progress.connect(self.result_display)
+		self.HCLC_Thread.HCLC_finish.connect(self.ShowMessageBox)
+		self.HCLC_Thread.start()
+
+		self.progress = ProgressBar(self)
+		self.progress.show()
 
 	@pyqtSlot()
 	def on_pushButtonHeatmap_clicked(self):
