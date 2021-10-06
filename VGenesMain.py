@@ -390,7 +390,7 @@ class HCLC_thread(QThread):
         self.HCLC_progress.emit(0, 1000, 1)
         try:
             shutil.copy(self.DBFilename, self.Pathname)
-		except:
+        except:
             Msg = 'Can not save file in this path! You do not have write permission!'
             sign = 1
             self.HCLC_finish.emit([sign, Msg])
@@ -7874,7 +7874,7 @@ class CSV_thread(QThread):
 	    files = self.files
 
 	    # import data from VDBs
-	    print('import data from VDBs')
+	    print('import data from CSV')
 	    conn = db.connect(DBFilename)
 	    cursor = conn.cursor()
 	    process = 1
@@ -7914,8 +7914,11 @@ class CSV_thread(QThread):
 
 		    # insert into DB
 		    SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
-		    cursor.executemany(SQLSTATEMENT, InputData)
-		    conn.commit()
+		    try:
+			    cursor.executemany(SQLSTATEMENT, InputData)
+			    conn.commit()
+		    except:
+			    self.trigger.emit('Data import error! Please remove any duplicate sequence names in you file!')
 
 		    pct = int(process/len(files)*100)
 		    label = "Processing CSV file: " + csv_file
