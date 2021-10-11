@@ -9559,7 +9559,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		self.match_table_to_tree()
 		'''
-		if self.ui.radioButtonExclusive.isChecked():
+		if self.ui.checkBoxExclusive.isChecked():
 			self.clearTreeChecks()
 
 		for cur_name in member_names:

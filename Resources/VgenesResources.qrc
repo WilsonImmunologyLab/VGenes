@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>AID.png</file>
     <file>CopyDB.png</file>
     <file>structure.png</file>
     <file>check.png</file>

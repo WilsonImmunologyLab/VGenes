@@ -10174,10 +10174,7 @@ If the J-end is off the J gene end may need adjusted</string>
             </widget>
            </item>
            <item row="5" column="1">
-            <widget class="QRadioButton" name="radioButtonExclusive">
-             <property name="toolTip">
-              <string>Check exclusively</string>
-             </property>
+            <widget class="QCheckBox" name="checkBoxExclusive">
              <property name="text">
               <string>Exclusively</string>
              </property>
@@ -11273,6 +11270,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionAnalyze_Isotypes"/>
     <addaction name="actionaddABlist"/>
     <addaction name="actionSampling"/>
+    <addaction name="actionBatchChangeName"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -11343,6 +11341,9 @@ If the J-end is off the J gene end may need adjusted</string>
    <property name="windowTitle">
     <string>toolBar</string>
    </property>
+   <property name="toolTip">
+    <string>A useful tool: change file names in batch</string>
+   </property>
    <property name="movable">
     <bool>false</bool>
    </property>
@@ -11405,7 +11406,6 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="separator"/>
    <addaction name="actionSampling"/>
    <addaction name="separator"/>
-   <addaction name="actionPreferences"/>
    <addaction name="action_Help"/>
    <addaction name="separator"/>
    <addaction name="actionIncrease_font_size"/>
@@ -12037,7 +12037,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/network.png</normaloff>:/PNG-Icons/network.png</iconset>
    </property>
    <property name="text">
-    <string>BatchChangeName</string>
+    <string>Change file names in batches</string>
    </property>
   </action>
   <action name="actionSeqSimlarPct">
@@ -12047,6 +12047,9 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>SeqSimlarPct</string>
+   </property>
+   <property name="toolTip">
+    <string>Sequence similarity </string>
    </property>
   </action>
   <action name="actionStructure">
@@ -12061,7 +12064,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionTestMutMap">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/HA.png</normaloff>:/PNG-Icons/HA.png</iconset>
+     <normaloff>:/PNG-Icons/AID.png</normaloff>:/PNG-Icons/AID.png</iconset>
    </property>
    <property name="text">
     <string>TestMutMap</string>
