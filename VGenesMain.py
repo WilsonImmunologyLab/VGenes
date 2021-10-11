@@ -9561,6 +9561,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 		'''
 		if self.ui.checkBoxExclusive.isChecked():
 			self.clearTreeChecks()
+			Msg = 'All members of this clone were exclusively checked!'
+		else:
+			Msg = 'All members of this clone were checked!'
 
 		for cur_name in member_names:
 			found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
@@ -9570,7 +9573,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 		rows = self.ui.SeqTable.rowCount()
 		self.match_tree_to_table()
 
-		Msg = 'All members of this clone were checked!'
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	@pyqtSlot()
@@ -9587,7 +9589,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					item.setCheckState(0, Qt.Checked)
 		self.match_tree_to_table()
 
-		Msg = 'All members of this HC table were checked!'
+		Msg = 'All members of this HC table were exclusively checked!'
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	@pyqtSlot()
@@ -9604,7 +9606,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					item.setCheckState(0, Qt.Checked)
 		self.match_tree_to_table()
 
-		Msg = 'All members of this LC table were checked!'
+		Msg = 'All members of this LC table were exclusively checked!'
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 	def initial_Clone(self):
@@ -9696,6 +9698,95 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_RefreshClone_clicked(self):
 		print('refresh clone')
 		self.initial_Clone()
+
+	@pyqtSlot()
+	def on_pushButtonPairClone_clicked(self):
+		notice = self.ui.lineEditCloneName.text()
+
+		# step 1, get all members of this clone
+		member_names = []
+		n_member = self.ui.listWidgetCloneMember.count()
+		for i in range(n_member):
+			item = self.ui.listWidgetCloneMember.item(i)
+			member_names.append(item.text())
+		
+		# step 2, pair HC/LCs for these sequences
+		WhereState = 'SeqName IN ("' + '","'.join(member_names) + '")'
+		field = 'SeqName,Blank10'
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		barcodes_list = [ele[1] for ele in DataIn]
+
+		WhereState = 'Blank10 IN ("' + '","'.join(barcodes_list) + '")'
+		field = 'SeqName,Blank10'
+		SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
+		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		listItems = [ele[0] for ele in DataIn]
+		
+		# step 3, add them into HC/LC list
+		shared = list(set(listItems).intersection(self.AntibodyCandidates))
+		novel_ele = list(set(listItems).difference(self.AntibodyCandidates))
+
+		# warn redundant sequences
+		if len(shared) > 0:
+			Msg = "Those sequences are already in the list:\n" + ", ".join(shared)
+			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+		# update Antibody Candidate list if there is new sequences
+		if len(novel_ele) > 0:
+			self.AntibodyCandidates = self.AntibodyCandidates + novel_ele
+
+			WhereState = 'SeqName IN ("' + '","'.join(novel_ele) + '")'
+
+			SQLStatement = 'SELECT SeqName,GeneType,ClonalPool,V1,D1,J1,TotalMuts,Isotype,Blank10 FROM vgenesDB WHERE ' + WhereState
+			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			for item in DataIn:
+				SeqName = item[0]
+				Genetype = item[1]
+				Clone = item[2]
+				Vgene = item[3]
+				Dgene = item[4]
+				Jgene = item[5]
+				TotalMuts = item[6]
+				Isotype = item[7]
+				barcode = item[8]
+
+				if Genetype in ['Heavy', 'Beta', 'Delta']:
+					rowPosition = self.ui.tableWidgetHC.rowCount()
+					self.ui.tableWidgetHC.insertRow(rowPosition)
+					self.ui.tableWidgetHC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+					self.ui.tableWidgetHC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+					self.ui.tableWidgetHC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+					self.ui.tableWidgetHC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 4, QTableWidgetItem(Dgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 5, QTableWidgetItem(Jgene))
+					self.ui.tableWidgetHC.setItem(rowPosition, 6, QTableWidgetItem(TotalMuts))
+					self.ui.tableWidgetHC.setItem(rowPosition, 7, QTableWidgetItem(Isotype))
+					self.ui.tableWidgetHC.setItem(rowPosition, 8, QTableWidgetItem(barcode))
+					self.ui.tableWidgetHC.setItem(rowPosition, 9, QTableWidgetItem(notice))
+				else:
+					rowPosition = self.ui.tableWidgetLC.rowCount()
+					self.ui.tableWidgetLC.insertRow(rowPosition)
+					self.ui.tableWidgetLC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+					self.ui.tableWidgetLC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+					self.ui.tableWidgetLC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+					self.ui.tableWidgetLC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+					self.ui.tableWidgetLC.setItem(rowPosition, 4, QTableWidgetItem(Jgene))
+					self.ui.tableWidgetLC.setItem(rowPosition, 5, QTableWidgetItem(TotalMuts))
+					self.ui.tableWidgetLC.setItem(rowPosition, 6, QTableWidgetItem(Isotype))
+					self.ui.tableWidgetLC.setItem(rowPosition, 7, QTableWidgetItem(barcode))
+					self.ui.tableWidgetLC.setItem(rowPosition, 8, QTableWidgetItem(notice))
+
+			self.ui.tableWidgetHC.resizeColumnsToContents()
+			self.ui.tableWidgetHC.horizontalHeader().setSortIndicatorShown(True)
+			self.ui.tableWidgetHC.horizontalHeader().sectionClicked.connect(self.sortHCtable)
+
+			self.ui.tableWidgetLC.resizeColumnsToContents()
+			self.ui.tableWidgetLC.horizontalHeader().setSortIndicatorShown(True)
+			self.ui.tableWidgetLC.horizontalHeader().sectionClicked.connect(self.sortLCtable)
+
+		# step 4, jump to HC/LC list
+		self.ui.tabWidget.setCurrentIndex(11)
 
 	def selectClone(self):
 		items = self.ui.listWidgetClone.selectedItems()
