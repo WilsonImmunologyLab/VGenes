@@ -27184,7 +27184,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 
-			IgBLASTAnalysis = IgBLASTer.IgBLASTit(filename, datalist)
+			IgBLASTAnalysis = IgBLASTer.IgBLASTit(filename, datalist, False)
 
 
 			i = 0

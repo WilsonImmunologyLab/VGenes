@@ -1666,7 +1666,7 @@ def MapHotspots(self, ReportType, DBFilename, SeqName):
 		self.ShowVGenesTextEdit(errrep, Style)
 	f = ''
 	f = saveFile(self, 'CSV')
-	if f != '':
+	if f != '' and f != None:
 		with open(f, 'w') as currentfile:
 			currentfile.write(Document)
 
