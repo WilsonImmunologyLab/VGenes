@@ -16460,11 +16460,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 	@pyqtSlot()
 	def on_actionDelete_record_triggered(self):
-		fields = ['SeqName', 'ID']
-
-		# checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-		SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-
 		sel_names = self.getTreeCheckedChild()
 		sel_names = sel_names[3]
 
@@ -16483,7 +16478,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					if os.path.isfile(DBFilename):
 						self.LoadDB(DBFilename)
 		else:
-			question = 'Do you want delete current selected sequences?\n' + '\n'.join(sel_names)
+			'''
+			question = 'Do you want delete current selected sequences?\n' + ','.join(sel_names)
 			buttons = 'YN'
 			answer = questionMessage(self, question, buttons)
 
@@ -16497,7 +16493,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 					if os.path.isfile(DBFilename):
 						self.LoadDB(DBFilename)
 						self.on_btnUpdateTree_clicked()
+			'''
+			self.modalessDeleteDialog = deleteDialog()
+			self.modalessDeleteDialog.ui.listWidget.addItems(sel_names)
+			self.modalessDeleteDialog.deleteSignal.connect(self.delRecordsFromDB)
+			self.modalessDeleteDialog.show()
 						
+	def delRecordsFromDB(self, del_list):
+		SQLStatement = ' FROM vgenesDB WHERE SeqName IN ("' + '","'.join(del_list) + '")'
+		VGenesSQL.deleterecords(DBFilename, SQLStatement)
+
+		QMessageBox.information(self, 'Information', 'The selected record has been deleted!',
+		                        QMessageBox.Ok, QMessageBox.Ok)
+
+		if DBFilename != None:
+			if os.path.isfile(DBFilename):
+				self.LoadDB(DBFilename)
+				self.on_btnUpdateTree_clicked()
 
 
 	def RemoveDuplicates(self, DataList):
@@ -17018,8 +17030,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 				ModSeq = ''.join(ModSeqList1)
 				Entry = (SeqNameAp, ModSeq)
 				OutList.append(Entry)
-
-
 
 				# for l in range(j+1, NumMuts-1): #now do first and second mutate with each consecutively
 				# 	Mutation1 = SeqMutsR[l]

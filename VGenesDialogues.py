@@ -203,10 +203,6 @@ def questionMessage(self, question, buttons):
 
     reply = QtWidgets.QMessageBox.question(self, "QMessageBox.question()", question, type)
 
-
-
-
-
     if reply == QtWidgets.QMessageBox.Yes:
         return 'Yes'
     elif reply == QtWidgets.QMessageBox.No:
