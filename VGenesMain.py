@@ -13823,10 +13823,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.ui.figure.ax.tick_params(labelsize=font_size)
 				self.ui.F.draw()
 			else:
-				box_data = [i[0] for i in DataIn]
-				try:
-					box_data = list(map(float, box_data))
-				except:
+				DataInClean = []
+				for ele in DataIn:
+					try:
+						cur_value = float(ele[0])
+						sub_data = [cur_value] + list(ele[1:])
+						DataInClean.append(sub_data)
+					except:
+						pass
+
+				box_data = [i[0] for i in DataInClean]
+				if len(box_data) == 0:
 					QMessageBox.warning(self, 'Warning', 'The data field is not numerical! Check your input!',
 					                    QMessageBox.Ok, QMessageBox.Ok)
 					return
@@ -13839,9 +13846,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				if multi_factor == True:
 					label_data = []
 					g2_label = []
-					for element in DataIn:
-						label_data.append(element[1])
-						g2_label.append(element[2])
+					for element in DataInClean:
+						label_data.append(str(element[1]))
+						g2_label.append(str(element[2]))
 
 					result = Counter(label_data)
 					labels = list(result.keys())
@@ -13910,8 +13917,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 					)
 				else:
 					data = []
-					for element in DataIn:
-						data.append(element[1])
+					for element in DataInClean:
+						data.append(str(element[1]))
 
 					result = Counter(data)
 					labels = list(result.keys())
