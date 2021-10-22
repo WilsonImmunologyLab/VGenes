@@ -14328,7 +14328,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							if self.ui.checkBoxScatterValueColor.isChecked():
 								z = float(d[2])
 							else:
-								z = d[2]
+								z = str(d[2])
 							x_data.append(x)
 							y_data.append(y)
 							group_data.append(z)
@@ -14569,7 +14569,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							if self.ui.checkBoxScatterValueColor.isChecked():
 								z = float(d[2])
 							else:
-								z = d[2]
+								z = str(d[2])
 							x_data.append(x)
 							y_data.append(y)
 							group_data.append(z)
