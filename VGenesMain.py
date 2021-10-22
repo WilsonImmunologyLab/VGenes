@@ -13438,6 +13438,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + sort_statement
 			#SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+			DataInClean = []
+			for ele in DataIn:
+				cur_data = list(map(str, ele))
+				DataInClean.append(cur_data)
 
 			if self.ui.radioButtonPNG.isChecked():
 				PNG = True
@@ -13451,7 +13455,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						labels = []
 						values = []
 						try:
-							for element in DataIn:
+							for element in DataInClean:
 								labels.append(element[0])
 								values.append(int(element[1]))
 						except:
@@ -13484,7 +13488,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					else:
 						label_data = []
-						for element in DataIn:
+						for element in DataInClean:
 							label_data.append(element[0])
 
 						result = Counter(label_data)
@@ -13493,7 +13497,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						labels.sort()
 
 						data = {}
-						for element in DataIn:
+						for element in DataInClean:
 							if data.__contains__(element[1]):
 								data[element[1]] = data[element[1]] + [element[0]]
 							else:
@@ -13577,7 +13581,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						self.ui.F.draw()
 				else:
 					data = []
-					for element in DataIn:
+					for element in DataInClean:
 						data.append(element[0])
 
 					result = Counter(data)
@@ -13613,7 +13617,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						stack = None
 
 					label_data = []
-					for element in DataIn:
+					for element in DataInClean:
 						label_data.append(element[0])
 
 					result = Counter(label_data)
@@ -13625,7 +13629,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						labels = []
 						values = []
 						try:
-							for element in DataIn:
+							for element in DataInClean:
 								labels.append(element[0])
 								values.append(int(element[1]))
 						except:
@@ -13647,7 +13651,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						)
 					else:
 						data = {}
-						for element in DataIn:
+						for element in DataInClean:
 							if data.__contains__(element[1]):
 								data[element[1]] = data[element[1]] + [element[0]]
 							else:
@@ -13725,7 +13729,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						)
 				else:
 					data = []
-					for element in DataIn:
+					for element in DataInClean:
 						data.append(element[0])
 
 					result = Counter(data)
