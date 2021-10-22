@@ -3563,7 +3563,10 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
 
 			data = []
 			for element in DataIn:
-				data.append(element[0])
+				if element[0] == None:
+					data.append('NA')
+				else:
+					data.append(element[0])
 			result = Counter(data)
 			labels = result.keys()
 			values = result.values()
