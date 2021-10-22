@@ -13417,9 +13417,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 			if field2 == field1:
-				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
+				field2 = ''
+				QMessageBox.warning(self, 'Warning', 'field1 = field2, Will only use field1!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
-				return
 
 			field1 = re.sub(r'\(.+', '', field1)
 			field2 = re.sub(r'\(.+', '', field2)
@@ -13758,16 +13758,19 @@ class VGenesForm(QtWidgets.QMainWindow):
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
 			if field2 == field1:
-				QMessageBox.warning(self, 'Warning', 'Please select different group factors for field1 and field2!',
+				field2 = ''
+				QMessageBox.warning(self, 'Warning', 'field1 = field2, Will only use field1!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
-				return
+
 			multi_factor = False
 			if field2 == "":
 				field = data_field + "," + field1
+				sort_statement = ' ORDER BY ' + field1
 			else:
 				field = data_field + "," + field1 + "," + field2
+				sort_statement = ' ORDER BY ' + field1 + "," + field2
 				multi_factor = True
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + sort_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			if self.ui.radioButtonPNG.isChecked():
 				PNG = True
