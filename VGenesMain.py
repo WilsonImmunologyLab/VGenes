@@ -14460,7 +14460,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 									axistick_opts=opts.AxisTickOpts(is_show=True),
 									splitline_opts=opts.SplitLineOpts(is_show=False),
 								),
-								tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+								tooltip_opts=opts.TooltipOpts(
+									is_show=True,
+									formatter=JsCode("""
+														function(params) {
+															mydata = params.data;
+															return params.dimensionNames[0] + ': ' + mydata[0] + '<br>' + params.dimensionNames[1] + ': ' + mydata[1] + '<br>' + params.seriesName + ': ' + mydata[2];
+														}	
+													""")
+								),
 								legend_opts=opts.LegendOpts(
 									is_show=self.ui.checkBoxFigLegend.isChecked()
 								),
@@ -14493,7 +14501,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 								axistick_opts=opts.AxisTickOpts(is_show=True),
 								splitline_opts=opts.SplitLineOpts(is_show=False),
 							),
-							tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+							tooltip_opts=opts.TooltipOpts(
+								is_show=True,
+								formatter=JsCode("""
+													function(params) {
+														mydata = params.data;
+														return params.dimensionNames[0] + ': ' + mydata[0] + '<br>' + params.dimensionNames[1] + ': ' + mydata[1] + '<br>' + params.seriesName + ': ' + mydata[2];
+													}	
+												""")
+							),
 							legend_opts=opts.LegendOpts(
 								is_show=self.ui.checkBoxFigLegend.isChecked()
 							),
@@ -14519,7 +14535,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 							axistick_opts=opts.AxisTickOpts(is_show=True),
 							splitline_opts=opts.SplitLineOpts(is_show=False),
 						),
-						tooltip_opts=opts.TooltipOpts(is_show=True, formatter="{c}, {a}"),
+						tooltip_opts=opts.TooltipOpts(
+							is_show=True,
+							formatter=JsCode("""
+												function(params) {
+													mydata = params.data;
+													return params.dimensionNames[0] + ': ' + mydata[0] + '<br>' + params.dimensionNames[1] + ': ' + mydata[1] + '<br>Group: ' + params.seriesName;
+												}	
+											""")
+						),
 						legend_opts=opts.LegendOpts(
 							is_show=self.ui.checkBoxFigLegend.isChecked()
 						),
