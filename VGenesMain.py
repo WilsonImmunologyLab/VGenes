@@ -14263,7 +14263,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				QMessageBox.warning(self, 'Warning', 'Your dim1 or dim2 is empty!',
 				                    QMessageBox.Ok, QMessageBox.Ok)
 				return
-
+			dotSize = self.ui.spinBoxDotSize.value()
 			if self.ui.radioButtonPNG.isChecked():
 				PNG = True
 				if group == "":
@@ -14338,7 +14338,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							self.ui.figure.clf()
 							# self.ui.figure.ax.remove()
 							self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-							i = self.ui.figure.ax.scatter(x_data, y_data, c=group_data, s=15, alpha=0.8, edgecolors='black',
+							i = self.ui.figure.ax.scatter(x_data, y_data, c=group_data, s=dotSize, alpha=0.8, edgecolors='black',
 							                          cmap='viridis')
 							self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
 							self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
@@ -14363,7 +14363,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							self.ui.figure.clf()
 							# self.ui.figure.ax.remove()
 							self.ui.figure.ax = self.ui.figure.add_axes([0.1, 0.1, 0.8, 0.8])
-							i = self.ui.figure.ax.scatter(x_data, y_data, c=group_data, s=15, alpha=0.8, edgecolors='black',cmap='viridis', vmin=scatterMin, vmax=scatterMax)
+							i = self.ui.figure.ax.scatter(x_data, y_data, c=group_data, s=dotSize, alpha=0.8, edgecolors='black',cmap='viridis', vmin=scatterMin, vmax=scatterMax)
 							self.ui.figure.ax.set_yscale(self.ui.comboBoxYscale.currentText())
 							self.ui.figure.ax.set_xscale(self.ui.comboBoxXscale.currentText())
 							self.ui.figure.ax.set_ylim(min(y_data), max(y_data))
@@ -14392,7 +14392,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 								if group_data[i] == group:
 									cur_x.append(x_data[i])
 									cur_y.append(y_data[i])
-							self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=15, alpha=0.8, edgecolors='black', label=group)
+							self.ui.figure.ax.scatter(cur_x, cur_y, c=colors[index], s=dotSize, alpha=0.8, edgecolors='black', label=group)
 							index += 1
 
 						font_size = 30 / len(groups)
@@ -14542,7 +14542,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 					# attach data
 					my_scatter.add_xaxis(xaxis_data=x_data)
-					my_scatter.add_yaxis(series_name="Data", y_axis=y_data, label_opts=opts.LabelOpts(is_show=False))
+					my_scatter.add_yaxis(series_name="Data", y_axis=y_data, label_opts=opts.LabelOpts(is_show=False), symbol_size=dotSize)
 
 				else:
 					field = dim1 + "," + dim2 + "," + group
@@ -14589,7 +14589,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 						my_scatter.add_xaxis(xaxis_data=x_data)
 						my_scatter.add_yaxis(series_name=group,
 						                     y_axis=[list(z) for z in zip(y_data, group_data)],
-						                     label_opts=opts.LabelOpts(is_show=False),
+						                     label_opts=opts.LabelOpts(is_show=False),symbol_size=dotSize
 						                     )
 					else:
 						group_result = Counter(group_data)
@@ -14606,7 +14606,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 							# attach data
 							my_scatter.add_xaxis(xaxis_data=sub_x_data)
-							my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data, label_opts=opts.LabelOpts(is_show=False))
+							my_scatter.add_yaxis(series_name=group, y_axis=sub_y_data, label_opts=opts.LabelOpts(is_show=False), symbol_size=dotSize)
 
 				my_pyecharts = (
 					my_scatter
