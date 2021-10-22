@@ -13427,10 +13427,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 			multi_factor = False
 			if field2 == "":
 				field = field1
+				sort_statement = ' ORDER BY ' + field1
 			else:
 				field = field1 + "," + field2
+				sort_statement = ' ORDER BY ' + field2
 				multi_factor = True
-			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
+			SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + sort_statement
+			#SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
 			if self.ui.radioButtonPNG.isChecked():
