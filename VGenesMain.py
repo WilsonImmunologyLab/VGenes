@@ -15067,7 +15067,40 @@ class VGenesForm(QtWidgets.QMainWindow):
 						else:
 							unit = [i, j, 0]
 						data.append(unit)
-	
+
+				# min and max value setting
+				min_value_ori = min_value
+				max_value_ori = max_value
+				if self.ui.lineEditMaxVDJ.text() != '':
+					try:
+						max_value1 = int(self.ui.lineEditMaxVDJ.text())
+						if max_value1 > 0:
+							max_value = max_value1
+						else:
+							Msg = 'Max value can not be negative! Will use the max value of this dataset!'
+							QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					except:
+						Msg = 'Your max value setting is not a number! Will use the max value of this dataset!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+				if self.ui.lineEditMinVDJ.text() != '':
+					try:
+						min_value1 = int(self.ui.lineEditMinVDJ.text())
+						if min_value1 >= 0:
+							min_value = min_value1
+						else:
+							Msg = 'Min value can not be negative! Will use the min value of this dataset!'
+							QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					except:
+						Msg = 'Your min value setting is not a number! Will use the min value of this dataset!'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				
+				if min_value >= max_value:
+					min_value = min_value_ori
+					max_value = max_value_ori
+					Msg = 'Min value must be smaller than max value! Will use the min value of this dataset!'
+					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				
 				# draw figure
 				my_pyecharts = (
 					HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
