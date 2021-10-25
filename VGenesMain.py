@@ -14465,7 +14465,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 									formatter=JsCode("""
 														function(params) {
 															mydata = params.data;
-															return params.dimensionNames[0] + ': ' + mydata[0] + '<br>' + params.dimensionNames[1] + ': ' + mydata[1] + '<br>' + params.seriesName + ': ' + mydata[2];
+															return ' """ + dim1 + """: ' + mydata[0] + '<br>' + ' """ + dim2 + """ ' + ': ' + mydata[1] + '<br>' + ' """ + group + """ ' + ': ' + mydata[2];
 														}	
 													""")
 								),
@@ -14506,7 +14506,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 								formatter=JsCode("""
 													function(params) {
 														mydata = params.data;
-														return params.dimensionNames[0] + ': ' + mydata[0] + '<br>' + params.dimensionNames[1] + ': ' + mydata[1] + '<br>' + params.seriesName + ': ' + mydata[2];
+														return ' """ + dim1 + """: ' + mydata[0] + '<br>' + ' """ + dim2 + """ ' + ': ' + mydata[1] + '<br>' + ' """ + group + """ ' + ': ' + mydata[2];
 													}	
 												""")
 							),
@@ -14540,7 +14540,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 							formatter=JsCode("""
 												function(params) {
 													mydata = params.data;
-													return params.dimensionNames[0] + ': ' + mydata[0] + '<br>' + params.dimensionNames[1] + ': ' + mydata[1] + '<br>Group: ' + params.seriesName;
+													return ' """ + dim1 + """: ' + mydata[0] + '<br>' + ' """ + dim2 + """ ' + ': ' + mydata[1] + '<br>' + ' """ + group + """ ' + ': ' + params.seriesName;
 												}	
 											""")
 						),
