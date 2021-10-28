@@ -810,6 +810,11 @@
             </item>
             <item>
              <property name="text">
+              <string>CSV format customized fields</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Count AA mutations</string>
              </property>
             </item>

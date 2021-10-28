@@ -88,6 +88,7 @@ from ui_samplingdialog import Ui_SamplingDialog
 from ui_deletedialog import Ui_deleteDialog
 from ui_hclctabledialog import Ui_HCLCDialog
 from ui_rename_dialog import Ui_RenameDialog
+from ui_export_option_dialog import Ui_ExportOptionDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -1579,7 +1580,57 @@ class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
 		Msg = 'Report is saved as\n' + Pathname + '!'
 		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 		self.close()
-		
+
+class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
+	GibsonUpdateSelectionSignal = pyqtSignal(str)
+	LogFileSignal = pyqtSignal(str)
+
+	def __init__(self, parent=None):
+		QtWidgets.QDialog.__init__(self, parent)
+		super(ExportOptionDialog, self).__init__()
+		self.ui = Ui_ExportOptionDialog()
+		self.ui.setupUi(self)
+
+		self.ui.pushButtonExport.clicked.connect(self.accept)
+		self.ui.pushButtonCancel.clicked.connect(self.reject)
+		self.ui.checkBox.clicked.connect(self.checkAll)
+
+		if system() == 'Windows':
+			# set style for windows
+			self.setStyleSheet("QLabel{font-size:18px;}"
+			                   "QTextEdit{font-size:18px;}"
+			                   "QComboBox{font-size:18px;}"
+			                   "QPushButton{font-size:18px;}"
+			                   "QTabWidget{font-size:18px;}"
+			                   "QCommandLinkButton{font-size:18px;}"
+			                   "QRadioButton{font-size:18px;}"
+			                   "QPlainTextEdit{font-size:18px;}"
+			                   "QCheckBox{font-size:18px;}"
+			                   "QTableWidget{font-size:18px;}"
+			                   "QToolBar{font-size:18px;}"
+			                   "QMenuBar{font-size:18px;}"
+			                   "QMenu{font-size:18px;}"
+			                   "QAction{font-size:18px;}"
+			                   "QMainWindow{font-size:18px;}")
+		else:
+			pass
+
+	def accept(self):
+		pass
+		# step 1: get file name
+
+		# step 2: export records
+
+	def checkAll(self):
+		rows = self.ui.tableWidget.rowCount()
+		if self.ui.checkBox.isChecked():
+			for row in range(1, rows):
+				self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
+		else:
+			for row in range(1, rows):
+				self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
+	
+
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 	GibsonUpdateSelectionSignal = pyqtSignal(str)
 	LogFileSignal = pyqtSignal(str)

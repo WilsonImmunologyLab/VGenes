@@ -4,8 +4,8 @@ import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
     setText
 from VGenesMain import ProgressBar
-from VGenesMain import GibsonDialog, PatentDialog
-from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView, QTextEdit, QLineEdit
+from VGenesMain import GibsonDialog, PatentDialog, ExportOptionDialog
+from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView, QTextEdit, QLineEdit, QCheckBox, QComboBox
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5 import QtGui
 
@@ -1690,8 +1690,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.myGibsonDialog.ui.tableWidget.setRowCount(num_row)
         self.myGibsonDialog.ui.tableWidget.setColumnCount(num_col)
         self.myGibsonDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
-        #self.myGibsonDialog.ui.tableWidget.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        #self.myGibsonDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.myGibsonDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.myGibsonDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
         self.myGibsonDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -1774,6 +1772,59 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.myGibsonDialog.LogFileSignal.connect(self.displayLog)
         # show dialog
         self.myGibsonDialog.show()
+    elif option == 'CSV format customized fields':
+        if len(self.AntibodyCandidates) == 0:
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+        else:
+            selected_list = self.AntibodyCandidates
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        self.myExportOptionDialog = ExportOptionDialog()
+
+        if DBFilename != '' and DBFilename != None and DBFilename != 'none':
+            SQLStatement = 'SELECT display,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            header_list = ['Selected', 'Field', 'Field nickname', 'Field type', 'Field comment','ID']
+            num_row = len(DataIn)
+            num_col = len(header_list)
+            self.myExportOptionDialog.ui.tableWidget.setRowCount(num_row)
+            self.myExportOptionDialog.ui.tableWidget.setColumnCount(num_col)
+            self.myExportOptionDialog.ui.tableWidget.setHorizontalHeaderLabels(header_list)
+
+            #self.myExportOptionDialog.ui.tableWidget.setDragDropMode(QAbstractItemView.InternalMove)
+            self.myExportOptionDialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+            self.myExportOptionDialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+
+            for row_index in range(num_row):
+                # col 0
+                cell_checkBox = QCheckBox()
+                cell_checkBox.setChecked(False)
+                self.myExportOptionDialog.ui.tableWidget.setCellWidget(row_index, 0, cell_checkBox)
+
+                # col 2:
+                for col_index in range(1, num_col):
+                    unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
+                    self.myExportOptionDialog.ui.tableWidget.setItem(row_index, col_index, unit)
+
+            # disable edit
+            self.myExportOptionDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+            # re-size column size
+            self.myExportOptionDialog.ui.tableWidget.resizeColumnsToContents()
+
+        # show dialog
+        self.myExportOptionDialog.show()
+
     elif option == 'Antibody Patent report':
         if len(self.AntibodyCandidates) == 0:
             Msg = 'Nothing in Antibody candidate list!'
