@@ -1591,6 +1591,9 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
 		self.ui = Ui_ExportOptionDialog()
 		self.ui.setupUi(self)
 
+		self.WHEREStatement = ''
+		self.DBFilename = ''
+
 		self.ui.pushButtonExport.clicked.connect(self.accept)
 		self.ui.pushButtonCancel.clicked.connect(self.reject)
 		self.ui.checkBox.clicked.connect(self.checkAll)
@@ -1618,16 +1621,76 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
 	def accept(self):
 		pass
 		# step 1: get file name
+		Pathname = saveFile(self.parent(), 'csv')
+		if Pathname == None:
+			return
 
 		# step 2: export records
+		fields = []
+		rows = self.ui.tableWidget.rowCount()
+		for row in range(0, rows):
+			if self.ui.tableWidget.cellWidget(row, 0).isChecked():
+				fields.append(self.ui.tableWidget.item(row,1).text())
+
+		if len(fields) == 0:
+			Msg = 'Your did not select any field!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
+		field_str = ','.join(fields)
+		SQLSTATEMENT = 'SELECT ' + field_str + ' from vgenesDB' + self.WHEREStatement
+		DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLSTATEMENT)
+
+		CSVOut = field_str + '\n'
+		mode = 0
+		try:
+			index_seqalignment = fields.index("SeqAlignment")
+			mode += 1
+		except:
+			index_seqalignment = None
+		try:
+			index_Mutations = fields.index("Mutations")
+			mode += 2
+		except:
+			index_Mutations = None
+
+		if mode == 0:
+			for record in DataIn:
+				CSVOut += ','.join(record) + '\n'
+		elif mode == 1:
+			for record in DataIn:
+				record_new = [str(x) for x in record]
+				record_new[index_seqalignment] = re.sub(r'\n', '#', record_new[index_seqalignment])
+				CSVOut += ','.join(record_new) + '\n'
+		elif mode == 2:
+			for record in DataIn:
+				record_new = [str(x) for x in record]
+				record_new[index_Mutations] = re.sub(',', '|', record_new[index_Mutations])
+				CSVOut += ','.join(record_new) + '\n'
+		elif mode == 3:
+			for record in DataIn:
+				record_new = [str(x) for x in record]
+				record_new[index_seqalignment] = re.sub(r'\n', '#', record_new[index_seqalignment])
+				record_new[index_Mutations] = re.sub(',', '|', record_new[index_Mutations])
+				CSVOut += ','.join(record_new) + '\n'
+
+		with open(Pathname, 'w') as currentfile:
+			currentfile.write(CSVOut)
+
+		Msg = 'Your records have been saved to ' + Pathname + '!\n Total ' + str(len(DataIn)) + \
+		      ' sequences were exported!'
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,
+		                        QMessageBox.Ok)
+
+		self.close()
 
 	def checkAll(self):
 		rows = self.ui.tableWidget.rowCount()
 		if self.ui.checkBox.isChecked():
-			for row in range(1, rows):
+			for row in range(0, rows):
 				self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
 		else:
-			for row in range(1, rows):
+			for row in range(0, rows):
 				self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
 	
 

@@ -1790,6 +1790,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 return
 
         self.myExportOptionDialog = ExportOptionDialog()
+        self.myExportOptionDialog.WHEREStatement = WHEREStatement
+        self.myExportOptionDialog.DBFilename = DBFilename
 
         if DBFilename != '' and DBFilename != None and DBFilename != 'none':
             SQLStatement = 'SELECT display,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
