@@ -1693,7 +1693,6 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
 			for row in range(0, rows):
 				self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
 	
-
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 	GibsonUpdateSelectionSignal = pyqtSignal(str)
 	LogFileSignal = pyqtSignal(str)
