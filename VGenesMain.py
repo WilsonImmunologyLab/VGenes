@@ -591,7 +591,6 @@ class RenameDialog(QtWidgets.QDialog):
 			QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
-
 class HCLCDialog(QtWidgets.QDialog):
 	deleteSignal = pyqtSignal(list)
 	def __init__(self):

@@ -29,7 +29,12 @@ def saveFile(self, typeSave):
         elif len(LastFileName)>1:
             workingdir, filename = os.path.split(LastFileName[0])
             os.chdir(workingdir)
-
+    else:
+        workingdir = '~/Desktop/'
+        try:
+            os.chdir(workingdir)
+        except:
+            pass
 
     if typeSave == 'db':
         queryIs = "Database " + time.strftime('%c')
@@ -73,8 +78,8 @@ def saveFile(self, typeSave):
 
     if Filename:
         LastFileName = Filename
-
         return Filename
+
 def openFile(self, typeOpen):
     global LastFileName
     queryIs = ''
