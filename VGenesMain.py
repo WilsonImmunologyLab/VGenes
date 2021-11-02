@@ -1846,7 +1846,13 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 			return
 
 		sender_widget = self.sender()
-		currentRow = sender_widget.rowindex
+		currentRowName = sender_widget.rowindex
+		currentRow = 0
+		for index in range(self.ui.tableWidget.rowCount()):
+			if self.ui.tableWidget.item(index, 1).text() == currentRowName:
+				currentRow = index
+				break
+
 		updatedVDJSeq = self.ui.tableWidget.cellWidget(currentRow,4).toPlainText().upper()
 		updatedJend = updatedVDJSeq[-6:]
 		Genetype = self.ui.tableWidget.item(currentRow, 2).text()

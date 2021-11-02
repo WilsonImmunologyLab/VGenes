@@ -1735,14 +1735,14 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 cell_Text = QTextEdit()
                 cell_Text.setPlainText(VDJseq)
                 #cell_Text.resize(cell_Text.size().width(), 20)
-                cell_Text.rowindex = index
+                cell_Text.rowindex = SeqName
                 cell_Text.textChanged.connect(self.myGibsonDialog.updateData)
                 self.myGibsonDialog.ui.tableWidget.setCellWidget(index, 4, cell_Text)
 
                 cell_TextAA = QTextEdit()
                 cell_TextAA.setPlainText(AAseq)
                 cell_TextAA.setReadOnly(True)
-                cell_TextAA.rowindex = index
+                #cell_TextAA.rowindex = index
                 self.myGibsonDialog.ui.tableWidget.setCellWidget(index, 5, cell_TextAA)
 
                 if checkRes == "Good":
