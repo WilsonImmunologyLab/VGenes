@@ -1624,6 +1624,13 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
 		if Pathname == None:
 			return
 
+		if os.access(Pathname, os.W_OK):
+			pass
+		else:
+			Msg = 'You do not have the write permission of this folder!\n' + Pathname
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 		# step 2: export records
 		fields = []
 		rows = self.ui.tableWidget.rowCount()
@@ -1931,7 +1938,10 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		if Pathname == None:
 			return
 
-		Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
+		if os.access(Pathname, os.W_OK):
+			Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
+		else:
+			Error_seq_names = 'You do not have the write permission of this folder!\n' + Pathname
 
 		with open(Pathname, 'w') as currentfile:
 			out_str = 'SeqName,V(D)J sequence\n'
@@ -8665,6 +8675,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_actionPairToNewDB_triggered(self):
 		Pathname = saveFile(self.parent(), 'db')
 		if Pathname == None:
+			return
+
+		if os.access(Pathname, os.W_OK):
+			pass
+		else:
+			msg = 'You do not have the write permission of this folder!'
+			QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
 		if self.ui.checkBoxAll.isChecked():
@@ -17454,6 +17471,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if f == '' or f == None:
 			return
 
+		if os.access(f, os.W_OK):
+			pass
+		else:
+			Msg = 'You do not have the write permission of this folder!\n' + f
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 		with open(f, 'w') as currentfile:
 			doc = 'Comparison, Project, Subject, Strain, Clonotype, Sequence 1, Sequence 2, Activity, Differences, R-Differences, S-Differences, \
 					Begin, End, Length,  Matches, Adjusted Matches,  \
@@ -17871,6 +17895,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			filename = saveFile(self, 'fastq')
 			if filename == '' or filename == None:
+				return
+
+			if os.access(filename, os.W_OK):
+				pass
+			else:
+				Msg = 'You do not have the write permission of this folder!\n' + filename
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
 			shutil.copy(WorkDir, filename)
@@ -21778,6 +21809,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if filename == '' or filename == None:
 			return
 
+		if os.access(filename, os.W_OK):
+			pass
+		else:
+			Msg = 'You do not have the write permission of this folder!\n' + filename
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 		f = open(filename, 'w')
 		DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		for record in DataIn:
@@ -21807,6 +21845,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		dump_sql_file = VGenesSQL.DumpDB(DBFilename, temp_folder, checkedItems)
 
 		filename = saveFile(self, 'db')
+
+		if os.access(filename, os.W_OK):
+			pass
+		else:
+			Msg = 'You do not have the write permission of this folder!\n' + filename
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 		SuccessMsg = VGenesSQL.ImportDB(filename, dump_sql_file)
 		if SuccessMsg == False:
 			Msg = 'Something wrong when import your selected records into new DB!'
@@ -21845,6 +21891,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 				filename = openFile(self, 'db')
 
 			if filename == '' or filename == None:
+				return
+
+			if os.access(filename, os.W_OK):
+				pass
+			else:
+				Msg = 'You do not have the write permission of this folder!\n' + filename
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
 			answer3 = 'No'
@@ -27354,6 +27407,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if Pathname == '' or Pathname == None:
 			return
 		else:
+
+			if os.access(Pathname, os.W_OK):
+				pass
+			else:
+				Msg = 'You do not have the write permission of this folder!\n' + Pathname
+				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+				return
+
 			with open(Pathname, 'w') as currentfile:
 				currentfile.write(CSVOut)
 
