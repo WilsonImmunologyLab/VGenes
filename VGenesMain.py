@@ -1934,18 +1934,26 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		GibsonKend = self.ui.GibsonKEnd.text()
 		GibsonLend = self.ui.GibsonLEnd.text()
 
-		Pathname = saveFile(self.parent(), 'csv')
+		if self.ui.checkBoxCSV.isChecked():
+			Pathname = saveFile(self.parent(), 'csv')
+		elif self.ui.checkBoxFASTA.isChecked():
+			Pathname = saveFile(self.parent(), 'FASTA')
+
 		if Pathname == None:
 			return
 
 		if os.access(Pathname, os.W_OK):
 			Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
 		else:
-			Error_seq_names = 'You do not have the write permission of this folder!\n' + Pathname
+			Error_seq_names = 'You do not have the write permission of this folder!\n' + Pathname + '\n'
 
 		with open(Pathname, 'w') as currentfile:
-			out_str = 'SeqName,V(D)J sequence\n'
-			currentfile.write(out_str)
+			if self.ui.checkBoxCSV.isChecked():
+				out_str = 'SeqName,V(D)J sequence\n'
+				currentfile.write(out_str)
+			elif self.ui.checkBoxFASTA.isChecked():
+				pass
+			
 
 			total_out = 0
 			total_rows = self.ui.tableWidget.rowCount()
@@ -1964,7 +1972,10 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 						GibsonEnd = GibsonLend
 					else:
 						continue
-					out_str = SeqName + ',' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+					if self.ui.checkBoxCSV.isChecked():
+						out_str = SeqName + ',' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+					elif self.ui.checkBoxFASTA.isChecked():
+						out_str = '>' + SeqName + '\n' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
 					currentfile.write(out_str)
 					total_out += 1
 				else:
