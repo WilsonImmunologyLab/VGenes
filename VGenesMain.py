@@ -1942,48 +1942,99 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		if Pathname == None:
 			return
 
-		if os.access(Pathname, os.W_OK):
-			Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
-		else:
-			Error_seq_names = 'You do not have the write permission of this folder!\n' + Pathname + '\n'
+		Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
 
-		with open(Pathname, 'w') as currentfile:
+		if self.ui.radioButtonSep.isChecked():
 			if self.ui.checkBoxCSV.isChecked():
-				out_str = 'SeqName,V(D)J sequence\n'
-				currentfile.write(out_str)
+				HC_name = Pathname.replace('.csv','_HC.csv')
+				KC_name = Pathname.replace('.csv','_KC.csv')
+				LC_name = Pathname.replace('.csv','_LC.csv')
 			elif self.ui.checkBoxFASTA.isChecked():
-				pass
-			
+				HC_name = Pathname.replace('.fasta', '_HC.fasta')
+				KC_name = Pathname.replace('.fasta', '_KC.fasta')
+				LC_name = Pathname.replace('.fasta', '_LC.fasta')
 
-			total_out = 0
-			total_rows = self.ui.tableWidget.rowCount()
-			for index in range(total_rows):
-				checkRes = self.ui.tableWidget.item(index, 0).text()
-				if checkRes[0:4] == "Good":
-					SeqName = self.ui.tableWidget.item(index, 1).text()
-					GeneType = self.ui.tableWidget.item(index, 2).text()
-					VDJSeq = self.ui.tableWidget.cellWidget(index,4).toPlainText()
+			with open(HC_name, 'w') as hc_file, open(KC_name, 'w') as kc_file, open(LC_name, 'w') as lc_file:
+				if self.ui.checkBoxCSV.isChecked():
+					out_str = 'SeqName,V(D)J sequence\n'
+					hc_file.write(out_str)
+					kc_file.write(out_str)
+					lc_file.write(out_str)
+				elif self.ui.checkBoxFASTA.isChecked():
+					pass
 
-					if GeneType == "Heavy":
-						GibsonEnd = GibsonHend
-					elif GeneType == "Kappa":
-						GibsonEnd = GibsonKend
-					elif GeneType == "Lambda":
-						GibsonEnd = GibsonLend
+				total_out = 0
+				total_rows = self.ui.tableWidget.rowCount()
+				for index in range(total_rows):
+					checkRes = self.ui.tableWidget.item(index, 0).text()
+					if checkRes[0:4] == "Good":
+						SeqName = self.ui.tableWidget.item(index, 1).text()
+						GeneType = self.ui.tableWidget.item(index, 2).text()
+						VDJSeq = self.ui.tableWidget.cellWidget(index,4).toPlainText()
+
+						if GeneType == "Heavy":
+							GibsonEnd = GibsonHend
+						elif GeneType == "Kappa":
+							GibsonEnd = GibsonKend
+						elif GeneType == "Lambda":
+							GibsonEnd = GibsonLend
+						else:
+							continue
+						if self.ui.checkBoxCSV.isChecked():
+							out_str = SeqName + ',' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+						elif self.ui.checkBoxFASTA.isChecked():
+							out_str = '>' + SeqName + '\n' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+
+						if GeneType == "Heavy":
+							hc_file.write(out_str)
+						elif GeneType == "Kappa":
+							kc_file.write(out_str)
+						elif GeneType == "Lambda":
+							lc_file.write(out_str)
+
+						total_out += 1
 					else:
-						continue
-					if self.ui.checkBoxCSV.isChecked():
-						out_str = SeqName + ',' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
-					elif self.ui.checkBoxFASTA.isChecked():
-						out_str = '>' + SeqName + '\n' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+						Error_seq_names += self.ui.tableWidget.item(index, 1).text() + '\t' + checkRes + '\n'
+			Msg = 'Your sequences have been saved to:\n' + HC_name + '\n' + KC_name + '\n' + LC_name + '!\n Total ' + str(total_out) + \
+			      ' sequences were exported!'
+		else:
+			with open(Pathname, 'w') as currentfile:
+				if self.ui.checkBoxCSV.isChecked():
+					out_str = 'SeqName,V(D)J sequence\n'
 					currentfile.write(out_str)
-					total_out += 1
-				else:
-					Error_seq_names += self.ui.tableWidget.item(index, 1).text() + '\t' + checkRes + '\n'
-		Msg = 'Your sequences have been saved to ' + Pathname + '!\n Total ' + str(total_out) + \
-		      ' sequences were exported!'
-		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,
-		                    QMessageBox.Ok)
+				elif self.ui.checkBoxFASTA.isChecked():
+					pass
+
+
+				total_out = 0
+				total_rows = self.ui.tableWidget.rowCount()
+				for index in range(total_rows):
+					checkRes = self.ui.tableWidget.item(index, 0).text()
+					if checkRes[0:4] == "Good":
+						SeqName = self.ui.tableWidget.item(index, 1).text()
+						GeneType = self.ui.tableWidget.item(index, 2).text()
+						VDJSeq = self.ui.tableWidget.cellWidget(index,4).toPlainText()
+
+						if GeneType == "Heavy":
+							GibsonEnd = GibsonHend
+						elif GeneType == "Kappa":
+							GibsonEnd = GibsonKend
+						elif GeneType == "Lambda":
+							GibsonEnd = GibsonLend
+						else:
+							continue
+						if self.ui.checkBoxCSV.isChecked():
+							out_str = SeqName + ',' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+						elif self.ui.checkBoxFASTA.isChecked():
+							out_str = '>' + SeqName + '\n' + GibsonStart.lower() + VDJSeq.upper() + GibsonEnd.lower() + '\n'
+						currentfile.write(out_str)
+						total_out += 1
+					else:
+						Error_seq_names += self.ui.tableWidget.item(index, 1).text() + '\t' + checkRes + '\n'
+			Msg = 'Your sequences have been saved to:\n' + Pathname + '!\n Total ' + str(total_out) + \
+			      ' sequences were exported!'
+
+		QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,QMessageBox.Ok)
 		self.close()
 
 		ErlogFile = os.path.join(temp_folder, 'ErLog.txt')

@@ -23,6 +23,7 @@ class Ui_GibsonDialog(object):
         self.checkBoxCSV.setObjectName("checkBoxCSV")
         self.gridLayout_3.addWidget(self.checkBoxCSV, 3, 5, 1, 1)
         self.radioButtonSep = QtWidgets.QRadioButton(GibsonDialog)
+        self.radioButtonSep.setAutoExclusive(False)
         self.radioButtonSep.setObjectName("radioButtonSep")
         self.gridLayout_3.addWidget(self.radioButtonSep, 3, 2, 1, 1)
         spacerItem = QtWidgets.QSpacerItem(939, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
