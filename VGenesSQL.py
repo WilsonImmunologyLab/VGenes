@@ -919,8 +919,10 @@ def OpenDB(DBFilename):
 def enterData(self, DBpathname, IgBLASTAnalysis, answer3, ErlogFile):
 
     (dirname, filename) = os.path.split(DBpathname)
-
-    os.chdir(dirname)
+    try:
+        os.chdir(dirname)
+    except:
+        pass
 
 
     conn = db.connect(DBpathname)
