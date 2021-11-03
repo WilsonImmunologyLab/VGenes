@@ -1623,11 +1623,11 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
 		Pathname = saveFile(self.parent(), 'csv')
 		if Pathname == None:
 			return
-
-		if os.access(Pathname, os.W_OK):
+		tmp_path, tmp_file = os.path.split(Pathname)
+		if os.access(tmp_path, os.W_OK):
 			pass
 		else:
-			Msg = 'You do not have the write permission of this folder!\n' + Pathname
+			Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
@@ -1947,8 +1947,13 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 
 		if Pathname == None:
 			return
-
-		Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
+		tmp_path, tmp_file = os.path.split(Pathname)
+		if os.access(tmp_path, os.W_OK):
+			Error_seq_names = 'All sequences have not been exported due to errors were listed here:\n'
+		else:
+			Error_seq_names = 'You do not have the write permission of this folder!\n' + tmp_path
+			QMessageBox.information(self, 'Information', Error_seq_names, QMessageBox.Ok, QMessageBox.Ok)
+			return
 
 		if self.ui.radioButtonSep.isChecked():
 			if self.ui.checkBoxCSV.isChecked():
@@ -8745,10 +8750,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if Pathname == None:
 			return
 
-		if os.access(Pathname, os.W_OK):
+		tmp_path, tmp_file = os.path.split(Pathname)
+		if os.access(tmp_path, os.W_OK):
 			pass
 		else:
-			msg = 'You do not have the write permission of this folder!'
+			msg = 'You do not have the write permission of this folder!\n' + tmp_path
 			QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
@@ -17538,11 +17544,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		f = saveFile(self, 'CSV')
 		if f == '' or f == None:
 			return
-
-		if os.access(f, os.W_OK):
+		tmp_path, tmp_file = os.path.split(f)
+		if os.access(tmp_path, os.W_OK):
 			pass
 		else:
-			Msg = 'You do not have the write permission of this folder!\n' + f
+			Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
@@ -17964,11 +17970,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			filename = saveFile(self, 'fastq')
 			if filename == '' or filename == None:
 				return
-
-			if os.access(filename, os.W_OK):
+			tmp_path, tmp_file = os.path.split(filename)
+			if os.access(tmp_path, os.W_OK):
 				pass
 			else:
-				Msg = 'You do not have the write permission of this folder!\n' + filename
+				Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
@@ -21876,11 +21882,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		filename = saveFile(self, 'Nucleotide')
 		if filename == '' or filename == None:
 			return
-
-		if os.access(filename, os.W_OK):
+		tmp_path, tmp_file = os.path.split(filename)
+		if os.access(tmp_path, os.W_OK):
 			pass
 		else:
-			Msg = 'You do not have the write permission of this folder!\n' + filename
+			Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
@@ -21913,11 +21919,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		dump_sql_file = VGenesSQL.DumpDB(DBFilename, temp_folder, checkedItems)
 
 		filename = saveFile(self, 'db')
-
-		if os.access(filename, os.W_OK):
+		tmp_path, tmp_file = os.path.split(filename)
+		if os.access(tmp_path, os.W_OK):
 			pass
 		else:
-			Msg = 'You do not have the write permission of this folder!\n' + filename
+			Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			return
 
@@ -21960,11 +21966,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 			if filename == '' or filename == None:
 				return
-
-			if os.access(filename, os.W_OK):
+			tmp_path, tmp_file = os.path.split(filename)
+			if os.access(tmp_path, os.W_OK):
 				pass
 			else:
-				Msg = 'You do not have the write permission of this folder!\n' + filename
+				Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
@@ -27475,11 +27481,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if Pathname == '' or Pathname == None:
 			return
 		else:
-
-			if os.access(Pathname, os.W_OK):
+			tmp_path, tmp_file = os.path.split(Pathname)
+			if os.access(tmp_path, os.W_OK):
 				pass
 			else:
-				Msg = 'You do not have the write permission of this folder!\n' + Pathname
+				Msg = 'You do not have the write permission of this folder!\n' + tmp_path
 				QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 				return
 
