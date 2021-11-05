@@ -19301,6 +19301,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		result = Counter(label_data)
 		labels = list(result.keys())
+		labels.sort()
 
 		g2_dict = {}
 		i = 0
@@ -19331,7 +19332,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		)
 
 		# for each group in field 2
-		for group in g2_dict_keys:
+		for group in sorted(g2_dict_keys):
 			cur_box_data = []
 			cur_label_data = []
 			for i in g2_dict[group]:
