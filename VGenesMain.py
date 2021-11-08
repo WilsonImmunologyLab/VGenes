@@ -11298,9 +11298,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# generate tree
-		cmd = 'cd ' + this_folder + ';'
-		cmd += raxml_path
-		cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		#cmd = 'cd ' + this_folder + ';'
+		#cmd += raxml_path
+		#cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		if system() == 'Windows':
+			cmd = 'cd ' + this_folder + ' & '
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		elif system() == 'Darwin':
+			cmd = 'cd ' + this_folder + ';'
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		elif system() == 'Linux':
+			cmd = 'cd ' + this_folder + ';'
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		else:
+			cmd = ''
 
 		os.system(cmd)
 		print("tree done!")
@@ -11450,9 +11464,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# generate tree
-		cmd = 'cd ' + this_folder + ';'
-		cmd += raxml_path
-		cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		#cmd = 'cd ' + this_folder + ';'
+		#cmd += raxml_path
+		#cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		if system() == 'Windows':
+			cmd = 'cd ' + this_folder + ' & '
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		elif system() == 'Darwin':
+			cmd = 'cd ' + this_folder + ';'
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		elif system() == 'Linux':
+			cmd = 'cd ' + this_folder + ';'
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		else:
+			cmd = ''
 
 		os.system(cmd)
 		print("tree done!")
@@ -11767,9 +11795,23 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# generate tree
-		cmd = 'cd ' + this_folder + ';'
-		cmd += raxml_path
-		cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		#cmd = 'cd ' + this_folder + ';'
+		#cmd += raxml_path
+		#cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		if system() == 'Windows':
+			cmd = 'cd ' + this_folder + ' & '
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		elif system() == 'Darwin':
+			cmd = 'cd ' + this_folder + ';'
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		elif system() == 'Linux':
+			cmd = 'cd ' + this_folder + ';'
+			cmd += raxml_path
+			cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+		else:
+			cmd = ''
 
 		os.system(cmd)
 		print("tree done!")
