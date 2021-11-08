@@ -2701,7 +2701,7 @@ class Batch_thread(QThread):
 
 			# start update records
 			field = re.sub(r'\(.+', '', self.dialog.ui.comboBox.currentText())
-			SQLStatement = 'SELECT ' + field + ',ID FROM vgenesdb'
+			SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb'
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			
 			process = 1
@@ -2713,9 +2713,9 @@ class Batch_thread(QThread):
 						if cur_value >= num_list[i] and cur_value < num_list[i+1]:
 							new_value = new_values[i]
 							if new_value == 'NULL':
-								SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
+								SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
 							else:
-								SQLStatement = 'UPDATE vgenesdb SET ' + field + '= ' + new_value + ' WHERE ID=' + cur_id
+								SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
 							VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
 							pct = int(process / len(DataIn) * 100)
