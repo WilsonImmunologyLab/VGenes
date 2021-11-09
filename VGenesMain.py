@@ -5173,6 +5173,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			                   "QMainWindow{font-size:18px;}")
 		else:
 			pass
+		
+		self.setIcon()
 
 	def setIcon(self):
 		if self.ui.pushButtonBCR.isChecked():
