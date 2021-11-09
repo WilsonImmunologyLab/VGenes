@@ -5524,7 +5524,20 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if len(files) == 0:
 			return
 		else:
-			self.ui.listWidgetVDB.addItems(files)
+			existing_items = []
+			count = self.ui.listWidgetVDB.count()
+			for i in range(count):
+				existing_items.append(self.ui.listWidgetVDB.item(i).text())
+
+			share = set(existing_items).intersection(set(files))
+			if len(share) > 0:
+				diff = set(files).difference(set(share))
+				self.ui.listWidgetVDB.addItems(diff)
+				
+				Msg = 'These folders/files are already in our list!\n' + '\n'.join(share)
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			else:
+				self.ui.listWidgetVDB.addItems(files)
 
 	def browse10x(self):
 		directory = QtWidgets.QFileDialog.getExistingDirectory(self, "getExistingDirectory", "～/Documents")
@@ -5540,7 +5553,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if len(files) == 0:
 			return
 		else:
-			self.ui.listWidgetFasta.addItems(files)
+			existing_items = []
+			count = self.ui.listWidgetFasta.count()
+			for i in range(count):
+				existing_items.append(self.ui.listWidgetFasta.item(i).text())
+
+			share = set(existing_items).intersection(set(files))
+			if len(share) > 0:
+				diff = set(files).difference(set(share))
+				self.ui.listWidgetFasta.addItems(diff)
+
+				Msg = 'These folders/files are already in our list!\n' + '\n'.join(share)
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			else:
+				self.ui.listWidgetFasta.addItems(files)
+
 			self.updateGroupSetting()
 
 	def browseSEQ(self):
@@ -5548,7 +5575,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if directory == None or directory == '':
 			return
 		else:
-			self.ui.listWidgetSEQ.addItem(directory)
+			existing_items = []
+			count = self.ui.listWidgetSEQ.count()
+			for i in range(count):
+				existing_items.append(self.ui.listWidgetSEQ.item(i).text())
+
+			share = set(existing_items).intersection(set(directory))
+			if len(share) > 0:
+				diff = set(directory).difference(set(share))
+				self.ui.listWidgetSEQ.addItems(diff)
+
+				Msg = 'These folders/files are already in our list!\n' + '\n'.join(share)
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			else:
+				self.ui.listWidgetSEQ.addItem(directory)
+
 			self.updateGroupSetting()
 
 	def browseCSV(self):
@@ -5557,7 +5598,20 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		if len(files) == 0:
 			return
 		else:
-			self.ui.listWidgetCSV.addItems(files)
+			existing_items = []
+			count = self.ui.listWidgetCSV.count()
+			for i in range(count):
+				existing_items.append(self.ui.listWidgetCSV.item(i).text())
+
+			share = set(existing_items).intersection(set(files))
+			if len(share) > 0:
+				diff = set(files).difference(set(share))
+				self.ui.listWidgetCSV.addItems(diff)
+
+				Msg = 'These folders/files are already in our list!\n' + '\n'.join(share)
+				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			else:
+				self.ui.listWidgetCSV.addItems(files)
 
 	def browseIgBlast(self):
 		file, filetype = QtWidgets.QFileDialog.getOpenFileName(self, "getOpenFileName", "~/Documents",
