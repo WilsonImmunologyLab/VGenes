@@ -9125,6 +9125,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 					wasClicked = True
 					record.setCheckState(0, Qt.Checked)
 			Msg = 'Your checked records have been updated according to your sampling!'
+			self.match_tree_to_table()
 		else:
 			self.AntibodyCandidates = []
 			self.ui.tableWidgetHC.setRowCount(0)
