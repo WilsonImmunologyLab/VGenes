@@ -5580,12 +5580,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 			for i in range(count):
 				existing_items.append(self.ui.listWidgetSEQ.item(i).text())
 
-			share = set(existing_items).intersection(set(directory))
-			if len(share) > 0:
-				diff = set(directory).difference(set(share))
-				self.ui.listWidgetSEQ.addItems(diff)
-
-				Msg = 'These folders/files are already in our list!\n' + '\n'.join(share)
+			if directory in existing_items:
+				Msg = 'These folders/files are already in our list!\n' + directory
 				QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			else:
 				self.ui.listWidgetSEQ.addItem(directory)
