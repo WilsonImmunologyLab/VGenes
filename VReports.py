@@ -1749,6 +1749,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.green)
                 elif checkRes == "Check ORF":
                     self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.yellow)
+                elif checkRes == "Jend Mut":
+                    self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.yellow)
                 else:
                     self.myGibsonDialog.ui.tableWidget.item(index, 0).setBackground(Qt.red)
                 index += 1
@@ -1908,17 +1910,26 @@ def checkJend(GeneType, JendSeq):
         if JendSeq.upper() == 'TCCTCA':
             res = 'Good'
         else:
-            res = 'Jend Error'
+            if VGenesSeq.Translator(JendSeq.upper(), 0)[0] == 'SS':
+                res = 'Jend Mut'
+            else:
+                res = 'Jend Error'
     elif GeneType == 'Kappa':
         if JendSeq.upper() in ['TCGAAC', 'ATTAAA', 'ATCAAA']:
             res = 'Good'
         else:
-            res = 'Jend Error'
+            if VGenesSeq.Translator(JendSeq.upper(), 0)[0] in ['SN', 'IK']:
+                res = 'Jend Mut'
+            else:
+                res = 'Jend Error'
     elif GeneType == 'Lambda':
         if JendSeq.upper() == 'GTCCTA':
             res = 'Good'
         else:
-            res = 'Jend Error'
+            if VGenesSeq.Translator(JendSeq.upper(), 0)[0] == 'VL':
+                res = 'Jend Mut'
+            else:
+                res = 'Jend Error'
 
     return res
 

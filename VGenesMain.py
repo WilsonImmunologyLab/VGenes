@@ -1869,6 +1869,10 @@ class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
 		self.ui.tableWidget.item(currentRow, 0).setText(checkRes)
 		if checkRes[0:4] == "Good":
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.green)
+		elif checkRes == "Check ORF":
+			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.yellow)
+		elif checkRes == "Jend Mut":
+			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.yellow)
 		else:
 			self.ui.tableWidget.item(currentRow, 0).setBackground(Qt.red)
 		self.ui.tableWidget.item(currentRow, 3).setText(updatedJend)
