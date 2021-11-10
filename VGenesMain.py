@@ -6771,7 +6771,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 		seq_pathname = os.path.join(temp_folder,time_stamp)
 		fout = open(seq_pathname,'w')
 		for fasta_file in fasta_files:
-			file_name = fasta_file.split('/')[-1]
+			fasta_file = os.path.normpath(fasta_file)
+			file_name = fasta_file.split(os.sep)[-1]
 			file_name = re.sub(r'\..+', '', file_name)
 			if os.path.isfile(fasta_file):
 				fasta_seqs = ReadFasta(fasta_file)
