@@ -2089,16 +2089,17 @@ class TranslateDialog(QtWidgets.QDialog, Ui_Translate_Dialog):
 			pass
 
 	def accept(self):
-		sequence = self.ui.textEditNT.toPlainText()
+		sequence = self.ui.textEditNT.toPlainText().upper()
 		if len(sequence) > 0:
 			# check sequence
-			pattern = re.compile(r'[^ATCUG]')
-			strange_residues = re.findall(pattern, sequence)
-			if len(strange_residues) > 0:
-				Msg = ','.join(strange_residues)
-				return
+			#pattern = re.compile(r'[^ATCUG]')
+			#strange_residues = re.findall(pattern, sequence)
+			#if len(strange_residues) > 0:
+			#	Msg = ','.join(strange_residues)
+			#	return
 
 			# RNA to DNA
+			sequence = re.sub(r'\W', '', sequence)
 			sequence = re.sub("U", 'T', sequence)
 			# translate
 			AA1, msg = Translator(sequence, 0)
