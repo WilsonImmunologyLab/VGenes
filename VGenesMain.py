@@ -21161,25 +21161,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		if currentitemIs:
 			self.findTreeItem(currentitemIs)
 
-
-
 	@pyqtSlot()
 	def on_pushButtonSimilar_clicked(self):
-		# print('searched')
 		global wasClicked
+		global TreeSelected
 		wasClicked = False
 
-		value = self.ui.treeWidget.selectedItems()
-		currentitemIs = ''
-
-		for item in value:
-			currentitemIs = item.text(0)
-
-		# already checked some records?
-		checked_names = self.getTreeCheckedChild()
-		checked_names = checked_names[3]
-
-		self.clearTreeChecks()
 		if LastSelected:
 			fieldsearch = LastSelected[0]
 		else:
@@ -21187,83 +21174,43 @@ class VGenesForm(QtWidgets.QMainWindow):
 			                            'No field was seleceted.\nClick a field from the Record tab and records with similar values will be checked.',
 			                            'OK')
 			return
-
 		search = LastSelected[1]
 
-		# fields = self.ui.cboTreeOp1.currentText()
-		# field1 = self.TransLateFieldtoReal(fields, True)
-		field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-		i = 0
-		for item in FieldList:
-			if field1 == item:
-				field1Value = data[i]
-			i += 1
+		value = self.ui.treeWidget.selectedItems()
+		currentitemIs = ''
 
-		# fields = self.ui.cboTreeOp2.currentText()
-		# field2 = self.TransLateFieldtoReal(fields, True)
-		field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-		i = 0
-		for item in FieldList:
-			if field2 == item:
-				field2Value = data[i]
-			i += 1
+		for item in value:
+			currentitemIs = item.text(0)
 
-		# fields = self.ui.cboTreeOp3.currentText()
-		# field3 = self.TransLateFieldtoReal(fields, True)
-		field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-		i = 0
-		for item in FieldList:
-			if field3 == item:
-				field3Value = data[i]
-			i += 1
-
-		if field1 == '': field1 = 'None'
-		if field2 == '': field1 = 'None'
-		if field3 == '': field1 = 'None'
-
-		# global RefreshSQL
-		if field1 == 'None' or field1 is None:
-			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '"'
-		elif field2 == 'None' or field2 is None:
-			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"'
-		elif field3 == 'None' or field3 is None:
-			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '"'
+		if self.ui.rdoLocal.isChecked():
+			WHEREStatement =  ' AND SeqName IN ("' + '","'.join(TreeSelected) + '")'
 		else:
-			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '" AND ' + field3 + ' = "' + field3Value + '"'
+			WHEREStatement = ''
 
-		# SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"' # AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+		SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '"' + WHEREStatement
 		foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+		self.clearTreeChecks()
+		TreeSelected = []
+
 		num_checked = 0
-		if len(checked_names) == 0:
-			NumFound = len(foundRecs)
-			i = 0
-			for item in foundRecs:
-				Seqname = item[0]
-				found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-				i += 1
-				for record in found:
-					if i == NumFound - 1:
-						wasClicked = True
-					record.setCheckState(0, Qt.Checked)
-					num_checked += 1
-		else:
-			NumFound = len(foundRecs)
-			i = 0
-			for item in foundRecs:
-				Seqname = item[0]
-				if Seqname in checked_names:
-					found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-					i += 1
-					for record in found:
-						if i == NumFound - 1:
-							wasClicked = True
-						record.setCheckState(0, Qt.Checked)
-						num_checked += 1
+		NumFound = len(foundRecs)
+		i = 0
+		for item in foundRecs:
+			Seqname = item[0]
+			TreeSelected.append(Seqname)
+			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+			i += 1
+			for record in found:
+				if i == NumFound - 1:
+					wasClicked = True
+				record.setCheckState(0, Qt.Checked)
+				num_checked += 1
 
 		NewLbl = str(num_checked) + ' records checked'
 		self.ui.label_Name.setText(NewLbl)
 
 		self.findTreeItem(currentitemIs)
+
 
 	@pyqtSlot()
 	def on_btnFieldSearch_clicked(self):
