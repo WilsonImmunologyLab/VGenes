@@ -21272,6 +21272,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 		global wasClicked
 		search = self.ui.txtFieldSearch.text()
+		search = re.sub(r'[\s\r\n\t]','',search)
+		if search == '':
+			Msg = 'Your search key word is empty!'
+			QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+			return
+
 		field = self.ui.cboFindField.currentText()
 		fieldsearch = re.sub(r'\(.+', '', field)
 
