@@ -11063,10 +11063,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			item[11], item[12], item[13], item[14], item[15], item[16])
 			DataSet.append(EachIn)
 		# make HTML
-		html_file = AlignSequencesHTMLBCR(DataSet, '')
-		if html_file[0] == 'W':
-			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
-			return
+		ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
+		if ErrMsg != 'OK':
+			QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
+			if html_file == '':
+				return
 		# delete close window objects
 		del_list = []
 		for id, obj in VGenesTextWindows.items():
@@ -11174,10 +11175,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 			item[11], item[12], item[13], item[14], item[15], item[16])
 			DataSet.append(EachIn)
 		# make HTML
-		html_file = AlignSequencesHTMLBCR(DataSet, '')
-		if html_file[0] == 'W':
-			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
-			return
+		ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
+		if ErrMsg != 'OK':
+			QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
+			if html_file == '':
+				return
 		# delete close window objects
 		del_list = []
 		for id, obj in VGenesTextWindows.items():
@@ -11229,10 +11231,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 				item[11], item[12], item[13], item[14], item[15], item[16])
 			DataSet.append(EachIn)
 		# make HTML
-		html_file = AlignSequencesHTMLBCR(DataSet, '')
-		if html_file[0] == 'W':
-			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
-			return
+		ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
+		if ErrMsg != 'OK':
+			QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
+			if html_file == '':
+				return
 		# delete close window objects
 		del_list = []
 		for id, obj in VGenesTextWindows.items():
@@ -22398,10 +22401,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 				DataSet.append(EachIn)
 
 		# make HTML
-		html_file = AlignSequencesHTMLBCR(DataSet, '')
-		if html_file[0] == 'W':
-			QMessageBox.warning(self, 'Warning', html_file, QMessageBox.Ok, QMessageBox.Ok)
-			return
+		ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
+		if ErrMsg != 'OK':
+			QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
+			if html_file == '':
+				return
 
 		# display
 		if self.ui.radioButtonCloneMSA.isChecked():
@@ -31334,6 +31338,8 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	global VGenesTextWindows
 	global muscle_path
 
+	ErrMsg = 'OK'
+
 	# align selected sequences (AA) using muscle
 	all = dict()
 	time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
@@ -31355,9 +31361,8 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		cur_strange = pattern.findall(NTseq)
 		cur_strange = list(set(cur_strange))
 		if len(cur_strange) > 0:
-			ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName + \
-			         '\nPlease remove those Unlawful nucleotide!'
-			return ErrMsg
+			ErrMsg = "We find Unlawful nucleotide: " + ','.join(cur_strange) + '\nfrom \n' + SeqName
+			#return ErrMsg
 
 		AAseq, ErMessage = Translator(NTseq, ORF)
 		AAseq = AAseq.replace('*','X').replace('~','Z').replace('.','J')
@@ -31390,7 +31395,7 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		os.system(cmd)
 	except:
 		ErrMsg = 'We failed to run muscle! Check your muscle path!'
-		return ErrMsg
+		return ErrMsg, ''
 
 	# read alignment file, make alignment NT and AA sequences
 	SeqName = ''
@@ -31412,7 +31417,8 @@ def AlignSequencesHTMLBCR(DataSet, template):
 		AAseq, NTseq = BuildNTalignment(AAseq, all[SeqName][0])
 		all[SeqName] = [NTseq, AAseq]
 	else:
-		return
+		ErrMsg = 'We failed to run muscle! Check your muscle path!'
+		return ErrMsg, ''
 
 	# generate consnesus sequences (AA and NT), without counting GL sequences
 	if len(all) == 1:
@@ -31471,7 +31477,7 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	vdj_structure = []
 	ruler_records = DataSet[0]
 	ruler_name = ruler_records[0]
-	ruler_original_AA, ErrMsg = Translator(all[ruler_name][0], 0)
+	ruler_original_AA, ErrMsg1 = Translator(all[ruler_name][0], 0)
 	ruler_aligned_AA = all[ruler_name][1]
 	# range
 	FWR1_end = int(ruler_records[3]) / 3
@@ -31644,7 +31650,7 @@ def AlignSequencesHTMLBCR(DataSet, template):
 	out_file_handle.write(seq_div)
 	out_file_handle.write('\n</div>\n</body>\n</html>')
 	out_file_handle.close()
-	return out_html_file
+	return ErrMsg, out_html_file
 
 def pct2color(data):
 	if data == 1:
