@@ -106,6 +106,9 @@ from PyQt5.QtSql import QSqlDatabase, QSqlQuery
 global LastPushed
 LastPushed = ''
 
+global RememberUserSelection
+RememberUserSelection = []
+
 global working_prefix
 global temp_folder
 global js_folder
@@ -20783,6 +20786,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_cboFindField_currentTextChanged(self):
 		global MoveNotChange
+		global RememberUserSelection
 
 		if self.ui.cboFindField.currentText() == 'Specificity':
 			self.SpecSet()
@@ -20802,8 +20806,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 			value_list = [str(row[0]) + "\t(Count=" + str(row[1]) + ")" for row in DataIn]
 			if MoveNotChange == False:
 				if len(value_list) > 10000:
-					Msg = 'This field have ' + str(len(value_list)) + ' distinct values, the auto complete function will be slow, please be patient!\n'
-					QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+					if self.ui.cboFindField.currentText() in RememberUserSelection:
+						pass
+					else:
+						RememberUserSelection.append(self.ui.cboFindField.currentText())
+						Msg = 'This field have ' + str(len(value_list)) + ' distinct values, the auto complete function will be slow, please be patient!\n'
+						QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 			# link value list to lineEdit
 			self.init_lineedit(self.ui.txtFieldSearch, value_list)
 
