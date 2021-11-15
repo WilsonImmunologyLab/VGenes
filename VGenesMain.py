@@ -156,9 +156,6 @@ IgBLASTAnalysis = []
 global IMGTAnalysis
 Analysis = []
 
-global TreeSelected
-TreeSelected = []
-
 global timer
 global data
 global LastSelected
@@ -13128,18 +13125,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 	def match_tree_to_table(self):
-		global TreeSelected
 		global MoveNotChange
 		# check if checked item changed
 		selected_list = self.getTreeCheckedChild()
 		selected_list = selected_list[3]
 		self.CheckedRecords = selected_list
-		TreeSelected = selected_list
-		# if TreeSelected.sort() == selected_list.sort():
-		#	print(",".join(selected_list))
-		#	print(",".join(TreeSelected))
-		#	return
-		# else:
+
 		MoveNotChange = True
 		rows = self.ui.SeqTable.rowCount()
 		for row in range(rows):
@@ -20791,7 +20782,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_cboFindField_currentTextChanged(self):
 		global MoveNotChange
 		global RememberUserSelection
-		global TreeSelected
 
 		if self.ui.cboFindField.currentText() == 'Specificity':
 			self.SpecSet()
@@ -20807,7 +20797,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
 		if cur_field != '':
 			if self.ui.rdoLocal.isChecked():
-				WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(TreeSelected) + '")'
+				WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
 			else:
 				WHEREStatement = ''
 
@@ -21174,7 +21164,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 	@pyqtSlot()
 	def on_pushButtonSimilar_clicked(self):
 		global wasClicked
-		global TreeSelected
 		wasClicked = False
 
 		if LastSelected:
@@ -21193,21 +21182,21 @@ class VGenesForm(QtWidgets.QMainWindow):
 			currentitemIs = item.text(0)
 
 		if self.ui.rdoLocal.isChecked():
-			WHEREStatement =  ' AND SeqName IN ("' + '","'.join(TreeSelected) + '")'
+			WHEREStatement =  ' AND SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
 		else:
 			WHEREStatement = ''
 
 		SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '"' + WHEREStatement
 		foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		self.clearTreeChecks()
-		TreeSelected = []
+		self.CheckedRecords = []
 
 		num_checked = 0
 		NumFound = len(foundRecs)
 		i = 0
 		for item in foundRecs:
 			Seqname = item[0]
-			TreeSelected.append(Seqname)
+			self.CheckedRecords.append(Seqname)
 			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
 			i += 1
 			for record in found:
@@ -21228,7 +21217,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		global wasClicked
-		global TreeSelected
 
 		search = self.ui.txtFieldSearch.text()
 		search = re.sub(r'[\s\r\n\t]','',search)
@@ -21245,7 +21233,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# #         todo select one if exact or if no then all similar items in tree and table...best if tree checkable
 
 		if self.ui.rdoLocal.isChecked():
-			WHEREStatement = ' AND SeqName IN ("' + '","'.join(TreeSelected) + '")'
+			WHEREStatement = ' AND SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
 		else:
 			WHEREStatement = ''
 
@@ -21270,14 +21258,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 		wasClicked = False
 
 		self.clearTreeChecks()
-		TreeSelected = []
+		self.CheckedRecords = []
 
 		i = 0
 		FindName = ''
 		for item in foundRecs:
 			i += 1
 			Seqname = item[0]
-			TreeSelected.append(Seqname)
+			self.CheckedRecords.append(Seqname)
 			if i == 1:
 				FindName = Seqname
 			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
