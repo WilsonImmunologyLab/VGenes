@@ -21218,6 +21218,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		global wasClicked
+		global TreeSelected
+
 		search = self.ui.txtFieldSearch.text()
 		search = re.sub(r'[\s\r\n\t]','',search)
 		if search == '':
@@ -21233,69 +21235,17 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# #         todo select one if exact or if no then all similar items in tree and table...best if tree checkable
 
 		if self.ui.rdoLocal.isChecked():
-			# fields = self.ui.cboTreeOp1.currentText()
-			# field1 = self.TransLateFieldtoReal(fields, True)
-			field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-			i = 0
-			for item in FieldList:
-				if field1 == item:
-					field1Value = data[i]
-				i += 1
-
-			# fields = self.ui.cboTreeOp2.currentText()
-			# field2 = self.TransLateFieldtoReal(fields, True)
-			field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-			i = 0
-			for item in FieldList:
-				if field2 == item:
-					field2Value = data[i]
-				i += 1
-
-			# fields = self.ui.cboTreeOp3.currentText()
-			# field3 = self.TransLateFieldtoReal(fields, True)
-			field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-			i = 0
-			for item in FieldList:
-				if field3 == item:
-					field3Value = data[i]
-				i += 1
-
-			if field1 == '': field1 = 'None'
-			if field2 == '': field1 = 'None'
-			if field3 == '': field1 = 'None'
-
-			# global RefreshSQL
-			if field1 == 'None' or field1 is None:
-				SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '"'
-			elif field2 == 'None' or field2 is None:
-				SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"'
-			elif field3 == 'None' or field3 is None:
-				SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '"'
-			else:
-				SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '" AND ' + field3 + ' = "' + field3Value + '"'
-
+			WHEREStatement = ' AND SeqName IN ("' + '","'.join(TreeSelected) + '")'
 		else:
-			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '"'
+			WHEREStatement = ''
 
-		# SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"' # AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+		SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '"' + WHEREStatement
 		foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 		NumFound = len(foundRecs)
 
 		# if precise match fails, try fuzzy match
 		if NumFound == 0:
-			if self.ui.rdoLocal.isChecked():
-				# global RefreshSQL
-				if field1 == 'None' or field1 is None:
-					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%"'
-				elif field2 == 'None' or field2 is None:
-					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%" AND ' + field1 + ' = "' + field1Value + '"'
-				elif field3 == 'None' or field3 is None:
-					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '"'
-				else:
-					SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%" AND ' + field1 + ' = "' + field1Value + '" AND ' + field2 + ' = "' + field2Value + '" AND ' + field3 + ' = "' + field3Value + '"'
-			else:
-				SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%"'
-
+			SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' LIKE "%' + search + '%"'  + WHEREStatement
 			foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			NumFound = len(foundRecs)
 
@@ -21306,30 +21256,27 @@ class VGenesForm(QtWidgets.QMainWindow):
 			return
 
 		# if matched something...
-		answer = "No"
 		global wasClicked
 		wasClicked = False
-		if NumFound > 1:
-			question = 'More then one record was found with this search criteria. Check all (Y) or just navigate to the first (N)?'
-			buttons = 'YN'
-			answer = questionMessage(self, question, buttons)
-			if answer == 'Yes':
-				self.clearTreeChecks()
+
+		self.clearTreeChecks()
+		TreeSelected = []
+
 		i = 0
 		FindName = ''
 		for item in foundRecs:
 			i += 1
 			Seqname = item[0]
+			TreeSelected.append(Seqname)
 			if i == 1:
 				FindName = Seqname
 			found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-			if answer == 'Yes':
-				for record in found:
-					# global wasClicked
-					# wasClicked = True
-					if i == NumFound - 1:
-						wasClicked = True
-					record.setCheckState(0, Qt.Checked)
+			for record in found:
+				# global wasClicked
+				# wasClicked = True
+				if i == NumFound - 1:
+					wasClicked = True
+				record.setCheckState(0, Qt.Checked)
 
 		self.findTreeItem(FindName)
 		NewLbl = self.ui.label_Name.text()
