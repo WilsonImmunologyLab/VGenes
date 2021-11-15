@@ -8386,6 +8386,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 		self.ui.spinBoxMinCloneSize.valueChanged.connect(self.initial_Clone)
 		self.ui.radioButtonHConly.clicked.connect(self.initial_Clone)
 		self.ui.tabWidgetClone.currentChanged['int'].connect(self.updateUIclone)
+		self.ui.rdoAll.clicked.connect(self.on_cboFindField_currentTextChanged)
+		self.ui.rdoLocal.clicked.connect(self.on_cboFindField_currentTextChanged)
 		# self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
 		# self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -13132,6 +13134,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 		selected_list = self.getTreeCheckedChild()
 		selected_list = selected_list[3]
 		self.CheckedRecords = selected_list
+		TreeSelected = selected_list
 		# if TreeSelected.sort() == selected_list.sort():
 		#	print(",".join(selected_list))
 		#	print(",".join(TreeSelected))
@@ -16356,6 +16359,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 				self.CheckUp(item, False)
 				print("unchecked")
 		self.match_tree_to_table()
+		self.tree_to_table_selection()
 
 	def tree_to_table_selection(self):
 		# find selection name
@@ -20787,6 +20791,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 	def on_cboFindField_currentTextChanged(self):
 		global MoveNotChange
 		global RememberUserSelection
+		global TreeSelected
 
 		if self.ui.cboFindField.currentText() == 'Specificity':
 			self.SpecSet()
@@ -20801,7 +20806,12 @@ class VGenesForm(QtWidgets.QMainWindow):
 		# get value list
 		cur_field = re.sub(r'\(.+', '', self.ui.cboFindField.currentText())
 		if cur_field != '':
-			SQLStatement = 'SELECT DISTINCT(' + cur_field + '),COUNT(*) FROM vgenesdb GROUP BY ' + cur_field
+			if self.ui.rdoLocal.isChecked():
+				WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(TreeSelected) + '")'
+			else:
+				WHEREStatement = ''
+
+			SQLStatement = 'SELECT DISTINCT(' + cur_field + '),COUNT(*) FROM vgenesdb' + WHEREStatement + ' GROUP BY ' + cur_field
 			DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 			value_list = [str(row[0]) + "\t(Count=" + str(row[1]) + ")" for row in DataIn]
 			if MoveNotChange == False:
