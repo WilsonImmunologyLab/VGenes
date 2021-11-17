@@ -5,21 +5,21 @@ sys.setrecursionlimit(5000)
 block_cipher = None
 
 added_files = [
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Js/*','Js'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/path_setting.txt','Conf'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Conf/RecentPaths.vtx','Conf'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog.txt','Temp'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Temp/ErLog2.txt','Temp'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/raxml','Tools'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/clustalo','Tools'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/muscle','Tools'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Tools/makeblastdb','Tools'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/Data','Data'),
-             ('/Users/leil/Documents/Projects/VGene/VGenes/IgBlast','IgBlast'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Js/*','Js'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Conf/path_setting.txt','Conf'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Conf/RecentPaths.vtx','Conf'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Temp/ErLog.txt','Temp'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Temp/ErLog2.txt','Temp'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/raxml','Tools'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/clustalo','Tools'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/muscle','Tools'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/makeblastdb','Tools'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Data','Data'),
+             ('/Users/lel4003/Documents/Projects/VGene/VGenes/IgBlast','IgBlast'),
              ]
 
 a = Analysis(['VGenesMain.py'],
-             pathex=['/Users/leil/Documents/Projects/VGene/VGenes'],
+             pathex=['/Users/lel4003/Documents/Projects/VGene/VGenes'],
              binaries=[],
              datas=added_files,
              hiddenimports=['scipy.special.cython_special','cmath'],
