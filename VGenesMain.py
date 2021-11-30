@@ -60,6 +60,9 @@ from tempfile import TemporaryDirectory
 import VGenesCloneCaller
 from ui_Import_Dialogue import Ui_DialogImport
 
+# Import pairwise2 module
+from Bio import pairwise2
+
 global OldName
 global UpdateSpecific
 UpdateSpecific = True
@@ -3161,6 +3164,210 @@ class annotate_thread(QThread):
                 self.loadProgress.emit(pct, label)
                 process += 1
 
+        if count == 0:
+            Msg = "Total " + str(count) + ' records affected! Maybe check if you anchor column is correct?'
+            sign = 1
+        else:
+            Msg = "Update successfully!\nTotal " + str(count) + ' records affected!'
+            sign = 0
+        self.trigger.emit([sign, Msg])
+
+class protein_slimlar_thread(QThread):
+    loadProgress =  pyqtSignal(int, str)
+    trigger = pyqtSignal(list)
+
+    def __int__(self):
+        super(protein_slimlar_thread, self).__init__()
+        self.DBFilename = ''
+        self.dialog = ''
+        self.options = {}
+        self.sequenceType = ''
+        self.searchRange = []
+        self.targetName = ''
+        self.targetSeq = ''
+        self.ignoreGap = False
+
+    def run(self):
+        DBFilename = self.DBFilename
+
+        # fetch all sequences
+        pct = 1
+        label = "Fetching records to compare with your selected sequence ..."
+        self.loadProgress.emit(pct, label)
+        
+        ## search range
+        if len(self.searchRange) == 0:
+            if self.sequenceType == '':
+                WhereStatement = ' WHERE 1'
+            else:
+                WhereStatement = ' WHERE GeneType = ' + self.sequenceType
+        else:
+            if self.sequenceType == '':
+                WhereStatement = ' WHERE SeqName IN ("' + '","'.join(self.searchRange) + '")'
+            else:
+                WhereStatement = ' WHERE GeneType = ' + self.sequenceType + \
+                                 ' AND SeqName IN ("' + '","'.join(self.searchRange) + '")'
+
+        ## fetch data
+        SQLStatement = 'SELECT SeqName, Sequence, CDR1From, Jend FROM vgenesDB' + WhereStatement
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        # pairwise alignment and score matching
+        ## get the target sequence ready
+        SQLStatement = 'SELECT SeqName, Sequence, CDR1From, Jend FROM vgenesDB WHERE SeqName = "' + self.targetName + '"'
+        targetDataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        targetNTSeq = targetDataIn[0][1]
+        targetVDJstart = int(targetDataIn[0][2])
+        targetVDJend = int(targetDataIn[0][3])
+        targetNTSeq = targetNTSeq[targetVDJstart-1:targetVDJend]
+        targetAASeq, msg = Translator(targetNTSeq, 0)
+        ## calculate protein score for target sequence
+        if 'Hydrophobicity' in self.options:
+            WindowSize = self.options['Hydrophobicity']
+            TargetColorMap1 = VGenesSeq.OtherParam(targetAASeq, 'Hydrophobicity', WindowSize, True)
+        if 'Hydrophilicity' in self.options:
+            WindowSize = self.options['Hydrophilicity']
+            TargetColorMap2 = VGenesSeq.OtherParam(targetAASeq, 'Hydrophilicity', WindowSize, True)
+        if 'Flexibility' in self.options:
+            WindowSize = self.options['Flexibility']
+            TargetColorMap3 = VGenesSeq.OtherParam(targetAASeq, 'Flexibility', WindowSize, True)
+        if 'Surface' in self.options:
+            WindowSize = self.options['Surface']
+            TargetColorMap4 = VGenesSeq.OtherParam(targetAASeq, 'Surface', WindowSize, True)
+        if 'MapAApI' in self.options:
+            WindowSize = self.options['MapAApI']
+            TargetColorMap5 = VGenesSeq.OtherParam(targetAASeq, 'MapAApI', WindowSize, True)
+        if 'MapInstability' in self.options:
+            WindowSize = self.options['MapInstability']
+            TargetColorMap6 = VGenesSeq.OtherParam(targetAASeq, 'MapInstability', WindowSize, True)
+
+        for record in DataIn:
+            ## make sequence for each sequence
+            currentNTSeq = record[1]
+            currentVDJstart = int(record[2])
+            currentVDJend = int(record[3])
+            currentNTSeq = currentNTSeq[currentVDJstart - 1:currentVDJstart]
+            currentAASeq, msg = Translator(currentNTSeq, 0)
+            ## for each sequence, calculate protein scores
+            if 'Hydrophobicity' in self.options:
+                WindowSize = self.options['Hydrophobicity']
+                CurrentColorMap1 = VGenesSeq.OtherParam(currentAASeq, 'Hydrophobicity', WindowSize, True)
+            if 'Hydrophilicity' in self.options:
+                WindowSize = self.options['Hydrophilicity']
+                CurrentColorMap2 = VGenesSeq.OtherParam(currentAASeq, 'Hydrophilicity', WindowSize, True)
+            if 'Flexibility' in self.options:
+                WindowSize = self.options['Flexibility']
+                CurrentColorMap3 = VGenesSeq.OtherParam(currentAASeq, 'Flexibility', WindowSize, True)
+            if 'Surface' in self.options:
+                WindowSize = self.options['Surface']
+                CurrentColorMap4 = VGenesSeq.OtherParam(currentAASeq, 'Surface', WindowSize, True)
+            if 'MapAApI' in self.options:
+                WindowSize = self.options['MapAApI']
+                CurrentColorMap5 = VGenesSeq.OtherParam(currentAASeq, 'MapAApI', WindowSize, True)
+            if 'MapInstability' in self.options:
+                WindowSize = self.options['MapInstability']
+                CurrentColorMap6 = VGenesSeq.OtherParam(currentAASeq, 'MapInstability', WindowSize, True)
+            ## for each sequence, align with target sequence
+            alignments = pairwise2.align.globalxx(targetAASeq, currentAASeq)
+            tergetAlign = alignments[0][0]
+            currentAlign = alignments[0][1]
+
+            ## align score array for target sequence
+            gap_index_target = []
+            index = 0
+            while index < len(tergetAlign):
+                pos = tergetAlign.find('-',index)
+                if pos != -1:
+                    index = pos + 1
+                    gap_index_target.append(pos)
+                    if 'Hydrophobicity' in self.options:
+                        TargetColorMap1.insert(pos,-10)
+                    if 'Hydrophilicity' in self.options:
+                        TargetColorMap2.insert(pos,-10)
+                    if 'Flexibility' in self.options:
+                        TargetColorMap3.insert(pos,-10)
+                    if 'Surface' in self.options:
+                        TargetColorMap4.insert(pos,-10)
+                    if 'MapAApI' in self.options:
+                        TargetColorMap5.insert(pos,-10)
+                    if 'MapInstability' in self.options:
+                        TargetColorMap6.insert(pos,-10)
+                else:
+                    break
+            ## align score array for current sequence
+            gap_index_current = []
+            index = 0
+            while index < len(currentAlign):
+                pos = currentAlign.find('-', index)
+                if pos != -1:
+                    index = pos + 1
+                    gap_index_current.append(pos)
+                    if 'Hydrophobicity' in self.options:
+                        CurrentColorMap1.insert(pos, -10)
+                    if 'Hydrophilicity' in self.options:
+                        CurrentColorMap2.insert(pos, -10)
+                    if 'Flexibility' in self.options:
+                        CurrentColorMap3.insert(pos, -10)
+                    if 'Surface' in self.options:
+                        CurrentColorMap4.insert(pos, -10)
+                    if 'MapAApI' in self.options:
+                        CurrentColorMap5.insert(pos, -10)
+                    if 'MapInstability' in self.options:
+                        CurrentColorMap6.insert(pos, -10)
+                else:
+                    break
+
+            if self.ignoreGap == True:
+                gap_index = gap_index_target + gap_index_current
+                valid_index = list(set(range(0,len(tergetAlign))) - set(gap_index))
+                if 'Hydrophobicity' in self.options:
+                    tmp_list = [TargetColorMap1[i] for i in valid_index]
+                    TargetColorMap1 = tmp_list
+                    tmp_list = [CurrentColorMap1[i] for i in valid_index]
+                    CurrentColorMap1 = tmp_list
+                if 'Hydrophilicity' in self.options:
+                    tmp_list = [TargetColorMap2[i] for i in valid_index]
+                    TargetColorMap1 = tmp_list
+                    tmp_list = [CurrentColorMap2[i] for i in valid_index]
+                    CurrentColorMap1 = tmp_list
+                if 'Flexibility' in self.options:
+                    tmp_list = [TargetColorMap3[i] for i in valid_index]
+                    TargetColorMap1 = tmp_list
+                    tmp_list = [CurrentColorMap3[i] for i in valid_index]
+                    CurrentColorMap1 = tmp_list
+                if 'Surface' in self.options:
+                    tmp_list = [TargetColorMap4[i] for i in valid_index]
+                    TargetColorMap1 = tmp_list
+                    tmp_list = [CurrentColorMap4[i] for i in valid_index]
+                    CurrentColorMap1 = tmp_list
+                if 'MapAApI' in self.options:
+                    tmp_list = [TargetColorMap5[i] for i in valid_index]
+                    TargetColorMap1 = tmp_list
+                    tmp_list = [CurrentColorMap5[i] for i in valid_index]
+                    CurrentColorMap1 = tmp_list
+                if 'MapInstability' in self.options:
+                    tmp_list = [TargetColorMap6[i] for i in valid_index]
+                    TargetColorMap1 = tmp_list
+                    tmp_list = [CurrentColorMap6[i] for i in valid_index]
+                    CurrentColorMap1 = tmp_list
+
+            ## for each sequence, compare the protein score difference，assign a diff score
+            if 'Hydrophobicity' in self.options:
+                Score1 = CalculateProteinScoreDiff(TargetColorMap1, CurrentColorMap1)
+            if 'Hydrophilicity' in self.options:
+                Score1 = CalculateProteinScoreDiff(TargetColorMap2, CurrentColorMap2)
+            if 'Flexibility' in self.options:
+                Score1 = CalculateProteinScoreDiff(TargetColorMap3, CurrentColorMap3)
+            if 'Surface' in self.options:
+                Score1 = CalculateProteinScoreDiff(TargetColorMap4, CurrentColorMap4)
+            if 'MapAApI' in self.options:
+                Score1 = CalculateProteinScoreDiff(TargetColorMap5, CurrentColorMap5)
+            if 'MapInstability' in self.options:
+                Score1 = CalculateProteinScoreDiff(TargetColorMap6, CurrentColorMap6)
+
+
+
+        # function finish, return message
         if count == 0:
             Msg = "Total " + str(count) + ' records affected! Maybe check if you anchor column is correct?'
             sign = 1
