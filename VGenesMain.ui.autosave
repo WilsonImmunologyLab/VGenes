@@ -1078,7 +1078,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -11444,18 +11444,20 @@ If the J-end is off the J gene end may need adjusted</string>
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionAnalyze_Mutations"/>
     <addaction name="actionMultiple_Alignement"/>
     <addaction name="actionAlignment"/>
+    <addaction name="actionAnalyze_Mutations"/>
+    <addaction name="separator"/>
     <addaction name="actionFind_Clonal"/>
     <addaction name="actionIdentifyPublicClone"/>
-    <addaction name="actionCreateVDJdb"/>
+    <addaction name="actionAnalyze_Isotypes"/>
+    <addaction name="separator"/>
+    <addaction name="actionaddABlist"/>
+    <addaction name="actionSampling"/>
+    <addaction name="separator"/>
     <addaction name="actiontranslate"/>
     <addaction name="actionTestMutMap"/>
     <addaction name="actionStructure"/>
-    <addaction name="actionAnalyze_Isotypes"/>
-    <addaction name="actionaddABlist"/>
-    <addaction name="actionSampling"/>
     <addaction name="actionBatchChangeName"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -11481,6 +11483,8 @@ If the J-end is off the J gene end may need adjusted</string>
     <property name="title">
      <string>Database</string>
     </property>
+    <addaction name="actionCreateVDJdb"/>
+    <addaction name="separator"/>
     <addaction name="actionTop"/>
     <addaction name="actionBottom"/>
     <addaction name="actionMove_Up"/>
@@ -11576,12 +11580,11 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionPairToNewDB"/>
    <addaction name="separator"/>
    <addaction name="actionTestMutMap"/>
+   <addaction name="actionSimilarProtein"/>
    <addaction name="separator"/>
    <addaction name="actionAnalyze_Mutations"/>
    <addaction name="actionFind_Clonal"/>
-   <addaction name="actionAlignment"/>
    <addaction name="actionSuggestCanonical"/>
-   <addaction name="actiontranslate"/>
    <addaction name="separator"/>
    <addaction name="actionMultiple_Alignement"/>
    <addaction name="actionDNA"/>
@@ -12145,7 +12148,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/nt2aa.png</normaloff>:/PNG-Icons/nt2aa.png</iconset>
    </property>
    <property name="text">
-    <string>translate</string>
+    <string>Translate</string>
    </property>
    <property name="toolTip">
     <string>Translate DNA sequences to Protein sequences</string>
@@ -12275,6 +12278,20 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>PairAndJump</string>
+   </property>
+  </action>
+  <action name="actiontranslate_2">
+   <property name="text">
+    <string>translate</string>
+   </property>
+  </action>
+  <action name="actionSimilarProtein">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/Flu.png</normaloff>:/PNG-Icons/Flu.png</iconset>
+   </property>
+   <property name="text">
+    <string>SimilarProtein</string>
    </property>
   </action>
  </widget>
