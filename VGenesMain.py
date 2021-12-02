@@ -93,6 +93,7 @@ from ui_hclctabledialog import Ui_HCLCDialog
 from ui_rename_dialog import Ui_RenameDialog
 from ui_export_option_dialog import Ui_ExportOptionDialog
 from ui_ProteinSimilarDialog import Ui_ProteinSimilarDialog
+from ui_ProteinSimilarResultDialog import Ui_ProteinSimilarResultDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -3516,6 +3517,45 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
         else:
             Msg = 'Please check at least one protein property!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialog):
+    def __init__(self, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        super(ProteinSimilarResultDialog, self).__init__()
+        self.ui = Ui_ProteinSimilarResultDialog()
+        self.ui.setupUi(self)
+
+        self.DBFilename = ""
+
+        self.ui.pushButtonReport.clicked.connect(self.Report)
+        self.ui.pushButtonExport.clicked.connect(self.exportRes)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}")
+        else:
+            pass
+
+    def Report(self):
+        pass
+    
+    def exportRes(self):
+        pass
 
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
@@ -8818,8 +8858,55 @@ class VGenesForm(QtWidgets.QMainWindow):
             pass
 
     def ShowProteinSimilarResults(self, result):
-        Msg = 'Yes'
-        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+        ScoreRank = result[1]
+        Error_info = result[2]
+
+        self.myProteinSimilarResultDialog = ProteinSimilarResultDialog()
+
+        self.myProteinSimilarResultDialog.DBFilename = DBFilename
+        # create a tab widget
+        self.myProteinSimilarResultDialog.ui.tabWidget = QtWidgets.QTabWidget()
+        self.myProteinSimilarResultDialog.ui.tabs = {}
+        self.myProteinSimilarResultDialog.ui.tables = {}
+        # recolve the results and add data and tabs
+        SequenceNames = ScoreRank.columns.values
+        for index in ScoreRank.index.values:
+            # create a tab and add tab to tab widget
+            self.myProteinSimilarResultDialog.ui.tabs[index] = QtWidgets.QWidget()
+            self.myProteinSimilarResultDialog.ui.tabWidget.addTab(self.myProteinSimilarResultDialog.ui.tabs[index], index)
+            # create table
+            self.myProteinSimilarResultDialog.ui.tabs[index].layout = QtWidgets.QVBoxLayout(self)
+            self.myProteinSimilarResultDialog.ui.tables[index] = QtWidgets.QTableWidget()
+
+            horizontalHeader = ['Selected','Seq Name','Score (the lower the better)']
+            self.myProteinSimilarResultDialog.ui.tables[index].setRowCount(len(SequenceNames))
+            self.myProteinSimilarResultDialog.ui.tables[index].setColumnCount(len(horizontalHeader))
+            self.myProteinSimilarResultDialog.ui.tables[index].setHorizontalHeaderLabels(horizontalHeader)
+            self.myProteinSimilarResultDialog.ui.tables[index].horizontalHeader().setStretchLastSection(True)
+            self.myProteinSimilarResultDialog.ui.tables[index].setSelectionMode(QAbstractItemView.SingleSelection)
+            self.myProteinSimilarResultDialog.ui.tables[index].setSelectionBehavior(QAbstractItemView.SelectRows)
+
+            currDataSlice = ScoreRank.loc[index].sort_values(ascending=True)
+            row_index = 0
+            for Seq in currDataSlice.index:
+                unit1 = QtWidgets.QCheckBox()
+                unit2 = QTableWidgetItem(Seq)
+                unit3 = QTableWidgetItem(str(currDataSlice[Seq]))
+
+                self.myProteinSimilarResultDialog.ui.tables[index].setCellWidget(row_index, 0, unit1)
+                self.myProteinSimilarResultDialog.ui.tables[index].setItem(row_index, 1, unit2)
+                self.myProteinSimilarResultDialog.ui.tables[index].setItem(row_index, 2, unit3)
+                row_index += 1
+
+            # add table to this tab
+            self.myProteinSimilarResultDialog.ui.tabs[index].layout.addWidget(self.myProteinSimilarResultDialog.ui.tables[index])
+            #
+            self.myProteinSimilarResultDialog.ui.tabs[index].setLayout(self.myProteinSimilarResultDialog.ui.tabs[index].layout)
+
+        # add the tab widget to the main layout
+        self.myProteinSimilarResultDialog.ui.gridLayoutMain.addWidget(self.myProteinSimilarResultDialog.ui.tabWidget)
+
+        self.myProteinSimilarResultDialog.show()
 
     def updateUIclone(self):
         if self.ui.tabWidgetClone.currentIndex() == 3:
