@@ -3406,6 +3406,8 @@ class protein_slimlar_thread(QThread):
                 Error_list.append([currentSeqName, currentAASeq])
 
         # function finish, return message and data
+        pct = 100
+        self.loadProgress.emit(pct, '')
         sign = 0
         self.trigger.emit([sign, ScoreRank, Error_list])
 
@@ -3445,8 +3447,11 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
 
     def progressLabel(self, pct, label):
         try:
-            self.progress.setValue(pct)
-            self.progress.setLabel(label)
+            if pct == 100:
+                self.progress.hide()
+            else:
+                self.progress.setValue(pct)
+                self.progress.setLabel(label)
         except:
             pass
 
