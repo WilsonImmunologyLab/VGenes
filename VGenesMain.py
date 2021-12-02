@@ -3244,156 +3244,170 @@ class protein_slimlar_thread(QThread):
         ScoreRank = pd.DataFrame(0, index=self.options.keys(), columns=[el[0] for el in DataIn])
         count = 0
         allRecordCount = len(DataIn)
+        
+        Error_list = []
+        
         for record in DataIn:
             pct = count / allRecordCount * 100
             label = "Comparing the target sequence against select sequences, " + str(count) + '/' + str(allRecordCount) + '...'
             self.loadProgress.emit(pct, label)
-            allRecordCount += 1
+            count += 1
 
             ## make sequence for each sequence
             currentSeqName = record[0]
             currentNTSeq = record[1]
             currentVDJstart = int(record[2])
             currentVDJend = int(record[3])
-            currentNTSeq = currentNTSeq[currentVDJstart-1:currentVDJend]
+            currentNTSeq = currentNTSeq[currentVDJstart - 1:currentVDJend]
             currentAASeq, msg = Translator(currentNTSeq, 0)
             currentAASeq = re.sub(r'~', '', currentAASeq)
 
-            ## for each sequence, calculate protein scores
-            if 'Hydrophobicity' in self.options:
-                WindowSize = self.options['Hydrophobicity']
-                CurrentColorMap1 = VGenesSeq.OtherParam(currentAASeq, 'Hydrophobicity', WindowSize, True)
-            if 'Hydrophilicity' in self.options:
-                WindowSize = self.options['Hydrophilicity']
-                CurrentColorMap2 = VGenesSeq.OtherParam(currentAASeq, 'Hydrophilicity', WindowSize, True)
-            if 'Flexibility' in self.options:
-                WindowSize = self.options['Flexibility']
-                CurrentColorMap3 = VGenesSeq.OtherParam(currentAASeq, 'Flexibility', WindowSize, True)
-            if 'Surface' in self.options:
-                WindowSize = self.options['Surface']
-                CurrentColorMap4 = VGenesSeq.OtherParam(currentAASeq, 'Surface', WindowSize, True)
-            if 'MapAApI' in self.options:
-                WindowSize = self.options['MapAApI']
-                CurrentColorMap5 = VGenesSeq.OtherParam(currentAASeq, 'MapAApI', WindowSize, True)
-            if 'MapInstability' in self.options:
-                WindowSize = self.options['MapInstability']
-                CurrentColorMap6 = VGenesSeq.OtherParam(currentAASeq, 'MapInstability', WindowSize, True)
-
-            ## for each sequence, align with target sequence
-            alignments = pairwise2.align.globalms(targetAASeq, currentAASeq, 2, -1, -0.5, -0.1)
-            tergetAlign = alignments[0][0]
-            currentAlign = alignments[0][1]
-
-            ## align score array for target sequence
-            gap_index_target = []
-            index = 0
-            while index < len(tergetAlign):
-                pos = tergetAlign.find('-',index)
-                if pos != -1:
-                    index = pos + 1
-                    gap_index_target.append(pos)
-                    if 'Hydrophobicity' in self.options:
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(TargetColorMap1)
-                        ThisLoop_TargetColorMap1.insert(pos,-10)
-                    if 'Hydrophilicity' in self.options:
-                        ThisLoop_TargetColorMap2 = copy.deepcopy(TargetColorMap2)
-                        ThisLoop_TargetColorMap2.insert(pos,-10)
-                    if 'Flexibility' in self.options:
-                        ThisLoop_TargetColorMap3 = copy.deepcopy(TargetColorMap3)
-                        ThisLoop_TargetColorMap3.insert(pos,-10)
-                    if 'Surface' in self.options:
-                        ThisLoop_TargetColorMap4 = copy.deepcopy(TargetColorMap4)
-                        ThisLoop_TargetColorMap4.insert(pos,-10)
-                    if 'MapAApI' in self.options:
-                        ThisLoop_TargetColorMap5 = copy.deepcopy(TargetColorMap5)
-                        ThisLoop_TargetColorMap5.insert(pos,-10)
-                    if 'MapInstability' in self.options:
-                        ThisLoop_TargetColorMap6 = copy.deepcopy(TargetColorMap6)
-                        ThisLoop_TargetColorMap6.insert(pos,-10)
-                else:
-                    break
-
-            ## align score array for current sequence
-            gap_index_current = []
-            index = 0
-            while index < len(currentAlign):
-                pos = currentAlign.find('-', index)
-                if pos != -1:
-                    index = pos + 1
-                    gap_index_current.append(pos)
-                    if 'Hydrophobicity' in self.options:
-                        CurrentColorMap1.insert(pos, -10)
-                    if 'Hydrophilicity' in self.options:
-                        CurrentColorMap2.insert(pos, -10)
-                    if 'Flexibility' in self.options:
-                        CurrentColorMap3.insert(pos, -10)
-                    if 'Surface' in self.options:
-                        CurrentColorMap4.insert(pos, -10)
-                    if 'MapAApI' in self.options:
-                        CurrentColorMap5.insert(pos, -10)
-                    if 'MapInstability' in self.options:
-                        CurrentColorMap6.insert(pos, -10)
-                else:
-                    break
-
-            ## code for ignore GAP option
-            if self.ignoreGap == True:
-                gap_index = gap_index_target + gap_index_current
-                valid_index = list(set(range(0,len(tergetAlign))) - set(gap_index))
+            try:
+                ## for each sequence, calculate protein scores
                 if 'Hydrophobicity' in self.options:
-                    tmp_list = [ThisLoop_TargetColorMap1[i] for i in valid_index]
-                    ThisLoop_TargetColorMap1 = tmp_list
-                    tmp_list = [CurrentColorMap1[i] for i in valid_index]
-                    CurrentColorMap1 = tmp_list
+                    WindowSize = self.options['Hydrophobicity']
+                    CurrentColorMap1 = VGenesSeq.OtherParam(currentAASeq, 'Hydrophobicity', WindowSize, True)
                 if 'Hydrophilicity' in self.options:
-                    tmp_list = [ThisLoop_TargetColorMap2[i] for i in valid_index]
-                    ThisLoop_TargetColorMap1 = tmp_list
-                    tmp_list = [CurrentColorMap2[i] for i in valid_index]
-                    CurrentColorMap1 = tmp_list
+                    WindowSize = self.options['Hydrophilicity']
+                    CurrentColorMap2 = VGenesSeq.OtherParam(currentAASeq, 'Hydrophilicity', WindowSize, True)
                 if 'Flexibility' in self.options:
-                    tmp_list = [ThisLoop_TargetColorMap3[i] for i in valid_index]
-                    ThisLoop_TargetColorMap1 = tmp_list
-                    tmp_list = [CurrentColorMap3[i] for i in valid_index]
-                    CurrentColorMap1 = tmp_list
+                    WindowSize = self.options['Flexibility']
+                    CurrentColorMap3 = VGenesSeq.OtherParam(currentAASeq, 'Flexibility', WindowSize, True)
                 if 'Surface' in self.options:
-                    tmp_list = [ThisLoop_TargetColorMap4[i] for i in valid_index]
-                    ThisLoop_TargetColorMap1 = tmp_list
-                    tmp_list = [CurrentColorMap4[i] for i in valid_index]
-                    CurrentColorMap1 = tmp_list
+                    WindowSize = self.options['Surface']
+                    CurrentColorMap4 = VGenesSeq.OtherParam(currentAASeq, 'Surface', WindowSize, True)
                 if 'MapAApI' in self.options:
-                    tmp_list = [ThisLoop_TargetColorMap5[i] for i in valid_index]
-                    ThisLoop_TargetColorMap1 = tmp_list
-                    tmp_list = [CurrentColorMap5[i] for i in valid_index]
-                    CurrentColorMap1 = tmp_list
+                    WindowSize = self.options['MapAApI']
+                    CurrentColorMap5 = VGenesSeq.OtherParam(currentAASeq, 'MapAApI', WindowSize, True)
                 if 'MapInstability' in self.options:
-                    tmp_list = [ThisLoop_TargetColorMap6[i] for i in valid_index]
-                    ThisLoop_TargetColorMap1 = tmp_list
-                    tmp_list = [CurrentColorMap6[i] for i in valid_index]
-                    CurrentColorMap1 = tmp_list
-
-            ## for each sequence, compare the protein score difference，assign a diff score
-            if 'Hydrophobicity' in self.options:
-                Score = CalculateProteinScoreDiff(TargetColorMap1, CurrentColorMap1, -10)
-                ScoreRank[currentSeqName].loc['Hydrophobicity'] = Score
-            if 'Hydrophilicity' in self.options:
-                Score = CalculateProteinScoreDiff(TargetColorMap2, CurrentColorMap2, -10)
-                ScoreRank[currentSeqName].loc['Hydrophilicity'] = Score
-            if 'Flexibility' in self.options:
-                Score = CalculateProteinScoreDiff(TargetColorMap3, CurrentColorMap3, -10)
-                ScoreRank[currentSeqName].loc['Flexibility'] = Score
-            if 'Surface' in self.options:
-                Score = CalculateProteinScoreDiff(TargetColorMap4, CurrentColorMap4, -10)
-                ScoreRank[currentSeqName].loc['Surface'] = Score
-            if 'MapAApI' in self.options:
-                Score = CalculateProteinScoreDiff(TargetColorMap5, CurrentColorMap5, -10)
-                ScoreRank[currentSeqName].loc['MapAApI'] = Score
-            if 'MapInstability' in self.options:
-                Score = CalculateProteinScoreDiff(TargetColorMap6, CurrentColorMap6, -10)
-                ScoreRank[currentSeqName].loc['MapInstability'] = Score
+                    WindowSize = self.options['MapInstability']
+                    CurrentColorMap6 = VGenesSeq.OtherParam(currentAASeq, 'MapInstability', WindowSize, True)
+    
+                ## hard copy oif target score
+                if 'Hydrophobicity' in self.options:
+                    ThisLoop_TargetColorMap1 = copy.deepcopy(TargetColorMap1)
+                if 'Hydrophilicity' in self.options:
+                    ThisLoop_TargetColorMap2 = copy.deepcopy(TargetColorMap2)
+                if 'Flexibility' in self.options:
+                    ThisLoop_TargetColorMap3 = copy.deepcopy(TargetColorMap3)
+                if 'Surface' in self.options:
+                    ThisLoop_TargetColorMap4 = copy.deepcopy(TargetColorMap4)
+                if 'MapAApI' in self.options:
+                    ThisLoop_TargetColorMap5 = copy.deepcopy(TargetColorMap5)
+                if 'MapInstability' in self.options:
+                    ThisLoop_TargetColorMap6 = copy.deepcopy(TargetColorMap6)
+    
+                ## for each sequence, align with target sequence
+                alignments = pairwise2.align.globalms(targetAASeq, currentAASeq, 2, -1, -0.5, -0.1)
+                tergetAlign = alignments[0][0]
+                currentAlign = alignments[0][1]
+    
+                ## align score array for target sequence
+                gap_index_target = []
+                index = 0
+                while index < len(tergetAlign):
+                    pos = tergetAlign.find('-',index)
+                    if pos != -1:
+                        index = pos + 1
+                        gap_index_target.append(pos)
+                        if 'Hydrophobicity' in self.options:
+                            ThisLoop_TargetColorMap1.insert(pos,-10)
+                        if 'Hydrophilicity' in self.options:
+                            ThisLoop_TargetColorMap2.insert(pos,-10)
+                        if 'Flexibility' in self.options:
+                            ThisLoop_TargetColorMap3.insert(pos,-10)
+                        if 'Surface' in self.options:
+                            ThisLoop_TargetColorMap4.insert(pos,-10)
+                        if 'MapAApI' in self.options:
+                            ThisLoop_TargetColorMap5.insert(pos,-10)
+                        if 'MapInstability' in self.options:
+                            ThisLoop_TargetColorMap6.insert(pos,-10)
+                    else:
+                        break
+    
+                ## align score array for current sequence
+                gap_index_current = []
+                index = 0
+                while index < len(currentAlign):
+                    pos = currentAlign.find('-', index)
+                    if pos != -1:
+                        index = pos + 1
+                        gap_index_current.append(pos)
+                        if 'Hydrophobicity' in self.options:
+                            CurrentColorMap1.insert(pos, -10)
+                        if 'Hydrophilicity' in self.options:
+                            CurrentColorMap2.insert(pos, -10)
+                        if 'Flexibility' in self.options:
+                            CurrentColorMap3.insert(pos, -10)
+                        if 'Surface' in self.options:
+                            CurrentColorMap4.insert(pos, -10)
+                        if 'MapAApI' in self.options:
+                            CurrentColorMap5.insert(pos, -10)
+                        if 'MapInstability' in self.options:
+                            CurrentColorMap6.insert(pos, -10)
+                    else:
+                        break
+    
+                ## code for ignore GAP option
+                if self.ignoreGap == True:
+                    gap_index = gap_index_target + gap_index_current
+                    valid_index = list(set(range(0,len(tergetAlign))) - set(gap_index))
+                    if 'Hydrophobicity' in self.options:
+                        tmp_list = [ThisLoop_TargetColorMap1[i] for i in valid_index]
+                        ThisLoop_TargetColorMap1 = tmp_list
+                        tmp_list = [CurrentColorMap1[i] for i in valid_index]
+                        CurrentColorMap1 = tmp_list
+                    if 'Hydrophilicity' in self.options:
+                        tmp_list = [ThisLoop_TargetColorMap2[i] for i in valid_index]
+                        ThisLoop_TargetColorMap1 = tmp_list
+                        tmp_list = [CurrentColorMap2[i] for i in valid_index]
+                        CurrentColorMap1 = tmp_list
+                    if 'Flexibility' in self.options:
+                        tmp_list = [ThisLoop_TargetColorMap3[i] for i in valid_index]
+                        ThisLoop_TargetColorMap1 = tmp_list
+                        tmp_list = [CurrentColorMap3[i] for i in valid_index]
+                        CurrentColorMap1 = tmp_list
+                    if 'Surface' in self.options:
+                        tmp_list = [ThisLoop_TargetColorMap4[i] for i in valid_index]
+                        ThisLoop_TargetColorMap1 = tmp_list
+                        tmp_list = [CurrentColorMap4[i] for i in valid_index]
+                        CurrentColorMap1 = tmp_list
+                    if 'MapAApI' in self.options:
+                        tmp_list = [ThisLoop_TargetColorMap5[i] for i in valid_index]
+                        ThisLoop_TargetColorMap1 = tmp_list
+                        tmp_list = [CurrentColorMap5[i] for i in valid_index]
+                        CurrentColorMap1 = tmp_list
+                    if 'MapInstability' in self.options:
+                        tmp_list = [ThisLoop_TargetColorMap6[i] for i in valid_index]
+                        ThisLoop_TargetColorMap1 = tmp_list
+                        tmp_list = [CurrentColorMap6[i] for i in valid_index]
+                        CurrentColorMap1 = tmp_list
+    
+                ## for each sequence, compare the protein score difference，assign a diff score
+                if 'Hydrophobicity' in self.options:
+                    Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap1, CurrentColorMap1, -10)
+                    ScoreRank[currentSeqName].loc['Hydrophobicity'] = Score
+                if 'Hydrophilicity' in self.options:
+                    Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap2, CurrentColorMap2, -10)
+                    ScoreRank[currentSeqName].loc['Hydrophilicity'] = Score
+                if 'Flexibility' in self.options:
+                    Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap3, CurrentColorMap3, -10)
+                    ScoreRank[currentSeqName].loc['Flexibility'] = Score
+                if 'Surface' in self.options:
+                    Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap4, CurrentColorMap4, -10)
+                    ScoreRank[currentSeqName].loc['Surface'] = Score
+                if 'MapAApI' in self.options:
+                    Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap5, CurrentColorMap5, -10)
+                    ScoreRank[currentSeqName].loc['MapAApI'] = Score
+                if 'MapInstability' in self.options:
+                    Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap6, CurrentColorMap6, -10)
+                    ScoreRank[currentSeqName].loc['MapInstability'] = Score
+            except:
+                Error_list.append([currentSeqName, currentAASeq])
 
         # function finish, return message and data
         sign = 0
-        self.trigger.emit([sign, ScoreRank])
+        self.trigger.emit([sign, ScoreRank, Error_list])
 
 class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
     def __init__(self, parent=None):
