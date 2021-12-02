@@ -3519,6 +3519,8 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
 class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialog):
+    ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
+
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         super(ProteinSimilarResultDialog, self).__init__()
@@ -3550,6 +3552,11 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def updateSelection(self, currentRow, currentColumn, previousRow, previousColumn):
+        sender_widget = self.sender()
+        SeqName = sender_widget.item(currentRow, 1).text()
+        self.ProteinSimilarUpdateSelectionSignal.emit(SeqName)
 
     def Report(self):
         pass
@@ -8898,6 +8905,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 self.myProteinSimilarResultDialog.ui.tables[index].setItem(row_index, 2, unit3)
                 row_index += 1
 
+            self.myProteinSimilarResultDialog.ui.tables[index].currentCellChanged.connect(self.myProteinSimilarResultDialog.updateSelection)
             # add table to this tab
             self.myProteinSimilarResultDialog.ui.tabs[index].layout.addWidget(self.myProteinSimilarResultDialog.ui.tables[index])
             #
@@ -8905,6 +8913,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         # add the tab widget to the main layout
         self.myProteinSimilarResultDialog.ui.gridLayoutMain.addWidget(self.myProteinSimilarResultDialog.ui.tabWidget)
+        # bind signals
+        self.myProteinSimilarResultDialog.ProteinSimilarUpdateSelectionSignal.connect(self.select_tree_by_name)
 
         self.myProteinSimilarResultDialog.show()
 
