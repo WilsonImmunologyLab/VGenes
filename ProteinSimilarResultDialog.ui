@@ -14,7 +14,7 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="2" column="0" colspan="4">
+   <item row="3" column="0" colspan="4">
     <layout class="QGridLayout" name="gridLayoutMain"/>
    </item>
    <item row="0" column="0" colspan="4">
@@ -44,16 +44,6 @@
      </layout>
     </widget>
    </item>
-   <item row="3" column="2">
-    <widget class="QPushButton" name="pushButtonExport">
-     <property name="text">
-      <string>Export Results</string>
-     </property>
-     <property name="autoDefault">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="0" colspan="4">
     <widget class="QLabel" name="label_2">
      <property name="lineWidth">
@@ -64,21 +54,59 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="0" colspan="2">
+   <item row="4" column="0" colspan="2">
     <widget class="QPushButton" name="pushButtonReport">
      <property name="text">
       <string>Make a protein report with my checked records</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="2">
+   <item row="2" column="0">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>Target Sequence:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLineEdit" name="lineEditTargetName">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>Window Size:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QLineEdit" name="lineEditWindowSize">
+     <property name="readOnly">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="3">
     <widget class="QPushButton" name="pushButtonCancel">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="4" column="2" colspan="2">
+    <widget class="QPushButton" name="pushButtonExport">
+     <property name="text">
+      <string>Export Results</string>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
