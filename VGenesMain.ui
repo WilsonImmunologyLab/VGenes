@@ -142,340 +142,7 @@
        <enum>QFrame::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_61">
-       <item row="0" column="0">
-        <widget class="QFrame" name="frame_3">
-         <property name="minimumSize">
-          <size>
-           <width>300</width>
-           <height>95</height>
-          </size>
-         </property>
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_22">
-          <property name="leftMargin">
-           <number>6</number>
-          </property>
-          <property name="topMargin">
-           <number>3</number>
-          </property>
-          <property name="rightMargin">
-           <number>6</number>
-          </property>
-          <property name="bottomMargin">
-           <number>3</number>
-          </property>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="cboFindField">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>0</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Choose a column name to search:</string>
-            </property>
-            <property name="currentText">
-             <string>Name</string>
-            </property>
-            <property name="frame">
-             <bool>true</bool>
-            </property>
-            <item>
-             <property name="text">
-              <string>Name</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>From column</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Any</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="4" column="4">
-           <widget class="QRadioButton" name="rdoLocal">
-            <property name="toolTip">
-             <string>Search from the records that have the same value of three three grouping option with current selected record</string>
-            </property>
-            <property name="text">
-             <string>Local</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0" colspan="2">
-           <widget class="QPushButton" name="btnFieldSearch">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Search</string>
-            </property>
-            <property name="text">
-             <string>Search</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Field:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QRadioButton" name="rdoAll">
-            <property name="toolTip">
-             <string>Search from the entire database</string>
-            </property>
-            <property name="text">
-             <string>All</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="5">
-           <widget class="QPushButton" name="pushButtonStat">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Select records from distribution</string>
-            </property>
-            <property name="text">
-             <string>Stat/Select</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2" colspan="4">
-           <widget class="QLineEdit" name="txtFieldSearch">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>Lucida Grande</family>
-             </font>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="1" rowspan="2">
-        <widget class="Line" name="line">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>100</height>
-          </size>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2" rowspan="2">
-        <widget class="QFrame" name="frame_10">
-         <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
-         </property>
-         <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
-         </property>
-         <layout class="QGridLayout" name="gridLayout_43">
-          <item row="3" column="2">
-           <widget class="QLabel" name="label_61">
-            <property name="text">
-             <string>To</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="3">
-           <widget class="QLineEdit" name="lineEditReplace">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>Lucida Grande</family>
-             </font>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="3">
-           <widget class="QPushButton" name="btnFieldBulk">
-            <property name="enabled">
-             <bool>false</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Edit search field of all checked records to match edit/search box value</string>
-            </property>
-            <property name="text">
-             <string>Bulk Edit</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLineEdit" name="lineEditTarget">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>Lucida Grande</family>
-             </font>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="4">
-           <widget class="QComboBox" name="cboFindField1"/>
-          </item>
-          <item row="2" column="0" colspan="4">
-           <widget class="QRadioButton" name="radioButtonReg">
-            <property name="text">
-             <string>Regular Expression allowed</string>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0" colspan="2">
-           <widget class="QPushButton" name="pushButtonLock">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>300</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Lock/Unlock Edit</string>
-            </property>
-            <property name="text">
-             <string>Lock</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
-       <item row="0" column="3" rowspan="2">
+       <item row="0" column="5" rowspan="2">
         <widget class="Line" name="line_3">
          <property name="minimumSize">
           <size>
@@ -488,7 +155,7 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="4">
+       <item row="0" column="6">
         <widget class="QFrame" name="frame_5">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -641,6 +308,19 @@
          </layout>
         </widget>
        </item>
+       <item row="0" column="3" rowspan="2">
+        <widget class="Line" name="line">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>100</height>
+          </size>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="0">
         <widget class="QFrame" name="frame_4">
          <property name="frameShape">
@@ -737,7 +417,7 @@
          </layout>
         </widget>
        </item>
-       <item row="1" column="4">
+       <item row="1" column="6">
         <widget class="QFrame" name="frame_23">
          <property name="frameShape">
           <enum>QFrame::StyledPanel</enum>
@@ -912,6 +592,330 @@
           </item>
          </layout>
         </widget>
+       </item>
+       <item row="0" column="0">
+        <widget class="QFrame" name="frame_3">
+         <property name="minimumSize">
+          <size>
+           <width>300</width>
+           <height>95</height>
+          </size>
+         </property>
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_22">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="topMargin">
+           <number>3</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>3</number>
+          </property>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="cboFindField">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Choose a column name to search:</string>
+            </property>
+            <property name="currentText">
+             <string>Name</string>
+            </property>
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <item>
+             <property name="text">
+              <string>Name</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>From column</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Any</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="4" column="0" colspan="2">
+           <widget class="QPushButton" name="btnFieldSearch">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Search</string>
+            </property>
+            <property name="text">
+             <string>Search</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Field:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" colspan="4">
+           <widget class="QLineEdit" name="txtFieldSearch">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>22</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="2" colspan="4">
+           <widget class="QPushButton" name="pushButtonStat">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Select records from distribution</string>
+            </property>
+            <property name="text">
+             <string>Stat/Select</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="4" rowspan="2">
+        <widget class="QFrame" name="frame_10">
+         <property name="frameShape">
+          <enum>QFrame::StyledPanel</enum>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Raised</enum>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_43">
+          <item row="3" column="2">
+           <widget class="QLabel" name="label_61">
+            <property name="text">
+             <string>To</string>
+            </property>
+            <property name="alignment">
+             <set>Qt::AlignCenter</set>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="3">
+           <widget class="QLineEdit" name="lineEditReplace">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QPushButton" name="btnFieldBulk">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Edit search field of all checked records to match edit/search box value</string>
+            </property>
+            <property name="text">
+             <string>Bulk Edit</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLineEdit" name="lineEditTarget">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="4">
+           <widget class="QComboBox" name="cboFindField1"/>
+          </item>
+          <item row="2" column="0" colspan="4">
+           <widget class="QRadioButton" name="radioButtonReg">
+            <property name="text">
+             <string>Regular Expression allowed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0" colspan="2">
+           <widget class="QPushButton" name="pushButtonLock">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Lock/Unlock Edit</string>
+            </property>
+            <property name="text">
+             <string>Lock</string>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="0" column="1" rowspan="2">
+        <layout class="QVBoxLayout" name="verticalLayout_12">
+         <item>
+          <widget class="QRadioButton" name="rdoAll">
+           <property name="toolTip">
+            <string>Search from the entire database</string>
+           </property>
+           <property name="text">
+            <string>All</string>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="rdoLocal">
+           <property name="toolTip">
+            <string>Search from the records that have the same value of three three grouping option with current selected record</string>
+           </property>
+           <property name="text">
+            <string>Local</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
        </item>
       </layout>
      </widget>
@@ -5603,6 +5607,9 @@
                  <property name="font">
                   <font>
                    <family>Courier New</family>
+                   <pointsize>13</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
                   </font>
                  </property>
                 </widget>
@@ -5646,6 +5653,9 @@
                  <property name="font">
                   <font>
                    <family>Courier New</family>
+                   <pointsize>13</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
                   </font>
                  </property>
                 </widget>
@@ -5689,6 +5699,9 @@
                  <property name="font">
                   <font>
                    <family>Courier New</family>
+                   <pointsize>13</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
                   </font>
                  </property>
                 </widget>
@@ -5732,6 +5745,9 @@
                  <property name="font">
                   <font>
                    <family>Courier New</family>
+                   <pointsize>13</pointsize>
+                   <weight>75</weight>
+                   <bold>true</bold>
                   </font>
                  </property>
                 </widget>
@@ -6482,8 +6498,8 @@
                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
 &lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.SF NS Text'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &amp;quot;-2&amp;quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text';&quot;&gt;Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &amp;quot;-2&amp;quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                 </widget>
                </item>
@@ -6533,6 +6549,9 @@ p, li { white-space: pre-wrap; }
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -6548,6 +6567,9 @@ p, li { white-space: pre-wrap; }
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -6570,6 +6592,9 @@ p, li { white-space: pre-wrap; }
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -6585,6 +6610,9 @@ p, li { white-space: pre-wrap; }
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -7395,6 +7423,9 @@ If the J-end is off the J gene end may need adjusted</string>
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -7447,6 +7478,9 @@ If the J-end is off the J gene end may need adjusted</string>
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -7512,6 +7546,9 @@ If the J-end is off the J gene end may need adjusted</string>
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                    </widget>
@@ -7564,6 +7601,9 @@ If the J-end is off the J gene end may need adjusted</string>
                     <property name="font">
                      <font>
                       <family>Courier New</family>
+                      <pointsize>13</pointsize>
+                      <weight>75</weight>
+                      <bold>true</bold>
                      </font>
                     </property>
                     <property name="readOnly">
@@ -7785,7 +7825,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>6</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -9788,7 +9828,7 @@ If the J-end is off the J gene end may need adjusted</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>0</number>
+                 <number>4</number>
                 </property>
                 <widget class="QWidget" name="tab_8">
                  <attribute name="title">
@@ -11404,18 +11444,20 @@ If the J-end is off the J gene end may need adjusted</string>
     <property name="title">
      <string>Tools</string>
     </property>
-    <addaction name="actionAnalyze_Mutations"/>
     <addaction name="actionMultiple_Alignement"/>
     <addaction name="actionAlignment"/>
+    <addaction name="actionAnalyze_Mutations"/>
+    <addaction name="separator"/>
     <addaction name="actionFind_Clonal"/>
     <addaction name="actionIdentifyPublicClone"/>
-    <addaction name="actionCreateVDJdb"/>
+    <addaction name="actionAnalyze_Isotypes"/>
+    <addaction name="separator"/>
+    <addaction name="actionaddABlist"/>
+    <addaction name="actionSampling"/>
+    <addaction name="separator"/>
     <addaction name="actiontranslate"/>
     <addaction name="actionTestMutMap"/>
     <addaction name="actionStructure"/>
-    <addaction name="actionAnalyze_Isotypes"/>
-    <addaction name="actionaddABlist"/>
-    <addaction name="actionSampling"/>
     <addaction name="actionBatchChangeName"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -11441,6 +11483,8 @@ If the J-end is off the J gene end may need adjusted</string>
     <property name="title">
      <string>Database</string>
     </property>
+    <addaction name="actionCreateVDJdb"/>
+    <addaction name="separator"/>
     <addaction name="actionTop"/>
     <addaction name="actionBottom"/>
     <addaction name="actionMove_Up"/>
@@ -11536,12 +11580,11 @@ If the J-end is off the J gene end may need adjusted</string>
    <addaction name="actionPairToNewDB"/>
    <addaction name="separator"/>
    <addaction name="actionTestMutMap"/>
+   <addaction name="actionSimilarProtein"/>
    <addaction name="separator"/>
    <addaction name="actionAnalyze_Mutations"/>
    <addaction name="actionFind_Clonal"/>
-   <addaction name="actionAlignment"/>
    <addaction name="actionSuggestCanonical"/>
-   <addaction name="actiontranslate"/>
    <addaction name="separator"/>
    <addaction name="actionMultiple_Alignement"/>
    <addaction name="actionDNA"/>
@@ -12105,7 +12148,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <normaloff>:/PNG-Icons/nt2aa.png</normaloff>:/PNG-Icons/nt2aa.png</iconset>
    </property>
    <property name="text">
-    <string>translate</string>
+    <string>Translate</string>
    </property>
    <property name="toolTip">
     <string>Translate DNA sequences to Protein sequences</string>
@@ -12237,6 +12280,20 @@ If the J-end is off the J gene end may need adjusted</string>
     <string>PairAndJump</string>
    </property>
   </action>
+  <action name="actiontranslate_2">
+   <property name="text">
+    <string>translate</string>
+   </property>
+  </action>
+  <action name="actionSimilarProtein">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/Flu.png</normaloff>:/PNG-Icons/Flu.png</iconset>
+   </property>
+   <property name="text">
+    <string>SimilarProtein</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="Resources/VgenesResources.qrc"/>
@@ -12310,8 +12367,8 @@ If the J-end is off the J gene end may need adjusted</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_3"/>
   <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
