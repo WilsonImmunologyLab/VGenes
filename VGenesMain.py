@@ -3283,7 +3283,7 @@ class protein_slimlar_thread(QThread):
                 if 'MapInstability' in self.options:
                     WindowSize = self.options['MapInstability']
                     CurrentColorMap6 = [0,0] + VGenesSeq.OtherParam(currentAASeq, 'MapInstability', WindowSize, True)
-    
+
                 ## hard copy oif target score
                 if 'Hydrophobicity' in self.options:
                     ThisLoop_TargetColorMap1 = copy.deepcopy(TargetColorMap1)
@@ -3297,12 +3297,12 @@ class protein_slimlar_thread(QThread):
                     ThisLoop_TargetColorMap5 = copy.deepcopy(TargetColorMap5)
                 if 'MapInstability' in self.options:
                     ThisLoop_TargetColorMap6 = copy.deepcopy(TargetColorMap6)
-    
+
                 ## for each sequence, align with target sequence
                 alignments = pairwise2.align.globalms(targetAASeq, currentAASeq, 2, -1, -0.5, -0.1)
                 tergetAlign = alignments[0][0]
                 currentAlign = alignments[0][1]
-    
+
                 ## align score array for target sequence
                 gap_index_target = []
                 index = 0
@@ -3325,7 +3325,7 @@ class protein_slimlar_thread(QThread):
                             ThisLoop_TargetColorMap6.insert(pos,-10)
                     else:
                         break
-    
+
                 ## align score array for current sequence
                 gap_index_current = []
                 index = 0
@@ -3348,42 +3348,29 @@ class protein_slimlar_thread(QThread):
                             CurrentColorMap6.insert(pos, -10)
                     else:
                         break
-    
+
                 ## code for ignore GAP option
                 if self.ignoreGap == True:
                     gap_index = gap_index_target + gap_index_current
-                    valid_index = list(set(range(0,len(tergetAlign))) - set(gap_index))
                     if 'Hydrophobicity' in self.options:
-                        tmp_list1 = [ThisLoop_TargetColorMap1[i] for i in valid_index]
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(tmp_list1)
-                        tmp_list2 = [CurrentColorMap1[i] for i in valid_index]
-                        CurrentColorMap1 = copy.deepcopy(tmp_list2)
+                        ThisLoop_TargetColorMap1 = numpy.delete(ThisLoop_TargetColorMap1, gap_index).tolist()
+                        CurrentColorMap1 = numpy.delete(CurrentColorMap1, gap_index).tolist()
                     if 'Hydrophilicity' in self.options:
-                        tmp_list1 = [ThisLoop_TargetColorMap2[i] for i in valid_index]
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(tmp_list1)
-                        tmp_list2 = [CurrentColorMap2[i] for i in valid_index]
-                        CurrentColorMap1 = copy.deepcopy(tmp_list2)
+                        ThisLoop_TargetColorMap2 = numpy.delete(ThisLoop_TargetColorMap2, gap_index).tolist()
+                        CurrentColorMap2 = numpy.delete(CurrentColorMap2, gap_index).tolist()
                     if 'Flexibility' in self.options:
-                        tmp_list1 = [ThisLoop_TargetColorMap3[i] for i in valid_index]
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(tmp_list1)
-                        tmp_list2 = [CurrentColorMap3[i] for i in valid_index]
-                        CurrentColorMap1 = copy.deepcopy(tmp_list2)
+                        ThisLoop_TargetColorMap3 = numpy.delete(ThisLoop_TargetColorMap3, gap_index).tolist()
+                        CurrentColorMap3 = numpy.delete(CurrentColorMap3, gap_index).tolist()
                     if 'Surface' in self.options:
-                        tmp_list1 = [ThisLoop_TargetColorMap4[i] for i in valid_index]
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(tmp_list1)
-                        tmp_list2 = [CurrentColorMap4[i] for i in valid_index]
-                        CurrentColorMap1 = copy.deepcopy(tmp_list2)
+                        ThisLoop_TargetColorMap4 = numpy.delete(ThisLoop_TargetColorMap4, gap_index).tolist()
+                        CurrentColorMap4 = numpy.delete(CurrentColorMap4, gap_index).tolist()
                     if 'MapAApI' in self.options:
-                        tmp_list1 = [ThisLoop_TargetColorMap5[i] for i in valid_index]
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(tmp_list1)
-                        tmp_list2 = [CurrentColorMap5[i] for i in valid_index]
-                        CurrentColorMap1 = copy.deepcopy(tmp_list2)
+                        ThisLoop_TargetColorMap5 = numpy.delete(ThisLoop_TargetColorMap5, gap_index).tolist()
+                        CurrentColorMap5 = numpy.delete(CurrentColorMap5, gap_index).tolist()
                     if 'MapInstability' in self.options:
-                        tmp_list1 = [ThisLoop_TargetColorMap6[i] for i in valid_index]
-                        ThisLoop_TargetColorMap1 = copy.deepcopy(tmp_list1)
-                        tmp_list2 = [CurrentColorMap6[i] for i in valid_index]
-                        CurrentColorMap1 = copy.deepcopy(tmp_list2)
-    
+                        ThisLoop_TargetColorMap6 = numpy.delete(ThisLoop_TargetColorMap6, gap_index).tolist()
+                        CurrentColorMap6 = numpy.delete(CurrentColorMap6, gap_index).tolist()
+
                 ## for each sequence, compare the protein score difference，assign a diff score
                 if 'Hydrophobicity' in self.options:
                     Score = CalculateProteinScoreDiff(ThisLoop_TargetColorMap1, CurrentColorMap1, -10)
