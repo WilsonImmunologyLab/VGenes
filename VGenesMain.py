@@ -3532,6 +3532,7 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
         self.ui.pushButtonReport.clicked.connect(self.Report)
         self.ui.pushButtonExport.clicked.connect(self.exportRes)
         self.ui.pushButtonCancel.clicked.connect(self.reject)
+        self.ui.radioButtonCheckAll.clicked.connect(self.CheckAll)
 
         if system() == 'Windows':
             # set style for windows
@@ -3552,6 +3553,15 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def CheckAll(self):
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentTable = self.ui.tables[option]
+        for index in range(currentTable.rowCount()):
+            if self.ui.radioButtonCheckAll.isChecked():
+                currentTable.cellWidget(index, 0).setChecked(True)
+            else:
+                currentTable.cellWidget(index, 0).setChecked(False)
 
     def updateSelection(self, currentRow, currentColumn, previousRow, previousColumn):
         sender_widget = self.sender()
