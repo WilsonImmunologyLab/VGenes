@@ -3572,7 +3572,7 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        HtmlFile, errorNum, errorFile = proteinFunction(DBFilename, SeqNames, option, windowSize)
+        HtmlFile, errorNum, errorFile = proteinFunction(DBFilename, SeqNames, option, windowSize, [self.ui.lineEditTargetName.text()])
 
         # display
         window_id = int(time.time() * 100)
@@ -23356,27 +23356,27 @@ class VGenesForm(QtWidgets.QMainWindow):
         html_content = '<ul class = "seq_container" style="margin-top: 40px; padding-top: 10px;">\n'
         ## make HTML for each report type
         html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 9, PhobScale)
+        html_content += makeProteinHTML(AllSeqs, 9, PhobScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 10, PhilScale)
+        html_content += makeProteinHTML(AllSeqs, 10, PhilScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 11, FlexScale)
+        html_content += makeProteinHTML(AllSeqs, 11, FlexScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 12, SurfScale)
+        html_content += makeProteinHTML(AllSeqs, 12, SurfScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 13, pIScale)
+        html_content += makeProteinHTML(AllSeqs, 13, pIScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 14, InsScale)
+        html_content += makeProteinHTML(AllSeqs, 14, InsScale, [])
         html_content += '</li>\n\n'
 
         html_content += '</ul>\n</body>\n</html>\n'
@@ -23670,27 +23670,27 @@ class VGenesForm(QtWidgets.QMainWindow):
         html_content = '<ul class = "seq_container" style="margin-top: 40px; padding-top: 10px;">\n'
         ## make HTML for each report type
         html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 9, PhobScale)
+        html_content += makeProteinHTML(AllSeqs, 9, PhobScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 10, PhilScale)
+        html_content += makeProteinHTML(AllSeqs, 10, PhilScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 11, FlexScale)
+        html_content += makeProteinHTML(AllSeqs, 11, FlexScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 12, SurfScale)
+        html_content += makeProteinHTML(AllSeqs, 12, SurfScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 13, pIScale)
+        html_content += makeProteinHTML(AllSeqs, 13, pIScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 14, InsScale)
+        html_content += makeProteinHTML(AllSeqs, 14, InsScale, [])
         html_content += '</li>\n\n'
 
         html_content += '</ul>\n</body>\n</html>\n'
@@ -23986,27 +23986,27 @@ class VGenesForm(QtWidgets.QMainWindow):
         html_content = '<ul class = "seq_container" style="margin-top: 40px; padding-top: 10px;">\n'
         ## make HTML for each report type
         html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 9, PhobScale)
+        html_content += makeProteinHTML(AllSeqs, 9, PhobScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 10, PhilScale)
+        html_content += makeProteinHTML(AllSeqs, 10, PhilScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 11, FlexScale)
+        html_content += makeProteinHTML(AllSeqs, 11, FlexScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 12, SurfScale)
+        html_content += makeProteinHTML(AllSeqs, 12, SurfScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 13, pIScale)
+        html_content += makeProteinHTML(AllSeqs, 13, pIScale, [])
         html_content += '</li>\n\n'
 
         html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 14, InsScale)
+        html_content += makeProteinHTML(AllSeqs, 14, InsScale, [])
         html_content += '</li>\n\n'
 
         html_content += '</ul>\n</body>\n</html>\n'
@@ -24330,32 +24330,32 @@ class VGenesForm(QtWidgets.QMainWindow):
         if self.ui.chkHydrophobicity.isChecked() == True:
 
             html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
-            html_content += makeProteinHTML(AllSeqs, 9, PhobScale)
+            html_content += makeProteinHTML(AllSeqs, 9, PhobScale, [])
             html_content += '</li>\n\n'
 
         if self.ui.chkHydrophilicity.isChecked() == True:
             html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
-            html_content += makeProteinHTML(AllSeqs, 10, PhilScale)
+            html_content += makeProteinHTML(AllSeqs, 10, PhilScale, [])
             html_content += '</li>\n\n'
 
         if self.ui.chkFlexibility.isChecked() == True:
             html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
-            html_content += makeProteinHTML(AllSeqs, 11, FlexScale)
+            html_content += makeProteinHTML(AllSeqs, 11, FlexScale, [])
             html_content += '</li>\n\n'
 
         if self.ui.chkSurface.isChecked() == True:
             html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
-            html_content += makeProteinHTML(AllSeqs, 12, SurfScale)
+            html_content += makeProteinHTML(AllSeqs, 12, SurfScale, [])
             html_content += '</li>\n\n'
 
         if self.ui.chkpI.isChecked() == True:
             html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
-            html_content += makeProteinHTML(AllSeqs, 13, pIScale)
+            html_content += makeProteinHTML(AllSeqs, 13, pIScale, [])
             html_content += '</li>\n\n'
 
         if self.ui.chkInstability.isChecked() == True:
             html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
-            html_content += makeProteinHTML(AllSeqs, 14, InsScale)
+            html_content += makeProteinHTML(AllSeqs, 14, InsScale, [])
             html_content += '</li>\n\n'
         
         html_content += '</ul>\n</body>\n</html>\n'
@@ -33191,7 +33191,7 @@ def dataReshape(data):
 
     return All_names, Matrix_list, HC_names, LC_names
 
-def proteinFunction(DBFilename, SeqNames, option, windowSize):
+def proteinFunction(DBFilename, SeqNames, option, windowSize, highLight):
     # step 1: fetch data
     fields = ['SeqName', 'Sequence', 'GermlineSequence', 'CDR3Length', 'CDR1From', 'CDR1To', 'CDR2From', 'CDR2To',
               'CDR3beg', 'CDR3end', 'Mutations', 'IDEvent', 'ID', 'Species', 'Jend', 'Blank7']
@@ -33410,32 +33410,32 @@ def proteinFunction(DBFilename, SeqNames, option, windowSize):
     ## make HTML for each report type
     if option == 'Hydrophobicity':
         html_content += '<li>\n<h3 class="title0" >Hydrophobicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 9, PhobScale)
+        html_content += makeProteinHTML(AllSeqs, 9, PhobScale, highLight)
         html_content += '</li>\n\n'
 
     if option == 'Hydrophilicity':
         html_content += '<li>\n<h3 class="title0" >Hydrophilicity</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 10, PhilScale)
+        html_content += makeProteinHTML(AllSeqs, 10, PhilScale, highLight)
         html_content += '</li>\n\n'
 
     if option == 'Flexibility':
         html_content += '<li>\n<h3 class="title0" >Flexibility</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 11, FlexScale)
+        html_content += makeProteinHTML(AllSeqs, 11, FlexScale, highLight)
         html_content += '</li>\n\n'
 
     if option == 'Surface':
         html_content += '<li>\n<h3 class="title0" >Surface liklihood</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 12, SurfScale)
+        html_content += makeProteinHTML(AllSeqs, 12, SurfScale, highLight)
         html_content += '</li>\n\n'
 
     if option == 'MapAApI':
         html_content += '<li>\n<h3 class="title0" >Isoelectric point (pI)</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 13, pIScale)
+        html_content += makeProteinHTML(AllSeqs, 13, pIScale, highLight)
         html_content += '</li>\n\n'
 
     if option == 'MapInstability':
         html_content += '<li>\n<h3 class="title0" >Instability</h3>\n'
-        html_content += makeProteinHTML(AllSeqs, 14, InsScale)
+        html_content += makeProteinHTML(AllSeqs, 14, InsScale, highLight)
         html_content += '</li>\n\n'
 
     html_content += '</ul>\n</body>\n</html>\n'
@@ -33448,7 +33448,7 @@ def proteinFunction(DBFilename, SeqNames, option, windowSize):
     return out_html_file, badNumber, ErlogFile2
 
 
-def makeProteinHTML(dataArray, index, scale):
+def makeProteinHTML(dataArray, index, scale, highLight):
     scaleMin = scale[0]
     scaleMax = scale[1]
     scaleRange = scaleMax - scaleMin
@@ -33459,7 +33459,10 @@ def makeProteinHTML(dataArray, index, scale):
     # Seq Name
     out_str += '<div class="virtcalBox">\n<p class="centerText name_section">Sequence Name</p>\n'
     for record in dataArray:
-        out_str += '<p>' + record[0] + '</p>\n'
+        if record[0] in highLight:
+            out_str += '<p style="color:red;">' + record[0] + '</p>\n'
+        else:
+            out_str += '<p>' + record[0] + '</p>\n'
     out_str += '</div>\n'
 
     # FWR1
