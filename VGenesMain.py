@@ -3589,12 +3589,23 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
         SeqName = sender_widget.item(currentRow, 1).text()
         self.ProteinSimilarUpdateSelectionSignal.emit(SeqName)
 
+    def updateWindowSize(self):
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentWindowSize = self.windowSize[option]
+        self.ui.lineEditWindowSize.setText(str(currentWindowSize))
+
     def Report(self):
         option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
         currentTable = self.ui.tables[option]
         SeqNames = []
         SeqNames.append(self.ui.lineEditTargetName.text())
-        windowSize = int(self.ui.lineEditWindowSize.text())
+        try:
+            windowSize = int(self.ui.lineEditWindowSize.text())
+        except:
+            Msg = 'Window Size only can be integers that >= 2!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
         for index in range(currentTable.rowCount()):
             if currentTable.cellWidget(index, 0).isChecked():
                 SeqNames.append(currentTable.item(index, 1).text())
@@ -8984,6 +8995,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.myProteinSimilarResultDialog.ui.tabs[index].layout.addWidget(self.myProteinSimilarResultDialog.ui.tables[index])
             #
             self.myProteinSimilarResultDialog.ui.tabs[index].setLayout(self.myProteinSimilarResultDialog.ui.tabs[index].layout)
+        self.myProteinSimilarResultDialog.ui.tabWidget.currentChanged.connect(self.myProteinSimilarResultDialog.updateWindowSize)
 
         # add the tab widget to the main layout
         self.myProteinSimilarResultDialog.ui.gridLayoutMain.addWidget(self.myProteinSimilarResultDialog.ui.tabWidget)
