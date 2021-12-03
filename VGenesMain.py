@@ -3393,6 +3393,10 @@ class protein_slimlar_thread(QThread):
             except:
                 Error_list.append([currentSeqName, currentAASeq])
 
+        if len(Error_list) > 0:
+            drop_list = [ele[0] for ele in Error_list]
+            ScoreRank = ScoreRank.drop(drop_list, axis=1)
+
         # function finish, return message and data
         pct = 100
         self.loadProgress.emit(pct, '')
@@ -8893,6 +8897,16 @@ class VGenesForm(QtWidgets.QMainWindow):
     def ShowProteinSimilarResults(self, result):
         ScoreRank = result[1]
         Error_info = result[2]
+        
+        # display error log
+        ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+        with open(ErlogFile, 'w') as currentFile:
+            currentFile.write('Running finished!\n')
+            currentFile.write('\nThe following records can not be processed:\n')
+            for record in Error_info:
+                err_string = record[0] + '\n' + record[1] + '\n'
+                currentFile.write(err_string)
+        self.ShowVGenesText(ErlogFile)
 
         self.myProteinSimilarResultDialog = ProteinSimilarResultDialog()
 
