@@ -62,6 +62,7 @@ from ui_Import_Dialogue import Ui_DialogImport
 
 # Import pairwise2 module
 from Bio import pairwise2
+from Bio.SubsMat import MatrixInfo as matlist
 
 global OldName
 global UpdateSpecific
@@ -3186,6 +3187,7 @@ class protein_slimlar_thread(QThread):
         self.searchRange = []
         self.targetName = ''
         self.ignoreGap = False
+        self.alignment_setting = []
 
     def run(self):
         DBFilename = self.DBFilename
@@ -3299,7 +3301,18 @@ class protein_slimlar_thread(QThread):
                     ThisLoop_TargetColorMap6 = copy.deepcopy(TargetColorMap6)
 
                 ## for each sequence, align with target sequence
-                alignments = pairwise2.align.globalms(targetAASeq, currentAASeq, 2, -1, -0.5, -0.1)
+                if self.alignment_setting[0] == "blosum62":
+                    matrix = matlist.blosum62
+                elif self.alignment_setting[0] == "pam60":
+                    matrix = matlist.pam60
+                elif self.alignment_setting[0] == "benner22":
+                    matrix = matlist.benner22
+                else:
+                    matrix = matlist.blosum62
+                gap_open = self.alignment_setting[1]
+                gap_extend = self.alignment_setting[2]
+
+                alignments = pairwise2.align.globalds(targetAASeq, currentAASeq, matrix, gap_open, gap_extend)
                 tergetAlign = alignments[0][0]
                 currentAlign = alignments[0][1]
 
@@ -3495,6 +3508,23 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
                 self.protein_slimlar_workThread.ignoreGap = True
             else:
                 self.protein_slimlar_workThread.ignoreGap = False
+
+            if self.ui.radioButtonblosum62.isChecked():
+                self.protein_slimlar_workThread.alignment_setting = ['blosum62']
+            elif self.ui.radioButtonpam60.isChecked():
+                self.protein_slimlar_workThread.alignment_setting = ['pam60']
+            elif self.ui.radioButtonbenner22.isChecked():
+                self.protein_slimlar_workThread.alignment_setting = ['benner22']
+            else:
+                self.protein_slimlar_workThread.alignment_setting = ['blosum62']
+
+            try:
+                self.protein_slimlar_workThread.alignment_setting.append(float(self.ui.lineEditGapopen.text()))
+                self.protein_slimlar_workThread.alignment_setting.append(float(self.ui.lineEditGapExtend.text()))
+            except:
+                Msg = 'Only numbers allowed for Gap open and Gap extend!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                return
 
             self.protein_slimlar_workThread.start()
             self.protein_slimlar_workThread.trigger.connect(self.vgene.ShowProteinSimilarResults)
