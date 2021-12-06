@@ -3211,18 +3211,22 @@ class protein_slimlar_thread(QThread):
                                  '" AND SeqName IN ("' + '","'.join(self.searchRange) + '")'
 
         ## fetch data
-        SQLStatement = 'SELECT SeqName, Sequence, FR1From, Jend FROM vgenesDB' + WhereStatement
+        SQLStatement = 'SELECT SeqName, Sequence, FR1From, Jend, Blank7 FROM vgenesDB' + WhereStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         # pairwise alignment and score matching
         ## get the target sequence ready
-        SQLStatement = 'SELECT SeqName, Sequence, FR1From, Jend FROM vgenesDB WHERE SeqName = "' + self.targetName + '"'
+        SQLStatement = 'SELECT SeqName, Sequence, FR1From, Jend, Blank7 FROM vgenesDB WHERE SeqName = "' + self.targetName + '"'
         targetDataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         targetNTSeq = targetDataIn[0][1]
         targetVDJstart = int(targetDataIn[0][2])
         targetVDJend = int(targetDataIn[0][3])
         targetNTSeq = targetNTSeq[targetVDJstart-1:targetVDJend]
-        targetAASeq, msg = Translator(targetNTSeq, 0)
+        try:
+            ORF = int(targetDataIn[0][4])
+        except:
+            ORF = 0
+        targetAASeq, msg = Translator(targetNTSeq, ORF)
         targetAASeq = re.sub(r'~','',targetAASeq)
         ## calculate protein score for target sequence
         if 'Hydrophobicity' in self.options:
@@ -3262,7 +3266,11 @@ class protein_slimlar_thread(QThread):
             currentVDJstart = int(record[2])
             currentVDJend = int(record[3])
             currentNTSeq = currentNTSeq[currentVDJstart - 1:currentVDJend]
-            currentAASeq, msg = Translator(currentNTSeq, 0)
+            try:
+                ORF = int(record[4])
+            except:
+                ORF = 0
+            currentAASeq, msg = Translator(currentNTSeq, ORF)
             currentAASeq = re.sub(r'~', '', currentAASeq)
 
             try:
