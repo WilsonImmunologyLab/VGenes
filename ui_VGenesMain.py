@@ -4918,7 +4918,7 @@ class Ui_MainWindow(object):
         self.actiontranslate_2.setObjectName("actiontranslate_2")
         self.actionSimilarProtein = QtWidgets.QAction(MainWindow)
         icon67 = QtGui.QIcon()
-        icon67.addPixmap(QtGui.QPixmap(":/PNG-Icons/Flu.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon67.addPixmap(QtGui.QPixmap(":/PNG-Icons/ProteinSimilar.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSimilarProtein.setIcon(icon67)
         self.actionSimilarProtein.setObjectName("actionSimilarProtein")
         self.menuFile.addAction(self.action_New)
