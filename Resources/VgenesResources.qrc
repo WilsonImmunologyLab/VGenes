@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>ProteinSimilar.png</file>
     <file>pairClone.png</file>
     <file>AID.png</file>
     <file>CopyDB.png</file>

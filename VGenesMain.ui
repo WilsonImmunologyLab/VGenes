@@ -12288,7 +12288,7 @@ If the J-end is off the J gene end may need adjusted</string>
   <action name="actionSimilarProtein">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/Flu.png</normaloff>:/PNG-Icons/Flu.png</iconset>
+     <normaloff>:/PNG-Icons/ProteinSimilar.png</normaloff>:/PNG-Icons/ProteinSimilar.png</iconset>
    </property>
    <property name="text">
     <string>SimilarProtein</string>
