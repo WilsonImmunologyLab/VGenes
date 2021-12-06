@@ -18027,14 +18027,28 @@ class VGenesForm(QtWidgets.QMainWindow):
 
             self.myProteinSimilarDialog.DBFilename = DBFilename
             self.myProteinSimilarDialog.vgene = self
-
+            
+            # load details
             self.myProteinSimilarDialog.ui.lineEditName.setText(self.ui.txtName.toPlainText())
             self.myProteinSimilarDialog.ui.lineEditGeneType.setText(self.ui.txtGeneType.toPlainText())
             self.myProteinSimilarDialog.ui.lineEditIsotype.setText(self.ui.txtIsotype.toPlainText())
             self.myProteinSimilarDialog.ui.lineEditVgene.setText(self.ui.txtVgene.toPlainText())
             self.myProteinSimilarDialog.ui.lineEditDgene.setText(self.ui.txtDgene.toPlainText())
             self.myProteinSimilarDialog.ui.lineEditJgene.setText(self.ui.txtJgene.toPlainText())
-            self.myProteinSimilarDialog.ui.textEdit.setText(self.ui.txtAASeq.toPlainText())
+            # load AA V(D)J seq
+            SQLStatement = 'SELECT SeqName, Sequence, FR1From, Jend, Blank7 FROM vgenesDB WHERE SeqName = "' + self.ui.txtName.toPlainText() + '"'
+            targetDataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            targetNTSeq = targetDataIn[0][1]
+            targetVDJstart = int(targetDataIn[0][2])
+            targetVDJend = int(targetDataIn[0][3])
+            targetNTSeq = targetNTSeq[targetVDJstart - 1:targetVDJend]
+            try:
+                ORF = int(targetDataIn[0][4])
+            except:
+                ORF = 0
+            targetAASeq, msg = Translator(targetNTSeq, ORF)
+            targetAASeq = re.sub(r'~', '', targetAASeq)
+            self.myProteinSimilarDialog.ui.textEdit.setText(targetAASeq)
 
             self.myProteinSimilarDialog.show()
 
