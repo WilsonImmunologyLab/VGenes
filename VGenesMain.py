@@ -13543,6 +13543,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.CheckedRecords = []
         self.match_tree_to_table()
 
+        self.ui.label_Name.setText(self.ui.txtName.toPlainText())
+
     def checkAll(self):
         global MoveNotChange
         if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
