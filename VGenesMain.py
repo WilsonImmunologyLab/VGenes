@@ -3605,18 +3605,18 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
     def Report(self):
         option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
         currentTable = self.ui.tables[option]
-        SeqNames = []
-        SeqNames.append(self.ui.lineEditTargetName.text())
+        SeqNames = {}
+        SeqNames[self.ui.lineEditTargetName.text()] = 0
         try:
             windowSize = int(self.ui.lineEditWindowSize.text())
         except:
             Msg = 'Window Size only can be integers that >= 2!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
-
+        
         for index in range(currentTable.rowCount()):
             if currentTable.cellWidget(index, 0).isChecked():
-                SeqNames.append(currentTable.item(index, 1).text())
+                SeqNames[currentTable.item(index, 1).text()] = float(currentTable.item(index, 2).text())
         if len(SeqNames) < 2:
             Msg = 'You did not check anything!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -33268,13 +33268,20 @@ def dataReshape(data):
 
     return All_names, Matrix_list, HC_names, LC_names
 
+def SortBySubList(sub_li, index):
+    # reverse = None (Sorts in Ascending order)
+    # key is set to sort using second element of
+    # sublist lambda has been used
+    return (sorted(sub_li, key=lambda x: x[index]))
+
+
 def proteinFunction(DBFilename, SeqNames, option, windowSize, highLight):
     # step 1: fetch data
     fields = ['SeqName', 'Sequence', 'GermlineSequence', 'CDR3Length', 'CDR1From', 'CDR1To', 'CDR2From', 'CDR2To',
               'CDR3beg', 'CDR3end', 'Mutations', 'IDEvent', 'ID', 'Species', 'Jend', 'Blank7']
 
     SQLStatement = 'SELECT SeqName, Sequence, GermlineSequence, CDR3Length, CDR1From, CDR1To, CDR2From, CDR2To, CDR3beg, CDR3end, Mutations, IDEvent, ID, Species, Jend, Blank7 FROM vgenesDB'
-    WhereStatement = ' WHERE SeqName IN ("' + '","'.join(SeqNames) + '")'
+    WhereStatement = ' WHERE SeqName IN ("' + '","'.join(SeqNames.keys()) + '")'
     SQLStatement += WhereStatement
     DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
@@ -33286,7 +33293,9 @@ def proteinFunction(DBFilename, SeqNames, option, windowSize, highLight):
         for record in DataIs:
             try:
                 tmpRes = int(record[4]) + int(record[5]) + int(record[6]) + int(record[7]) + int(record[8])
-                FilterDataIs.append(record)
+                record_list = list(record)
+                record_list.append(SeqNames[record[0]])
+                FilterDataIs.append(record_list)
             except:
                 errMsg = 'Sequence ' + record[0] + ' is incomplete and has been removed from current analysis!\n'
                 currentFile.write(errMsg)
@@ -33312,6 +33321,7 @@ def proteinFunction(DBFilename, SeqNames, option, windowSize, highLight):
     SeqArray = []
     AllSeqs = []
 
+    FilterDataIs = SortBySubList(FilterDataIs, 16)
     # SeqArray has: SeqName, CDR1beg, CDR1end, CDR2beg, CDR2end, CDR3beg, CDR3end,
     for item in FilterDataIs:
         SeqArray.clear()
