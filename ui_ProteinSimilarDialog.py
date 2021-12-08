@@ -255,7 +255,7 @@ class Ui_ProteinSimilarDialog(object):
 
     def retranslateUi(self, ProteinSimilarDialog):
         _translate = QtCore.QCoreApplication.translate
-        ProteinSimilarDialog.setWindowTitle(_translate("ProteinSimilarDialog", "Dialog"))
+        ProteinSimilarDialog.setWindowTitle(_translate("ProteinSimilarDialog", "Identify Similar Proteins"))
         self.label.setText(_translate("ProteinSimilarDialog", "Identify sequences that have similar protein properties"))
         self.groupBox_2.setTitle(_translate("ProteinSimilarDialog", "Searching criteria"))
         self.chkHydrophobicity.setText(_translate("ProteinSimilarDialog", "Hydrophobicity"))

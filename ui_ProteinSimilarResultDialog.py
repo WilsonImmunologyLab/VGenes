@@ -83,7 +83,7 @@ class Ui_ProteinSimilarResultDialog(object):
 
     def retranslateUi(self, ProteinSimilarResultDialog):
         _translate = QtCore.QCoreApplication.translate
-        ProteinSimilarResultDialog.setWindowTitle(_translate("ProteinSimilarResultDialog", "Dialog"))
+        ProteinSimilarResultDialog.setWindowTitle(_translate("ProteinSimilarResultDialog", "Identify Similar Proteins"))
         self.label.setText(_translate("ProteinSimilarResultDialog", "Protein similarity matching results"))
         self.label_4.setText(_translate("ProteinSimilarResultDialog", "Window Size:"))
         self.label_2.setText(_translate("ProteinSimilarResultDialog", "* This page is linked to the main UI. When you click one record, the main UI will be automatically switched to it."))
