@@ -11459,6 +11459,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionTestMutMap"/>
     <addaction name="actionStructure"/>
     <addaction name="actionBatchChangeName"/>
+    <addaction name="actionQchart"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -12292,6 +12293,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>SimilarProtein</string>
+   </property>
+  </action>
+  <action name="actionQchart">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
+   </property>
+   <property name="text">
+    <string>Qchart</string>
    </property>
   </action>
  </widget>

@@ -4921,6 +4921,9 @@ class Ui_MainWindow(object):
         icon67.addPixmap(QtGui.QPixmap(":/PNG-Icons/ProteinSimilar.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionSimilarProtein.setIcon(icon67)
         self.actionSimilarProtein.setObjectName("actionSimilarProtein")
+        self.actionQchart = QtWidgets.QAction(MainWindow)
+        self.actionQchart.setIcon(icon3)
+        self.actionQchart.setObjectName("actionQchart")
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.action_Open)
         self.menuFile.addAction(self.action_Save)
@@ -4948,6 +4951,7 @@ class Ui_MainWindow(object):
         self.menuTools.addAction(self.actionTestMutMap)
         self.menuTools.addAction(self.actionStructure)
         self.menuTools.addAction(self.actionBatchChangeName)
+        self.menuTools.addAction(self.actionQchart)
         self.menuHelp.addAction(self.action_Help)
         self.menuHelp.addSeparator()
         self.menuHelp.addAction(self.actionAbout_2)
@@ -5673,4 +5677,5 @@ class Ui_MainWindow(object):
         self.actionPairAndJump.setText(_translate("MainWindow", "PairAndJump"))
         self.actiontranslate_2.setText(_translate("MainWindow", "translate"))
         self.actionSimilarProtein.setText(_translate("MainWindow", "SimilarProtein"))
+        self.actionQchart.setText(_translate("MainWindow", "Qchart"))
 import VgenesResources_rc

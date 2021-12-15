@@ -20,6 +20,7 @@ from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
 from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter, QListWidget
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
+from PyQt5.QtChart import QChart, QChartView, QScatterSeries
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
 from PyQt5.QtWebEngineWidgets import *
@@ -95,6 +96,7 @@ from ui_rename_dialog import Ui_RenameDialog
 from ui_export_option_dialog import Ui_ExportOptionDialog
 from ui_ProteinSimilarDialog import Ui_ProteinSimilarDialog
 from ui_ProteinSimilarResultDialog import Ui_ProteinSimilarResultDialog
+from ui_Qchart_dialog import Ui_QchartDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -3642,6 +3644,73 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
 
     def exportRes(self):
         pass
+
+class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
+    ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        super(QchartDialog, self).__init__()
+        self.ui = Ui_QchartDialog()
+        self.ui.setupUi(self)
+
+        self.DBFilename = ""
+
+        self.ui.pushButtonDraw.clicked.connect(self.Draw)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}")
+        else:
+            pass
+
+    def Draw(self):
+
+        series0 = QScatterSeries()
+        series0.setName('Group1')
+        series0.setMarkerShape(QScatterSeries.MarkerShapeCircle)
+        series0.setMarkerSize(15)
+        series0.append(1, 4)
+        series0.append(-4, 2)
+        series0.append(6, 7)
+        series0.append(1, 0)
+        series0.append(-2, -5)
+
+        series1 = QScatterSeries()
+        series1.setName('Group2')
+        series1.setMarkerShape(QScatterSeries.MarkerShapeRectangle)
+        series1.setMarkerSize(15)
+        series1.append(-1, -4)
+        series1.append(4, -2)
+        series1.append(-6, -7)
+        series1.append(-1, 0)
+        series1.append(2, 5)
+
+        chart = QChart()
+        chart.addSeries(series0)
+        chart.addSeries(series1)
+        chart.setTitle("Scatter plot Example")
+        chart.setAnimationOptions(QChart.SeriesAnimations)
+        chart.setTheme(QChart.ChartThemeDark)
+        chart.createDefaultAxes()
+
+        chartview = QChartView(chart)
+        chartview.setRubberBand(QChartView.RectangleRubberBand)
+        self.ui.PlotVerticalLayout.addWidget(chartview)
 
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
@@ -18052,6 +18121,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 
             self.myProteinSimilarDialog.show()
 
+    @pyqtSlot()
+    def on_actionQchart_triggered(self):
+        # open a dialog for settings
+        self.myQchartDialog = QchartDialog()
+
+        self.myQchartDialog.DBFilename = DBFilename
+        self.myQchartDialog.vgene = self
+
+        self.myQchartDialog.show()
 
     @pyqtSlot()
     def on_actionAnalyze_Mutations_triggered(self):
