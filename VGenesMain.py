@@ -20,7 +20,7 @@ from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
 from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter, QListWidget
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
-from PyQt5.QtChart import QChart, QChartView, QScatterSeries
+from PyQt5.QtChart import QChart, QChartView, QScatterSeries, QLogValueAxis, QValueAxis
 from operator import itemgetter
 from PyQt5.QtWebEngine import *
 from PyQt5.QtWebEngineWidgets import *
@@ -3696,36 +3696,110 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.chartview.chart().zoomReset()
 
     def Draw(self):
+        dim1 = self.ui.comboBoxX.currentText()
+        dim2 = self.ui.comboBoxY.currentText()
+        group = self.ui.comboBoxGroup.currentText()
 
-        series0 = QScatterSeries()
-        series0.setName('Group1')
-        series0.setMarkerShape(QScatterSeries.MarkerShapeCircle)
-        series0.setMarkerSize(15)
-        series0.append(1, 4)
-        series0.append(-4, 2)
-        series0.append(6, 7)
-        series0.append(1, 0)
-        series0.append(-2, -5)
+        dim1 = re.sub(r'\(.+', '', dim1)
+        dim2 = re.sub(r'\(.+', '', dim2)
+        group = re.sub(r'\(.+', '', group)
 
-        series1 = QScatterSeries()
-        series1.setName('Group2')
-        series1.setMarkerShape(QScatterSeries.MarkerShapeRectangle)
-        series1.setMarkerSize(15)
-        series1.append(-1, -4)
-        series1.append(4, -2)
-        series1.append(-6, -7)
-        series1.append(-1, 0)
-        series1.append(2, 5)
+        if dim1 == "" or dim2 == "":
+            QMessageBox.warning(self, 'Warning', 'Your dim1 or dim2 is empty!',
+                                QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        where_statement = ' WHERE 1'
 
         chart = QChart()
-        chart.addSeries(series0)
-        chart.addSeries(series1)
-        chart.setTitle("Scatter plot Example")
-        chart.setAnimationOptions(QChart.SeriesAnimations)
-        chart.setTheme(QChart.ChartThemeDark)
-        chart.createDefaultAxes()
+        if group == '':
+            field = dim1 + "," + dim2
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + where_statement
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            series0 = QScatterSeries()
+            series0.setName('plot data')
+            series0.setMarkerShape(QScatterSeries.MarkerShapeCircle)
+            
+            goodNum = 0
+            for d in DataIn:
+                try:
+                    x = float(d[0])
+                    y = float(d[1])
+                    series0.append(x, y)
+                    goodNum += 1
+                except:
+                    pass
+            if goodNum == 0:
+                QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                    QMessageBox.Ok, QMessageBox.Ok)
+                return
+
+            chart.addSeries(series0)
+            chart.setTitle("Scatter plot")
+            chart.setAnimationOptions(QChart.SeriesAnimations)
+            chart.setTheme(QChart.ChartThemeDark)
+            chart.createDefaultAxes()
+
+            axis_x = QValueAxis()
+            axis_x.setTitleText(dim1)
+            axis_y = QValueAxis()
+            axis_y.setTitleText(dim2)
+
+            chart.setAxisX(axis_x, series0)
+            chart.setAxisY(axis_y, series0)
+        else:
+            field = dim1 + "," + dim2 + "," + group
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            goodNum = 0
+            curGroup = ''
+            series = []
+            for d in DataIn:
+                try:
+                    x = float(d[0])
+                    y = float(d[1])
+
+                    if curGroup != d[2]:
+                        if curGroup != '':
+                            series.append(sub_series)
+                            chart.addSeries(sub_series)
+                        
+                        curGroup = d[2]
+                        sub_series = QScatterSeries()
+                        sub_series.setName(curGroup)
+                        sub_series.setMarkerShape(QScatterSeries.MarkerShapeCircle)
+                        sub_series.append(x, y)
+                    else:
+                        sub_series.append(x, y)
+                    goodNum += 1
+                except:
+                    pass
+            series.append(sub_series)
+            chart.addSeries(sub_series)
+
+            if goodNum == 0:
+                QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                    QMessageBox.Ok, QMessageBox.Ok)
+                return
+
+            chart.setTitle("Scatter plot")
+            chart.setAnimationOptions(QChart.SeriesAnimations)
+            chart.setTheme(QChart.ChartThemeDark)
+            chart.createDefaultAxes()
+
+            axis_x = QValueAxis()
+            axis_x.setTitleText(dim1)
+            axis_y = QValueAxis()
+            axis_y.setTitleText(dim2)
+
+            for ele in series:
+                chart.setAxisX(axis_x, ele)
+                chart.setAxisY(axis_y, ele)
 
         self.chartview.setChart(chart)
+        self.chartview.chart().zoom(0.9)
 
 
 class MyFigure(FigureCanvas):
