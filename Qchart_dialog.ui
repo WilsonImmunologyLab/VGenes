@@ -6,37 +6,223 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>882</width>
-    <height>656</height>
+    <width>1082</width>
+    <height>710</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>70</y>
-     <width>421</width>
-     <height>431</height>
-    </rect>
-   </property>
-   <layout class="QVBoxLayout" name="PlotVerticalLayout"/>
-  </widget>
-  <widget class="QPushButton" name="pushButtonDraw">
-   <property name="geometry">
-    <rect>
-     <x>480</x>
-     <y>550</y>
-     <width>112</width>
-     <height>32</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Draw</string>
-   </property>
-  </widget>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0" rowspan="2">
+    <layout class="QVBoxLayout" name="verticalLayout">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="maximumSize">
+        <size>
+         <width>280</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>X axis</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxX">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="maximumSize">
+        <size>
+         <width>280</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Y axis</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxY">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="maximumSize">
+        <size>
+         <width>280</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Color by: (optional)</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="comboBoxGroup">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="radioButtonNum">
+       <property name="maximumSize">
+        <size>
+         <width>280</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Numerical</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="maximumSize">
+          <size>
+           <width>25</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Min</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEditMin">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_5">
+         <property name="maximumSize">
+          <size>
+           <width>25</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Max</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="lineEditMax">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>100</width>
+           <height>16777215</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="Line" name="line_3">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButtonResetZoom">
+       <property name="maximumSize">
+        <size>
+         <width>300</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Reset zoom</string>
+       </property>
+       <property name="autoDefault">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="Line" name="line_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="pushButtonDraw">
+     <property name="maximumSize">
+      <size>
+       <width>300</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Draw</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="0" column="1" rowspan="4">
+    <layout class="QVBoxLayout" name="PlotVerticalLayout"/>
+   </item>
+  </layout>
  </widget>
  <resources/>
  <connections/>

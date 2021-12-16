@@ -3657,6 +3657,12 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.DBFilename = ""
 
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
+        self.ui.pushButtonResetZoom.clicked.connect(self.resetZoom)
+        self.ui.radioButtonNum.clicked.connect(self.activeUI)
+
+        self.chartview = QChartView()
+        self.chartview.setRubberBand(QChartView.RectangleRubberBand)
+        self.ui.PlotVerticalLayout.addWidget(self.chartview)
 
         if system() == 'Windows':
             # set style for windows
@@ -3677,6 +3683,17 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def activeUI(self):
+        if self.ui.radioButtonNum.isChecked():
+            self.ui.lineEditMin.setEnabled(True)
+            self.ui.lineEditMax.setEnabled(True)
+        else:
+            self.ui.lineEditMin.setEnabled(False)
+            self.ui.lineEditMax.setEnabled(False)
+
+    def resetZoom(self):
+        self.chartview.chart().zoomReset()
 
     def Draw(self):
 
@@ -3708,9 +3725,8 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
         chart.setTheme(QChart.ChartThemeDark)
         chart.createDefaultAxes()
 
-        chartview = QChartView(chart)
-        chartview.setRubberBand(QChartView.RectangleRubberBand)
-        self.ui.PlotVerticalLayout.addWidget(chartview)
+        self.chartview.setChart(chart)
+
 
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
@@ -18128,6 +18144,11 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         self.myQchartDialog.DBFilename = DBFilename
         self.myQchartDialog.vgene = self
+
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myQchartDialog.ui.comboBoxX.addItems(fields_name)
+        self.myQchartDialog.ui.comboBoxY.addItems(fields_name)
+        self.myQchartDialog.ui.comboBoxGroup.addItems(fields_name)
 
         self.myQchartDialog.show()
 
