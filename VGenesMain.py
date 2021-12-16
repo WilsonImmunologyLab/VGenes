@@ -3741,10 +3741,20 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
             chart.setTheme(QChart.ChartThemeDark)
             chart.createDefaultAxes()
 
-            axis_x = QValueAxis()
-            axis_x.setTitleText(dim1)
-            axis_y = QValueAxis()
-            axis_y.setTitleText(dim2)
+            if self.ui.radioButtonLogX.isChecked():
+                axis_x = QLogValueAxis()
+                axis_x.setTitleText(dim1)
+                axis_x.setMinorTickCount(-1)
+            else:
+                axis_x = QValueAxis()
+                axis_x.setTitleText(dim1)
+            if self.ui.radioButtonLogY.isChecked():
+                axis_y = QLogValueAxis()
+                axis_y.setTitleText(dim2)
+                axis_y.setMinorTickCount(-1)
+            else:
+                axis_y = QValueAxis()
+                axis_y.setTitleText(dim2)
 
             chart.setAxisX(axis_x, series0)
             chart.setAxisY(axis_y, series0)
@@ -3789,10 +3799,20 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
             chart.setTheme(QChart.ChartThemeDark)
             chart.createDefaultAxes()
 
-            axis_x = QValueAxis()
-            axis_x.setTitleText(dim1)
-            axis_y = QValueAxis()
-            axis_y.setTitleText(dim2)
+            if self.ui.radioButtonLogX.isChecked():
+                axis_x = QLogValueAxis()
+                axis_x.setTitleText(dim1)
+                axis_x.setMinorTickCount(-1)
+            else:
+                axis_x = QValueAxis()
+                axis_x.setTitleText(dim1)
+            if self.ui.radioButtonLogY.isChecked():
+                axis_y = QLogValueAxis()
+                axis_y.setTitleText(dim2)
+                axis_y.setMinorTickCount(-1)
+            else:
+                axis_y = QValueAxis()
+                axis_y.setTitleText(dim2)
 
             for ele in series:
                 chart.setAxisX(axis_x, ele)
