@@ -3664,6 +3664,8 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.chartview.setRubberBand(QChartView.RectangleRubberBand)
         self.ui.PlotVerticalLayout.addWidget(self.chartview)
 
+
+
         if system() == 'Windows':
             # set style for windows
             self.setStyleSheet("QLabel{font-size:18px;}"
@@ -3683,6 +3685,11 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def select(self, event):
+
+        msg = 'xxx'
+        QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def activeUI(self):
         if self.ui.radioButtonNum.isChecked():
