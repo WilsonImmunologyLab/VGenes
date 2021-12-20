@@ -15655,7 +15655,8 @@ class VGenesForm(QtWidgets.QMainWindow):
                                                             mydata = params.data;
                                                             return ' """ + dim1 + """: ' + mydata[0] + '<br>' + ' """ + dim2 + """ ' + ': ' + mydata[1] + '<br>' + ' """ + group + """ ' + ': ' + mydata[2];
                                                         }	
-                                                    """)
+                                                    """),
+                                    axis_pointer_type='cross'
                                 ),
                                 legend_opts=opts.LegendOpts(
                                     is_show=self.ui.checkBoxFigLegend.isChecked()
@@ -15696,7 +15697,8 @@ class VGenesForm(QtWidgets.QMainWindow):
                                                         mydata = params.data;
                                                         return ' """ + dim1 + """: ' + mydata[0] + '<br>' + ' """ + dim2 + """ ' + ': ' + mydata[1] + '<br>' + ' """ + group + """ ' + ': ' + mydata[2];
                                                     }	
-                                                """)
+                                                """),
+                                axis_pointer_type='cross'
                             ),
                             legend_opts=opts.LegendOpts(
                                 is_show=self.ui.checkBoxFigLegend.isChecked()
@@ -29202,87 +29204,107 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
             # import V(D)J junction info
             ig_match = re.findall(r'V-\(D\)-J junction.+\n.+', cur_block)
-            junction = ig_match[0]
-            junction = junction.split('\n')[1]
-            junction_list = junction.split('\t')
-            if DATA[block_id][2] == 'Heavy':
-                DATA[block_id][16] = junction_list[0]
-                DATA[block_id][17] = junction_list[1]
-                DATA[block_id][18] = junction_list[2]
-                DATA[block_id][19] = junction_list[3]
-                DATA[block_id][20] = junction_list[4]
-            else:
-                DATA[block_id][16] = junction_list[0]
-                DATA[block_id][21] = junction_list[1]
-                DATA[block_id][20] = junction_list[2]
+            try:
+                junction = ig_match[0]
+                junction = junction.split('\n')[1]
+                junction_list = junction.split('\t')
+                if DATA[block_id][2] == 'Heavy':
+                    DATA[block_id][16] = junction_list[0]
+                    DATA[block_id][17] = junction_list[1]
+                    DATA[block_id][18] = junction_list[2]
+                    DATA[block_id][19] = junction_list[3]
+                    DATA[block_id][20] = junction_list[4]
+                else:
+                    DATA[block_id][16] = junction_list[0]
+                    DATA[block_id][21] = junction_list[1]
+                    DATA[block_id][20] = junction_list[2]
+            except:
+                print(DATA[block_id][0])
 
             # import Alignment summary
-            ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
-            fr1_match = ig_match[0]
-            fr1_match = fr1_match[1:]
-            fr1_match = fr1_match.split('\t')
-            DATA[block_id][22] = 1
-            DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
-            DATA[block_id][24] = fr1_match[3]
-            DATA[block_id][25] = fr1_match[4]
-            DATA[block_id][26] = fr1_match[5]
-            DATA[block_id][27] = fr1_match[6]
-            DATA[block_id][28] = fr1_match[7]
-
-            ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
-            cdr1_match = ig_match[0]
-            cdr1_match = cdr1_match[1:]
-            cdr1_match = cdr1_match.split('\t')
-            DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
-            DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
-            DATA[block_id][31] = cdr1_match[3]
-            DATA[block_id][32] = cdr1_match[4]
-            DATA[block_id][33] = cdr1_match[5]
-            DATA[block_id][34] = cdr1_match[6]
-            DATA[block_id][35] = cdr1_match[7]
-
-            ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
-            fr2_match = ig_match[0]
-            fr2_match = fr2_match[1:]
-            fr2_match = fr2_match.split('\t')
-            DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
-            DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
-            DATA[block_id][38] = fr2_match[3]
-            DATA[block_id][39] = fr2_match[4]
-            DATA[block_id][40] = fr2_match[5]
-            DATA[block_id][41] = fr2_match[6]
-            DATA[block_id][42] = fr2_match[7]
-
-            ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
-            cdr2_match = ig_match[0]
-            cdr2_match = cdr2_match[1:]
-            cdr2_match = cdr2_match.split('\t')
-            DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
-            DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
-            DATA[block_id][45] = cdr2_match[3]
-            DATA[block_id][46] = cdr2_match[4]
-            DATA[block_id][47] = cdr2_match[5]
-            DATA[block_id][48] = cdr2_match[6]
-            DATA[block_id][49] = cdr2_match[7]
-
-            ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
-            fr3_match = ig_match[0]
-            fr3_match = fr3_match[1:]
-            fr3_match = fr3_match.split('\t')
-            DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
-            DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
-            DATA[block_id][52] = fr3_match[3]
-            DATA[block_id][53] = fr3_match[4]
-            DATA[block_id][54] = fr3_match[5]
-            DATA[block_id][55] = fr3_match[6]
-            DATA[block_id][56] = fr3_match[7]
+            try:
+                ig_match = re.findall(r'\nFR1[^\n]+', cur_block)
+                fr1_match = ig_match[0]
+                fr1_match = fr1_match[1:]
+                fr1_match = fr1_match.split('\t')
+                DATA[block_id][22] = 1
+                DATA[block_id][23] = str(int(fr1_match[2]) - int(fr1_match[1]) + 1)
+                DATA[block_id][24] = fr1_match[3]
+                DATA[block_id][25] = fr1_match[4]
+                DATA[block_id][26] = fr1_match[5]
+                DATA[block_id][27] = fr1_match[6]
+                DATA[block_id][28] = fr1_match[7]
+            except:
+                print(DATA[block_id][0])
+            
+            try:
+                ig_match = re.findall(r'\nCDR1[^\n]+', cur_block)
+                cdr1_match = ig_match[0]
+                cdr1_match = cdr1_match[1:]
+                cdr1_match = cdr1_match.split('\t')
+                DATA[block_id][29] = str(int(cdr1_match[1]) - int(fr1_match[1]) + 1)
+                DATA[block_id][30] = str(int(cdr1_match[2]) - int(fr1_match[1]) + 1)
+                DATA[block_id][31] = cdr1_match[3]
+                DATA[block_id][32] = cdr1_match[4]
+                DATA[block_id][33] = cdr1_match[5]
+                DATA[block_id][34] = cdr1_match[6]
+                DATA[block_id][35] = cdr1_match[7]
+            except:
+                print(DATA[block_id][0])
+            
+            try:
+                ig_match = re.findall(r'\nFR2[^\n]+', cur_block)
+                fr2_match = ig_match[0]
+                fr2_match = fr2_match[1:]
+                fr2_match = fr2_match.split('\t')
+                DATA[block_id][36] = str(int(fr2_match[1]) - int(fr1_match[1]) + 1)
+                DATA[block_id][37] = str(int(fr2_match[2]) - int(fr1_match[1]) + 1)
+                DATA[block_id][38] = fr2_match[3]
+                DATA[block_id][39] = fr2_match[4]
+                DATA[block_id][40] = fr2_match[5]
+                DATA[block_id][41] = fr2_match[6]
+                DATA[block_id][42] = fr2_match[7]
+            except:
+                print(DATA[block_id][0])
+            try:
+                ig_match = re.findall(r'\nCDR2[^\n]+', cur_block)
+                cdr2_match = ig_match[0]
+                cdr2_match = cdr2_match[1:]
+                cdr2_match = cdr2_match.split('\t')
+                DATA[block_id][43] = str(int(cdr2_match[1]) - int(fr1_match[1]) + 1)
+                DATA[block_id][44] = str(int(cdr2_match[2]) - int(fr1_match[1]) + 1)
+                DATA[block_id][45] = cdr2_match[3]
+                DATA[block_id][46] = cdr2_match[4]
+                DATA[block_id][47] = cdr2_match[5]
+                DATA[block_id][48] = cdr2_match[6]
+                DATA[block_id][49] = cdr2_match[7]
+            except:
+                print(DATA[block_id][0])
+            
+            try:
+                ig_match = re.findall(r'\nFR3[^\n]+', cur_block)
+                fr3_match = ig_match[0]
+                fr3_match = fr3_match[1:]
+                fr3_match = fr3_match.split('\t')
+                DATA[block_id][50] = str(int(fr3_match[1]) - int(fr1_match[1]) + 1)
+                DATA[block_id][51] = str(int(fr3_match[2]) - int(fr1_match[1]) + 1)
+                DATA[block_id][52] = fr3_match[3]
+                DATA[block_id][53] = fr3_match[4]
+                DATA[block_id][54] = fr3_match[5]
+                DATA[block_id][55] = fr3_match[6]
+                DATA[block_id][56] = fr3_match[7]
+            except:
+                print(DATA[block_id][0])
 
             # import Alignment summary
-            ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
-            alignment = ig_match[0]
-            alignment = alignment[1:]
-            alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
-            DATA[block_id][58] = alignment
+            try:
+                ig_match = re.findall(r'\nAlignments[\n\S\s]+', cur_block)
+                alignment = ig_match[0]
+                alignment = alignment[1:]
+                alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
+                DATA[block_id][58] = alignment
+            except:
+                print(DATA[block_id][0])
 
             # get ORF info from alignment
             lines = alignment.split('\n')
