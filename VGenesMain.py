@@ -6410,7 +6410,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.ui.pushButtonBCR.setEnabled(False)
             self.ui.pushButtonTCR.setEnabled(False)
 
-
     def accept(self):
         num = self.ui.tabWidget.currentIndex()
 
@@ -6495,6 +6494,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
     def readBarcode(self, anno_path_name):
         # read annotation content
+        name_index = 17
         barcode_dict = {}
         if anno_path_name != "":
             csvFile = open(anno_path_name, "r")
@@ -6502,8 +6502,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             for item in reader:
                 # ignore header line
                 if reader.line_num == 1:
-                    continue
-                barcode_dict[item[17]] = item[0]
+                    name_index = item.index('raw_consensus_id')
+                barcode_dict[item[name_index]] = item[0]
             csvFile.close()
         return barcode_dict
 
@@ -28541,11 +28541,11 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
             FASTAline = FASTAline.replace('\n', '').replace('\r', '')
             if FASTAline[0] == '>':
                 #print(FASTAline)
-                SeqNamed  = FASTAline[1:]
+                SeqNamed = FASTAline[1:]
                 SeqNamed = SeqNamed.strip()
 
             else:
-                Sequence  = FASTAline
+                Sequence = FASTAline
                 if Sequence != '':
                     Sequences[SeqNamed] = Sequence
                 SeqNamed = ''
