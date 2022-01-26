@@ -140,11 +140,11 @@ def ProcessFASTA(FASTAfile, MaxNum):
 				if TotSeqs > MaxNum-1:
 					break
 		# need to write the last sequence into the FASTA file
-		SeqName = SeqNameParse(SeqName, 25)
+		SeqName = SeqNameParse(SeqName, 35)
 		CleanSeq += SeqName + '\n' + Sequence + '\n'
 		TotSeqs += 1
 
-	WorkingDir  = os.path.join(working_prefix, 'IgBlast')
+	WorkingDir = os.path.join(working_prefix, 'IgBlast')
 	os.chdir(WorkingDir)
 
 	workingfilename = os.path.join(working_prefix, 'IgBlast', 'WorkingFile.nt')
