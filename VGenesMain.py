@@ -1659,7 +1659,11 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
                     self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
                 else:
                     self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
-
+            
+            for IDs in FieldIDs:
+                if IDs > rows:
+                    Msg = 'Some fields in your config are not exist in current database!'
+                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def accept(self):
         # step 1: get file name
@@ -1763,6 +1767,8 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
                 currentfile.write(res_str)
 
         self.readConfig()
+        Msg = 'Your configuration has been saved as ' + config_name + '!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,QMessageBox.Ok)
         
 
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):

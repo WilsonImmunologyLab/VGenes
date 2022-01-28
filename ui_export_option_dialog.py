@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_ExportOptionDialog(object):
     def setupUi(self, ExportOptionDialog):
         ExportOptionDialog.setObjectName("ExportOptionDialog")
-        ExportOptionDialog.resize(504, 698)
+        ExportOptionDialog.resize(735, 698)
         self.gridLayout_3 = QtWidgets.QGridLayout(ExportOptionDialog)
         self.gridLayout_3.setObjectName("gridLayout_3")
         self.pushButtonRemember = QtWidgets.QPushButton(ExportOptionDialog)
