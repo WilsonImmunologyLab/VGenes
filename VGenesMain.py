@@ -64,6 +64,7 @@ from ui_Import_Dialogue import Ui_DialogImport
 # Import pairwise2 module
 from Bio import pairwise2
 from Bio.SubsMat import MatrixInfo as matlist
+#from Bio.Align import substitution_matrices
 
 global OldName
 global UpdateSpecific
@@ -3377,12 +3378,16 @@ class protein_slimlar_thread(QThread):
                 ## for each sequence, align with target sequence
                 if self.alignment_setting[0] == "blosum62":
                     matrix = matlist.blosum62
+                    #matrix = substitution_matrices.load('BLOSUM62')
                 elif self.alignment_setting[0] == "pam60":
                     matrix = matlist.pam60
+                    #matrix = substitution_matrices.load('PAM70')
                 elif self.alignment_setting[0] == "benner22":
                     matrix = matlist.benner22
+                    #matrix = substitution_matrices.load('BENNER22')
                 else:
                     matrix = matlist.blosum62
+                    #matrix = substitution_matrices.load('BLOSUM62')
                 gap_open = self.alignment_setting[1]
                 gap_extend = self.alignment_setting[2]
 
