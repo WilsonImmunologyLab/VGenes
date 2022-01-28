@@ -17797,7 +17797,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.modalessDeleteDialog.deleteSignal.connect(self.delRecordsFromDB)
             self.modalessDeleteDialog.show()
                         
-    def delRecordsFromDB(self, del_list):
+    def delRecordsFromDB(self, del_list, table):
         SQLStatement = ' FROM vgenesDB WHERE SeqName IN ("' + '","'.join(del_list) + '")'
         VGenesSQL.deleterecords(DBFilename, SQLStatement)
 
