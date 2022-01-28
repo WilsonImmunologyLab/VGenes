@@ -1602,11 +1602,15 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
 
         self.WHEREStatement = ''
         self.DBFilename = ''
+        self.preDefineConfig = {}
 
         self.ui.pushButtonExport.clicked.connect(self.accept)
         self.ui.pushButtonCancel.clicked.connect(self.reject)
         self.ui.checkBox.clicked.connect(self.checkAll)
         self.ui.pushButtonRemember.clicked.connect(self.remember)
+        self.ui.comboBox.currentTextChanged.connect(self.setConfig)
+
+        self.readConfig()
 
         if system() == 'Windows':
             # set style for windows
@@ -1627,6 +1631,35 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def readConfig(self):
+        config_file = os.path.join(working_prefix, 'Conf', 'pre_defined_export_option.txt')
+        ConfigNames = ['']
+        if os.path.exists(config_file):
+            with open(config_file, 'r') as currentfile:
+                lines = currentfile.readlines()
+                for line in lines:
+                    temp = line.split('#')
+                    if len(temp) == 2:
+                        self.preDefineConfig[temp[0]] = temp[1]
+                        ConfigNames.append(temp[0])
+        self.ui.comboBox.clear()
+        self.ui.comboBox.addItems(ConfigNames)
+
+    def setConfig(self):
+        cutSet = self.ui.comboBox.currentText()
+        if cutSet in self.preDefineConfig.keys():
+            FieldIDs = self.preDefineConfig[cutSet]
+            FieldIDs = FieldIDs.split(',')
+            FieldIDs = [int(i) for i in FieldIDs]
+
+            rows = self.ui.tableWidget.rowCount()
+            for row in range(0, rows):
+                if row in FieldIDs:
+                    self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
+                else:
+                    self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
+
 
     def accept(self):
         # step 1: get file name
@@ -1728,6 +1761,8 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         else:
             with open(config_file, 'w') as currentfile:
                 currentfile.write(res_str)
+
+        self.readConfig()
         
 
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
