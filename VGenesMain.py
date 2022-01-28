@@ -1610,6 +1610,7 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         self.ui.checkBox.clicked.connect(self.checkAll)
         self.ui.pushButtonRemember.clicked.connect(self.remember)
         self.ui.comboBox.currentTextChanged.connect(self.setConfig)
+        self.ui.pushButtonDelete.clicked.connect(self.deleteConfig)
 
         self.readConfig()
 
@@ -1633,9 +1634,24 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         else:
             pass
 
+    def deleteConfig(self):
+        cutSet = self.ui.comboBox.currentText()
+        if cutSet != '':
+            config_file = os.path.join(working_prefix, 'Conf', 'pre_defined_export_option.txt')
+            if os.path.exists(config_file):
+                with open(config_file, 'w') as currentfile:
+                    for config_name in self.preDefineConfig.keys():
+                        if config_name != cutSet:
+                            res_str = config_name + "#" + self.preDefineConfig[config_name] + "\n"
+                            currentfile.write(res_str)
+            self.readConfig()
+            Msg = 'Your configuration "' + cutSet + '" has been removed!'
+            QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
     def readConfig(self):
         config_file = os.path.join(working_prefix, 'Conf', 'pre_defined_export_option.txt')
         ConfigNames = ['']
+        self.preDefineConfig.clear()
         if os.path.exists(config_file):
             with open(config_file, 'r') as currentfile:
                 lines = currentfile.readlines()
@@ -1753,10 +1769,25 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         for row in range(0, rows):
             if self.ui.tableWidget.cellWidget(row, 0).isChecked():
                 fields.append(str(row))
+        if len(fields) == 0:
+            Msg = 'You did not check any field!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
         fields_str = ','.join(fields)
-        config_name = VGenesDialogues.setText(self, 'Please name your config (do not use "#" in your name)', 'Config1')
+        config_name = ''
+        config_name = VGenesDialogues.setText(self, 'Please name your config (do not use "#" in your name)','Config1')
         if config_name == 'Cancelled Action':
             return
+        if config_name in self.preDefineConfig:
+            GoodName = 0
+            while GoodName == 0:
+                config_name = VGenesDialogues.setText(self, 'The name is taken! Please name your config (do not use "#" in your name)',
+                                                      'Config1')
+                if config_name == 'Cancelled Action':
+                    return
+                if config_name not in self.preDefineConfig:
+                    GoodName = 1
         
         res_str = config_name + "#" + fields_str + "\n"
         config_file = os.path.join(working_prefix, 'Conf', 'pre_defined_export_option.txt')
