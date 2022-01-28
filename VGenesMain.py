@@ -1606,6 +1606,7 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         self.ui.pushButtonExport.clicked.connect(self.accept)
         self.ui.pushButtonCancel.clicked.connect(self.reject)
         self.ui.checkBox.clicked.connect(self.checkAll)
+        self.ui.pushButtonRemember.clicked.connect(self.remember)
 
         if system() == 'Windows':
             # set style for windows
@@ -1628,7 +1629,6 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
             pass
 
     def accept(self):
-        pass
         # step 1: get file name
         Pathname = saveFile(self.parent(), 'csv')
         if Pathname == None:
@@ -1708,6 +1708,27 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         else:
             for row in range(0, rows):
                 self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
+
+    def remember(self):
+        fields = []
+        rows = self.ui.tableWidget.rowCount()
+        for row in range(0, rows):
+            if self.ui.tableWidget.cellWidget(row, 0).isChecked():
+                fields.append(str(row))
+        fields_str = ','.join(fields)
+        config_name = VGenesDialogues.setText(self, 'Please name your config (do not use "#" in your name)', 'Config1')
+        if config_name == 'Cancelled Action':
+            return
+        
+        res_str = config_name + "#" + fields_str + "\n"
+        config_file = os.path.join(working_prefix, 'Conf', 'pre_defined_export_option.txt')
+        if os.path.exists(config_file):
+            with open(config_file, 'a') as currentfile:
+                currentfile.write(res_str)
+        else:
+            with open(config_file, 'w') as currentfile:
+                currentfile.write(res_str)
+        
 
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
     GibsonUpdateSelectionSignal = pyqtSignal(str)
