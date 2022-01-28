@@ -628,11 +628,13 @@ class HCLCDialog(QtWidgets.QDialog):
                                "QSpinBox{font-size:18px;}")
 
 class deleteDialog(QtWidgets.QDialog):
-    deleteSignal = pyqtSignal(list)
+    deleteSignal = pyqtSignal(list, str)
     def __init__(self):
         super(deleteDialog, self).__init__()
         self.ui = Ui_deleteDialog()
         self.ui.setupUi(self)
+        
+        self.table = ''
 
         self.ui.deleteButton.clicked.connect(self.accept)
         self.ui.cancelButton.clicked.connect(self.reject)
@@ -666,7 +668,7 @@ class deleteDialog(QtWidgets.QDialog):
             del_list = []
             for item in selItems:
                 del_list.append(item.text())
-            self.deleteSignal.emit(del_list)
+            self.deleteSignal.emit(del_list, self.table)
             self.close()
         else:
             self.reject()
@@ -10215,35 +10217,63 @@ class VGenesForm(QtWidgets.QMainWindow):
             print('wrong in delete these!')
 
     def deleteBatch(self):
-        if self.ui.tableWidgetHC.rowCount() > 0:
-            self.open_delete_dialog()
+        if self.ui.tableWidgetHC.hasFocus():
+            if self.ui.tableWidgetHC.rowCount() > 0:
+                self.open_delete_dialog('HC')
+        elif self.ui.tableWidgetLC.hasFocus():
+            if self.ui.tableWidgetLC.rowCount() > 0:
+                self.open_delete_dialog('LC')
+        else:
+            if self.ui.tableWidgetHC.rowCount() > 0:
+                self.open_delete_dialog('HC')
 
-    def open_delete_dialog(self):
+    def open_delete_dialog(self, table):
         list = []
-        for index in range(self.ui.tableWidgetHC.rowCount()):
-            name = self.ui.tableWidgetHC.item(index, 0).text()
-            list.append(name)
+        if table == 'HC':
+            for index in range(self.ui.tableWidgetHC.rowCount()):
+                name = self.ui.tableWidgetHC.item(index, 0).text()
+                list.append(name)
+        elif table == 'LC':
+            for index in range(self.ui.tableWidgetLC.rowCount()):
+                name = self.ui.tableWidgetLC.item(index, 0).text()
+                list.append(name)
+        else:
+            return
 
         self.modalessDeleteDialog = deleteDialog()
+        self.modalessDeleteDialog.table = table
         self.modalessDeleteDialog.ui.listWidget.addItems(list)
         self.modalessDeleteDialog.deleteSignal.connect(self.delRecords)
         self.modalessDeleteDialog.show()
 
-    def delRecords(self, del_list):
-        row_index_list = list(range(self.ui.tableWidgetHC.rowCount()))
-        row_index_list.reverse()
-        for index in row_index_list:
-            name = self.ui.tableWidgetHC.item(index, 0).text()
-            barcode = self.ui.tableWidgetHC.item(index, 8).text()
-            if name in del_list:
-                # delete in HC
-                try:
-                    self.AntibodyCandidates.remove(name)
-                except:
-                    print('opppppps!')
-                self.ui.tableWidgetHC.removeRow(index)
+    def delRecords(self, del_list, table):
+        if table == 'HC':
+            row_index_list = list(range(self.ui.tableWidgetHC.rowCount()))
+            row_index_list.reverse()
+            for index in row_index_list:
+                name = self.ui.tableWidgetHC.item(index, 0).text()
+                barcode = self.ui.tableWidgetHC.item(index, 8).text()
+                if name in del_list:
+                    # delete in HC
+                    try:
+                        self.AntibodyCandidates.remove(name)
+                    except:
+                        print('opppppps!')
+                    self.ui.tableWidgetHC.removeRow(index)
+        elif table == 'LC':
+            row_index_list = list(range(self.ui.tableWidgetLC.rowCount()))
+            row_index_list.reverse()
+            for index in row_index_list:
+                name = self.ui.tableWidgetLC.item(index, 0).text()
+                if name in del_list:
+                    # delete in LC
+                    try:
+                        self.AntibodyCandidates.remove(name)
+                    except:
+                        print('opppppps!')
+                    self.ui.tableWidgetLC.removeRow(index)
                 # delete LC
-                LC_row_index_list = list(range(self.ui.tableWidgetLC.rowCount()))
+                '''LC_row_index_list = list(range(self.ui.tableWidgetLC.rowCount()))
                 LC_row_index_list.reverse()
                 for LC_index in LC_row_index_list:
                     if barcode == self.ui.tableWidgetLC.item(LC_index, 7).text():
@@ -10252,7 +10282,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                             self.AntibodyCandidates.remove(name)
                         except:
                             print('opppppps!')
-                        self.ui.tableWidgetLC.removeRow(LC_index)
+                        self.ui.tableWidgetLC.removeRow(LC_index)'''
 
 
     def matchSelection(self, row, col):
