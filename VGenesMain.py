@@ -5436,6 +5436,25 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
             self.refreshDBSignal.emit()
             self.hide()
         '''
+        # check new column names with old names make sure there is no Conflict
+        num_col = self.ui.tableWidget.columnCount()
+        new_cols = []
+        for col in range(num_col):
+            my_widget = self.ui.tableWidget.cellWidget(0, col)
+            if my_widget.currentText() != "":
+                new_cols.append(my_widget.currentText())
+        
+        unique_cols = dict(Counter(new_cols))
+        repeat_cols = [key for key,value in unique_cols.items() if value > 1]
+
+        ErrMessage = ''
+        if len(repeat_cols) > 0:
+            ErrMessage = "Found duplicate column names:\n" + "\n".join(repeat_cols)
+
+        if ErrMessage != "":
+            QMessageBox.warning(self, 'Warning', ErrMessage, QMessageBox.Ok,QMessageBox.Ok)
+            return
+
         # try multi-thread
         self.workThread = annotate_thread(self)
         self.workThread.dialog = self
