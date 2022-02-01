@@ -5269,6 +5269,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
         self.ui.pushButtonCancel.clicked.connect(self.reject)
         self.ui.radioButton.clicked.connect(self.switchHeader)
         self.ui.pushButtonOK.clicked.connect(self.accept)
+        self.ui.pushButtonCopyName.clicked.connect(self.copyName)
 
         if system() == 'Windows':
             # set style for windows
@@ -5289,6 +5290,25 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def copyName(self):
+        num_col = self.ui.tableWidget.columnCount()
+        num_row = self.ui.tableWidget.rowCount()
+        header = self.header
+        anchor_field = self.ui.comboBox.currentText()
+        target_field = self.ui.comboBox2.currentText()
+        target_field = re.sub(r'\s.+', '', target_field)
+        anchor_col_index = header.index(anchor_field)
+        for col in range(num_col):
+            if col == anchor_col_index:
+                continue
+            my_widget = self.ui.tableWidget.cellWidget(0, col)
+            if my_widget.currentText() == "":
+                my_widget.setEditText(header[col])
+
+        Msg = 'We filled all empty fields with names pre-defiend in CSV!\nYou still can edit them!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
 
     def progressLabel(self, pct, label):
         try:

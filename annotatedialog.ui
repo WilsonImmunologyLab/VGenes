@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
+    <width>885</width>
     <height>652</height>
    </rect>
   </property>
@@ -137,6 +137,13 @@
      </property>
      <property name="autoExclusive">
       <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="2" colspan="2">
+    <widget class="QPushButton" name="pushButtonCopyName">
+     <property name="text">
+      <string>Use field names in my CSV</string>
      </property>
     </widget>
    </item>
