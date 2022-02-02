@@ -98,6 +98,7 @@ from ui_export_option_dialog import Ui_ExportOptionDialog
 from ui_ProteinSimilarDialog import Ui_ProteinSimilarDialog
 from ui_ProteinSimilarResultDialog import Ui_ProteinSimilarResultDialog
 from ui_Qchart_dialog import Ui_QchartDialog
+from ui_CloneOptiondialog import Ui_CloneOptionDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -451,6 +452,46 @@ class HCLC_thread(QThread):
 
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
+
+class CloneOptionDialog(QtWidgets.QDialog):
+    optionSignal = pyqtSignal(int)
+    def __init__(self):
+        super(CloneOptionDialog, self).__init__()
+        self.ui = Ui_CloneOptionDialog()
+        self.ui.setupUi(self)
+
+        self.ui.pushButtonCloneMethod1.clicked.connect(self.option1)
+        self.ui.pushButtonCloneMethod2.clicked.connect(self.option2)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def option1(self):
+        self.optionSignal.emit(1)
+        self.close()
+    
+    def option2(self):
+        self.optionSignal.emit(2)
+        self.close()
 
 class RenameDialog(QtWidgets.QDialog):
     def __init__(self):
@@ -18260,6 +18301,20 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionFind_Clonal_triggered(self):
+        self.myDialog = CloneOptionDialog()
+        self.myDialog.optionSignal.connect(self.cloneOptionHandle)
+        self.myDialog.show()
+        
+    def cloneOptionHandle(self, signal):    
+        if signal == 1:
+            self.ConventionalCloneIdentification()
+        else:
+            self.ClusteringCloneIdentification()
+
+    def ClusteringCloneIdentification(self):
+        print('QQQQ')
+    
+    def ConventionalCloneIdentification(self):
         global updateMarker
         from operator import itemgetter
         import itertools
