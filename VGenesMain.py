@@ -59,6 +59,7 @@ import zipfile
 from tempfile import TemporaryDirectory
 
 import VGenesCloneCaller
+import MakeDb
 from ui_Import_Dialogue import Ui_DialogImport
 
 # Import pairwise2 module
@@ -3094,6 +3095,64 @@ class Clone_thread(QThread):
             updateMarker == True
 
         Vgenes.initial_Clone()
+
+        sign = 0
+        Msg = 'Successfully identified clones!'
+        self.Clone_finish.emit([sign, Msg])
+
+class CloneChangeO_thread(QThread):
+    Clone_progress = pyqtSignal(int, str)
+    Clone_finish = pyqtSignal(list)
+
+    def __int__(self, parent=None):
+        super(CloneChangeO_thread, self).__init__(parent)
+        self.data = []
+        self.species = ''
+
+    def run(self):
+        data = self.data
+        #species = self.species
+        # step 1: make fasta
+        self.Clone_progress.emit(5,'Fetching data...')
+
+        time_stamp = str(int(time.time() * 100))
+        seq_pathname = os.path.join(temp_folder, time_stamp + '.fasta')
+        #if checkATCG(data[0][2]) == True:
+        #    seq_index = 2
+        #else:
+        #    seq_index = 1
+        seq_index = 2
+        with open(seq_pathname, 'w') as currentfile:
+            for row in data:
+                currentfile.write('>' + row[0] + '\n')
+                currentfile.write(row[seq_index] + '\n')
+
+        # step 2: run IgBlast, outfmt 7
+        self.Clone_progress.emit(20, 'Running IgBlast ...')
+        igblast_res_pathname = os.path.join(temp_folder, time_stamp + '.fmt7')
+        workingdir = os.path.join(working_prefix, 'IgBlast')
+        os.chdir(workingdir)
+        #if species == 'Human':
+        BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/human_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        #elif species == 'Mouse':
+        #    BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/mouse_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        IgBlastOut = os.popen(BLASTCommandLine)
+        # step 3: make DB
+        self.Clone_progress.emit(40, 'Parsing IgBlast results...')
+        os.chdir(temp_folder)
+        igblast_db_pathname = os.path.join(temp_folder, time_stamp + '_db-pass.tsv')
+        cmd = 'MakeDb.py igblast -i ' + igblast_res_pathname + ' -s ' + seq_pathname + ' -r ../IgBlast/IG/Human/HumanVGenes.fasta ../IgBlast/IG/Human/HumanDGenes.fasta ../IgBlast/IG/Human/HumanJGenes.fasta --extended'
+        os.system(cmd)
+        #out = MakeDb.parseIgBLAST(aligner_file = igblast_res_pathname, seq_file = seq_pathname,
+        #                          repo = '../IgBlast/IG/Human/HumanVGenes.fasta ../IgBlast/IG/Human/HumanDGenes.fasta ../IgBlast/IG/Human/HumanJGenes.fasta',
+        #                          extended = True, asis_id = False, out_file = igblast_db_pathname)
+        aa = 1
+        # step 4: identify clones
+        self.Clone_progress.emit(60, 'Identifying clones...')
+        igblast_db_pathname = os.path.join(temp_folder, time_stamp + '_db-pass.tsv')
+
+        # step 5: load results to vgenes
+        self.Clone_progress.emit(80, 'Parsing clonal identification results...')
 
         sign = 0
         Msg = 'Successfully identified clones!'
@@ -18312,8 +18371,28 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.ClusteringCloneIdentification()
 
     def ClusteringCloneIdentification(self):
-        print('QQQQ')
-    
+        # if sequence selected
+        WhereStatement = '1'
+        if len(self.CheckedRecords) == 0:
+            msg = 'You did not selected any records, will identify clones from the entir dataset!'
+            QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+            WhereStatement = ' WHERE 1'
+        else:
+            WhereStatement = ' WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
+        
+        # fetch sequence
+        SQLStatement = 'SELECT SeqName, Sequence, Blank20 FROM vgenesDB' + WhereStatement
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        self.clone_Thread = CloneChangeO_thread(self)
+        self.clone_Thread.data = DataIs
+        self.clone_Thread.Clone_progress.connect(self.progressLabel)
+        self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
+        self.clone_Thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
     def ConventionalCloneIdentification(self):
         global updateMarker
         from operator import itemgetter
