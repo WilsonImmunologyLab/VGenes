@@ -501,11 +501,24 @@ class ChangeODialog(QtWidgets.QDialog):
                 return
             else:
                 # update the VGenes DB
-                pass
+                resDict = {}
+                for record in parseRes:
+                    if record[1] in resDict:
+                        resDict[record[1]].append(record[0])
+                    else:
+                        resDict[record[1]] = [record[0]]
+                
+                for key,value in resDict.items():
+                    SQLStatement = 'UPDATE vgenesDB SET ClonalPool= "' + str(key) + '" WHERE SeqName IN ("' + '","'.join(value) + '")'
+                    print(SQLStatement)
+                    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                
+                Msg = 'ChangeO result has been imported!'
+                QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                self.close()
 
     def changeOrun(self):
         self.changeOSignal.emit(2)
-
 
 class CloneOptionDialog(QtWidgets.QDialog):
     optionSignal = pyqtSignal(int)
@@ -34388,7 +34401,7 @@ def parseChangeOoutput(file):
         cloneDict = Counter(cloneIDs)
         for record in Result:
             if cloneDict[record[1]] < 2:
-                record[1] = 0
+                record[1] = '0'
         return Err, Result
 
 def logoColorSchemeAA(colorOption):
