@@ -3157,7 +3157,7 @@ class CloneChangeOIgBlast_thread(QThread):
 
     def run(self):
         data = self.data
-        #species = self.species
+        species = data[0][3]
         # step 1: make fasta
         self.Clone_progress.emit(20,'Fetching data...')
 
@@ -3178,10 +3178,10 @@ class CloneChangeOIgBlast_thread(QThread):
         igblast_res_pathname = self.file
         workingdir = os.path.join(working_prefix, 'IgBlast')
         os.chdir(workingdir)
-        #if species == 'Human':
-        BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/human_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
-        #elif species == 'Mouse':
-        #    BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/mouse_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        if species == 'Human':
+            BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/human_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        elif species == 'Mouse':
+            BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/mouse_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
         IgBlastOut = os.popen(BLASTCommandLine)
 
         sign = 0
@@ -3199,7 +3199,7 @@ class CloneChangeO_thread(QThread):
 
     def run(self):
         data = self.data
-        #species = self.species
+        species = data[0][3]
         # step 1: make fasta
         self.Clone_progress.emit(5,'Fetching data...')
 
@@ -3220,10 +3220,10 @@ class CloneChangeO_thread(QThread):
         igblast_res_pathname = os.path.join(temp_folder, time_stamp + '.fmt7')
         workingdir = os.path.join(working_prefix, 'IgBlast')
         os.chdir(workingdir)
-        #if species == 'Human':
-        BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/human_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
-        #elif species == 'Mouse':
-        #    BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/mouse_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        if species == 'Human':
+            BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/human_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        elif species == 'Mouse':
+            BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/mouse_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
         IgBlastOut = os.popen(BLASTCommandLine)
         # step 3: make DB
         self.Clone_progress.emit(40, 'Parsing IgBlast results...')
@@ -18471,7 +18471,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             WhereStatement = ' WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
         
         # fetch sequence
-        SQLStatement = 'SELECT SeqName, Sequence, Blank20 FROM vgenesDB' + WhereStatement
+        SQLStatement = 'SELECT SeqName, Sequence, Blank20, Species FROM vgenesDB' + WhereStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         if signal_int == 1:
