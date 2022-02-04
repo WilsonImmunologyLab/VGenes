@@ -59,17 +59,18 @@ def saveFile(self, typeSave):
         filenamed = filenamed + filename
         queryIs = filenamed + '_Merged'
         FileTypes  = "fastq Files (*.fastq);;fq Files (*.fq);;All Files (*)"
-
     elif typeSave == 'seq':
         queryIs = "Sequence " + time.strftime('%c')
         FileTypes  = "All Files (*);;Seq Files (*.seq);;Text Files (*.txt)"
-    elif typeSave == 'csv' or 'CSV':
+    elif typeSave == 'csv' or typeSave == 'CSV':
         queryIs = "CSV " + time.strftime('%c')
         FileTypes  = "comma separated values (*.csv);;All Files (*)"
     elif typeSave == 'text':
-
         queryIs = "Text: " + time.strftime('%c')
         FileTypes  = "text (*.txt);;All Files (*)"
+    elif typeSave == 'fmt7':
+        queryIs = "Text: " + time.strftime('%c')
+        FileTypes  = "IgBlast output (*.fmt7);;All Files (*)"
 
 
     # options |= QtWidgets.QFileDialog.DontUseNativeDialog

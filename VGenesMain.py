@@ -18475,7 +18475,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         if signal_int == 1:
-            output_path = saveFile(self, 'text')
+            output_path = saveFile(self, 'fmt7')
             if output_path == '' or output_path == None:
                 return
             self.clone_Thread = CloneChangeOIgBlast_thread(self)
