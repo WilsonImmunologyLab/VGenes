@@ -456,7 +456,7 @@ class HCLC_thread(QThread):
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
 
 class ChangeODialog(QtWidgets.QDialog):
-    changeOSignal = pyqtSignal()
+    changeOSignal = pyqtSignal(int)
 
     def __init__(self):
         super(ChangeODialog, self).__init__()
@@ -490,13 +490,13 @@ class ChangeODialog(QtWidgets.QDialog):
                                "QSpinBox{font-size:18px;}")
 
     def changeOsetp1(self):
-        pass
+        self.changeOSignal.emit(1)
 
     def changeOsetp3(self):
         pass
 
     def changeOrun(self):
-        pass
+        self.changeOSignal.emit(2)
 
 
 class CloneOptionDialog(QtWidgets.QDialog):
@@ -3143,6 +3143,49 @@ class Clone_thread(QThread):
 
         sign = 0
         Msg = 'Successfully identified clones!'
+        self.Clone_finish.emit([sign, Msg])
+
+class CloneChangeOIgBlast_thread(QThread):
+    Clone_progress = pyqtSignal(int, str)
+    Clone_finish = pyqtSignal(list)
+
+    def __int__(self, parent=None):
+        super(CloneChangeOIgBlast_thread, self).__init__(parent)
+        self.data = []
+        self.file = ''
+        self.species = ''
+
+    def run(self):
+        data = self.data
+        #species = self.species
+        # step 1: make fasta
+        self.Clone_progress.emit(20,'Fetching data...')
+
+        time_stamp = str(int(time.time() * 100))
+        seq_pathname = os.path.join(temp_folder, time_stamp + '.fasta')
+        #if checkATCG(data[0][2]) == True:
+        #    seq_index = 2
+        #else:
+        #    seq_index = 1
+        seq_index = 2
+        with open(seq_pathname, 'w') as currentfile:
+            for row in data:
+                currentfile.write('>' + row[0] + '\n')
+                currentfile.write(row[seq_index] + '\n')
+
+        # step 2: run IgBlast, outfmt 7
+        self.Clone_progress.emit(40, 'Running IgBlast ...')
+        igblast_res_pathname = self.file
+        workingdir = os.path.join(working_prefix, 'IgBlast')
+        os.chdir(workingdir)
+        #if species == 'Human':
+        BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/human_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        #elif species == 'Mouse':
+        #    BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -ig_seqtype Ig -query " + seq_pathname + " -auxiliary_data optional_file/mouse_gl.aux -outfmt '7 std qseq sseq btop' -out " + igblast_res_pathname
+        IgBlastOut = os.popen(BLASTCommandLine)
+
+        sign = 0
+        Msg = 'Successfully finished IgBlast, the results has been saved!'
         self.Clone_finish.emit([sign, Msg])
 
 class CloneChangeO_thread(QThread):
@@ -18417,7 +18460,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.myDialog.changeOSignal.connect(self.ClusteringCloneIdentification)
             self.myDialog.show()
 
-    def ClusteringCloneIdentification(self):
+    def ClusteringCloneIdentification(self, signal_int):
         # if sequence selected
         WhereStatement = '1'
         if len(self.CheckedRecords) == 0:
@@ -18431,11 +18474,22 @@ class VGenesForm(QtWidgets.QMainWindow):
         SQLStatement = 'SELECT SeqName, Sequence, Blank20 FROM vgenesDB' + WhereStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-        self.clone_Thread = CloneChangeO_thread(self)
-        self.clone_Thread.data = DataIs
-        self.clone_Thread.Clone_progress.connect(self.progressLabel)
-        self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
-        self.clone_Thread.start()
+        if signal_int == 1:
+            output_path = saveFile(self, 'text')
+            if output_path == '' or output_path == None:
+                return
+            self.clone_Thread = CloneChangeOIgBlast_thread(self)
+            self.clone_Thread.data = DataIs
+            self.clone_Thread.file = output_path
+            self.clone_Thread.Clone_progress.connect(self.progressLabel)
+            self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
+            self.clone_Thread.start()
+        else:
+            self.clone_Thread = CloneChangeO_thread(self)
+            self.clone_Thread.data = DataIs
+            self.clone_Thread.Clone_progress.connect(self.progressLabel)
+            self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
+            self.clone_Thread.start()
 
         self.progress = ProgressBar(self)
         self.progress.show()
