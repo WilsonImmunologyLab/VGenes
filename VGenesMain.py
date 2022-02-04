@@ -13359,7 +13359,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             return
 
         #listItems = self.getTreeCheckedChild()
-        listItems = self.CheckedRecordslistItems[3]
+        listItems = self.CheckedRecords
         WhereState = ''
         NumSeqs = len(listItems)
         # if not listItems: do nothing
