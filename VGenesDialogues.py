@@ -108,6 +108,9 @@ def openFile(self, typeOpen):
     elif typeOpen == 'All':
         queryIs = "All file types"
         FileTypes  = "All Files (*);;"
+    elif typeOpen == 'Tsv':
+        queryIs = "Open a Tab Separated Values file"
+        FileTypes  = "TSV Files (*.tsv);;All Files (*);;"
 
     options = QtWidgets.QFileDialog.Options()
 

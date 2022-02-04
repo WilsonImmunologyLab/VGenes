@@ -493,7 +493,15 @@ class ChangeODialog(QtWidgets.QDialog):
         self.changeOSignal.emit(1)
 
     def changeOsetp3(self):
-        pass
+        res_file = openFile(self, 'Tsv')
+        if os.path.isfile(res_file):
+            Err, parseRes = parseChangeOoutput(res_file)
+            if Err == 1:
+                QMessageBox.warning(self, 'Warning', parseRes, QMessageBox.Ok, QMessageBox.Ok)
+                return
+            else:
+                # update the VGenes DB
+                pass
 
     def changeOrun(self):
         self.changeOSignal.emit(2)
@@ -3163,11 +3171,10 @@ class CloneChangeOIgBlast_thread(QThread):
 
         time_stamp = str(int(time.time() * 100))
         seq_pathname = os.path.join(temp_folder, time_stamp + '.fasta')
-        #if checkATCG(data[0][2]) == True:
-        #    seq_index = 2
-        #else:
-        #    seq_index = 1
-        seq_index = 2
+        if checkATCG(data[0][2]) == True:
+            seq_index = 2
+        else:
+            seq_index = 1
         with open(seq_pathname, 'w') as currentfile:
             for row in data:
                 currentfile.write('>' + row[0] + '\n')
@@ -3205,11 +3212,10 @@ class CloneChangeO_thread(QThread):
 
         time_stamp = str(int(time.time() * 100))
         seq_pathname = os.path.join(temp_folder, time_stamp + '.fasta')
-        #if checkATCG(data[0][2]) == True:
-        #    seq_index = 2
-        #else:
-        #    seq_index = 1
-        seq_index = 2
+        if checkATCG(data[0][2]) == True:
+            seq_index = 2
+        else:
+            seq_index = 1
         with open(seq_pathname, 'w') as currentfile:
             for row in data:
                 currentfile.write('>' + row[0] + '\n')
@@ -34343,6 +34349,48 @@ def makeProteinHTML(dataArray, index, scale, highLight):
     out_str += '</div>\n'
     return out_str
 
+def parseChangeOoutput(file):
+    name_index = 0
+    clone_index = 48
+    line_index = 0
+    Err = 0
+    ErrMsg = 'Please double check your input file, make sure it is the ourput of ChangeO DefineClones.py!\n'
+    Result = []
+    cloneIDs = []
+    # read file
+    with open(file, 'r') as readfile:
+        for line in readfile:
+            line = re.sub(r'[\r\n]', '', line)
+            if line_index == 0:
+                tmp_list = line.split('\t')
+                try:
+                    name_index = tmp_list.index('sequence_id')
+                except:
+                    ErrMsg += "Can not find sequence_id information from your file!\n"
+                    Err = 1
+                try:
+                    clone_index = tmp_list.index('clone_id')
+                except:
+                    ErrMsg += "Can not find clone_id information from your file!\n"
+                    Err = 1
+                if Err == 1:
+                    break
+            else:
+                tmp_list = line.split('\t')
+                Result.append([tmp_list[name_index], tmp_list[clone_index]])
+                cloneIDs.append(tmp_list[clone_index])
+            
+            line_index += 1
+    # return results
+    if Err == 1:
+        return Err, ErrMsg
+    else:
+        cloneDict = Counter(cloneIDs)
+        for record in Result:
+            if cloneDict[record[1]] < 2:
+                record[1] = 0
+        return Err, Result
+
 def logoColorSchemeAA(colorOption):
     protein_alphabet = Alphabet('ACDEFGHIKLMNOPQRSTUVWYBJZX*-adefghiklmnopqrstuvwybjzx', [])
     if colorOption == 'Hydrophobicity':
@@ -34394,6 +34442,16 @@ def logoColorSchemeNT(colorOption):
         colorscheme = 'default'
 
     return colorscheme
+
+def checkATCG(sequence):
+    if len(sequence) > 0:
+        residue = re.sub(r'[ATCG]','',sequence)
+        if len(residue) > 0:
+            return False
+        else:
+            return True
+    else:
+        return False
 
 async def get_json_data(url: str) -> dict:
     async with ClientSession(connector=TCPConnector(ssl=False)) as session:
