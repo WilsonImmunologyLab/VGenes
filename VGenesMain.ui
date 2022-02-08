@@ -890,7 +890,7 @@
          </layout>
         </widget>
        </item>
-       <item row="0" column="1" rowspan="2">
+       <item row="0" column="1">
         <layout class="QVBoxLayout" name="verticalLayout_12">
          <item>
           <widget class="QRadioButton" name="rdoAll">
@@ -916,6 +916,32 @@
           </widget>
          </item>
         </layout>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="pushButtonUserList">
+         <property name="maximumSize">
+          <size>
+           <width>60</width>
+           <height>60</height>
+          </size>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/computer_mouse.png</normaloff>:/PNG-Icons/computer_mouse.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>40</width>
+           <height>40</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -1510,8 +1536,8 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>0</y>
-             <width>1226</width>
+             <y>-176</y>
+             <width>1211</width>
              <height>821</height>
             </rect>
            </property>
@@ -4560,8 +4586,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1226</width>
-             <height>750</height>
+             <width>1211</width>
+             <height>747</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_56">
@@ -6481,7 +6507,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1226</width>
+             <width>1211</width>
              <height>911</height>
             </rect>
            </property>
@@ -7825,7 +7851,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>6</number>
+           <number>0</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -12377,8 +12403,8 @@ If the J-end is off the J gene end may need adjusted</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

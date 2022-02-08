@@ -101,6 +101,7 @@ from ui_ProteinSimilarResultDialog import Ui_ProteinSimilarResultDialog
 from ui_Qchart_dialog import Ui_QchartDialog
 from ui_CloneOptiondialog import Ui_CloneOptionDialog
 from ui_ChangeOdialog import Ui_ChangeODialog
+from ui_UserListDialog import Ui_UserListDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -454,6 +455,62 @@ class HCLC_thread(QThread):
 
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
+
+class UserListDialog(QtWidgets.QDialog):
+    BatchSignal = pyqtSignal(list)
+
+    def __init__(self):
+        super(UserListDialog, self).__init__()
+        self.ui = Ui_UserListDialog()
+        self.ui.setupUi(self)
+
+        self.ui.pushButtonLocate.clicked.connect(self.locate)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def locate(self):
+        # process the field names
+        field_name = self.ui.comboBox.currentText()
+        if field_name == '':
+            Msg = 'Please specify the field!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        field_name = re.sub(r'\(.+','',field_name)
+        # process the values
+        bigText = self.ui.textEdit.toPlainText()
+        bigText = re.sub(r'[\r\n\s\t]$','',bigText)
+        tmp_list = bigText.split('\n')
+        # search from SQL DB
+        WHEREStatement = 'WHERE ' + field_name + ' IN ("' + '","'.join(tmp_list) + '")'
+        SQLStatement = 'SELECT SeqName FROM vgenesDB ' + WHEREStatement
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        if len(DataIn) == 0:
+            Msg = 'No records found in your list! Check values in your list, or the field name!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        # send result out
+        selected_list = [i[0] for i in DataIn]
+        self.BatchSignal.emit(selected_list)
 
 class ChangeODialog(QtWidgets.QDialog):
     changeOSignal = pyqtSignal(int)
@@ -1910,7 +1967,6 @@ class ExportOptionDialog(QtWidgets.QDialog, Ui_ExportOptionDialog):
         Msg = 'Your configuration has been saved as ' + config_name + '!'
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok,QMessageBox.Ok)
         
-
 class GibsonDialog(QtWidgets.QDialog, Ui_GibsonDialog):
     GibsonUpdateSelectionSignal = pyqtSignal(str)
     LogFileSignal = pyqtSignal(str)
@@ -4134,7 +4190,6 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         self.chartview.setChart(chart)
         self.chartview.chart().zoom(0.9)
-
 
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
@@ -9391,6 +9446,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.tabWidgetClone.currentChanged['int'].connect(self.updateUIclone)
         self.ui.rdoAll.clicked.connect(self.on_cboFindField_currentTextChanged)
         self.ui.rdoLocal.clicked.connect(self.on_cboFindField_currentTextChanged)
+        self.ui.pushButtonUserList.clicked.connect(self.openUserList)
         # self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
         # self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -9474,6 +9530,13 @@ class VGenesForm(QtWidgets.QMainWindow):
                                "QSpinBox{font-size:18px;}")
         else:
             pass
+
+    def openUserList(self):
+        self.myUserListDialog = UserListDialog()
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myUserListDialog.ui.comboBox.addItems(fields_name)
+        self.myUserListDialog.BatchSignal.connect(self.updateSelectionFromDialog)
+        self.myUserListDialog.show()
 
     def ShowProteinSimilarResults(self, result):
         ScoreRank = result[1]
