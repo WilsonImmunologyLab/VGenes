@@ -102,6 +102,7 @@ from ui_Qchart_dialog import Ui_QchartDialog
 from ui_CloneOptiondialog import Ui_CloneOptionDialog
 from ui_ChangeOdialog import Ui_ChangeODialog
 from ui_UserListDialog import Ui_UserListDialog
+from ui_MarkRecordsDialog import Ui_MarkRecordsDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -455,6 +456,56 @@ class HCLC_thread(QThread):
 
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
+
+class MarkRecordsDialog(QtWidgets.QDialog):
+    BatchSignal = pyqtSignal(str, str)
+
+    def __init__(self):
+        super(MarkRecordsDialog, self).__init__()
+        self.ui = Ui_MarkRecordsDialog()
+        self.ui.setupUi(self)
+
+        self.ui.pushButtonConfirm.clicked.connect(self.accept)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def accept(self):
+        # process the field names
+        field_name = self.ui.comboBox.currentText()
+        if field_name == '':
+            Msg = 'Please specify the field!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        field_name = re.sub(r'\(.+','',field_name)
+        # process the values
+        bigText = self.ui.lineEdit.text()
+        bigText = re.sub(r'[\r\n\s\t]$','',bigText)
+        if bigText == '':
+            Msg = 'The Value is empty!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        # send result out
+        self.BatchSignal.emit(field_name, bigText)
 
 class UserListDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(list)
@@ -9422,6 +9473,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.listWidgetAll.itemDoubleClicked.connect(self.addFieldsHeatmap)
         self.ui.listWidgetSelected.itemDoubleClicked.connect(self.delFieldsHeatmap)
         self.ui.pushButtonClear.clicked.connect(self.clearCheck)
+        self.ui.pushButtonMark.clicked.connect(self.markRecords)
         self.ui.radioButtonPNG.clicked.connect(self.setupPNG)
         self.ui.tabWidgetFig.currentChanged['int'].connect(self.disablePNG)
         self.ui.comboBoxTree.currentTextChanged.connect(self.updateCloneTreeInfo)
@@ -9530,6 +9582,27 @@ class VGenesForm(QtWidgets.QMainWindow):
                                "QSpinBox{font-size:18px;}")
         else:
             pass
+
+    def markRecords(self):
+        if len(self.CheckedRecords) == 0:
+            Msg = 'You have not checked any records yet!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        self.myMarkRecordsDialog = MarkRecordsDialog()
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myMarkRecordsDialog.ui.comboBox.addItems(fields_name)
+        self.myMarkRecordsDialog.ui.lcdNumber.display(len(self.CheckedRecords))
+        self.myMarkRecordsDialog.BatchSignal.connect(self.updateValueForSelection)
+        self.myMarkRecordsDialog.show()
+
+    def updateValueForSelection(self, filed_name, given_value):
+        WHEREStatement = 'WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
+        SQLStatement = 'UPDATE vgenesDB SET ' + filed_name + ' = "' + given_value + '" ' + WHEREStatement
+        VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+        Msg = 'Records updated successfully!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def openUserList(self):
         self.myUserListDialog = UserListDialog()

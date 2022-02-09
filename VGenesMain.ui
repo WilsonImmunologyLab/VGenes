@@ -1005,6 +1005,12 @@
       <layout class="QGridLayout" name="gridLayout_11">
        <item row="1" column="1">
         <widget class="QPushButton" name="btnUpdateTree">
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <property name="text">
           <string>Update tree</string>
          </property>
@@ -1035,6 +1041,15 @@
        </item>
        <item row="1" column="0">
         <widget class="QCheckBox" name="checkBoxAll1">
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="layoutDirection">
+          <enum>Qt::LeftToRight</enum>
+         </property>
          <property name="text">
           <string>Check All</string>
          </property>
@@ -1062,6 +1077,12 @@
        </item>
        <item row="2" column="1">
         <widget class="QPushButton" name="pushButtonClear">
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <property name="text">
           <string>Clear Check</string>
          </property>
@@ -1074,6 +1095,26 @@
            <width>18</width>
            <height>18</height>
           </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButtonMark">
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Quick mark</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/comment.png</normaloff>:/PNG-Icons/comment.png</iconset>
          </property>
          <property name="flat">
           <bool>true</bool>
