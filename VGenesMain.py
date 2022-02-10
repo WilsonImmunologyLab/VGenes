@@ -20913,7 +20913,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         SHM_STAT_res = []
         for record in DataIn:
             try:
-                detail_shm_s, detail_shm_nons = self.MutationalAnalysis(record[1])
+                detail_shm_s, detail_shm_nons = MutationalAnalysis(record[1])
                 stat_s = self.SHM_STAT(detail_shm_s)
                 stat_nons = self.SHM_STAT(detail_shm_nons)
                 stat = [record[0]] + stat_s + stat_nons
@@ -20957,86 +20957,6 @@ class VGenesForm(QtWidgets.QMainWindow):
         for record in DataIn:
             mutman = MutMap(record[1])
             a = 1
-
-    def MutationalAnalysis(self, input):
-        # initialize variable
-        LineRegion = ''
-        LineQueryAA = ''
-        LineQueryNT = ''
-        LineGermlineNT = ''
-        LineGermlineAA = ''
-        
-        # fetch correct information
-        Lines = input.split("\n")
-        i = 0
-        for line in Lines:
-            if line == '':
-                tmp_region = Lines[i + 1]
-                str,end = re.search(r'\S+', tmp_region).span()
-
-                LineRegion += Lines[i + 1][str:end]
-                LineQueryAA += Lines[i + 2][str:end]
-                LineQueryNT += Lines[i + 3][str:end]
-                LineGermlineNT += Lines[i + 4][str:end]
-                LineGermlineAA += Lines[i + 5][str:end]
-
-                if re.search(r'FR3-+>', LineRegion):
-                    break
-            i += 1
-
-        # regions
-        FR1_region = re.search(r'<-+FR1-+>', LineRegion).span()
-        FR2_region = re.search(r'<-+FR2-+>', LineRegion).span()
-        FR3_region = re.search(r'<-+FR3-+>', LineRegion).span()
-        CDR1_region = re.search(r'<-+CDR1-+>', LineRegion).span()
-        CDR2_region = re.search(r'<-+CDR2-+>', LineRegion).span()
-
-        region_list = ['FR1'] * (FR1_region[1] - FR1_region[0]) + \
-                      ['CDR1'] * (CDR1_region[1] - CDR1_region[0]) + \
-                      ['FR2'] * (FR2_region[1] - FR2_region[0]) + \
-                      ['CDR2'] * (CDR2_region[1] - CDR2_region[0]) + \
-                      ['FR3'] * (FR3_region[1] - FR3_region[0])
-
-        MutDetail_S = []
-        MutDetail_N = []
-        for i in range(len(LineRegion)):
-            if LineGermlineNT[i] != '.' and LineGermlineNT[i] != '-':
-                pos_nt = i + 1
-                germline_nt = LineGermlineNT[i]
-                query_nt = LineQueryNT[i]
-                start_codon = i - 1
-                if start_codon < 0:
-                    start_codon = 0
-                end_codon = i + 1
-                germline_aa = LineGermlineAA[start_codon:end_codon]
-                query_aa = LineQueryAA[start_codon:end_codon]
-                germline_aa = re.sub(' ', '', germline_aa)
-                query_aa = re.sub(' ', '', query_aa)
-                if i < len(region_list):
-                    region = region_list[i]
-                else:
-                    region = 'Other'
-                str_aa = LineQueryAA[0:pos_nt + 1]
-                str_aa = re.sub(' ', '', str_aa)
-                pos_aa = len(str_aa)
-
-                if germline_aa == query_aa:
-                    mut_type = 'synonymous'
-                    record = [pos_nt, germline_nt, query_nt, pos_aa, germline_aa, query_aa, mut_type, region]
-                    MutDetail_S.append(record)
-                else:
-                    mut_type = 'Nonsynonymous'
-                    record = [pos_nt, germline_nt, query_nt, pos_aa, germline_aa, query_aa, mut_type, region]
-                    MutDetail_N.append(record)
-
-
-        #res = LineRegion + "\n" + \
-        #      LineQueryAA + "\n" + \
-        #      LineQueryNT + "\n" + \
-        #      LineGermlineNT + "\n" + \
-        #      LineGermlineAA
-
-        return MutDetail_S, MutDetail_N
 
     def SHM_STAT(self, input):
         # accept input from MutationalAnalysis function
@@ -29322,7 +29242,6 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                     mAb_seq = record[12]
                     germline_seq = record[13]
                     mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
-                    this_data[57] = str(num_mut)
                     this_data[96] = str(num_mut)
                     this_data[97] = mut
                 else:
@@ -29456,7 +29375,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                     mAb_seq = record[11]
                     germline_seq = record[12]
                     mut, num_mut = IdentifyMutation(mAb_seq, germline_seq)
-                    this_data[57] = str(num_mut)
+                    # V(D)J mutation
                     this_data[96] = str(num_mut)
                     this_data[97] = mut
                 DATA.append(this_data)
@@ -29674,6 +29593,9 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                     alignment = alignment[1:]
                     alignment = re.sub(r'\n+Lambda[\n\S\s]+','',alignment)
                     DATA[block_id][58] = alignment
+                    # mutation in V gene
+                    detail_shm_s, detail_shm_nons = MutationalAnalysis(alignment)
+                    DATA[block_id][57] = str(len(detail_shm_s) + len(detail_shm_nons))
 
                     # get ORF info from alignment
                     lines = alignment.split('\n')
@@ -29860,6 +29782,9 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                 alignment = alignment[1:]
                 alignment = re.sub(r'\n+Lambda[\n\S\s]+', '', alignment)
                 DATA[block_id][58] = alignment
+                # mutation in V gene
+                detail_shm_s, detail_shm_nons = MutationalAnalysis(alignment)
+                DATA[block_id][57] = str(len(detail_shm_s) + len(detail_shm_nons))
             except:
                 print(DATA[block_id][0])
 
@@ -34591,6 +34516,86 @@ def logoColorSchemeNT(colorOption):
         colorscheme = 'default'
 
     return colorscheme
+
+
+def MutationalAnalysis(input):
+    # initialize variable
+    LineRegion = ''
+    LineQueryAA = ''
+    LineQueryNT = ''
+    LineGermlineNT = ''
+    LineGermlineAA = ''
+
+    # fetch correct information
+    Lines = input.split("\n")
+    i = 0
+    for line in Lines:
+        if line == '':
+            tmp_region = Lines[i + 1]
+            str, end = re.search(r'\S+', tmp_region).span()
+
+            LineRegion += Lines[i + 1][str:end]
+            LineQueryAA += Lines[i + 2][str:end]
+            LineQueryNT += Lines[i + 3][str:end]
+            LineGermlineNT += Lines[i + 4][str:end]
+            LineGermlineAA += Lines[i + 5][str:end]
+
+            if re.search(r'FR3-+>', LineRegion):
+                break
+        i += 1
+
+    # regions
+    FR1_region = re.search(r'<-+FR1-+>', LineRegion).span()
+    FR2_region = re.search(r'<-+FR2-+>', LineRegion).span()
+    FR3_region = re.search(r'<-+FR3-+>', LineRegion).span()
+    CDR1_region = re.search(r'<-+CDR1-+>', LineRegion).span()
+    CDR2_region = re.search(r'<-+CDR2-+>', LineRegion).span()
+
+    region_list = ['FR1'] * (FR1_region[1] - FR1_region[0]) + \
+                  ['CDR1'] * (CDR1_region[1] - CDR1_region[0]) + \
+                  ['FR2'] * (FR2_region[1] - FR2_region[0]) + \
+                  ['CDR2'] * (CDR2_region[1] - CDR2_region[0]) + \
+                  ['FR3'] * (FR3_region[1] - FR3_region[0])
+
+    MutDetail_S = []
+    MutDetail_N = []
+    for i in range(len(LineRegion)):
+        if LineGermlineNT[i] != '.' and LineGermlineNT[i] != '-':
+            pos_nt = i + 1
+            germline_nt = LineGermlineNT[i]
+            query_nt = LineQueryNT[i]
+            start_codon = i - 1
+            if start_codon < 0:
+                start_codon = 0
+            end_codon = i + 1
+            germline_aa = LineGermlineAA[start_codon:end_codon]
+            query_aa = LineQueryAA[start_codon:end_codon]
+            germline_aa = re.sub(' ', '', germline_aa)
+            query_aa = re.sub(' ', '', query_aa)
+            if i < len(region_list):
+                region = region_list[i]
+            else:
+                region = 'Other'
+            str_aa = LineQueryAA[0:pos_nt + 1]
+            str_aa = re.sub(' ', '', str_aa)
+            pos_aa = len(str_aa)
+
+            if germline_aa == query_aa:
+                mut_type = 'synonymous'
+                record = [pos_nt, germline_nt, query_nt, pos_aa, germline_aa, query_aa, mut_type, region]
+                MutDetail_S.append(record)
+            else:
+                mut_type = 'Nonsynonymous'
+                record = [pos_nt, germline_nt, query_nt, pos_aa, germline_aa, query_aa, mut_type, region]
+                MutDetail_N.append(record)
+
+    # res = LineRegion + "\n" + \
+    #      LineQueryAA + "\n" + \
+    #      LineQueryNT + "\n" + \
+    #      LineGermlineNT + "\n" + \
+    #      LineGermlineAA
+
+    return MutDetail_S, MutDetail_N
 
 def checkATCG(sequence):
     if len(sequence) > 0:
