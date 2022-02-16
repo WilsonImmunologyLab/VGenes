@@ -103,6 +103,7 @@ from ui_CloneOptiondialog import Ui_CloneOptionDialog
 from ui_ChangeOdialog import Ui_ChangeODialog
 from ui_UserListDialog import Ui_UserListDialog
 from ui_MarkRecordsDialog import Ui_MarkRecordsDialog
+from ui_AdvanceSelectiondialog import Ui_AdvanceSelectioDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -456,6 +457,280 @@ class HCLC_thread(QThread):
 
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
+
+class AdvanceSelectioDialog(QtWidgets.QDialog):
+    BatchSignal = pyqtSignal(str, str)
+
+    def __init__(self):
+        super(AdvanceSelectioDialog, self).__init__()
+        self.ui = Ui_AdvanceSelectioDialog()
+        self.ui.setupUi(self)
+
+        self.initial = 0
+        
+        self.ui.comboBox1.row = 1
+        self.ui.radioButton1.row = 1
+        self.ui.plainTextEdit1.row = 1
+        self.ui.comboBox2.row = 2
+        self.ui.radioButton2.row = 2
+        self.ui.plainTextEdit2.row = 2
+        self.ui.comboBox3.row = 3
+        self.ui.radioButton3.row = 3
+        self.ui.plainTextEdit3.row = 3
+        self.ui.comboBox4.row = 4
+        self.ui.radioButton4.row = 4
+        self.ui.plainTextEdit4.row = 4
+        self.ui.comboBox5.row = 5
+        self.ui.radioButton5.row = 5
+        self.ui.plainTextEdit5.row = 5
+        self.ui.comboBox6.row = 6
+        self.ui.radioButton6.row = 6
+        self.ui.plainTextEdit6.row = 6
+
+        self.ui.pushButtonConfirm.clicked.connect(self.accept)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+        self.ui.comboBox1.currentTextChanged.connect(self.StatFig)
+        self.ui.comboBox2.currentTextChanged.connect(self.StatFig)
+        self.ui.comboBox3.currentTextChanged.connect(self.StatFig)
+        self.ui.comboBox4.currentTextChanged.connect(self.StatFig)
+        self.ui.comboBox5.currentTextChanged.connect(self.StatFig)
+        self.ui.comboBox6.currentTextChanged.connect(self.StatFig)
+
+        self.ui.radioButton1.clicked.connect(self.StatFig)
+        self.ui.radioButton2.clicked.connect(self.StatFig)
+        self.ui.radioButton3.clicked.connect(self.StatFig)
+        self.ui.radioButton4.clicked.connect(self.StatFig)
+        self.ui.radioButton5.clicked.connect(self.StatFig)
+        self.ui.radioButton6.clicked.connect(self.StatFig)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+    
+    def updateInfo(self, DataIn):
+        data = [row[0] for row in DataIn]
+        result = Counter(data)
+
+        text = ''
+        for ele in result.most_common():
+            text += str(ele[0]) + '\t' + str(ele[1]) + '\n'
+        self.ui.plainTextEditRange.setPlainText(text)
+    
+    def StatFig(self):
+        if self.initial == 0:
+            return
+
+        # determine row of sender
+        sender_widget = self.sender()
+        if sender_widget.row == 1:
+            filed_name = self.ui.comboBox1.currentText()
+            figure_type = self.ui.radioButton1.isChecked()
+            data_range = self.ui.plainTextEdit1.toPlainText()
+        elif sender_widget.row == 2:
+            filed_name = self.ui.comboBox2.currentText()
+            figure_type = self.ui.radioButton2.isChecked()
+            data_range = self.ui.plainTextEdit2.toPlainText()
+        elif sender_widget.row == 3:
+            filed_name = self.ui.comboBox3.currentText()
+            figure_type = self.ui.radioButton3.isChecked()
+            data_range = self.ui.plainTextEdit3.toPlainText()
+        elif sender_widget.row == 4:
+            filed_name = self.ui.comboBox4.currentText()
+            figure_type = self.ui.radioButton4.isChecked()
+            data_range = self.ui.plainTextEdit4.toPlainText()
+        elif sender_widget.row == 5:
+            filed_name = self.ui.comboBox5.currentText()
+            figure_type = self.ui.radioButton5.isChecked()
+            data_range = self.ui.plainTextEdit5.toPlainText()
+        elif sender_widget.row == 6:
+            filed_name = self.ui.comboBox6.currentText()
+            figure_type = self.ui.radioButton6.isChecked()
+            data_range = self.ui.plainTextEdit6.toPlainText()
+        
+        # delete old figure
+        if self.ui.gridLayoutFig.count() > 0:
+            for i in range(self.ui.gridLayoutFig.count()):
+                self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+
+        # numeric value
+        if figure_type == True:
+            field = re.sub(r'\(.+', '', filed_name)
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            self.updateInfo(DataIn)
+
+            value_list = []
+            char_list = []
+            non_number_count = 0
+            for row in DataIn:
+                try:
+                    value_list.append(float(row[0]))
+                except:
+                    char_list.append(row[0])
+                    non_number_count += 1
+
+            if len(value_list) == 0:
+                Msg = 'No value can be converted to number!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                if sender_widget.row == 1:
+                    self.ui.radioButton1.setChecked(False)
+                elif sender_widget.row == 2:
+                    self.ui.radioButton2.setChecked(False)
+                elif sender_widget.row == 3:
+                    self.ui.radioButton3.setChecked(False)
+                elif sender_widget.row == 4:
+                    self.ui.radioButton4.setChecked(False)
+                elif sender_widget.row == 5:
+                    self.ui.radioButton5.setChecked(False)
+                elif sender_widget.row == 6:
+                    self.ui.radioButton6.setChecked(False)
+                self.StatFig()
+                return
+
+            # do it later
+            ## number list
+            #self.ui.LineEditCutoff.min = min(value_list)
+            #self.ui.LineEditCutoff.max = max(value_list)
+            #self.updateNum()
+
+            ## char list
+            #char_list = list(set(char_list))
+            #for i in range(len(char_list)):
+            #    if char_list[i] == None:
+            #        char_list[i] = 'NULL'
+            #self.load_data_char(char_list)
+
+            #num_list = []
+            #error = False
+            #if self.ui.LineEditCutoff.text() != '':
+            #    temp_data = self.ui.LineEditCutoff.text().split(',')
+            #    if len(temp_data) > 0:
+            #        for ele in temp_data:
+            #            try:
+            #                num = float(ele)
+            #                if num > self.ui.LineEditCutoff.min and num < self.ui.LineEditCutoff.max:
+             #                   num_list.append(num)
+             #           except:
+             #               error = True
+             #       # remove redudant and sort
+            #        num_list = list(set(num_list))
+            #        num_list.sort()
+
+            # update figure
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            F = MyFigure(width=3, height=3, dpi=300)
+            F.axes.hist(value_list, bins=30)
+
+            #if error == False:
+            #    ymin, ymax = F.axes.get_ylim()
+            #    for num in num_list:
+            #        F.axes.plot([num,num], [ymin, ymax], color='r', linewidth = 1, label="Cutoff")
+
+            F.axes.tick_params(labelsize=7)
+            F.fig.subplots_adjust(bottom=0.1)
+
+            self.ui.gridLayoutFig.addWidget(F, 0, 1)
+        # character value
+        else:
+            if self.initial == 0:
+                return
+            elif self.initial == 1:
+                return
+            elif self.initial == 2:
+                field = re.sub(r'\(.+', '', filed_name)
+                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+                value_list = [row[0] for row in DataIn]
+
+                if len(value_list) > 30:
+                    question = 'Distinct values of this field seems too many (number =  ' + str(
+                        len(value_list)) + ')\nAre you sure?'
+                    buttons = 'YN'
+                    answer = questionMessage(self, question, buttons)
+                    if answer == 'No':
+                        return
+
+            for i in range(len(value_list)):
+                if value_list[i] == None:
+                    value_list[i] = 'NULL'
+
+            # update figure
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            self.updateInfo(DataIn)
+
+            data = []
+            for element in DataIn:
+                data.append(element[0])
+            result = Counter(data)
+            labels = result.keys()
+            values = result.values()
+            colors = sns.color_palette("hls", len(values))
+
+            # replace None by 'No record'
+            labels = list(labels)
+            values = list(values)
+            for i in range(len(labels)):
+                if labels[i] == None:
+                    labels[i] = 'NULL'
+
+            F = MyFigure(width=3, height=3, dpi=300)
+            F.axes.bar(labels, values, color=colors)
+            F.axes.set_xticklabels(labels, rotation=-90)
+            F.axes.tick_params(labelsize=7)
+
+            # determine spacing
+            lens = [len(lab) for lab in labels]
+            max_len = max(lens)
+            if max_len < 20:
+                my_adjust = 0.1 + max_len/50
+                F.fig.subplots_adjust(bottom=my_adjust)
+
+            self.ui.gridLayoutFig.addWidget(F, 0, 1)
+
+
+    def accept(self):
+        numerical_filters = []
+        WHEREStatement = ''
+        # process each field
+        field_name = self.ui.comboBox1.currentText()
+        if field_name == '':
+            pass
+        else:
+            pass
+
+
+
+        field_name = re.sub(r'\(.+','',field_name)
+        # process the values
+        bigText = self.ui.lineEdit.text()
+        bigText = re.sub(r'[\r\n\s\t]$','',bigText)
+        if bigText == '':
+            Msg = 'The Value is empty!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        # send result out
+        self.BatchSignal.emit(field_name, bigText)
+        '''
 
 class MarkRecordsDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(str, str)
@@ -22559,6 +22834,24 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myStatDialog.show()
         self.myStatDialog.initial = 2
         self.myStatDialog.resize(1200, 700)
+
+    @pyqtSlot()
+    def on_pushButtonAdvance_clicked(self):
+        self.myAdvanceSelectioDialog = AdvanceSelectioDialog()
+
+        # self.myStatDialog.load_data(value_list)
+        field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        field_list = [''] + field_list
+        self.myAdvanceSelectioDialog.initial = 1
+        self.myAdvanceSelectioDialog.ui.comboBox1.addItems(field_list)
+        self.myAdvanceSelectioDialog.ui.comboBox2.addItems(field_list)
+        self.myAdvanceSelectioDialog.ui.comboBox3.addItems(field_list)
+        self.myAdvanceSelectioDialog.ui.comboBox4.addItems(field_list)
+        self.myAdvanceSelectioDialog.ui.comboBox5.addItems(field_list)
+        self.myAdvanceSelectioDialog.ui.comboBox6.addItems(field_list)
+
+        self.myAdvanceSelectioDialog.show()
+        self.myAdvanceSelectioDialog.initial = 2
 
     def updateSelectionFromDialog(self, data):
         self.clearTreeChecks()

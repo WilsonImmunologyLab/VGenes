@@ -620,6 +620,35 @@
           <property name="bottomMargin">
            <number>3</number>
           </property>
+          <item row="4" column="2" colspan="4">
+           <widget class="QPushButton" name="pushButtonStat">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Select records from distribution</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
           <item row="2" column="1">
            <widget class="QComboBox" name="cboFindField">
             <property name="sizePolicy">
@@ -708,7 +737,33 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="2" colspan="4">
+          <item row="4" column="6">
+           <widget class="QPushButton" name="pushButtonAdvance">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" colspan="5">
            <widget class="QLineEdit" name="txtFieldSearch">
             <property name="minimumSize">
              <size>
@@ -720,35 +775,6 @@
              <font>
               <family>Lucida Grande</family>
              </font>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2" colspan="4">
-           <widget class="QPushButton" name="pushButtonStat">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Select records from distribution</string>
-            </property>
-            <property name="text">
-             <string>Stat/Select</string>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
             </property>
            </widget>
           </item>

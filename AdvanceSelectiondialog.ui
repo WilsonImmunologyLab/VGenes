@@ -27,7 +27,14 @@
       </widget>
      </item>
      <item row="2" column="0">
-      <widget class="QComboBox" name="comboBox1_2"/>
+      <widget class="QComboBox" name="comboBox2">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="0" column="2">
       <widget class="QLabel" name="label_6">
@@ -81,7 +88,14 @@
       </widget>
      </item>
      <item row="5" column="0">
-      <widget class="QComboBox" name="comboBox5"/>
+      <widget class="QComboBox" name="comboBox5">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="3" column="1">
       <widget class="QRadioButton" name="radioButton3">
@@ -93,6 +107,9 @@
        </property>
        <property name="text">
         <string>Yes</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -117,10 +134,20 @@
        <property name="text">
         <string>Yes</string>
        </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="4" column="0">
-      <widget class="QComboBox" name="comboBox4"/>
+      <widget class="QComboBox" name="comboBox4">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="2" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit2">
@@ -143,10 +170,20 @@
        <property name="text">
         <string>Yes</string>
        </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="6" column="0">
-      <widget class="QComboBox" name="comboBox6"/>
+      <widget class="QComboBox" name="comboBox6">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="5" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit5">
@@ -169,6 +206,9 @@
        <property name="text">
         <string>Yes</string>
        </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="5" column="1">
@@ -182,10 +222,20 @@
        <property name="text">
         <string>Yes</string>
        </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
+       </property>
       </widget>
      </item>
      <item row="3" column="0">
-      <widget class="QComboBox" name="comboBox3"/>
+      <widget class="QComboBox" name="comboBox3">
+       <property name="maximumSize">
+        <size>
+         <width>200</width>
+         <height>16777215</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="4" column="1">
       <widget class="QRadioButton" name="radioButton4">
@@ -197,6 +247,9 @@
        </property>
        <property name="text">
         <string>Yes</string>
+       </property>
+       <property name="autoExclusive">
+        <bool>false</bool>
        </property>
       </widget>
      </item>
@@ -269,7 +322,7 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>500</width>
+       <width>16777215</width>
        <height>16777215</height>
       </size>
      </property>
