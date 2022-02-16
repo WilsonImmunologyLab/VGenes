@@ -459,7 +459,7 @@ class HCLC_thread(QThread):
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
 
 class AdvanceSelectioDialog(QtWidgets.QDialog):
-    BatchSignal = pyqtSignal(str, str)
+    BatchSignal = pyqtSignal(list)
 
     def __init__(self):
         super(AdvanceSelectioDialog, self).__init__()
@@ -707,30 +707,154 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
 
             self.ui.gridLayoutFig.addWidget(F, 0, 1)
 
-
     def accept(self):
         numerical_filters = []
-        WHEREStatement = ''
+        char_filters = []
         # process each field
         field_name = self.ui.comboBox1.currentText()
+        field_name = re.sub(r'\(.+', '', field_name)
         if field_name == '':
             pass
         else:
+            if self.ui.plainTextEdit1.toPlainText() == '':
+                pass
+            else:
+                if self.ui.radioButton1.isChecked():
+                    numerical_filters.append([field_name, self.ui.plainTextEdit1.toPlainText()])
+                else:
+                    char_filters.append([field_name, self.ui.plainTextEdit1.toPlainText()])
+
+        field_name = self.ui.comboBox2.currentText()
+        field_name = re.sub(r'\(.+', '', field_name)
+        if field_name == '':
             pass
+        else:
+            if self.ui.plainTextEdit2.toPlainText() == '':
+                pass
+            else:
+                if self.ui.radioButton2.isChecked():
+                    numerical_filters.append([field_name, self.ui.plainTextEdit2.toPlainText()])
+                else:
+                    char_filters.append([field_name, self.ui.plainTextEdit2.toPlainText()])
 
+        field_name = self.ui.comboBox3.currentText()
+        field_name = re.sub(r'\(.+', '', field_name)
+        if field_name == '':
+            pass
+        else:
+            if self.ui.plainTextEdit3.toPlainText() == '':
+                pass
+            else:
+                if self.ui.radioButton3.isChecked():
+                    numerical_filters.append([field_name, self.ui.plainTextEdit3.toPlainText()])
+                else:
+                    char_filters.append([field_name, self.ui.plainTextEdit3.toPlainText()])
 
+        field_name = self.ui.comboBox4.currentText()
+        field_name = re.sub(r'\(.+', '', field_name)
+        if field_name == '':
+            pass
+        else:
+            if self.ui.plainTextEdit4.toPlainText() == '':
+                pass
+            else:
+                if self.ui.radioButton4.isChecked():
+                    numerical_filters.append([field_name, self.ui.plainTextEdit4.toPlainText()])
+                else:
+                    char_filters.append([field_name, self.ui.plainTextEdit4.toPlainText()])
 
-        field_name = re.sub(r'\(.+','',field_name)
-        # process the values
-        bigText = self.ui.lineEdit.text()
-        bigText = re.sub(r'[\r\n\s\t]$','',bigText)
-        if bigText == '':
-            Msg = 'The Value is empty!'
-            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-            return
+        field_name = self.ui.comboBox5.currentText()
+        field_name = re.sub(r'\(.+', '', field_name)
+        if field_name == '':
+            pass
+        else:
+            if self.ui.plainTextEdit5.toPlainText() == '':
+                pass
+            else:
+                if self.ui.radioButton5.isChecked():
+                    numerical_filters.append([field_name, self.ui.plainTextEdit5.toPlainText()])
+                else:
+                    char_filters.append([field_name, self.ui.plainTextEdit5.toPlainText()])
+
+        field_name = self.ui.comboBox6.currentText()
+        field_name = re.sub(r'\(.+', '', field_name)
+        if field_name == '':
+            pass
+        else:
+            if self.ui.plainTextEdit6.toPlainText() == '':
+                pass
+            else:
+                if self.ui.radioButton6.isChecked():
+                    numerical_filters.append([field_name, self.ui.plainTextEdit6.toPlainText()])
+                else:
+                    char_filters.append([field_name, self.ui.plainTextEdit6.toPlainText()])
+
+        # apply filters
+        if len(char_filters) > 0:
+            WhereStatement = ' WHERE '
+            for filter in char_filters:
+                temp_list = filter[1].split(',')
+                WhereStatement += filter[0] + ' IN ("' + '","'.join(temp_list) + '") AND '
+            WhereStatement += '1'
+        else:
+            WhereStatement = ' WHERE 1'
+
+        if len(numerical_filters) > 0:
+            filed_list = [i[0] for i in numerical_filters]
+            name_fields = ','.join(filed_list)
+            SQLStatement = 'SELECT SeqName,' + name_fields + ' FROM vgenesDB' + WhereStatement
+        else:
+            SQLStatement = 'SELECT SeqName FROM vgenesDB' + WhereStatement
+        
+        # fetch records
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        data_index = list(range(len(DataIn)))
+
+        # filter records using numerical_filters
+        if len(numerical_filters) > 0:
+            filter_index = 1
+            for filter in numerical_filters:
+                bad_index = []
+
+                # read numerical filters
+                filter_list = []
+                temp_filter = filter[1].split(';')
+                for ele in temp_filter:
+                    temp_filter_sub = ele.split(',')
+                    if len(temp_filter_sub) < 2:
+                        pass
+                    else:
+                        try:
+                            min_value = float(temp_filter_sub[0])
+                            max_value = float(temp_filter_sub[1])
+                            filter_list.append([min_value, max_value])
+                        except:
+                            pass
+                # apply numerical filters
+                for cur_index in data_index:
+                    data_point = DataIn[cur_index][filter_index]
+                    try:
+                        data_point = float(data_point)
+                        in_range = 0
+                        for cur_filter in filter_list:
+                            if data_point >= cur_filter[0] and data_point <= cur_filter[1]:
+                                in_range = 1
+                                continue
+                        if in_range == 0:
+                            bad_index.append(cur_index)
+                    except:
+                        bad_index.append(cur_index)
+                # remove all bad index
+                data_index = [item for item in data_index if item not in set(bad_index)]
+                filter_index += 1
+        
+        # make selected SeqNames
+        Selected_names = []
+        for cur_index in data_index:
+            Selected_names.append(DataIn[cur_index][0])
+
         # send result out
-        self.BatchSignal.emit(field_name, bigText)
-        '''
+        self.BatchSignal.emit(Selected_names)
 
 class MarkRecordsDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(str, str)
@@ -22849,6 +22973,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myAdvanceSelectioDialog.ui.comboBox4.addItems(field_list)
         self.myAdvanceSelectioDialog.ui.comboBox5.addItems(field_list)
         self.myAdvanceSelectioDialog.ui.comboBox6.addItems(field_list)
+
+        self.myAdvanceSelectioDialog.BatchSignal.connect(self.updateSelectionFromDialog)
 
         self.myAdvanceSelectioDialog.show()
         self.myAdvanceSelectioDialog.initial = 2
