@@ -537,33 +537,77 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
         if self.initial == 0:
             return
 
+        # check if redudant
+        filed_names = []
+        filed_names.append(self.ui.comboBox1.currentText())
+        filed_names.append(self.ui.comboBox2.currentText())
+        filed_names.append(self.ui.comboBox3.currentText())
+        filed_names.append(self.ui.comboBox4.currentText())
+        filed_names.append(self.ui.comboBox5.currentText())
+        filed_names.append(self.ui.comboBox6.currentText())
+        unique_value_dict = Counter(filed_names)
+        redudant_sign = 0
+        for value in unique_value_dict:
+            if unique_value_dict[value] > 1:
+                if value != '':
+                    redudant_sign = 1
+
         # determine row of sender
         sender_widget = self.sender()
         if sender_widget.row == 1:
             filed_name = self.ui.comboBox1.currentText()
             figure_type = self.ui.radioButton1.isChecked()
             data_range = self.ui.plainTextEdit1.toPlainText()
+            if redudant_sign == 1:
+                self.initial = 0
+                self.ui.comboBox1.setCurrentText('')
+                self.initial = 2
         elif sender_widget.row == 2:
             filed_name = self.ui.comboBox2.currentText()
             figure_type = self.ui.radioButton2.isChecked()
             data_range = self.ui.plainTextEdit2.toPlainText()
+            if redudant_sign == 1:
+                self.initial = 0
+                self.ui.comboBox2.setCurrentText('')
+                self.initial = 2
         elif sender_widget.row == 3:
             filed_name = self.ui.comboBox3.currentText()
             figure_type = self.ui.radioButton3.isChecked()
             data_range = self.ui.plainTextEdit3.toPlainText()
+            if redudant_sign == 1:
+                self.initial = 0
+                self.ui.comboBox3.setCurrentText('')
+                self.initial = 2
         elif sender_widget.row == 4:
             filed_name = self.ui.comboBox4.currentText()
             figure_type = self.ui.radioButton4.isChecked()
             data_range = self.ui.plainTextEdit4.toPlainText()
+            if redudant_sign == 1:
+                self.initial = 0
+                self.ui.comboBox4.setCurrentText('')
+                self.initial = 2
         elif sender_widget.row == 5:
             filed_name = self.ui.comboBox5.currentText()
             figure_type = self.ui.radioButton5.isChecked()
             data_range = self.ui.plainTextEdit5.toPlainText()
+            if redudant_sign == 1:
+                self.initial = 0
+                self.ui.comboBox5.setCurrentText('')
+                self.initial = 2
         elif sender_widget.row == 6:
             filed_name = self.ui.comboBox6.currentText()
             figure_type = self.ui.radioButton6.isChecked()
             data_range = self.ui.plainTextEdit6.toPlainText()
-        
+            if redudant_sign == 1:
+                self.initial = 0
+                self.ui.comboBox6.setCurrentText('')
+                self.initial = 2
+
+        if redudant_sign == 1:
+            Msg = 'You already have filter on this field:\n' + filed_name
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
         # delete old figure
         if self.ui.gridLayoutFig.count() > 0:
             for i in range(self.ui.gridLayoutFig.count()):
@@ -706,7 +750,9 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
                 F.fig.subplots_adjust(bottom=my_adjust)
 
             self.ui.gridLayoutFig.addWidget(F, 0, 1)
-
+        
+        self.ui.labelField.setText('Data distribution of '+ filed_name)
+        
     def accept(self):
         numerical_filters = []
         char_filters = []

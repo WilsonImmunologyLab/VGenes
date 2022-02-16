@@ -18,6 +18,12 @@
     <layout class="QGridLayout" name="gridLayout_5">
      <item row="6" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit6">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>400</width>
@@ -45,6 +51,12 @@
      </item>
      <item row="1" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit1">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>400</width>
@@ -69,6 +81,12 @@
      </item>
      <item row="4" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit4">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>400</width>
@@ -79,6 +97,12 @@
      </item>
      <item row="3" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit3">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>400</width>
@@ -151,6 +175,12 @@
      </item>
      <item row="2" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit2">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>400</width>
@@ -187,6 +217,12 @@
      </item>
      <item row="5" column="2">
       <widget class="QPlainTextEdit" name="plainTextEdit5">
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>0</height>
+        </size>
+       </property>
        <property name="maximumSize">
         <size>
          <width>400</width>
@@ -272,7 +308,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Data range/levels of current field</string>
+         <string>Data range/levels</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -316,7 +352,7 @@
     <widget class="QFrame" name="frame_2">
      <property name="minimumSize">
       <size>
-       <width>500</width>
+       <width>400</width>
        <height>0</height>
       </size>
      </property>
@@ -334,14 +370,14 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="labelField">
         <property name="font">
          <font>
           <pointsize>18</pointsize>
          </font>
         </property>
         <property name="text">
-         <string>Data distribution of current field</string>
+         <string>Data distribution</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -382,7 +418,7 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>1187</width>
+       <width>1207</width>
        <height>20</height>
       </size>
      </property>
