@@ -44,8 +44,11 @@
      </item>
      <item row="0" column="2">
       <widget class="QLabel" name="label_6">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;For none-numerical factors, please use comma &amp;quot;,&amp;quot; between multiple levels, for example: Cluster1,Cluster2,Cluster3&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;p&gt;For numerical factors, use comma &amp;quot;,&amp;quot; between lower value and upper value of a range, and put different ranges in different lines: for example:&lt;/p&gt;&lt;p&gt;100,200&lt;/p&gt;&lt;p&gt;200,300&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
        <property name="text">
-        <string>Selected range</string>
+        <string>Selection range (mouse over for details)</string>
        </property>
       </widget>
      </item>
@@ -370,7 +373,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="labelField">
+       <widget class="QLabel" name="label_2">
         <property name="font">
          <font>
           <pointsize>18</pointsize>
@@ -402,7 +405,17 @@
     </widget>
    </item>
    <item row="1" column="3" colspan="3">
-    <widget class="QPlainTextEdit" name="plainTextEditRange"/>
+    <widget class="QPlainTextEdit" name="plainTextEditRange">
+     <property name="plainText">
+      <string>For none-numerical factors, please use comma &quot;,&quot; between multiple levels, for example: 
+Cluster1,Cluster2,Cluster3
+
+
+For numerical factors, use comma &quot;,&quot; between lower value and upper value of a range, and put different ranges in different lines: for example:
+100,200
+200,300</string>
+     </property>
+    </widget>
    </item>
    <item row="0" column="1" rowspan="2">
     <widget class="Line" name="line">

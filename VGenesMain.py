@@ -607,7 +607,10 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
             Msg = 'You already have filter on this field:\n' + filed_name
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
-
+        
+        if filed_name == '':
+            return
+        
         # delete old figure
         if self.ui.gridLayoutFig.count() > 0:
             for i in range(self.ui.gridLayoutFig.count()):
@@ -864,7 +867,7 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
 
                 # read numerical filters
                 filter_list = []
-                temp_filter = filter[1].split(';')
+                temp_filter = filter[1].split('\n')
                 for ele in temp_filter:
                     temp_filter_sub = ele.split(',')
                     if len(temp_filter_sub) < 2:

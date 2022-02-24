@@ -152,13 +152,13 @@ class Ui_AdvanceSelectioDialog(object):
         self.frame_2.setObjectName("frame_2")
         self.gridLayout_3 = QtWidgets.QGridLayout(self.frame_2)
         self.gridLayout_3.setObjectName("gridLayout_3")
-        self.labelField = QtWidgets.QLabel(self.frame_2)
+        self.label_2 = QtWidgets.QLabel(self.frame_2)
         font = QtGui.QFont()
         font.setPointSize(18)
-        self.labelField.setFont(font)
-        self.labelField.setAlignment(QtCore.Qt.AlignCenter)
-        self.labelField.setObjectName("labelField")
-        self.gridLayout_3.addWidget(self.labelField, 0, 0, 1, 1)
+        self.label_2.setFont(font)
+        self.label_2.setAlignment(QtCore.Qt.AlignCenter)
+        self.label_2.setObjectName("label_2")
+        self.gridLayout_3.addWidget(self.label_2, 0, 0, 1, 1)
         self.gridLayout_6.addWidget(self.frame_2, 0, 2, 1, 1)
         self.pushButtonCancel = QtWidgets.QPushButton(AdvanceSelectioDialog)
         self.pushButtonCancel.setObjectName("pushButtonCancel")
@@ -183,7 +183,8 @@ class Ui_AdvanceSelectioDialog(object):
     def retranslateUi(self, AdvanceSelectioDialog):
         _translate = QtCore.QCoreApplication.translate
         AdvanceSelectioDialog.setWindowTitle(_translate("AdvanceSelectioDialog", "Dialog"))
-        self.label_6.setText(_translate("AdvanceSelectioDialog", "Selected range"))
+        self.label_6.setToolTip(_translate("AdvanceSelectioDialog", "<html><head/><body><p>For none-numerical factors, please use comma &quot;,&quot; between multiple levels, for example: Cluster1,Cluster2,Cluster3</p><p><br/></p><p>For numerical factors, use comma &quot;,&quot; between lower value and upper value of a range, and put different ranges in different lines: for example:</p><p>100,200</p><p>200,300</p></body></html>"))
+        self.label_6.setText(_translate("AdvanceSelectioDialog", "Selection range (mouse over for details)"))
         self.label_5.setText(_translate("AdvanceSelectioDialog", "Numerical?"))
         self.label_4.setText(_translate("AdvanceSelectioDialog", "Fields"))
         self.radioButton3.setText(_translate("AdvanceSelectioDialog", "Yes"))
@@ -194,6 +195,13 @@ class Ui_AdvanceSelectioDialog(object):
         self.radioButton4.setText(_translate("AdvanceSelectioDialog", "Yes"))
         self.label_3.setText(_translate("AdvanceSelectioDialog", "Data range/levels"))
         self.label.setText(_translate("AdvanceSelectioDialog", "Selection criterias"))
-        self.labelField.setText(_translate("AdvanceSelectioDialog", "Data distribution"))
+        self.label_2.setText(_translate("AdvanceSelectioDialog", "Data distribution"))
         self.pushButtonCancel.setText(_translate("AdvanceSelectioDialog", "Cancel"))
         self.pushButtonConfirm.setText(_translate("AdvanceSelectioDialog", "Apply"))
+        self.plainTextEditRange.setPlainText(_translate("AdvanceSelectioDialog", "For none-numerical factors, please use comma \",\" between multiple levels, for example: \n"
+"Cluster1,Cluster2,Cluster3\n"
+"\n"
+"\n"
+"For numerical factors, use comma \",\" between lower value and upper value of a range, and put different ranges in different lines: for example:\n"
+"100,200\n"
+"200,300"))
