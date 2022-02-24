@@ -373,7 +373,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="label_2">
+       <widget class="QLabel" name="labelField">
         <property name="font">
          <font>
           <pointsize>18</pointsize>
