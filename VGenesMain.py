@@ -6758,6 +6758,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.ui.lineEditRep2.setText('contig_')
         self.updateName()
 
+        if self.ui.Annopath.text() != "":
+            path_10x = self.ui.Annopath.text()
+            path_10x = re.sub('filtered_contig_annotations.csv', '', path_10x)
+            self.update10x(path_10x)
+
     def setIcon(self):
         if self.ui.pushButtonBCR.isChecked():
             self.ui.pushButtonBCR.setIcon(self.iconBCR)
@@ -6796,22 +6801,15 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             else:
                 pass
 
-        choosed_seq = 'consensus.fasta'
-        choose_annotate = 'filtered_contig_annotations.csv'
-
-        '''
         choosed_seq = ''
         choose_annotate = ''
-        if self.ui.radioButtonFiltercontig.isChecked():
+        if self.ui.radioButtonTig.isChecked():
             choosed_seq = 'filtered_contig.fasta'
             choose_annotate = 'filtered_contig_annotations.csv'
-        elif self.ui.radioButtonConsensus.isChecked():
+        elif self.ui.radioButtonCon.isChecked():
             choosed_seq = 'consensus.fasta'
             choose_annotate = 'filtered_contig_annotations.csv'
-        elif self.ui.radioButtonAllcontig.isChecked():
-            choosed_seq = 'all_contig.fasta'
-            choose_annotate = 'all_contig_annotations.csv'
-        '''
+
         if choosed_seq == '':
             return
 
@@ -6821,24 +6819,22 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         seq_file = os.path.join(self.path10x, choosed_seq)
         anno_file = os.path.join(self.path10x, choose_annotate)
         if os.path.exists(seq_file):
-            if os.path.exists(anno_file):
-                self.ui.Seqpath.setText(seq_file)
-                self.ui.Annopath.setText(anno_file)
-            else:
-                self.ui.Seqpath.setText(seq_file)
+            pass
         else:
             seq_file = os.path.join(self.path10x, 'outs', choosed_seq)
             anno_file = os.path.join(self.path10x, 'outs', choose_annotate)
-            if os.path.exists(seq_file):
-                if os.path.exists(anno_file):
-                    self.ui.Seqpath.setText(seq_file)
-                    self.ui.Annopath.setText(anno_file)
-                else:
-                    self.ui.Seqpath.setText(seq_file)
-            else:
-                Msg = 'Can not find consensus.fasta under your folder! Please check your input!'
-                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-                return
+
+        if os.path.exists(anno_file):
+            self.ui.Annopath.setText(anno_file)
+        else:
+            Msg = 'Can not find ' + anno_file + ' under your folder! Please check your input!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+        if os.path.exists(seq_file):
+            self.ui.Seqpath.setText(seq_file)
+        else:
+            Msg = 'Can not find ' + seq_file + ' under your folder! Please check your input!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def updateGroupSetting(self):
         if self.ui.rdoChoose.isChecked():
