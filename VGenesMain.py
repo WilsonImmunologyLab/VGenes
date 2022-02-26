@@ -6749,11 +6749,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.ui.label_16.setText('1) Replace "clonotype" by')
             self.ui.label_17.setText('2) Replace "consensus_" by')
             self.ui.label_15.setText('10X seq name: clonotype2_consensus_1')
+            self.ui.lineEditRep2.setText('consensus_')
         else:   # filtered contigs sequence
             self.ui.lineEditRep1.setEnabled(False)
             self.ui.label_16.setText('1) ')
             self.ui.label_17.setText('2) Replace "contig_" by')
             self.ui.label_15.setText('10X seq name: AAACCTGAGACAAGCC-1_contig_1')
+            self.ui.lineEditRep2.setText('contig_')
+        self.updateName()
 
     def setIcon(self):
         if self.ui.pushButtonBCR.isChecked():
@@ -6770,7 +6773,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         offset_pool = [-1, 1]
         offset = offset_pool[random.randint(0, 1)]
         self.resize(size_w + offset, size_h + offset)
-
 
     def progressLabel(self, pct, label):
         try:
@@ -7079,14 +7081,22 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                         pass
 
     def updateName(self):
-        ori_name = 'clonotype2_consensus_1'
-        rep1 = self.ui.lineEditRep1.text()
-        if self.ui.radioButtonChain.isChecked():
-            rep2 = 'H'
+        if self.ui.radioButtonCon.isChecked():
+            ori_name = 'clonotype2_consensus_1'
+            rep1 = self.ui.lineEditRep1.text()
+            if self.ui.radioButtonChain.isChecked():
+                rep2 = 'H'
+            else:
+                rep2 = self.ui.lineEditRep2.text()
+            prefix = self.ui.lineEditRep3.text()
         else:
-            rep2 = self.ui.lineEditRep2.text()
-        prefix = self.ui.lineEditRep3.text()
-
+            ori_name = 'AAACCTGAGACAAGCC-1_contig_1'
+            rep1 = 'contig'
+            if self.ui.radioButtonChain.isChecked():
+                rep2 = 'H'
+            else:
+                rep2 = self.ui.lineEditRep2.text()
+            prefix = self.ui.lineEditRep3.text()
         new_name = reName(ori_name, rep1, rep2, prefix)
         self.ui.labelName.setText(new_name)
 
@@ -7441,7 +7451,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         anno_path_name = self.ui.Annopath.text()
         self.anno_path_name = anno_path_name
 
-        self.rep1 = self.ui.lineEditRep1.text()
+        if self.ui.radioButtonCon.isChecked():
+            self.rep1 = self.ui.lineEditRep1.text()
+        else:
+            self.rep1 = 'contig'
+
         if self.ui.radioButtonChain.isChecked():
             self.rep2 = 'byChain'
         else:
@@ -29449,8 +29463,11 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.updateF(data[119])
 
 def reName(ori_name, rep1, rep2, prefix):
-    my_name = re.sub('clonotype',rep1, ori_name)
-    my_name = re.sub('consensus_', rep2, my_name)
+    if rep1 == 'contig':
+        my_name = re.sub('contig_', rep2, ori_name)
+    else:
+        my_name = re.sub('clonotype',rep1, ori_name)
+        my_name = re.sub('consensus_', rep2, my_name)
     if prefix != '':
         my_name = prefix + '_' + my_name
     return my_name
