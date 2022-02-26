@@ -32,6 +32,7 @@ class Ui_UserListDialog(object):
         self.pushButtonCancel.setObjectName("pushButtonCancel")
         self.gridLayout.addWidget(self.pushButtonCancel, 3, 2, 1, 1)
         self.textEdit = QtWidgets.QTextEdit(UserListDialog)
+        self.textEdit.setLineWrapMode(QtWidgets.QTextEdit.NoWrap)
         self.textEdit.setObjectName("textEdit")
         self.gridLayout.addWidget(self.textEdit, 2, 0, 1, 3)
         self.label_2 = QtWidgets.QLabel(UserListDialog)

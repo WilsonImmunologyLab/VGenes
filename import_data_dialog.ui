@@ -218,10 +218,20 @@
           <enum>QFrame::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="1" column="1" colspan="6">
+           <widget class="QLineEdit" name="Seqpath"/>
+          </item>
+          <item row="2" column="1" colspan="6">
+           <widget class="QLineEdit" name="Annopath">
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0" colspan="3">
            <widget class="QLabel" name="label_5">
             <property name="text">
-             <string>Click to choose your 10X VDJ output folder path:</string>
+             <string>Choose your 10X VDJ output folder path:</string>
             </property>
            </widget>
           </item>
@@ -251,13 +261,6 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1" colspan="3">
-           <widget class="QLineEdit" name="Annopath">
-            <property name="text">
-             <string/>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="3">
            <widget class="QToolButton" name="browse10x">
             <property name="font">
@@ -270,8 +273,22 @@
             </property>
            </widget>
           </item>
-          <item row="1" column="1" colspan="3">
-           <widget class="QLineEdit" name="Seqpath"/>
+          <item row="0" column="4">
+           <widget class="QRadioButton" name="radioButtonCon">
+            <property name="text">
+             <string>Consensus</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QRadioButton" name="radioButtonTig">
+            <property name="text">
+             <string>Filtered contig</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </widget>

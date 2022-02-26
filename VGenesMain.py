@@ -6698,6 +6698,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         self.ui.listWidgetCSV.itemDoubleClicked.connect(self.removeSel)
         self.ui.listWidgetFasta.itemDoubleClicked.connect(self.removeSel)
         self.ui.listWidgetSEQ.itemDoubleClicked.connect(self.removeSel)
+        self.ui.radioButtonCon.clicked.connect(self.change10xType)
+        self.ui.radioButtonTig.clicked.connect(self.change10xType)
 
         # unknown bug for this function, the icon doesn't update well
         self.ui.pushButtonBCR.clicked.connect(self.setIcon)
@@ -6740,6 +6742,18 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             pass
         
         self.setIcon()
+    
+    def change10xType(self):
+        if self.ui.radioButtonCon.isChecked():  # consensus sequence
+            self.ui.lineEditRep1.setEnabled(True)
+            self.ui.label_16.setText('1) Replace "clonotype" by')
+            self.ui.label_17.setText('2) Replace "consensus_" by')
+            self.ui.label_15.setText('10X seq name: clonotype2_consensus_1')
+        else:   # filtered contigs sequence
+            self.ui.lineEditRep1.setEnabled(False)
+            self.ui.label_16.setText('1) ')
+            self.ui.label_17.setText('2) Replace "contig_" by')
+            self.ui.label_15.setText('10X seq name: AAACCTGAGACAAGCC-1_contig_1')
 
     def setIcon(self):
         if self.ui.pushButtonBCR.isChecked():
