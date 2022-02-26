@@ -6717,6 +6717,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         self.path10x = ''
         self.pathIMGT = ''
         self.pathIgBlast = ''
+        self.type10x = 'consensus'
 
         global answer3
         answer3 = 'No'
@@ -7412,7 +7413,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             t = thd.Timer(1, self.checkProgress)
             t.start()
 
-    def readBarcode(self, anno_path_name):
+    def readBarcode(self, anno_path_name, type10x):
         # read annotation content
         name_index = 17
         barcode_dict = {}
@@ -7422,7 +7423,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             for item in reader:
                 # ignore header line
                 if reader.line_num == 1:
-                    name_index = item.index('raw_consensus_id')
+                    if type10x == 'consensus':
+                        name_index = item.index('raw_consensus_id')
+                    else:
+                        name_index = item.index('contig_id')
                 barcode_dict[item[name_index]] = item[0]
             csvFile.close()
         return barcode_dict
@@ -7449,8 +7453,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
         if self.ui.radioButtonCon.isChecked():
             self.rep1 = self.ui.lineEditRep1.text()
+            self.type10x = 'consensus'
         else:
             self.rep1 = 'contig'
+            self.type10x = 'contig'
 
         if self.ui.radioButtonChain.isChecked():
             self.rep2 = 'byChain'
@@ -8573,7 +8579,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
         if self.calling == 1:
             # match barcode
-            barcodeDict = self.readBarcode(self.anno_path_name)
+            barcodeDict = self.readBarcode(self.anno_path_name, self.type10x)
 
             for record in IgBLASTAnalysis:
                 if record[0] in barcodeDict.keys():
