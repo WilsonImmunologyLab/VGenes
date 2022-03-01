@@ -837,13 +837,15 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
                     numerical_filters.append([field_name, self.ui.plainTextEdit6.toPlainText()])
                 else:
                     char_filters.append([field_name, self.ui.plainTextEdit6.toPlainText()])
-
+        # filter text
+        applied_filters_text = ''
         # apply filters
         if len(char_filters) > 0:
             WhereStatement = ' WHERE '
             for filter in char_filters:
                 temp_list = filter[1].split(',')
                 WhereStatement += filter[0] + ' IN ("' + '","'.join(temp_list) + '") AND '
+                applied_filters_text += 'Field name: ' + filter[0] + '\tSelected values: ' + ','.join(temp_list) + '\n'
             WhereStatement += '1'
         else:
             WhereStatement = ' WHERE 1'
@@ -864,10 +866,10 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
             filter_index = 1
             for filter in numerical_filters:
                 bad_index = []
-
                 # read numerical filters
                 filter_list = []
                 temp_filter = filter[1].split('\n')
+                temp_filters_text = ''
                 for ele in temp_filter:
                     temp_filter_sub = ele.split(',')
                     if len(temp_filter_sub) < 2:
@@ -877,8 +879,12 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
                             min_value = float(temp_filter_sub[0])
                             max_value = float(temp_filter_sub[1])
                             filter_list.append([min_value, max_value])
+                            temp_filters_text += temp_filter_sub[0] + ' <= selected value <=' + temp_filter_sub[1] + '; '
                         except:
                             pass
+                if temp_filters_text != '':
+                    applied_filters_text += 'Field name: ' + filter[0] + '\tSelected values: ' + temp_filters_text + '\n'
+
                 # apply numerical filters
                 for cur_index in data_index:
                     data_point = DataIn[cur_index][filter_index]
@@ -901,7 +907,13 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
         Selected_names = []
         for cur_index in data_index:
             Selected_names.append(DataIn[cur_index][0])
-
+        
+        # show log
+        ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+        with open(ErlogFile, 'w') as currentFile:
+            currentFile.write(applied_filters_text)
+        Vgenes.ShowVGenesText(ErlogFile)
+        
         # send result out
         self.BatchSignal.emit(Selected_names)
 
