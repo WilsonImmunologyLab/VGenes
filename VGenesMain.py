@@ -838,7 +838,7 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
                 else:
                     char_filters.append([field_name, self.ui.plainTextEdit6.toPlainText()])
         # filter text
-        applied_filters_text = ''
+        applied_filters_text = 'Records that fit in the following criteria have been selected/checked:\n'
         # apply filters
         if len(char_filters) > 0:
             WhereStatement = ' WHERE '
