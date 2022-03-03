@@ -4772,15 +4772,17 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         where_statement = ' WHERE 1'
 
-        data_series1 = []
-        data_series2 = []
         self.w4.clear()
         self.w4.addLegend()
 
         if group == '':
             field = dim1 + "," + dim2
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + where_statement
+            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB' + where_statement
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            data_series1 = []
+            data_series2 = []
+            data_names = []
 
             goodNum = 0
             for d in DataIn:
@@ -4789,6 +4791,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     y = float(d[1])
                     data_series1.append(x)
                     data_series2.append(y)
+                    data_names.append(d[2])
                     goodNum += 1
                 except:
                     pass
@@ -4813,72 +4816,118 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 x=data_series1,
                 y=data_series2,
                 brush=pg.mkBrush(0.6),
-                name='all data points'
+                name='All data points',
                 # size=(numpy.random.random(n) * 20.).astype(int),
-                # data=numpy.arange(n)
+                data=data_names
             )
             self.w4.addItem(s4)
         else:
             field = dim1 + "," + dim2 + "," + group
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
+            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-            goodNum = 0
-            data_dict = {}
-            data_series1 = []
-            data_series2 = []
-            data_name = []
-            
-            for d in DataIn:
-                try:
-                    x = float(d[0])
-                    y = float(d[1])
-                    if d[2] in data_dict:
-                        data_dict[d[2]].append([x,y])
-                    else:
-                        data_dict[d[2]] = [[x,y]]
-                    goodNum += 1
-                except:
-                    pass
+            if self.ui.radioButtonNum.isChecked():
+                goodNum = 0
+                data_series1 = []
+                data_series2 = []
+                data_color = []
+                data_names = []
 
-            if goodNum == 0:
-                QMessageBox.warning(self, 'Warning', 'No qualified records found!',
-                                    QMessageBox.Ok, QMessageBox.Ok)
-                return
+                for d in DataIn:
+                    try:
+                        x = float(d[0])
+                        y = float(d[1])
+                        z = float(d[2])
+                        data_series1.append(x)
+                        data_series2.append(y)
+                        data_color.append(z)
+                        data_names.append(d[3])
+                        goodNum += 1
+                    except:
+                        pass
 
-            # generate color code
-            labels = list(data_dict.keys())
-            colors = sns.color_palette("hls", len(labels))
-            color_dict = {}
-            for i in range(len(labels)):
-                cur_color = [x*255 for x in colors[i]]
-                color_dict[labels[i]] = cur_color
-
-            for key in data_dict.keys():
-                data_series1 = [x[0] for x in data_dict[key]]
-                data_series2 = [x[1] for x in data_dict[key]]
+                if goodNum == 0:
+                    QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                        QMessageBox.Ok, QMessageBox.Ok)
+                    return
 
                 # make plot
                 s4 = pg.ScatterPlotItem(
                     size=16,
                     pen=pg.mkPen('k', width=2),
-                    brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
                     hoverSymbol='s',
                     hoverSize=15,
                     hoverPen=pg.mkPen('r', width=2),
                     hoverBrush=pg.mkBrush('g'),
                 )
-
                 s4.addPoints(
                     x=data_series1,
                     y=data_series2,
-                    brush=pg.mkBrush(color_dict[key]),
-                    name=key
-                    # size=(numpy.random.random(n) * 20.).astype(int),
-                    # data=numpy.arange(n)
+                    name='All data points',
+                    data=data_names
                 )
                 self.w4.addItem(s4)
+                # make color map
+                cm = pg.colormap.get('CET-L9')  # prepare a linear color map
+                bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cm)
+                # bar.setImageItem(s4, insert_in=self.w4)
+            else:
+                goodNum = 0
+                data_dict = {}
+                data_name_dict = {}
+                for d in DataIn:
+                    try:
+                        x = float(d[0])
+                        y = float(d[1])
+                        if d[2] in data_dict:
+                            data_dict[d[2]].append([x,y])
+                            data_name_dict[d[2]].append(d[3])
+                        else:
+                            data_dict[d[2]] = [[x,y]]
+                            data_name_dict[d[2]] = d[3]
+                        goodNum += 1
+                    except:
+                        pass
+    
+                if goodNum == 0:
+                    QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                        QMessageBox.Ok, QMessageBox.Ok)
+                    return
+    
+                # generate color code
+                labels = list(data_dict.keys())
+                colors = sns.color_palette("hls", len(labels))
+                color_dict = {}
+                for i in range(len(labels)):
+                    cur_color = [x*255 for x in colors[i]]
+                    color_dict[labels[i]] = cur_color
+    
+                for key in data_dict.keys():
+                    data_series1 = [x[0] for x in data_dict[key]]
+                    data_series2 = [x[1] for x in data_dict[key]]
+    
+                    # make plot
+                    s4 = pg.ScatterPlotItem(
+                        size=16,
+                        pen=pg.mkPen('k', width=2),
+                        brush=pg.mkBrush(255, 255, 255, 20),
+                        hoverable=True,
+                        hoverSymbol='s',
+                        hoverSize=15,
+                        hoverPen=pg.mkPen('r', width=2),
+                        hoverBrush=pg.mkBrush('g'),
+                    )
+    
+                    s4.addPoints(
+                        x=data_series1,
+                        y=data_series2,
+                        brush=pg.mkBrush(color_dict[key]),
+                        name=key,
+                        # size=(numpy.random.random(n) * 20.).astype(int),
+                        data=data_name_dict[key]
+                    )
+                    self.w4.addItem(s4)
 
         self.w4.autoRange()
 
