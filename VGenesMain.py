@@ -4852,6 +4852,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     return
 
                 # make plot
+                pos = numpy.array([0., 0.25, 0.5, 0.75, 1.])
+                color = [[20, 133, 212, 255], [53, 42, 135, 255], [48, 174, 170, 255],
+                         [210, 184, 87, 255], [249, 251, 14, 255]]
+                color = numpy.array(color, dtype=numpy.ubyte)
+                cmap = pg.ColorMap(pos, color)
+                min_spec = numpy.min(data_color)
+                max_spec = numpy.max(data_color)
+                spectr = [(x-min_spec)/(max_spec-min_spec) for x in data_color]
                 s4 = pg.ScatterPlotItem(
                     size=16,
                     pen=pg.mkPen('k', width=2),
@@ -4865,12 +4873,13 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     x=data_series1,
                     y=data_series2,
                     name='All data points',
-                    data=data_names
+                    data=data_names,
+                    brush=cmap.map(spectr, 'qcolor')
                 )
                 self.w4.addItem(s4)
                 # make color map
-                cm = pg.colormap.get('CET-L9')  # prepare a linear color map
-                bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cm)
+                  # prepare a linear color map
+                # bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cm)
                 # bar.setImageItem(s4, insert_in=self.w4)
             else:
                 goodNum = 0
