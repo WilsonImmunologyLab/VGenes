@@ -43,6 +43,10 @@ matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import pyqtgraph.examples
+
+from pyqtgraph.Qt import QtGui, QtCore
+import pyqtgraph as pg
 
 import VReports
 from ui_VGenesMain import Ui_MainWindow
@@ -4701,6 +4705,183 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         self.chartview.setChart(chart)
         self.chartview.chart().zoom(0.9)
+
+class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
+    ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        super(PyqtGraphDialog, self).__init__()
+        self.ui = Ui_QchartDialog()
+        self.ui.setupUi(self)
+
+        self.DBFilename = ""
+
+        self.ui.pushButtonDraw.clicked.connect(self.Draw)
+        self.ui.radioButtonNum.clicked.connect(self.activeUI)
+
+        self.view = pg.GraphicsLayoutWidget()
+        self.ui.PlotVerticalLayout.addWidget(self.view)
+        self.w4 = self.view.addPlot()
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}")
+        else:
+            pass
+
+    def select(self, event):
+        msg = 'xxx'
+        QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+
+    def activeUI(self):
+        if self.ui.radioButtonNum.isChecked():
+            self.ui.lineEditMin.setEnabled(True)
+            self.ui.lineEditMax.setEnabled(True)
+        else:
+            self.ui.lineEditMin.setEnabled(False)
+            self.ui.lineEditMax.setEnabled(False)
+
+    def Draw(self):
+        dim1 = self.ui.comboBoxX.currentText()
+        dim2 = self.ui.comboBoxY.currentText()
+        group = self.ui.comboBoxGroup.currentText()
+
+        dim1 = re.sub(r'\(.+', '', dim1)
+        dim2 = re.sub(r'\(.+', '', dim2)
+        group = re.sub(r'\(.+', '', group)
+
+        if dim1 == "" or dim2 == "":
+            QMessageBox.warning(self, 'Warning', 'Your dim1 or dim2 is empty!',
+                                QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        where_statement = ' WHERE 1'
+
+        data_series1 = []
+        data_series2 = []
+        self.w4.clear()
+        self.w4.addLegend()
+
+        if group == '':
+            field = dim1 + "," + dim2
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + where_statement
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            goodNum = 0
+            for d in DataIn:
+                try:
+                    x = float(d[0])
+                    y = float(d[1])
+                    data_series1.append(x)
+                    data_series2.append(y)
+                    goodNum += 1
+                except:
+                    pass
+            if goodNum == 0:
+                QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                    QMessageBox.Ok, QMessageBox.Ok)
+                return
+
+            # make plot
+            s4 = pg.ScatterPlotItem(
+                size=16,
+                pen=pg.mkPen('k', width=2),
+                brush=pg.mkBrush(255, 255, 255, 20),
+                hoverable=True,
+                hoverSymbol='s',
+                hoverSize=15,
+                hoverPen=pg.mkPen('r', width=2),
+                hoverBrush=pg.mkBrush('g'),
+            )
+
+            s4.addPoints(
+                x=data_series1,
+                y=data_series2,
+                brush=pg.mkBrush(0.6),
+                name='all data points'
+                # size=(numpy.random.random(n) * 20.).astype(int),
+                # data=numpy.arange(n)
+            )
+            self.w4.addItem(s4)
+        else:
+            field = dim1 + "," + dim2 + "," + group
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            goodNum = 0
+            data_dict = {}
+            data_series1 = []
+            data_series2 = []
+            data_name = []
+            
+            for d in DataIn:
+                try:
+                    x = float(d[0])
+                    y = float(d[1])
+                    if d[2] in data_dict:
+                        data_dict[d[2]].append([x,y])
+                    else:
+                        data_dict[d[2]] = [[x,y]]
+                    goodNum += 1
+                except:
+                    pass
+
+            if goodNum == 0:
+                QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                    QMessageBox.Ok, QMessageBox.Ok)
+                return
+
+            # generate color code
+            labels = list(data_dict.keys())
+            colors = sns.color_palette("hls", len(labels))
+            color_dict = {}
+            for i in range(len(labels)):
+                cur_color = [x*255 for x in colors[i]]
+                color_dict[labels[i]] = cur_color
+
+            for key in data_dict.keys():
+                data_series1 = [x[0] for x in data_dict[key]]
+                data_series2 = [x[1] for x in data_dict[key]]
+
+                # make plot
+                s4 = pg.ScatterPlotItem(
+                    size=16,
+                    pen=pg.mkPen('k', width=2),
+                    brush=pg.mkBrush(255, 255, 255, 20),
+                    hoverable=True,
+                    hoverSymbol='s',
+                    hoverSize=15,
+                    hoverPen=pg.mkPen('r', width=2),
+                    hoverBrush=pg.mkBrush('g'),
+                )
+
+                s4.addPoints(
+                    x=data_series1,
+                    y=data_series2,
+                    brush=pg.mkBrush(color_dict[key]),
+                    name=key
+                    # size=(numpy.random.random(n) * 20.).astype(int),
+                    # data=numpy.arange(n)
+                )
+                self.w4.addItem(s4)
+
+        self.w4.autoRange()
+
 
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
@@ -10347,6 +10528,9 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionTestMutMap_triggered(self):
+        # test something
+        pyqtgraph.examples.run()
+        return
         # fetch data
         cur_name = self.ui.txtName.toPlainText()
         WHEREStatement = 'WHERE SeqName IN ("' + cur_name + '")'
@@ -19301,6 +19485,21 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myQchartDialog.ui.comboBoxGroup.addItems(fields_name)
 
         self.myQchartDialog.show()
+
+    @pyqtSlot()
+    def on_actionpyqtGraph_triggered(self):
+        # open a dialog for settings
+        self.myPyqtGraphDialog = PyqtGraphDialog()
+
+        self.myPyqtGraphDialog.DBFilename = DBFilename
+        self.myPyqtGraphDialog.vgene = self
+
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myPyqtGraphDialog.ui.comboBoxX.addItems(fields_name)
+        self.myPyqtGraphDialog.ui.comboBoxY.addItems(fields_name)
+        self.myPyqtGraphDialog.ui.comboBoxGroup.addItems(fields_name)
+
+        self.myPyqtGraphDialog.show()
 
     @pyqtSlot()
     def on_actionAnalyze_Mutations_triggered(self):

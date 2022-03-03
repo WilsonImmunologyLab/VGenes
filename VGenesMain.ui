@@ -1603,8 +1603,8 @@
            <property name="geometry">
             <rect>
              <x>0</x>
-             <y>-176</y>
-             <width>1211</width>
+             <y>0</y>
+             <width>1226</width>
              <height>821</height>
             </rect>
            </property>
@@ -4653,8 +4653,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1211</width>
-             <height>747</height>
+             <width>1226</width>
+             <height>750</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_56">
@@ -6574,7 +6574,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1211</width>
+             <width>1226</width>
              <height>911</height>
             </rect>
            </property>
@@ -11553,6 +11553,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionStructure"/>
     <addaction name="actionBatchChangeName"/>
     <addaction name="actionQchart"/>
+    <addaction name="actionpyqtGraph"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -12395,6 +12396,11 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>Qchart</string>
+   </property>
+  </action>
+  <action name="actionpyqtGraph">
+   <property name="text">
+    <string>pyqtGraph</string>
    </property>
   </action>
  </widget>
