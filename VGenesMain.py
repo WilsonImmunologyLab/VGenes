@@ -4775,10 +4775,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         dim1 = self.ui.comboBoxX.currentText()
         dim2 = self.ui.comboBoxY.currentText()
         group = self.ui.comboBoxGroup.currentText()
+        size = self.ui.comboBoxSize.currentText()
 
         dim1 = re.sub(r'\(.+', '', dim1)
         dim2 = re.sub(r'\(.+', '', dim2)
         group = re.sub(r'\(.+', '', group)
+        size = re.sub(r'\(.+', '', size)
 
         if dim1 == "" or dim2 == "":
             QMessageBox.warning(self, 'Warning', 'Your dim1 or dim2 is empty!',
@@ -4791,52 +4793,115 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.w4.addLegend()
 
         if group == '':
-            field = dim1 + "," + dim2
-            SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB' + where_statement
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            if size == '':
+                field = dim1 + "," + dim2
+                SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB' + where_statement
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+    
+                data_series1 = []
+                data_series2 = []
+                data_names = []
+    
+                goodNum = 0
+                for d in DataIn:
+                    try:
+                        x = float(d[0])
+                        y = float(d[1])
+                        data_series1.append(x)
+                        data_series2.append(y)
+                        cur_names = '\nName:\t\t' + d[2] + '\nIsotype:\t\t' + d[3] + '\nCDR3Length:\t' + d[4] + '\nTotMut:\t\t' + d[5]
+                        data_names.append(cur_names)
+                        goodNum += 1
+                    except:
+                        pass
+                if goodNum == 0:
+                    QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                        QMessageBox.Ok, QMessageBox.Ok)
+                    return
+    
+                # make plot
+                s4 = pg.ScatterPlotItem(
+                    size=16,
+                    pen=pg.mkPen('k', width=2),
+                    brush=pg.mkBrush(255, 255, 255, 20),
+                    hoverable=True,
+                    hoverSymbol='s',
+                    hoverSize=15,
+                    hoverPen=pg.mkPen('r', width=2),
+                    hoverBrush=pg.mkBrush('g'),
+                )
+    
+                s4.addPoints(
+                    x=data_series1,
+                    y=data_series2,
+                    brush=pg.mkBrush(0.6),
+                    name='All data points',
+                    # size=(numpy.random.random(n) * 20.).astype(int),
+                    data=data_names
+                )
+                self.w4.addItem(s4)
+            else:
+                field = dim1 + "," + dim2 + ',' + size
+                SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB' + where_statement
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-            data_series1 = []
-            data_series2 = []
-            data_names = []
+                data_series1 = []
+                data_series2 = []
+                data_size = []
+                data_names = []
 
-            goodNum = 0
-            for d in DataIn:
-                try:
-                    x = float(d[0])
-                    y = float(d[1])
-                    data_series1.append(x)
-                    data_series2.append(y)
-                    cur_names = '\nName:\t\t' + d[2] + '\nIsotype:\t\t' + d[3] + '\nCDR3Length:\t' + d[4] + '\nTotMut:\t\t' + d[5]
-                    data_names.append(cur_names)
-                    goodNum += 1
-                except:
-                    pass
-            if goodNum == 0:
-                QMessageBox.warning(self, 'Warning', 'No qualified records found!',
-                                    QMessageBox.Ok, QMessageBox.Ok)
-                return
+                goodNum = 0
+                for d in DataIn:
+                    try:
+                        x = float(d[0])
+                        y = float(d[1])
+                        z = float(d[2])
+                        data_series1.append(x)
+                        data_series2.append(y)
+                        data_size.append(z)
+                        cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' +\
+                                    d[5] + '\nTotMut:\t\t' + d[6]
+                        data_names.append(cur_names)
+                        goodNum += 1
+                    except:
+                        pass
+                if goodNum == 0:
+                    QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                        QMessageBox.Ok, QMessageBox.Ok)
+                    return
+                # process data size
+                datamin = numpy.min(data_size)
+                datamax = numpy.max(data_size)
+                if datamin < 0:
+                    datamin = 0
+                # new range is 0 - 30
+                scale_factor = (datamax - datamin) / 30
+                data_size_scale = []
+                for x in data_size:
+                    scaled_value = int((abs(x) - datamin) / scale_factor)
+                    data_size_scale.append(scaled_value)
 
-            # make plot
-            s4 = pg.ScatterPlotItem(
-                size=16,
-                pen=pg.mkPen('k', width=2),
-                brush=pg.mkBrush(255, 255, 255, 20),
-                hoverable=True,
-                hoverSymbol='s',
-                hoverSize=15,
-                hoverPen=pg.mkPen('r', width=2),
-                hoverBrush=pg.mkBrush('g'),
-            )
+                # make plot
+                s4 = pg.ScatterPlotItem(
+                    size=16,
+                    pen=pg.mkPen('k', width=2),
+                    brush=pg.mkBrush(255, 255, 255, 20),
+                    hoverable=True,
+                    hoverSymbol='s',
+                    hoverSize=15,
+                    hoverPen=pg.mkPen('r', width=2),
+                    hoverBrush=pg.mkBrush('g'),
+                )
 
-            s4.addPoints(
-                x=data_series1,
-                y=data_series2,
-                brush=pg.mkBrush(0.6),
-                name='All data points',
-                # size=(numpy.random.random(n) * 20.).astype(int),
-                data=data_names
-            )
-            self.w4.addItem(s4)
+                s4.addPoints(
+                    x=data_series1,
+                    y=data_series2,
+                    brush=pg.mkBrush(0.6),
+                    name='All data points',
+                    size=data_size_scale,
+                    data=data_names
+                )
+                self.w4.addItem(s4)
         else:
             field = dim1 + "," + dim2 + "," + group
             SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
@@ -19692,6 +19757,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPyqtGraphDialog.ui.comboBoxX.addItems(fields_name)
         self.myPyqtGraphDialog.ui.comboBoxY.addItems(fields_name)
         self.myPyqtGraphDialog.ui.comboBoxGroup.addItems(fields_name)
+        self.myPyqtGraphDialog.ui.comboBoxSize.addItems(fields_name)
 
         self.myPyqtGraphDialog.show()
 
