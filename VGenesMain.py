@@ -4771,6 +4771,21 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             self.ui.lineEditMax.setEnabled(False)
             self.ui.spinBox.setEnabled(False)
 
+    def scaleSize(self, data_size, data_size_raw, range):
+        datamin = numpy.min(data_size)
+        datamax = numpy.max(data_size)
+        if datamin < 0:
+            datamin = 0
+        # new range is 0 - 30
+        scale_factor = (datamax - datamin) / range
+        data_size_scale = []
+        
+        for x in data_size_raw:
+            scaled_value = int((abs(x) - datamin) / scale_factor)
+            data_size_scale.append(scaled_value)
+
+        return data_size_scale
+
     def Draw(self):
         dim1 = self.ui.comboBoxX.currentText()
         dim2 = self.ui.comboBoxY.currentText()
@@ -4870,16 +4885,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                         QMessageBox.Ok, QMessageBox.Ok)
                     return
                 # process data size
-                datamin = numpy.min(data_size)
-                datamax = numpy.max(data_size)
-                if datamin < 0:
-                    datamin = 0
-                # new range is 0 - 30
-                scale_factor = (datamax - datamin) / 30
-                data_size_scale = []
-                for x in data_size:
-                    scaled_value = int((abs(x) - datamin) / scale_factor)
-                    data_size_scale.append(scaled_value)
+                data_size_scale = self.scaleSize(data_size, data_size, 30)
 
                 # make plot
                 s4 = pg.ScatterPlotItem(
@@ -4903,241 +4909,457 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 )
                 self.w4.addItem(s4)
         else:
-            field = dim1 + "," + dim2 + "," + group
-            SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            if size == '':
+                field = dim1 + "," + dim2 + "," + group
+                SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            else:
+                field = dim1 + "," + dim2 + "," + group + ',' + size
+                SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             if self.ui.radioButtonNum.isChecked():
-                goodNum = 0
-                data_series1 = []
-                data_series2 = []
-                data_color = []
-                data_names = []
-
-                for d in DataIn:
-                    try:
-                        x = float(d[0])
-                        y = float(d[1])
-                        z = float(d[2])
-                        data_series1.append(x)
-                        data_series2.append(y)
-                        data_color.append(z)
-                        cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
-                        data_names.append(cur_names)
-                        goodNum += 1
-                    except:
-                        pass
-
-                if goodNum == 0:
-                    QMessageBox.warning(self, 'Warning', 'No qualified records found!',
-                                        QMessageBox.Ok, QMessageBox.Ok)
-                    return
-
-                ''' some old code
-                # make plot
-                pos = numpy.array([0., 0.25, 0.5, 0.75, 1.])
-                color = [[20, 133, 212, 255], [53, 42, 135, 255], [48, 174, 170, 255],
-                         [210, 184, 87, 255], [249, 251, 14, 255]]
-                color = numpy.array(color, dtype=numpy.ubyte)
-                cmap = pg.ColorMap(pos, color)
-                min_spec = numpy.min(data_color)
-                max_spec = numpy.max(data_color)
-                spectr = [(x-min_spec)/(max_spec-min_spec) for x in data_color]
-                s4 = pg.ScatterPlotItem(
-                    size=16,
-                    pen=pg.mkPen('k', width=2),
-                    hoverable=True,
-                    hoverSymbol='s',
-                    hoverSize=15,
-                    hoverPen=pg.mkPen('r', width=2),
-                    hoverBrush=pg.mkBrush('g'),
-                )
-                s4.addPoints(
-                    x=data_series1,
-                    y=data_series2,
-                    name='All data points',
-                    data=data_names,
-                    brush=cmap.map(spectr, 'qcolor')
-                )
-                self.w4.addItem(s4)
-                # make color map
-                bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cmap)
-                bar.setAxisItems(s4)
-                # bar.setImageItem(s4, insert_in=self.w4)
-                #bar_width = 32
-                #bar_data = pg.colormap.modulatedBarData(width=bar_width)
-                #imi = pg.ImageItem(bar_data)
-                #imi.setLookupTable(cmap.getLookupTable(alpha=True))
-                #self.w5 = self.view.addPlot()
-                #self.w5.addItem(imi)
-                '''
-                # make color range
-                if self.rangeSet == True:
-                    minOK = False
-                    maxOK = False
-                    try:
-                        min_spec = float(self.ui.lineEditMin.text())
-                        minOK = True
-                    except:
-                        pass
+                if size == '':
+                    goodNum = 0
+                    data_series1 = []
+                    data_series2 = []
+                    data_color = []
+                    data_names = []
+    
+                    for d in DataIn:
+                        try:
+                            x = float(d[0])
+                            y = float(d[1])
+                            z = float(d[2])
+                            data_series1.append(x)
+                            data_series2.append(y)
+                            data_color.append(z)
+                            cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
+                            data_names.append(cur_names)
+                            goodNum += 1
+                        except:
+                            pass
+    
+                    if goodNum == 0:
+                        QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                            QMessageBox.Ok, QMessageBox.Ok)
+                        return
+    
+                    ''' some old code
+                    # make plot
+                    pos = numpy.array([0., 0.25, 0.5, 0.75, 1.])
+                    color = [[20, 133, 212, 255], [53, 42, 135, 255], [48, 174, 170, 255],
+                             [210, 184, 87, 255], [249, 251, 14, 255]]
+                    color = numpy.array(color, dtype=numpy.ubyte)
+                    cmap = pg.ColorMap(pos, color)
+                    min_spec = numpy.min(data_color)
+                    max_spec = numpy.max(data_color)
+                    spectr = [(x-min_spec)/(max_spec-min_spec) for x in data_color]
+                    s4 = pg.ScatterPlotItem(
+                        size=16,
+                        pen=pg.mkPen('k', width=2),
+                        hoverable=True,
+                        hoverSymbol='s',
+                        hoverSize=15,
+                        hoverPen=pg.mkPen('r', width=2),
+                        hoverBrush=pg.mkBrush('g'),
+                    )
+                    s4.addPoints(
+                        x=data_series1,
+                        y=data_series2,
+                        name='All data points',
+                        data=data_names,
+                        brush=cmap.map(spectr, 'qcolor')
+                    )
+                    self.w4.addItem(s4)
+                    # make color map
+                    bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cmap)
+                    bar.setAxisItems(s4)
+                    # bar.setImageItem(s4, insert_in=self.w4)
+                    #bar_width = 32
+                    #bar_data = pg.colormap.modulatedBarData(width=bar_width)
+                    #imi = pg.ImageItem(bar_data)
+                    #imi.setLookupTable(cmap.getLookupTable(alpha=True))
+                    #self.w5 = self.view.addPlot()
+                    #self.w5.addItem(imi)
+                    '''
+                    # make color range
+                    if self.rangeSet == True:
+                        minOK = False
+                        maxOK = False
+                        try:
+                            min_spec = float(self.ui.lineEditMin.text())
+                            minOK = True
+                        except:
+                            pass
+                            
+                        try:
+                            max_spec = float(self.ui.lineEditMax.text())
+                            maxOK = True
+                        except:
+                            pass
                         
-                    try:
-                        max_spec = float(self.ui.lineEditMax.text())
-                        maxOK = True
-                    except:
-                        pass
-                    
-                    if minOK or maxOK:
-                        if minOK:
-                            if maxOK:
-                                pass
+                        if minOK or maxOK:
+                            if minOK:
+                                if maxOK:
+                                    pass
+                                else:
+                                    # check min
+                                    if min_spec > numpy.max(data_color):
+                                        Msg = 'The min value you set is even larger than the max of your data, will use min and max of your data!'
+                                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                                        min_spec = numpy.min(data_color)
+                                        max_spec = numpy.max(data_color)
+                                        self.resetRange()
+                                    else:
+                                        max_spec = numpy.max(data_color)
                             else:
-                                # check min
-                                if min_spec > numpy.max(data_color):
-                                    Msg = 'The min value you set is even larger than the max of your data, will use min and max of your data!'
+                                # check max
+                                if max_spec < numpy.min(data_color):
+                                    Msg = 'The max value you set is even smaller than the min of your data, will use min and max of your data!'
                                     QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                                     min_spec = numpy.min(data_color)
                                     max_spec = numpy.max(data_color)
                                     self.resetRange()
                                 else:
-                                    max_spec = numpy.max(data_color)
+                                    min_spec = numpy.min(data_color)
                         else:
-                            # check max
-                            if max_spec < numpy.min(data_color):
-                                Msg = 'The max value you set is even smaller than the min of your data, will use min and max of your data!'
-                                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-                                min_spec = numpy.min(data_color)
-                                max_spec = numpy.max(data_color)
-                                self.resetRange()
-                            else:
-                                min_spec = numpy.min(data_color)
+                            Msg = 'Can not parse both the min and max value you specified, will use min and max of your data!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            min_spec = numpy.min(data_color)
+                            max_spec = numpy.max(data_color)
+                            self.resetRange()
                     else:
-                        Msg = 'Can not parse both the min and max value you specified, will use min and max of your data!'
-                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                         min_spec = numpy.min(data_color)
                         max_spec = numpy.max(data_color)
-                        self.resetRange()
-                else:
-                    min_spec = numpy.min(data_color)
-                    max_spec = numpy.max(data_color)
-
-                n_color = self.ui.spinBox.value()
-                colors = sns.color_palette("afmhot", n_color) # CET-l3
-                color_dict = {}
-                for i in range(n_color):
-                    cur_color = [x * 255 for x in colors[i]]
-                    color_dict[i] = cur_color
-
-                color_step = (max_spec - min_spec) / n_color
-                data_dict = {}
-                data_name_dict = {}
-                group_name_dict = {}
-
-                start_value = min_spec
-                for i in range(n_color):
-                    cur_name = 'G' + str(i+1) + '\t' + str(round(start_value, 2)) + ' - ' + str(round(start_value + color_step, 2))
-                    group_name_dict[i] = cur_name
-                    start_value += color_step
-
-                for i in range(len(data_color)):
-                    cur_group = (data_color[i] - min_spec) // color_step
-                    if cur_group > n_color - 1:
-                        cur_group = n_color - 1
-                    if cur_group < 0:
-                        cur_group = 0
-
-                    cur_names = data_names[i]
-                    cur_names += '\n' + group + ':\t\t' + str(data_color[i])
-                    if cur_group in data_dict:
-                        data_dict[cur_group].append([data_series1[i], data_series2[i]])
-                        data_name_dict[cur_group].append(cur_names)
-                    else:
-                        data_dict[cur_group] = [[data_series1[i], data_series2[i]]]
-                        data_name_dict[cur_group] = [cur_names]
-
-                # make plot
-                for key in data_dict.keys():
-                    data_series1 = [x[0] for x in data_dict[key]]
-                    data_series2 = [x[1] for x in data_dict[key]]
-
-                    # make plot
-                    s4 = pg.ScatterPlotItem(
-                        size=16,
-                        pen=pg.mkPen('k', width=2),
-                        brush=pg.mkBrush(255, 255, 255, 20),
-                        hoverable=True,
-                        hoverSymbol='s',
-                        hoverSize=15,
-                        hoverPen=pg.mkPen('r', width=2),
-                        hoverBrush=pg.mkBrush('g'),
-                    )
-                    s4.addPoints(
-                        x=data_series1,
-                        y=data_series2,
-                        brush=pg.mkBrush(color_dict[key]),
-                        name=group_name_dict[key],
-                        # size=(numpy.random.random(n) * 20.).astype(int),
-                        data=data_name_dict[key]
-                    )
-                    self.w4.addItem(s4)
-
-            else:
-                goodNum = 0
-                data_dict = {}
-                data_name_dict = {}
-                for d in DataIn:
-                    try:
-                        x = float(d[0])
-                        y = float(d[1])
-                        cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
-                        if d[2] in data_dict:
-                            data_dict[d[2]].append([x,y])
-                            data_name_dict[d[2]].append(cur_names)
+    
+                    n_color = self.ui.spinBox.value()
+                    colors = sns.color_palette("afmhot", n_color) # CET-l3
+                    color_dict = {}
+                    for i in range(n_color):
+                        cur_color = [x * 255 for x in colors[i]]
+                        color_dict[i] = cur_color
+    
+                    color_step = (max_spec - min_spec) / n_color
+                    data_dict = {}
+                    data_name_dict = {}
+                    group_name_dict = {}
+                    
+                    # make group name dict
+                    start_value = min_spec
+                    for i in range(n_color):
+                        cur_name = 'G' + str(i+1) + '\t' + str(round(start_value, 2)) + ' - ' + str(round(start_value + color_step, 2))
+                        group_name_dict[i] = cur_name
+                        start_value += color_step
+    
+                    # make data dict
+                    for i in range(len(data_color)):
+                        cur_group = (data_color[i] - min_spec) // color_step
+                        if cur_group > n_color - 1:
+                            cur_group = n_color - 1
+                        if cur_group < 0:
+                            cur_group = 0
+    
+                        cur_names = data_names[i]
+                        cur_names += '\n' + group + ':\t\t' + str(data_color[i])
+                        if cur_group in data_dict:
+                            data_dict[cur_group].append([data_series1[i], data_series2[i]])
+                            data_name_dict[cur_group].append(cur_names)
                         else:
-                            data_dict[d[2]] = [[x,y]]
-                            data_name_dict[d[2]] = [cur_names]
-                        goodNum += 1
-                    except:
-                        pass
-    
-                if goodNum == 0:
-                    QMessageBox.warning(self, 'Warning', 'No qualified records found!',
-                                        QMessageBox.Ok, QMessageBox.Ok)
-                    return
-    
-                # generate color code
-                labels = list(data_dict.keys())
-                colors = sns.color_palette("hls", len(labels))
-                color_dict = {}
-                for i in range(len(labels)):
-                    cur_color = [x*255 for x in colors[i]]
-                    color_dict[labels[i]] = cur_color
-    
-                for key in data_dict.keys():
-                    data_series1 = [x[0] for x in data_dict[key]]
-                    data_series2 = [x[1] for x in data_dict[key]]
+                            data_dict[cur_group] = [[data_series1[i], data_series2[i]]]
+                            data_name_dict[cur_group] = [cur_names]
     
                     # make plot
-                    s4 = pg.ScatterPlotItem(
-                        size=16,
-                        pen=pg.mkPen('k', width=2),
-                        brush=pg.mkBrush(255, 255, 255, 20),
-                        hoverable=True,
-                        hoverSymbol='s',
-                        hoverSize=15,
-                        hoverPen=pg.mkPen('r', width=2),
-                        hoverBrush=pg.mkBrush('g'),
-                    )
+                    for key in data_dict.keys():
+                        data_series1 = [x[0] for x in data_dict[key]]
+                        data_series2 = [x[1] for x in data_dict[key]]
     
-                    s4.addPoints(
-                        x=data_series1,
-                        y=data_series2,
-                        brush=pg.mkBrush(color_dict[key]),
-                        name=key,
-                        # size=(numpy.random.random(n) * 20.).astype(int),
-                        data=data_name_dict[key]
-                    )
-                    self.w4.addItem(s4)
+                        # make plot
+                        s4 = pg.ScatterPlotItem(
+                            size=16,
+                            pen=pg.mkPen('k', width=2),
+                            brush=pg.mkBrush(255, 255, 255, 20),
+                            hoverable=True,
+                            hoverSymbol='s',
+                            hoverSize=15,
+                            hoverPen=pg.mkPen('r', width=2),
+                            hoverBrush=pg.mkBrush('g'),
+                        )
+                        s4.addPoints(
+                            x=data_series1,
+                            y=data_series2,
+                            brush=pg.mkBrush(color_dict[key]),
+                            name=group_name_dict[key],
+                            # size=(numpy.random.random(n) * 20.).astype(int),
+                            data=data_name_dict[key]
+                        )
+                        self.w4.addItem(s4)
+                else:
+                    goodNum = 0
+                    data_series1 = []
+                    data_series2 = []
+                    data_size = []
+                    data_color = []
+                    data_names = []
+
+                    for d in DataIn:
+                        try:
+                            x = float(d[0])
+                            y = float(d[1])
+                            z = float(d[2])
+                            n = float(d[3])
+                            data_series1.append(x)
+                            data_series2.append(y)
+                            data_size.append(n)
+                            data_color.append(z)
+                            cur_names = '\nName:\t\t' + d[4] + '\nIsotype:\t\t' + d[5] + '\nCDR3Length:\t' + \
+                                        d[6] + '\nTotMut:\t\t' + d[7]
+                            data_names.append(cur_names)
+                            goodNum += 1
+                        except:
+                            pass
+
+                    if goodNum == 0:
+                        QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                            QMessageBox.Ok, QMessageBox.Ok)
+                        return
+
+                    # process data size
+                    data_size_scale = self.scaleSize(data_size, data_size, 30)
+                    # make color range
+                    if self.rangeSet == True:
+                        minOK = False
+                        maxOK = False
+                        try:
+                            min_spec = float(self.ui.lineEditMin.text())
+                            minOK = True
+                        except:
+                            pass
+
+                        try:
+                            max_spec = float(self.ui.lineEditMax.text())
+                            maxOK = True
+                        except:
+                            pass
+
+                        if minOK or maxOK:
+                            if minOK:
+                                if maxOK:
+                                    pass
+                                else:
+                                    # check min
+                                    if min_spec > numpy.max(data_color):
+                                        Msg = 'The min value you set is even larger than the max of your data, will use min and max of your data!'
+                                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                                        min_spec = numpy.min(data_color)
+                                        max_spec = numpy.max(data_color)
+                                        self.resetRange()
+                                    else:
+                                        max_spec = numpy.max(data_color)
+                            else:
+                                # check max
+                                if max_spec < numpy.min(data_color):
+                                    Msg = 'The max value you set is even smaller than the min of your data, will use min and max of your data!'
+                                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                                    min_spec = numpy.min(data_color)
+                                    max_spec = numpy.max(data_color)
+                                    self.resetRange()
+                                else:
+                                    min_spec = numpy.min(data_color)
+                        else:
+                            Msg = 'Can not parse both the min and max value you specified, will use min and max of your data!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            min_spec = numpy.min(data_color)
+                            max_spec = numpy.max(data_color)
+                            self.resetRange()
+                    else:
+                        min_spec = numpy.min(data_color)
+                        max_spec = numpy.max(data_color)
+
+                    n_color = self.ui.spinBox.value()
+                    colors = sns.color_palette("afmhot", n_color)  # CET-l3
+                    color_dict = {}
+                    for i in range(n_color):
+                        cur_color = [x * 255 for x in colors[i]]
+                        color_dict[i] = cur_color
+
+                    color_step = (max_spec - min_spec) / n_color
+                    data_dict = {}
+                    data_name_dict = {}
+                    group_name_dict = {}
+
+                    # make group name dict
+                    start_value = min_spec
+                    for i in range(n_color):
+                        cur_name = 'G' + str(i + 1) + '\t' + str(round(start_value, 2)) + ' - ' + str(
+                            round(start_value + color_step, 2))
+                        group_name_dict[i] = cur_name
+                        start_value += color_step
+
+                    # make data dict
+                    for i in range(len(data_color)):
+                        cur_group = (data_color[i] - min_spec) // color_step
+                        if cur_group > n_color - 1:
+                            cur_group = n_color - 1
+                        if cur_group < 0:
+                            cur_group = 0
+
+                        cur_names = data_names[i]
+                        cur_names += '\n' + group + ':\t\t' + str(data_color[i])
+                        if cur_group in data_dict:
+                            data_dict[cur_group].append([data_series1[i], data_series2[i], data_size_scale[i]])
+                            data_name_dict[cur_group].append(cur_names)
+                        else:
+                            data_dict[cur_group] = [[data_series1[i], data_series2[i], data_size_scale[i]]]
+                            data_name_dict[cur_group] = [cur_names]
+
+                    # make plot
+                    for key in data_dict.keys():
+                        data_series1 = [x[0] for x in data_dict[key]]
+                        data_series2 = [x[1] for x in data_dict[key]]
+                        data_size = [x[2] for x in data_dict[key]]
+                        # make plot
+                        s4 = pg.ScatterPlotItem(
+                            size=16,
+                            pen=pg.mkPen('k', width=2),
+                            brush=pg.mkBrush(255, 255, 255, 20),
+                            hoverable=True,
+                            hoverSymbol='s',
+                            hoverSize=15,
+                            hoverPen=pg.mkPen('r', width=2),
+                            hoverBrush=pg.mkBrush('g'),
+                        )
+                        s4.addPoints(
+                            x=data_series1,
+                            y=data_series2,
+                            brush=pg.mkBrush(color_dict[key]),
+                            name=group_name_dict[key],
+                            size=data_size,
+                            data=data_name_dict[key]
+                        )
+                        self.w4.addItem(s4)
+            else:
+                if size == '':
+                    goodNum = 0
+                    data_dict = {}
+                    data_name_dict = {}
+                    for d in DataIn:
+                        try:
+                            x = float(d[0])
+                            y = float(d[1])
+                            cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
+                            if d[2] in data_dict:
+                                data_dict[d[2]].append([x,y])
+                                data_name_dict[d[2]].append(cur_names)
+                            else:
+                                data_dict[d[2]] = [[x,y]]
+                                data_name_dict[d[2]] = [cur_names]
+                            goodNum += 1
+                        except:
+                            pass
+
+                    if goodNum == 0:
+                        QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                            QMessageBox.Ok, QMessageBox.Ok)
+                        return
+
+                    # generate color code
+                    labels = list(data_dict.keys())
+                    colors = sns.color_palette("hls", len(labels))
+                    color_dict = {}
+                    for i in range(len(labels)):
+                        cur_color = [x*255 for x in colors[i]]
+                        color_dict[labels[i]] = cur_color
+
+                    for key in data_dict.keys():
+                        data_series1 = [x[0] for x in data_dict[key]]
+                        data_series2 = [x[1] for x in data_dict[key]]
+
+                        # make plot
+                        s4 = pg.ScatterPlotItem(
+                            size=16,
+                            pen=pg.mkPen('k', width=2),
+                            brush=pg.mkBrush(255, 255, 255, 20),
+                            hoverable=True,
+                            hoverSymbol='s',
+                            hoverSize=15,
+                            hoverPen=pg.mkPen('r', width=2),
+                            hoverBrush=pg.mkBrush('g'),
+                        )
+
+                        s4.addPoints(
+                            x=data_series1,
+                            y=data_series2,
+                            brush=pg.mkBrush(color_dict[key]),
+                            name=key,
+                            # size=(numpy.random.random(n) * 20.).astype(int),
+                            data=data_name_dict[key]
+                        )
+                        self.w4.addItem(s4)
+                else:
+                    goodNum = 0
+                    data_dict = {}
+                    data_name_dict = {}
+                    data_size = []
+                    for d in DataIn:
+                        try:
+                            x = float(d[0])
+                            y = float(d[1])
+                            z = float(d[3])
+                            cur_names = '\nName:\t\t' + d[4] + '\nIsotype:\t\t' + d[5] + '\nCDR3Length:\t' + \
+                                        d[6] + '\nTotMut:\t\t' + d[7]
+                            if d[2] in data_dict:
+                                data_dict[d[2]].append([x, y, z])
+                                data_name_dict[d[2]].append(cur_names)
+                            else:
+                                data_dict[d[2]] = [[x, y, z]]
+                                data_name_dict[d[2]] = [cur_names]
+                            data_size.append(z)
+                            goodNum += 1
+                        except:
+                            pass
+
+                    if goodNum == 0:
+                        QMessageBox.warning(self, 'Warning', 'No qualified records found!',
+                                            QMessageBox.Ok, QMessageBox.Ok)
+                        return
+
+                    # generate color code
+                    labels = list(data_dict.keys())
+                    colors = sns.color_palette("hls", len(labels))
+                    color_dict = {}
+                    for i in range(len(labels)):
+                        cur_color = [x * 255 for x in colors[i]]
+                        color_dict[labels[i]] = cur_color
+
+                    for key in data_dict.keys():
+                        data_series1 = [x[0] for x in data_dict[key]]
+                        data_series2 = [x[1] for x in data_dict[key]]
+                        data_size_raw = [x[2] for x in data_dict[key]]
+                        data_size_scale = self.scaleSize(data_size, data_size_raw, 30)
+                        
+                        # make plot
+                        s4 = pg.ScatterPlotItem(
+                            size=16,
+                            pen=pg.mkPen('k', width=2),
+                            brush=pg.mkBrush(255, 255, 255, 20),
+                            hoverable=True,
+                            hoverSymbol='s',
+                            hoverSize=15,
+                            hoverPen=pg.mkPen('r', width=2),
+                            hoverBrush=pg.mkBrush('g'),
+                        )
+
+                        s4.addPoints(
+                            x=data_series1,
+                            y=data_series2,
+                            brush=pg.mkBrush(color_dict[key]),
+                            name=key,
+                            size=data_size_scale,
+                            data=data_name_dict[key]
+                        )
+                        self.w4.addItem(s4)
+
 
         self.w4.autoRange()
 
