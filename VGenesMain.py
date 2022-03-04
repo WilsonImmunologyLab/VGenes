@@ -4719,10 +4719,15 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
         self.ui.radioButtonNum.clicked.connect(self.activeUI)
+        self.ui.lineEditMin.textChanged.connect(self.updateRange)
+        self.ui.lineEditMax.textChanged.connect(self.updateRange)
 
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
         self.w4 = self.view.addPlot()
+
+        self.rangeSet = False
+
 
         if system() == 'Windows':
             # set style for windows
@@ -4743,6 +4748,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def resetRange(self):
+        self.rangeSet = False
+        self.ui.lineEditMin.setText('')
+        self.ui.lineEditMax.setText('')
+    
+    def updateRange(self):
+        self.rangeSet = True
 
     def select(self, event):
         msg = 'xxx'
@@ -4853,7 +4866,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                         QMessageBox.Ok, QMessageBox.Ok)
                     return
 
-                
                 ''' some old code
                 # make plot
                 pos = numpy.array([0., 0.25, 0.5, 0.75, 1.])
@@ -4893,10 +4905,56 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 #self.w5.addItem(imi)
                 '''
                 # make color range
-                min_spec = numpy.min(data_color)
-                max_spec = numpy.max(data_color)
-                n_color = 9
+                if self.rangeSet == True:
+                    minOK = False
+                    maxOK = False
+                    try:
+                        min_spec = float(self.ui.lineEditMin.text())
+                        minOK = True
+                    except:
+                        pass
+                        
+                    try:
+                        max_spec = float(self.ui.lineEditMax.text())
+                        maxOK = True
+                    except:
+                        pass
+                    
+                    if minOK or maxOK:
+                        if minOK:
+                            if maxOK:
+                                pass
+                            else:
+                                # check min
+                                if min_spec > numpy.max(data_color):
+                                    Msg = 'The min value you set is even larger than the max of your data, will use min and max of your data!'
+                                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                                    min_spec = numpy.min(data_color)
+                                    max_spec = numpy.max(data_color)
+                                    self.resetRange()
+                                else:
+                                    max_spec = numpy.max(data_color)
+                        else:
+                            # check max
+                            if max_spec < numpy.min(data_color):
+                                Msg = 'The max value you set is even smaller than the min of your data, will use min and max of your data!'
+                                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                                min_spec = numpy.min(data_color)
+                                max_spec = numpy.max(data_color)
+                                self.resetRange()
+                            else:
+                                min_spec = numpy.min(data_color)
+                    else:
+                        Msg = 'Can not parse both the min and max value you specified, will use min and max of your data!'
+                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                        min_spec = numpy.min(data_color)
+                        max_spec = numpy.max(data_color)
+                        self.resetRange()
+                else:
+                    min_spec = numpy.min(data_color)
+                    max_spec = numpy.max(data_color)
 
+                n_color = 9
                 colors = sns.color_palette("afmhot", 9) # CET-l3
                 color_dict = {}
                 for i in range(9):
