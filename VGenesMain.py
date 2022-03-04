@@ -4765,9 +4765,11 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         if self.ui.radioButtonNum.isChecked():
             self.ui.lineEditMin.setEnabled(True)
             self.ui.lineEditMax.setEnabled(True)
+            self.ui.spinBox.setEnabled(True)
         else:
             self.ui.lineEditMin.setEnabled(False)
             self.ui.lineEditMax.setEnabled(False)
+            self.ui.spinBox.setEnabled(False)
 
     def Draw(self):
         dim1 = self.ui.comboBoxX.currentText()
@@ -4954,10 +4956,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     min_spec = numpy.min(data_color)
                     max_spec = numpy.max(data_color)
 
-                n_color = 9
-                colors = sns.color_palette("afmhot", 9) # CET-l3
+                n_color = self.ui.spinBox.value()
+                colors = sns.color_palette("afmhot", n_color) # CET-l3
                 color_dict = {}
-                for i in range(9):
+                for i in range(n_color):
                     cur_color = [x * 255 for x in colors[i]]
                     color_dict[i] = cur_color
 
