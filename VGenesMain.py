@@ -4777,7 +4777,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         if group == '':
             field = dim1 + "," + dim2
-            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB' + where_statement
+            SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB' + where_statement
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             data_series1 = []
@@ -4791,7 +4791,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     y = float(d[1])
                     data_series1.append(x)
                     data_series2.append(y)
-                    data_names.append(d[2])
+                    cur_names = '\nName:\t\t' + d[2] + '\nIsotype:\t\t' + d[3] + '\nCDR3Length:\t' + d[4] + '\nTotMut:\t\t' + d[5]
+                    data_names.append(cur_names)
                     goodNum += 1
                 except:
                     pass
@@ -4823,7 +4824,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             self.w4.addItem(s4)
         else:
             field = dim1 + "," + dim2 + "," + group
-            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
+            SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB ' + where_statement + ' ORDER BY ' + group
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             if self.ui.radioButtonNum.isChecked():
@@ -4841,7 +4842,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         data_series1.append(x)
                         data_series2.append(y)
                         data_color.append(z)
-                        data_names.append(d[3])
+                        cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
+                        data_names.append(cur_names)
                         goodNum += 1
                     except:
                         pass
@@ -4878,9 +4880,15 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 )
                 self.w4.addItem(s4)
                 # make color map
-                  # prepare a linear color map
-                # bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cm)
+                bar = pg.ColorBarItem(values=(numpy.min(data_color), numpy.max(data_color)), colorMap=cmap)
+                bar.setAxisItems(s4)
                 # bar.setImageItem(s4, insert_in=self.w4)
+                #bar_width = 32
+                #bar_data = pg.colormap.modulatedBarData(width=bar_width)
+                #imi = pg.ImageItem(bar_data)
+                #imi.setLookupTable(cmap.getLookupTable(alpha=True))
+                #self.w5 = self.view.addPlot()
+                #self.w5.addItem(imi)
             else:
                 goodNum = 0
                 data_dict = {}
@@ -4889,12 +4897,13 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     try:
                         x = float(d[0])
                         y = float(d[1])
+                        cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
                         if d[2] in data_dict:
                             data_dict[d[2]].append([x,y])
-                            data_name_dict[d[2]].append(d[3])
+                            data_name_dict[d[2]].append(cur_names)
                         else:
                             data_dict[d[2]] = [[x,y]]
-                            data_name_dict[d[2]] = d[3]
+                            data_name_dict[d[2]] = cur_names
                         goodNum += 1
                     except:
                         pass
