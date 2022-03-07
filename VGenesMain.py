@@ -4749,7 +4749,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
-
+    
+    def makeColors(self, n_color, plate_name): 
+        try:    # continuous colors
+            colors = sns.color_palette(plate_name, n_color)
+            return colors
+        except: # discrete colors
+            pass
+    
     def changeBG(self):
         if self.ui.radioButtonWhiteBG.isChecked():
             self.view.setBackground('w')
@@ -5038,9 +5045,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     else:
                         min_spec = numpy.min(data_color)
                         max_spec = numpy.max(data_color)
-    
+                    
+                    # determine colors
                     n_color = self.ui.spinBox.value()
-                    colors = sns.color_palette("afmhot", n_color) # CET-l3
+                    colors = self.makeColors(n_color, self.ui.comboBoxDiscretePlate.currentText())
                     color_dict = {}
                     for i in range(n_color):
                         cur_color = [x * 255 for x in colors[i]]
@@ -5182,7 +5190,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         max_spec = numpy.max(data_color)
 
                     n_color = self.ui.spinBox.value()
-                    colors = sns.color_palette("afmhot", n_color)  # CET-l3
+                    colors = self.makeColors(n_color, self.ui.comboBoxDiscretePlate.currentText())
                     color_dict = {}
                     for i in range(n_color):
                         cur_color = [x * 255 for x in colors[i]]

@@ -360,7 +360,48 @@
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBoxDiscretePlate"/>
+        <widget class="QComboBox" name="comboBoxDiscretePlate">
+         <item>
+          <property name="text">
+           <string>viridis</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>afmhot</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>rainbow</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>RdYlBu_r</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>RdYlGn_r</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Spectral_r</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>turbo</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>YlOrRd</string>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </item>
