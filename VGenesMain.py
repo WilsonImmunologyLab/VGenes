@@ -5092,7 +5092,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             data_name_dict[cur_group] = [cur_names]
     
                     # make plot
-                    for key in data_dict.keys():
+                    for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
     
@@ -5235,7 +5235,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             data_name_dict[cur_group] = [cur_names]
 
                     # make plot
-                    for key in data_dict.keys():
+                    for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
                         data_size = [x[2] for x in data_dict[key]]
@@ -5293,7 +5293,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         cur_color = [x*255 for x in colors[i]]
                         color_dict[labels[i]] = cur_color
 
-                    for key in data_dict.keys():
+                    for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
 
@@ -5354,7 +5354,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         cur_color = [x * 255 for x in colors[i]]
                         color_dict[labels[i]] = cur_color
 
-                    for key in data_dict.keys():
+                    for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
                         data_size_raw = [x[2] for x in data_dict[key]]
