@@ -4833,10 +4833,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     QMessageBox.warning(self, 'Warning', 'No qualified records found!',
                                         QMessageBox.Ok, QMessageBox.Ok)
                     return
-    
+
                 # make plot
                 s4 = pg.ScatterPlotItem(
-                    size=16,
+                    size=self.ui.spinBoxPointSize.value(),
                     pen=pg.mkPen('k', width=2),
                     brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
@@ -4851,7 +4851,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     y=data_series2,
                     brush=pg.mkBrush(0.6),
                     name='All data points',
-                    # size=(numpy.random.random(n) * 20.).astype(int),
                     data=data_names
                 )
                 self.w4.addItem(s4)
@@ -4889,7 +4888,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
                 # make plot
                 s4 = pg.ScatterPlotItem(
-                    size=16,
+                    size=self.ui.spinBoxPointSize.value(),
                     pen=pg.mkPen('k', width=2),
                     brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
@@ -5076,7 +5075,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     
                         # make plot
                         s4 = pg.ScatterPlotItem(
-                            size=16,
+                            size=self.ui.spinBoxPointSize.value(),
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
@@ -5090,7 +5089,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             y=data_series2,
                             brush=pg.mkBrush(color_dict[key]),
                             name=group_name_dict[key],
-                            # size=(numpy.random.random(n) * 20.).astype(int),
                             data=data_name_dict[key]
                         )
                         self.w4.addItem(s4)
@@ -5220,7 +5218,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         data_size = [x[2] for x in data_dict[key]]
                         # make plot
                         s4 = pg.ScatterPlotItem(
-                            size=16,
+                            size=self.ui.spinBoxPointSize.value(),
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
@@ -5277,7 +5275,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
                         # make plot
                         s4 = pg.ScatterPlotItem(
-                            size=16,
+                            size=self.ui.spinBoxPointSize.value(),
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
@@ -5292,7 +5290,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             y=data_series2,
                             brush=pg.mkBrush(color_dict[key]),
                             name=key,
-                            # size=(numpy.random.random(n) * 20.).astype(int),
                             data=data_name_dict[key]
                         )
                         self.w4.addItem(s4)
@@ -5340,7 +5337,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         
                         # make plot
                         s4 = pg.ScatterPlotItem(
-                            size=16,
+                            size=self.ui.spinBoxPointSize.value(),
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
