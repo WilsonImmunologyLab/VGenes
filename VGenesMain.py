@@ -4721,6 +4721,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.radioButtonNum.clicked.connect(self.activeUI)
         self.ui.lineEditMin.textChanged.connect(self.updateRange)
         self.ui.lineEditMax.textChanged.connect(self.updateRange)
+        self.ui.radioButtonWhiteBG.clicked.connect(self.changeBG)
 
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -4748,6 +4749,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def changeBG(self):
+        if self.ui.radioButtonWhiteBG.isChecked():
+            self.view.setBackground('w')
+        else:
+            self.view.setBackground('k')
 
     def resetRange(self):
         self.rangeSet = False
