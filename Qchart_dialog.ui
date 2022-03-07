@@ -329,12 +329,58 @@
           </size>
          </property>
          <property name="text">
-          <string>Continuous Plate</string>
+          <string>Discrete Plate</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBoxContinuePlate"/>
+        <widget class="QComboBox" name="comboBoxDiscretePlate">
+         <item>
+          <property name="text">
+           <string>viridis</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>hls</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>rainbow</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>turbo</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Set2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Paired</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Dark2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>ManyColor1</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>ManyColor2</string>
+          </property>
+         </item>
+        </widget>
        </item>
       </layout>
      </item>
@@ -355,12 +401,12 @@
           </size>
          </property>
          <property name="text">
-          <string>Discrete Plate</string>
+          <string>Continuous Plate</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QComboBox" name="comboBoxDiscretePlate">
+        <widget class="QComboBox" name="comboBoxContinuePlate">
          <item>
           <property name="text">
            <string>viridis</string>
