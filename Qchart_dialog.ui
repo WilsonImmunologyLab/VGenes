@@ -109,6 +109,23 @@
          <property name="text">
           <string>White BG</string>
          </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_10">
+       <item>
+        <widget class="QRadioButton" name="radioButtonDataRange">
+         <property name="text">
+          <string>Only draw checked records</string>
+         </property>
+         <property name="autoExclusive">
+          <bool>false</bool>
+         </property>
         </widget>
        </item>
       </layout>

@@ -4824,7 +4824,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                 QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        where_statement = ' WHERE 1'
+        if self.ui.radioButtonDataRange.isChecked():
+            where_statement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
+        else:
+            where_statement = ' WHERE 1'
 
         self.w4.clear()
         self.w4.addLegend()
@@ -4862,10 +4865,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     pen=pg.mkPen('k', width=2),
                     brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
-                    hoverSymbol='s',
-                    hoverSize=15,
-                    hoverPen=pg.mkPen('r', width=2),
-                    hoverBrush=pg.mkBrush('g'),
+                    hoverSymbol='o',
+                    hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                    hoverPen=pg.mkPen('r', width=4)
+                    #hoverBrush=pg.mkBrush('g'),
                 )
     
                 s4.addPoints(
@@ -4914,10 +4917,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     pen=pg.mkPen('k', width=2),
                     brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
-                    hoverSymbol='s',
-                    hoverSize=15,
-                    hoverPen=pg.mkPen('r', width=2),
-                    hoverBrush=pg.mkBrush('g'),
+                    hoverSymbol='o',
+                    hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                    hoverPen=pg.mkPen('r', width=4)
+                    #hoverBrush=pg.mkBrush('g'),
                 )
 
                 s4.addPoints(
@@ -5102,10 +5105,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
-                            hoverSymbol='s',
-                            hoverSize=15,
-                            hoverPen=pg.mkPen('r', width=2),
-                            hoverBrush=pg.mkBrush('g'),
+                            hoverSymbol='o',
+                            hoverSize=self.ui.spinBoxPointSize.value()*1.5,
+                            hoverPen=pg.mkPen('r', width=4)
+                            #hoverBrush=pg.mkBrush('g'),
                         )
                         s4.addPoints(
                             x=data_series1,
@@ -5245,10 +5248,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
-                            hoverSymbol='s',
-                            hoverSize=15,
-                            hoverPen=pg.mkPen('r', width=2),
-                            hoverBrush=pg.mkBrush('g'),
+                            hoverSymbol='o',
+                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                            hoverPen=pg.mkPen('r', width=4)
+                            #hoverBrush=pg.mkBrush('g'),
                         )
                         s4.addPoints(
                             x=data_series1,
@@ -5303,10 +5306,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
-                            hoverSymbol='s',
-                            hoverSize=15,
-                            hoverPen=pg.mkPen('r', width=2),
-                            hoverBrush=pg.mkBrush('g'),
+                            hoverSymbol='o',
+                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                            hoverPen=pg.mkPen('r', width=4)
+                            #hoverBrush=pg.mkBrush('g'),
                         )
 
                         s4.addPoints(
@@ -5366,10 +5369,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             pen=pg.mkPen('k', width=2),
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
-                            hoverSymbol='s',
-                            hoverSize=15,
-                            hoverPen=pg.mkPen('r', width=2),
-                            hoverBrush=pg.mkBrush('g'),
+                            hoverSymbol='o',
+                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                            hoverPen=pg.mkPen('r', width=4)
+                            #hoverBrush=pg.mkBrush('g'),
                         )
 
                         s4.addPoints(
@@ -20002,6 +20005,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPyqtGraphDialog.ui.comboBoxY.addItems(fields_name)
         self.myPyqtGraphDialog.ui.comboBoxGroup.addItems(fields_name)
         self.myPyqtGraphDialog.ui.comboBoxSize.addItems(fields_name)
+        self.myPyqtGraphDialog.vgenes = self
 
         self.myPyqtGraphDialog.show()
 
