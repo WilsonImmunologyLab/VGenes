@@ -4723,12 +4723,15 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.lineEditMax.textChanged.connect(self.updateRange)
         self.ui.radioButtonWhiteBG.clicked.connect(self.changeBG)
         self.ui.comboBoxSize.currentTextChanged.connect(self.sizeSwitch)
-
+        self.ui.pushButtonSelect.clicked.connect(self.mouseModeRect)
+        self.ui.pushButtonZoom.clicked.connect(self.mouseModeRect)
+        self.ui.pushButtonPan.clicked.connect(self.mouseModePan)
+        self.ui.pushButtonReset.clicked.connect(self.resetZoom)
+        
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
         self.w4 = self.view.addPlot()
-        w4box = self.w4.getViewBox()
-        w4box.setMouseMode(pg.ViewBox.RectMode)
+        self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)
         self.rangeSet = False
 
 
@@ -4752,6 +4755,20 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         else:
             pass
 
+    def mouseModeRect(self):
+        self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)
+
+    def mouseModePan(self):
+        self.w4.getViewBox().setMouseMode(pg.ViewBox.PanMode)
+
+    def resetZoom(self):
+        self.w4.getViewBox().autoRange()
+
+    def Clicked(self, *args):
+        a = 1
+        b = 2
+        print('click')
+    
     def sizeSwitch(self):
         if self.ui.comboBoxSize.currentText() != "":
             self.ui.spinBoxPointSize.setEnabled(False)
@@ -4902,6 +4919,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     name='All data points',
                     data=data_names
                 )
+
+                s4.sigClicked.connect(self.Clicked)
 
                 self.w4.addItem(s4)
 
