@@ -4727,7 +4727,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
         self.w4 = self.view.addPlot()
-
+        w4box = self.w4.getViewBox()
+        w4box.setMouseMode(pg.ViewBox.RectMode)
         self.rangeSet = False
 
 
@@ -4901,7 +4902,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     name='All data points',
                     data=data_names
                 )
+
                 self.w4.addItem(s4)
+
             else:
                 field = dim1 + "," + dim2 + ',' + size
                 SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB' + where_statement
