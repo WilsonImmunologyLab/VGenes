@@ -4722,6 +4722,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.lineEditMin.textChanged.connect(self.updateRange)
         self.ui.lineEditMax.textChanged.connect(self.updateRange)
         self.ui.radioButtonWhiteBG.clicked.connect(self.changeBG)
+        self.ui.comboBoxSize.currentTextChanged.connect(self.sizeSwitch)
 
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -4749,7 +4750,15 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
-    
+
+    def sizeSwitch(self):
+        if self.ui.comboBoxSize.currentText() != "":
+            self.ui.spinBoxPointSize.setEnabled(False)
+            self.ui.label_6.setEnabled(False)
+        else:
+            self.ui.spinBoxPointSize.setEnabled(True)
+            self.ui.label_6.setEnabled(True)
+            
     def makeColors(self, n_color, plate_name): 
         try:    # continuous colors
             colors = sns.color_palette(plate_name, n_color)
@@ -4789,15 +4798,25 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             self.ui.lineEditMax.setEnabled(True)
             self.ui.spinBox.setEnabled(True)
             self.ui.comboBoxContinuePlate.setEnabled(True)
+            self.ui.label_4.setEnabled(True)
+            self.ui.label_5.setEnabled(True)
+            self.ui.label_7.setEnabled(True)
+            self.ui.label_10.setEnabled(True)
             self.ui.comboBoxDiscretePlate.setEnabled(False)
+            self.ui.label_9.setEnabled(False)
         else:
             self.ui.lineEditMin.setEnabled(False)
             self.ui.lineEditMax.setEnabled(False)
             self.ui.spinBox.setEnabled(False)
             self.ui.comboBoxContinuePlate.setEnabled(False)
+            self.ui.label_4.setEnabled(False)
+            self.ui.label_5.setEnabled(False)
+            self.ui.label_7.setEnabled(False)
+            self.ui.label_10.setEnabled(False)
             self.ui.comboBoxDiscretePlate.setEnabled(True)
+            self.ui.label_9.setEnabled(True)
 
-    def scaleSize(self, data_size, data_size_raw, range):
+    def scaleSize(self, data_size, data_size_raw, range, baseSize):
         datamin = numpy.min(data_size)
         datamax = numpy.max(data_size)
         if datamin < 0:
@@ -4807,7 +4826,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         data_size_scale = []
         
         for x in data_size_raw:
-            scaled_value = int((abs(x) - datamin) / scale_factor)
+            scaled_value = int((abs(x) - datamin) / scale_factor) + baseSize
             data_size_scale.append(scaled_value)
 
         return data_size_scale
@@ -4913,7 +4932,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                         QMessageBox.Ok, QMessageBox.Ok)
                     return
                 # process data size
-                data_size_scale = self.scaleSize(data_size, data_size, 30)
+                data_size_scale = self.scaleSize(data_size, data_size, 30, 5)
 
                 # make plot
                 s4 = pg.ScatterPlotItem(
@@ -5153,7 +5172,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         return
 
                     # process data size
-                    data_size_scale = self.scaleSize(data_size, data_size, 30)
+                    data_size_scale = self.scaleSize(data_size, data_size, 30, 5)
                     # make color range
                     if self.rangeSet == True:
                         minOK = False
@@ -5365,7 +5384,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
                         data_size_raw = [x[2] for x in data_dict[key]]
-                        data_size_scale = self.scaleSize(data_size, data_size_raw, 30)
+                        data_size_scale = self.scaleSize(data_size, data_size_raw, 30, 5)
                         
                         # make plot
                         s4 = pg.ScatterPlotItem(
