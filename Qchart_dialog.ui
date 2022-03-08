@@ -354,7 +354,17 @@
         <widget class="QComboBox" name="comboBoxDiscretePlate">
          <item>
           <property name="text">
-           <string>viridis</string>
+           <string>Paired</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Set2</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Dark2</string>
           </property>
          </item>
          <item>
@@ -370,21 +380,6 @@
          <item>
           <property name="text">
            <string>turbo</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Set2</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Paired</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>Dark2</string>
           </property>
          </item>
          <item>
@@ -424,6 +419,9 @@
        </item>
        <item>
         <widget class="QComboBox" name="comboBoxContinuePlate">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <item>
           <property name="text">
            <string>viridis</string>

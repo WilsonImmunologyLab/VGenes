@@ -4788,10 +4788,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             self.ui.lineEditMin.setEnabled(True)
             self.ui.lineEditMax.setEnabled(True)
             self.ui.spinBox.setEnabled(True)
+            self.ui.comboBoxContinuePlate.setEnabled(True)
+            self.ui.comboBoxDiscretePlate.setEnabled(False)
         else:
             self.ui.lineEditMin.setEnabled(False)
             self.ui.lineEditMax.setEnabled(False)
             self.ui.spinBox.setEnabled(False)
+            self.ui.comboBoxContinuePlate.setEnabled(False)
+            self.ui.comboBoxDiscretePlate.setEnabled(True)
 
     def scaleSize(self, data_size, data_size_raw, range):
         datamin = numpy.min(data_size)
