@@ -45,8 +45,8 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import pyqtgraph.examples
 
-from pyqtgraph.Qt import QtGui, QtCore
 import pyqtgraph as pg
+from PyQtGraphPlotItem import PlotItem
 
 import VReports
 from ui_VGenesMain import Ui_MainWindow
@@ -4730,8 +4730,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
-        self.w4 = self.view.addPlot()
+        #self.w4 = self.view.addPlot()
+        self.w4 = PlotItem()
+        self.view.addItem(self.w4)
+
         self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)
+        self.w4.getViewBox().setMenuEnabled(False)
         self.rangeSet = False
 
 
@@ -4916,6 +4920,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     x=data_series1,
                     y=data_series2,
                     brush=pg.mkBrush(0.6),
+                    pen=pg.mkPen(0.6),
                     name='All data points',
                     data=data_names
                 )
@@ -5429,7 +5434,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             data=data_name_dict[key]
                         )
                         self.w4.addItem(s4)
-
 
         self.w4.autoRange()
 

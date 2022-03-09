@@ -1,5 +1,9 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>hand.png</file>
+    <file>reset.png</file>
+    <file>zoom.png</file>
+    <file>Sel.png</file>
     <file>changeo.png</file>
     <file>Clone1.png</file>
     <file>Clone2.png</file>
