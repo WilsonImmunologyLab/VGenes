@@ -5354,6 +5354,33 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         cur_color = [x*255 for x in colors[i]]
                         color_dict[labels[i]] = cur_color
 
+                    # plot N/A value first if have
+                    if 'N/A' in data_dict:
+                        na_group_data = data_dict.pop('N/A')
+                        data_series1 = [x[0] for x in na_group_data]
+                        data_series2 = [x[1] for x in na_group_data]
+
+                        # make plot
+                        s4 = pg.ScatterPlotItem(
+                            size=self.ui.spinBoxPointSize.value(),
+                            pen=pg.mkPen('k', width=2),
+                            brush=pg.mkBrush(255, 255, 255, 20),
+                            hoverable=True,
+                            hoverSymbol='o',
+                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                            hoverPen=pg.mkPen('r', width=4)
+                            # hoverBrush=pg.mkBrush('g'),
+                        )
+
+                        s4.addPoints(
+                            x=data_series1,
+                            y=data_series2,
+                            brush=pg.mkBrush(0.7),
+                            name='N/A',
+                            data=data_name_dict['N/A']
+                        )
+                        self.w4.addItem(s4)
+
                     for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
@@ -5418,6 +5445,33 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     for i in range(len(labels)):
                         cur_color = [x * 255 for x in colors[i]]
                         color_dict[labels[i]] = cur_color
+
+                    # plot N/A value first if have
+                    if 'N/A' in data_dict:
+                        na_group_data = data_dict.pop('N/A')
+                        data_series1 = [x[0] for x in na_group_data]
+                        data_series2 = [x[1] for x in na_group_data]
+
+                        # make plot
+                        s4 = pg.ScatterPlotItem(
+                            size=self.ui.spinBoxPointSize.value(),
+                            pen=pg.mkPen('k', width=2),
+                            brush=pg.mkBrush(255, 255, 255, 20),
+                            hoverable=True,
+                            hoverSymbol='o',
+                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                            hoverPen=pg.mkPen('r', width=4)
+                            # hoverBrush=pg.mkBrush('g'),
+                        )
+
+                        s4.addPoints(
+                            x=data_series1,
+                            y=data_series2,
+                            brush=pg.mkBrush(0.7),
+                            name='N/A',
+                            data=data_name_dict['N/A']
+                        )
+                        self.w4.addItem(s4)
 
                     for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
