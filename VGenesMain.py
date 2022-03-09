@@ -5327,12 +5327,15 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             x = float(d[0])
                             y = float(d[1])
                             cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
-                            if d[2] in data_dict:
-                                data_dict[d[2]].append([x,y])
-                                data_name_dict[d[2]].append(cur_names)
+                            cur_group_info = d[2]
+                            if cur_group_info is None:
+                                cur_group_info = "N/A"
+                            if cur_group_info in data_dict:
+                                data_dict[cur_group_info].append([x,y])
+                                data_name_dict[cur_group_info].append(cur_names)
                             else:
-                                data_dict[d[2]] = [[x,y]]
-                                data_name_dict[d[2]] = [cur_names]
+                                data_dict[cur_group_info] = [[x,y]]
+                                data_name_dict[cur_group_info] = [cur_names]
                             goodNum += 1
                         except:
                             pass
@@ -5387,12 +5390,16 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             z = float(d[3])
                             cur_names = '\nName:\t\t' + d[4] + '\nIsotype:\t\t' + d[5] + '\nCDR3Length:\t' + \
                                         d[6] + '\nTotMut:\t\t' + d[7]
-                            if d[2] in data_dict:
-                                data_dict[d[2]].append([x, y, z])
-                                data_name_dict[d[2]].append(cur_names)
+
+                            cur_group_info = d[2]
+                            if cur_group_info is None:
+                                cur_group_info = "N/A"
+                            if cur_group_info in data_dict:
+                                data_dict[cur_group_info].append([x, y, z])
+                                data_name_dict[cur_group_info].append(cur_names)
                             else:
-                                data_dict[d[2]] = [[x, y, z]]
-                                data_name_dict[d[2]] = [cur_names]
+                                data_dict[cur_group_info] = [[x, y, z]]
+                                data_name_dict[cur_group_info] = [cur_names]
                             data_size.append(z)
                             goodNum += 1
                         except:
