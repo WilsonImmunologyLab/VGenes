@@ -9,7 +9,6 @@ import shutil
 import math
 import numpy
 import pandas as pd
-#from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
 
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
@@ -45,6 +44,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import pyqtgraph.examples
 
+# import PyQtGraph
 import pyqtgraph as pg
 from PyQtGraphPlotItem import PlotItem
 
@@ -4875,7 +4875,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             where_statement = ' WHERE 1'
 
         self.w4.clear()
-        self.w4.addLegend()
+        self.w4.addLegend(
+            pen=pg.mkPen('k', width=2),
+            brush=pg.mkBrush(0.8),
+            labelTextColor='k',
+            labelTextSize='12px'
+        )
 
         if group == '':
             if size == '':
@@ -4920,7 +4925,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     x=data_series1,
                     y=data_series2,
                     brush=pg.mkBrush(0.6),
-                    pen=pg.mkPen(0.6),
+                    #pen=[pg.mkPen(x) for x in numpy.random.randint(0, 256, (len(data_series1), 3))],
                     name='All data points',
                     data=data_names
                 )

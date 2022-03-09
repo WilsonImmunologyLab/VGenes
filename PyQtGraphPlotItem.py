@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# This files is copied from pyqtgraph with some modifications
+# Lei Li, Mar, 9, 2022, WCM
 import importlib
 import os
 import warnings
