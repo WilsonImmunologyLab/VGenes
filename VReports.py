@@ -1798,7 +1798,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
         if DBFilename != '' and DBFilename != None and DBFilename != 'none':
             SQLStatement = 'SELECT display,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             header_list = ['Selected', 'Field', 'Field nickname', 'Field type', 'Field comment','ID']
             num_row = len(DataIn)
             num_col = len(header_list)

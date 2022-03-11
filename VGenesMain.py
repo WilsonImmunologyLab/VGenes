@@ -109,6 +109,7 @@ from ui_ChangeOdialog import Ui_ChangeODialog
 from ui_UserListDialog import Ui_UserListDialog
 from ui_MarkRecordsDialog import Ui_MarkRecordsDialog
 from ui_AdvanceSelectiondialog import Ui_AdvanceSelectioDialog
+from ui_TableDialog import Ui_ColorTableDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -4709,6 +4710,63 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.chartview.chart().zoom(0.9)
 '''
 
+class ColorTableDialog(QtWidgets.QDialog):
+    SelectSignal = pyqtSignal(str, list)
+
+    def __init__(self):
+        super(ColorTableDialog, self).__init__()
+        self.ui = Ui_ColorTableDialog()
+        self.ui.setupUi(self)
+
+        self.ui.pushButtonConfirm.clicked.connect(self.accept)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+        self.ui.radioButton.clicked.connect(self.checkAll)
+        
+        self.field = ''
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def checkAll(self):
+        rows = self.ui.tableWidget.rowCount()
+        if self.ui.radioButton.isChecked():
+            for row in range(0, rows):
+                self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
+        else:
+            for row in range(0, rows):
+                self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
+
+    def accept(self):
+        fields = []
+        rows = self.ui.tableWidget.rowCount()
+        for row in range(0, rows):
+            if self.ui.tableWidget.cellWidget(row, 0).isChecked():
+                fields.append(self.ui.tableWidget.item(row, 1).text())
+        
+        self.SelectSignal.emit(self.field, fields)
+        Msg = 'High light setting saved! Try to draw plot to see the difference!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+        self.close()
+
+
 class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
 
@@ -4731,6 +4789,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.pushButtonPan.clicked.connect(self.mouseModePan)
         self.ui.pushButtonReset.clicked.connect(self.resetZoom)
         self.ui.pushButtonExport.clicked.connect(self.exportFigure)
+        self.ui.pushButtonColorSetting.clicked.connect(self.setColor)
         
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -4742,6 +4801,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.w4.getViewBox().setMenuEnabled(False)
         self.rangeSet = False
 
+        # high light factor setting for color group
+        self.HighlightFactor = {}
 
         if system() == 'Windows':
             # set style for windows
@@ -4762,7 +4823,76 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+    
+    def setColor(self):
+        group = self.ui.comboBoxGroup.currentText()
+        if group == '':
+            Msg = 'Please specify a group factor!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
 
+        group = re.sub(r'\(.+', '', group)
+        # initial dialog
+        self.tableDialog = ColorTableDialog()
+        self.tableDialog.field = group
+        SQLStatement = 'SELECT ' + group + ' FROM vgenesDB'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        data = []
+        for element in DataIn:
+            data.append(element[0])
+        result = Counter(data)
+        sorted_labels = sorted(result, key=result.get, reverse=True)
+
+        header_list = ['Selected', 'Value', 'Count']
+        num_row = len(sorted_labels)
+        num_col = len(header_list)
+        self.tableDialog.ui.tableWidget.setRowCount(num_row)
+        self.tableDialog.ui.tableWidget.setColumnCount(num_col)
+        self.tableDialog.ui.tableWidget.setHorizontalHeaderLabels(header_list)
+
+        if group in self.HighlightFactor:
+            for row_index in range(num_row):
+                # col 0
+                cell_checkBox = QCheckBox()
+                if sorted_labels[row_index] in self.HighlightFactor[group]:
+                    cell_checkBox.setChecked(True)
+                else:
+                    cell_checkBox.setChecked(False)
+                self.tableDialog.ui.tableWidget.setCellWidget(row_index, 0, cell_checkBox)
+
+                # col 2:
+                unit = QTableWidgetItem(sorted_labels[row_index])
+                self.tableDialog.ui.tableWidget.setItem(row_index, 1, unit)
+                # col 3:
+                unit = QTableWidgetItem(str(result[sorted_labels[row_index]]))
+                self.tableDialog.ui.tableWidget.setItem(row_index, 2, unit)
+        else:
+            for row_index in range(num_row):
+                # col 0
+                cell_checkBox = QCheckBox()
+                cell_checkBox.setChecked(True)
+                self.tableDialog.ui.tableWidget.setCellWidget(row_index, 0, cell_checkBox)
+
+                # col 2:
+                unit = QTableWidgetItem(sorted_labels[row_index])
+                self.tableDialog.ui.tableWidget.setItem(row_index, 1, unit)
+                # col 3:
+                unit = QTableWidgetItem(str(result[sorted_labels[row_index]]))
+                self.tableDialog.ui.tableWidget.setItem(row_index, 2, unit)
+
+        # disable edit
+        self.tableDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        # re-size column size
+        self.tableDialog.ui.tableWidget.resizeColumnsToContents()
+
+        # connect signal
+        self.tableDialog.SelectSignal.connect(self.saveColor)
+        # show dialog
+        self.tableDialog.show()
+    
+    def saveColor(self, field, list):
+        self.HighlightFactor[field] = list
+    
     def exportFigure(self):
         if self.ui.radioButtonPNG.isChecked():
             Pathname = saveFile(self.parent(), 'png')
@@ -5349,23 +5479,50 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     goodNum = 0
                     data_dict = {}
                     data_name_dict = {}
-                    for d in DataIn:
-                        try:
-                            x = float(d[0])
-                            y = float(d[1])
-                            cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
-                            cur_group_info = d[2]
-                            if cur_group_info is None:
-                                cur_group_info = "N/A"
-                            if cur_group_info in data_dict:
-                                data_dict[cur_group_info].append([x,y])
-                                data_name_dict[cur_group_info].append(cur_names)
-                            else:
-                                data_dict[cur_group_info] = [[x,y]]
-                                data_name_dict[cur_group_info] = [cur_names]
-                            goodNum += 1
-                        except:
-                            pass
+                    
+                    # IF USERS TRY TO HIGHLIGHT SOME GROUPS
+                    if group in self.HighlightFactor:
+                        for d in DataIn:
+                            try:
+                                x = float(d[0])
+                                y = float(d[1])
+                                cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
+                                cur_group_info = d[2]
+                                # handle NA value from database
+                                if cur_group_info is None:
+                                    cur_group_info = "N/A"
+                                # handle those values that not being highlighted
+                                if cur_group_info not in self.HighlightFactor[group]:
+                                    cur_group_info = "Others"
+                                
+                                # make different groups
+                                if cur_group_info in data_dict:
+                                    data_dict[cur_group_info].append([x,y])
+                                    data_name_dict[cur_group_info].append(cur_names)
+                                else:
+                                    data_dict[cur_group_info] = [[x,y]]
+                                    data_name_dict[cur_group_info] = [cur_names]
+                                goodNum += 1
+                            except:
+                                pass
+                    else:
+                        for d in DataIn:
+                            try:
+                                x = float(d[0])
+                                y = float(d[1])
+                                cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
+                                cur_group_info = d[2]
+                                if cur_group_info is None:
+                                    cur_group_info = "N/A"
+                                if cur_group_info in data_dict:
+                                    data_dict[cur_group_info].append([x,y])
+                                    data_name_dict[cur_group_info].append(cur_names)
+                                else:
+                                    data_dict[cur_group_info] = [[x,y]]
+                                    data_name_dict[cur_group_info] = [cur_names]
+                                goodNum += 1
+                            except:
+                                pass
 
                     if goodNum == 0:
                         QMessageBox.warning(self, 'Warning', 'No qualified records found!',
@@ -5381,32 +5538,34 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         cur_color = [x*255 for x in colors[i]]
                         color_dict[labels[i]] = cur_color
 
-                    # plot N/A value first if have
-                    if 'N/A' in data_dict:
-                        na_group_data = data_dict.pop('N/A')
-                        data_series1 = [x[0] for x in na_group_data]
-                        data_series2 = [x[1] for x in na_group_data]
+                    # plot N/A value and other value first if have
+                    special_groups = ['N/A','Others']
+                    for group in special_groups:
+                        if group in data_dict:
+                            na_group_data = data_dict.pop(group)
+                            data_series1 = [x[0] for x in na_group_data]
+                            data_series2 = [x[1] for x in na_group_data]
 
-                        # make plot
-                        s4 = pg.ScatterPlotItem(
-                            size=self.ui.spinBoxPointSize.value(),
-                            pen=pg.mkPen('k', width=2),
-                            brush=pg.mkBrush(255, 255, 255, 20),
-                            hoverable=True,
-                            hoverSymbol='o',
-                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
-                            hoverPen=pg.mkPen('r', width=4)
-                            # hoverBrush=pg.mkBrush('g'),
-                        )
+                            # make plot
+                            s4 = pg.ScatterPlotItem(
+                                size=self.ui.spinBoxPointSize.value(),
+                                pen=pg.mkPen('k', width=2),
+                                brush=pg.mkBrush(255, 255, 255, 20),
+                                hoverable=True,
+                                hoverSymbol='o',
+                                hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                                hoverPen=pg.mkPen('r', width=4)
+                                # hoverBrush=pg.mkBrush('g'),
+                            )
 
-                        s4.addPoints(
-                            x=data_series1,
-                            y=data_series2,
-                            brush=pg.mkBrush(0.7),
-                            name='N/A',
-                            data=data_name_dict['N/A']
-                        )
-                        self.w4.addItem(s4)
+                            s4.addPoints(
+                                x=data_series1,
+                                y=data_series2,
+                                brush=pg.mkBrush(0.7),
+                                name=group,
+                                data=data_name_dict[group]
+                            )
+                            self.w4.addItem(s4)
 
                     for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
@@ -5437,27 +5596,58 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     data_dict = {}
                     data_name_dict = {}
                     data_size = []
-                    for d in DataIn:
-                        try:
-                            x = float(d[0])
-                            y = float(d[1])
-                            z = float(d[3])
-                            cur_names = '\nName:\t\t' + d[4] + '\nIsotype:\t\t' + d[5] + '\nCDR3Length:\t' + \
-                                        d[6] + '\nTotMut:\t\t' + d[7]
 
-                            cur_group_info = d[2]
-                            if cur_group_info is None:
-                                cur_group_info = "N/A"
-                            if cur_group_info in data_dict:
-                                data_dict[cur_group_info].append([x, y, z])
-                                data_name_dict[cur_group_info].append(cur_names)
-                            else:
-                                data_dict[cur_group_info] = [[x, y, z]]
-                                data_name_dict[cur_group_info] = [cur_names]
-                            data_size.append(z)
-                            goodNum += 1
-                        except:
-                            pass
+                    # IF USERS TRY TO HIGHLIGHT SOME GROUPS
+                    if group in self.HighlightFactor:
+                        for d in DataIn:
+                            try:
+                                x = float(d[0])
+                                y = float(d[1])
+                                z = float(d[3])
+                                cur_names = '\nName:\t\t' + d[4] + '\nIsotype:\t\t' + d[5] + '\nCDR3Length:\t' + \
+                                            d[6] + '\nTotMut:\t\t' + d[7]
+
+                                cur_group_info = d[2]
+                                # handle NA value from database
+                                if cur_group_info is None:
+                                    cur_group_info = "N/A"
+                                # handle those values that not being highlighted
+                                if cur_group_info not in self.HighlightFactor[group]:
+                                    cur_group_info = "Others"
+
+                                # make different groups
+                                if cur_group_info in data_dict:
+                                    data_dict[cur_group_info].append([x, y, z])
+                                    data_name_dict[cur_group_info].append(cur_names)
+                                else:
+                                    data_dict[cur_group_info] = [[x, y, z]]
+                                    data_name_dict[cur_group_info] = [cur_names]
+                                data_size.append(z)
+                                goodNum += 1
+                            except:
+                                pass
+                    else:
+                        for d in DataIn:
+                            try:
+                                x = float(d[0])
+                                y = float(d[1])
+                                z = float(d[3])
+                                cur_names = '\nName:\t\t' + d[4] + '\nIsotype:\t\t' + d[5] + '\nCDR3Length:\t' + \
+                                            d[6] + '\nTotMut:\t\t' + d[7]
+
+                                cur_group_info = d[2]
+                                if cur_group_info is None:
+                                    cur_group_info = "N/A"
+                                if cur_group_info in data_dict:
+                                    data_dict[cur_group_info].append([x, y, z])
+                                    data_name_dict[cur_group_info].append(cur_names)
+                                else:
+                                    data_dict[cur_group_info] = [[x, y, z]]
+                                    data_name_dict[cur_group_info] = [cur_names]
+                                data_size.append(z)
+                                goodNum += 1
+                            except:
+                                pass
 
                     if goodNum == 0:
                         QMessageBox.warning(self, 'Warning', 'No qualified records found!',
@@ -5473,32 +5663,34 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         cur_color = [x * 255 for x in colors[i]]
                         color_dict[labels[i]] = cur_color
 
-                    # plot N/A value first if have
-                    if 'N/A' in data_dict:
-                        na_group_data = data_dict.pop('N/A')
-                        data_series1 = [x[0] for x in na_group_data]
-                        data_series2 = [x[1] for x in na_group_data]
+                    # plot N/A value and other value first if have
+                    special_groups = ['N/A', 'Others']
+                    for group in special_groups:
+                        if group in data_dict:
+                            na_group_data = data_dict.pop(group)
+                            data_series1 = [x[0] for x in na_group_data]
+                            data_series2 = [x[1] for x in na_group_data]
 
-                        # make plot
-                        s4 = pg.ScatterPlotItem(
-                            size=self.ui.spinBoxPointSize.value(),
-                            pen=pg.mkPen('k', width=2),
-                            brush=pg.mkBrush(255, 255, 255, 20),
-                            hoverable=True,
-                            hoverSymbol='o',
-                            hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
-                            hoverPen=pg.mkPen('r', width=4)
-                            # hoverBrush=pg.mkBrush('g'),
-                        )
+                            # make plot
+                            s4 = pg.ScatterPlotItem(
+                                size=self.ui.spinBoxPointSize.value(),
+                                pen=pg.mkPen('k', width=2),
+                                brush=pg.mkBrush(255, 255, 255, 20),
+                                hoverable=True,
+                                hoverSymbol='o',
+                                hoverSize=self.ui.spinBoxPointSize.value() * 1.5,
+                                hoverPen=pg.mkPen('r', width=4)
+                                # hoverBrush=pg.mkBrush('g'),
+                            )
 
-                        s4.addPoints(
-                            x=data_series1,
-                            y=data_series2,
-                            brush=pg.mkBrush(0.7),
-                            name='N/A',
-                            data=data_name_dict['N/A']
-                        )
-                        self.w4.addItem(s4)
+                            s4.addPoints(
+                                x=data_series1,
+                                y=data_series2,
+                                brush=pg.mkBrush(0.7),
+                                name=group,
+                                data=data_name_dict[group]
+                            )
+                            self.w4.addItem(s4)
 
                     for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
@@ -5529,7 +5721,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         self.w4.addItem(s4)
 
         self.w4.autoRange()
-
 
 class MyFigure(FigureCanvas):
     def __init__(self,width=5, height=4, dpi=100):
