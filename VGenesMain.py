@@ -4523,6 +4523,7 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
     def exportRes(self):
         pass
 
+'''
 class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
 
@@ -4705,6 +4706,7 @@ class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         self.chartview.setChart(chart)
         self.chartview.chart().zoom(0.9)
+'''
 
 class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
@@ -4875,12 +4877,18 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             where_statement = ' WHERE 1'
 
         self.w4.clear()
-        self.w4.addLegend(
-            pen=pg.mkPen('k', width=2),
-            brush=pg.mkBrush(0.8),
-            labelTextColor='k',
-            labelTextSize='12px'
-        )
+
+        if self.ui.radioButtonLegend.isChecked():
+            self.w4.addLegend(
+                pen=pg.mkPen('k', width=2),
+                brush=pg.mkBrush(0.8),
+                labelTextColor='k',
+                labelTextSize='12px'
+            )
+        else:
+            if self.w4.legend is not None:
+                self.w4.legend.scene().removeItem(self.w4.legend)
+
 
         if group == '':
             if size == '':
@@ -20093,21 +20101,6 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.myProteinSimilarDialog.show()
 
     @pyqtSlot()
-    def on_actionQchart_triggered(self):
-        # open a dialog for settings
-        self.myQchartDialog = QchartDialog()
-
-        self.myQchartDialog.DBFilename = DBFilename
-        self.myQchartDialog.vgene = self
-
-        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
-        self.myQchartDialog.ui.comboBoxX.addItems(fields_name)
-        self.myQchartDialog.ui.comboBoxY.addItems(fields_name)
-        self.myQchartDialog.ui.comboBoxGroup.addItems(fields_name)
-
-        self.myQchartDialog.show()
-
-    @pyqtSlot()
     def on_actionpyqtGraph_triggered(self):
         # open a dialog for settings
         self.myPyqtGraphDialog = PyqtGraphDialog()
@@ -23891,6 +23884,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         self.myAdvanceSelectioDialog.show()
         self.myAdvanceSelectioDialog.initial = 2
+
+    @pyqtSlot()
+    def on_pushButtonScatter_clicked(self):
+        self.on_actionpyqtGraph_triggered()
 
     def updateSelectionFromDialog(self, data):
         self.clearTreeChecks()

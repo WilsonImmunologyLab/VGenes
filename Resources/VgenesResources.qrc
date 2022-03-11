@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>scatter.png</file>
     <file>hand.png</file>
     <file>reset.png</file>
     <file>zoom.png</file>

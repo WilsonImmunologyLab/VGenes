@@ -620,8 +620,14 @@
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item row="4" column="2" colspan="4">
-           <widget class="QPushButton" name="pushButtonStat">
+          <item row="4" column="0" colspan="2">
+           <widget class="QPushButton" name="btnFieldSearch">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -629,14 +635,14 @@
              </size>
             </property>
             <property name="toolTip">
-             <string>Select records from distribution</string>
+             <string>Search</string>
             </property>
             <property name="text">
              <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
+              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -649,7 +655,14 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="1">
+          <item row="2" column="0">
+           <widget class="QLabel" name="label_13">
+            <property name="text">
+             <string>Field:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="1" colspan="2">
            <widget class="QComboBox" name="cboFindField">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -695,29 +708,29 @@
             </item>
            </widget>
           </item>
-          <item row="4" column="0" colspan="2">
-           <widget class="QPushButton" name="btnFieldSearch">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="4" column="2" colspan="4">
+           <widget class="QPushButton" name="pushButtonStat">
             <property name="minimumSize">
              <size>
               <width>0</width>
               <height>30</height>
              </size>
             </property>
+            <property name="maximumSize">
+             <size>
+              <width>60</width>
+              <height>16777215</height>
+             </size>
+            </property>
             <property name="toolTip">
-             <string>Search</string>
+             <string>Select records from distribution</string>
             </property>
             <property name="text">
-             <string>Search</string>
+             <string/>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
+              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -730,14 +743,48 @@
             </property>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="label_13">
-            <property name="text">
-             <string>Field:</string>
+          <item row="2" column="3" colspan="6">
+           <widget class="QLineEdit" name="txtFieldSearch">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>22</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
             </property>
            </widget>
           </item>
-          <item row="4" column="6">
+          <item row="4" column="8">
+           <widget class="QPushButton" name="pushButtonScatter">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="Resources/VgenesResources.qrc">
+              <normaloff>:/PNG-Icons/scatter.png</normaloff>:/PNG-Icons/scatter.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>30</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="flat">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="7">
            <widget class="QPushButton" name="pushButtonAdvance">
             <property name="minimumSize">
              <size>
@@ -760,21 +807,6 @@
             </property>
             <property name="flat">
              <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="2" column="2" colspan="5">
-           <widget class="QLineEdit" name="txtFieldSearch">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>22</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>Lucida Grande</family>
-             </font>
             </property>
            </widget>
           </item>
@@ -11552,7 +11584,6 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionTestMutMap"/>
     <addaction name="actionStructure"/>
     <addaction name="actionBatchChangeName"/>
-    <addaction name="actionQchart"/>
     <addaction name="actionpyqtGraph"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -12399,8 +12430,12 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
   </action>
   <action name="actionpyqtGraph">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/scatter.png</normaloff>:/PNG-Icons/scatter.png</iconset>
+   </property>
    <property name="text">
-    <string>pyqtGraph</string>
+    <string>Scatter Viewer</string>
    </property>
   </action>
  </widget>
@@ -12476,8 +12511,8 @@ If the J-end is off the J gene end may need adjusted</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_3"/>
   <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>
