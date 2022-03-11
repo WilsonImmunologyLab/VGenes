@@ -46,6 +46,7 @@ import pyqtgraph.examples
 
 # import PyQtGraph
 import pyqtgraph as pg
+import pyqtgraph.exporters
 from PyQtGraphPlotItem import PlotItem
 
 import VReports
@@ -4729,6 +4730,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.pushButtonZoom.clicked.connect(self.mouseModeRect)
         self.ui.pushButtonPan.clicked.connect(self.mouseModePan)
         self.ui.pushButtonReset.clicked.connect(self.resetZoom)
+        self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -4760,6 +4762,23 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
+
+    def exportFigure(self):
+        if self.ui.radioButtonPNG.isChecked():
+            Pathname = saveFile(self.parent(), 'png')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.ImageExporter(self.view.scene())
+            exporter.export(Pathname)
+            return
+
+        if self.ui.radioButtonSVG.isChecked():
+            Pathname = saveFile(self.parent(), 'svg')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.SVGExporter(self.view.scene())
+            exporter.export(Pathname)
+            return
 
     def mouseModeRect(self):
         self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)

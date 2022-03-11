@@ -71,6 +71,12 @@ def saveFile(self, typeSave):
     elif typeSave == 'fmt7':
         queryIs = "Text: " + time.strftime('%c')
         FileTypes  = "IgBlast output (*.fmt7);;All Files (*)"
+    elif typeSave == 'png':
+        queryIs = "Text: " + time.strftime('%c')
+        FileTypes = "Portable Network Graphics (*.PNG);;All Files (*)"
+    elif typeSave == 'svg':
+        queryIs = "Text: " + time.strftime('%c')
+        FileTypes = "Scalable Vector Graphics (*.SVG);;All Files (*)"
 
 
     # options |= QtWidgets.QFileDialog.DontUseNativeDialog
