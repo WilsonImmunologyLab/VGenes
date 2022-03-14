@@ -4766,7 +4766,6 @@ class ColorTableDialog(QtWidgets.QDialog):
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
         self.close()
 
-
 class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
 
@@ -8463,6 +8462,26 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             csvFile.close()
         return barcode_dict
 
+    def readInfo(self, anno_path_name, type10x, field_name):
+        # read annotation content
+        barcode_dict = {}
+        name_index = 1
+        iso_index = 2
+        if anno_path_name != "":
+            csvFile = open(anno_path_name, "r")
+            reader = csv.reader(csvFile)
+            for item in reader:
+                # ignore header line
+                if reader.line_num == 1:
+                    if type10x == 'consensus':
+                        name_index = item.index('raw_consensus_id')
+                    else:
+                        name_index = item.index('contig_id')
+                    iso_index = item.index(field_name)
+                barcode_dict[item[name_index]] = item[iso_index]
+            csvFile.close()
+        return barcode_dict
+
     def InitiateImportFrom10X(self, Filenamed, MaxNum, dataType):
         self.calling = 1
 
@@ -9612,10 +9631,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         if self.calling == 1:
             # match barcode
             barcodeDict = self.readBarcode(self.anno_path_name, self.type10x)
+            IsoDict = self.readInfo(self.anno_path_name, self.type10x, 'c_gene')
 
             for record in IgBLASTAnalysis:
                 if record[0] in barcodeDict.keys():
                     record[108] = barcodeDict[record[0]]
+
+                if record[0] in IsoDict.keys():
+                    record[101] = IsoDict[record[0]]
 
                 if self.rep2 == "byChain":
                     rep2 = record[2][0]
