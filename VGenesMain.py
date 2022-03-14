@@ -11500,9 +11500,53 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPatternSearchDialog.show()
 
     def SearchPattern(self, pattern, region, vlist, dlist, jlist):
-        a = 1
-        pass
+        WHEREStatement = ' 1'
+        # search range
+        and_used = False
+        if len(vlist) + len(dlist) + len(jlist) > 0:
+            WHEREStatement = ' WHERE '
+            if len(vlist) > 0:
+                WHEREStatement += 'Vlocus IN ("' + '","'.join(vlist) + '")'
+                and_used = True
+            if len(dlist) > 0:
+                if and_used:
+                    WHEREStatement += ' AND Dlocus IN ("' + '","'.join(dlist) + '")'
+                else:
+                    WHEREStatement += 'Dlocus IN ("' + '","'.join(dlist) + '")'
+                    and_used = True
+            if len(jlist) > 0:
+                if and_used:
+                    WHEREStatement += ' AND Jlocus IN ("' + '","'.join(jlist) + '")'
+                else:
+                    WHEREStatement += 'Jlocus IN ("' + '","'.join(jlist) + '")'
+        
+        # fetch sequence
+        SQLStatement = "SELECT SeqName,SeqAlignment,Blank20 FROM vgenesDB" + WHEREStatement
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        if len(DataIn) == 0:
+            Msg = 'No records were found under your searching criteria!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
 
+        # write to fasta
+        time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+        fasta_path = os.path.join(temp_folder, time_stamp + '.fasta')
+        if DataIn[0][2] != "":
+            index = 2
+        else:
+            index = 1
+        with open(fasta_path, 'w') as writeFasta:
+            for record in DataIn:
+                writeFasta.write('>' + record[0] + '\n')
+                writeFasta.write(record[index] + '\n')
+
+        # run IgBlast
+        
+        # Identify pattern from IgBlast result
+        
+        # present results
+
+        
     @pyqtSlot()
     def on_actionTestMutMap_triggered(self):
         # test something
