@@ -8462,6 +8462,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             csvFile.close()
         return barcode_dict
 
+
     def readInfo(self, anno_path_name, type10x, field_name):
         # read annotation content
         barcode_dict = {}
@@ -9638,7 +9639,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                     record[108] = barcodeDict[record[0]]
 
                 if record[0] in IsoDict.keys():
-                    record[101] = IsoDict[record[0]]
+                    record[101] = isotypeTranslation(IsoDict[record[0]])
 
                 if self.rep2 == "byChain":
                     rep2 = record[2][0]
@@ -32907,6 +32908,18 @@ def IgBlastParserFastOld(FASTAFile, datalist, signal):
     print('Run time for fast mode: ' + str(end - start))
 
     return DATA
+
+def isotypeTranslation(input):
+    if input[2] == 'H':
+        isotype = 'Ig' + input[3:]
+    elif input[2] == 'L':
+        isotype = 'Lambda'
+    elif input[2] == 'K':
+        isotype = 'Kappa'
+    else:
+        isotype = 'Unknown'
+
+    return isotype
 
 def IMGTparser(IMGT_out, data_list, signal):
     #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
