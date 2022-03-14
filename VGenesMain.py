@@ -110,6 +110,7 @@ from ui_UserListDialog import Ui_UserListDialog
 from ui_MarkRecordsDialog import Ui_MarkRecordsDialog
 from ui_AdvanceSelectiondialog import Ui_AdvanceSelectioDialog
 from ui_TableDialog import Ui_ColorTableDialog
+from ui_PatternSearchDialog import Ui_PatternSearchDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -4765,6 +4766,88 @@ class ColorTableDialog(QtWidgets.QDialog):
         Msg = 'High light setting saved! Try to draw plot to see the difference!'
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
         self.close()
+
+class PatternSearchDialog(QtWidgets.QDialog):
+    InfoSignal = pyqtSignal(str, list, list, list, list)
+
+    def __init__(self):
+        super(PatternSearchDialog, self).__init__()
+        self.ui = Ui_PatternSearchDialog()
+        self.ui.setupUi(self)
+
+        self.ui.pushButtonSearch.clicked.connect(self.accept)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def accept(self):
+        # pattern
+        pattern_str = self.ui.lineEdit.text()
+        if pattern_str == '':
+            Msg = 'Please type your pattern!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        
+        # search region
+        region_list = []
+        if self.ui.checkBoxVgene.isChecked():
+            region_list.append('Vgene')
+        if self.ui.checkBoxDgene.isChecked():
+            region_list.append('Dgene')
+        if self.ui.checkBoxJgene.isChecked():
+            region_list.append('Jgene')
+
+        if self.ui.checkBoxFWR1.isChecked():
+            region_list.append('FWR1')
+        if self.ui.checkBoxFWR2.isChecked():
+            region_list.append('FWR2')
+        if self.ui.checkBoxFWR3.isChecked():
+            region_list.append('FWR3')
+        if self.ui.checkBoxFWR4.isChecked():
+            region_list.append('FWR4')
+        if self.ui.checkBoxCDR1.isChecked():
+            region_list.append('CDR1')
+        if self.ui.checkBoxCDR2.isChecked():
+            region_list.append('CDR2')
+        if self.ui.checkBoxCDR3.isChecked():
+            region_list.append('CDR3')
+
+        if self.ui.checkBoxFull.isChecked():
+            region_list.append('Full')
+        if self.ui.checkBoxJunction.isChecked():
+            region_list.append('Junction')
+            
+        if len(region_list) == 0:
+            Msg = 'Please check at least 1 region!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        
+        # filter
+        vlist = self.ui.comboBoxVgene.Selectlist()
+        dlist = self.ui.comboBoxDgene.Selectlist()
+        jlist = self.ui.comboBoxJgene.Selectlist()
+        
+        self.InfoSignal.emit(pattern_str, region_list, vlist, dlist, jlist)
+
 
 class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
@@ -11388,6 +11471,37 @@ class VGenesForm(QtWidgets.QMainWindow):
             else:
                 text = 'Please click any records from your HC or LC list to see their details!'
                 self.HCLCDialog.ui.label.setText(text)
+
+    @pyqtSlot()
+    def on_actionPatternSearch_triggered(self):
+        self.myPatternSearchDialog = PatternSearchDialog()
+        
+        SQLStatement = "SELECT DISTINCT VLocus FROM vgenesDB"
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        VList = [x[0] for x in DataIn]
+        VList.sort()
+        self.myPatternSearchDialog.ui.comboBoxVgene.loadItems(VList)
+
+        SQLStatement = "SELECT DISTINCT DLocus FROM vgenesDB"
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        DList = [x[0] for x in DataIn]
+        DList.remove('')
+        DList.sort()
+        self.myPatternSearchDialog.ui.comboBoxDgene.loadItems(DList)
+
+        SQLStatement = "SELECT DISTINCT JLocus FROM vgenesDB"
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        JList = [x[0] for x in DataIn]
+        JList.sort()
+        self.myPatternSearchDialog.ui.comboBoxJgene.loadItems(JList)
+
+        self.myPatternSearchDialog.InfoSignal.connect(self.SearchPattern)
+        
+        self.myPatternSearchDialog.show()
+
+    def SearchPattern(self, pattern, region, vlist, dlist, jlist):
+        a = 1
+        pass
 
     @pyqtSlot()
     def on_actionTestMutMap_triggered(self):

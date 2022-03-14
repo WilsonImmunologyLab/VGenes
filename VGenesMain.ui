@@ -11585,6 +11585,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <addaction name="actionStructure"/>
     <addaction name="actionBatchChangeName"/>
     <addaction name="actionpyqtGraph"/>
+    <addaction name="actionPatternSearch"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
     <property name="title">
@@ -12436,6 +12437,15 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>Scatter Viewer</string>
+   </property>
+  </action>
+  <action name="actionPatternSearch">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/coffee.png</normaloff>:/PNG-Icons/coffee.png</iconset>
+   </property>
+   <property name="text">
+    <string>PatternSearch</string>
    </property>
   </action>
  </widget>

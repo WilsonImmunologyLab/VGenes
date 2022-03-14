@@ -1,0 +1,288 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PatternSearchDialog</class>
+ <widget class="QDialog" name="PatternSearchDialog">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>538</width>
+    <height>566</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Dialog</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_7">
+   <item row="5" column="0" colspan="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>342</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="minimumSize">
+      <size>
+       <width>500</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="title">
+      <string>Region</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_6">
+      <item row="0" column="0">
+       <widget class="QFrame" name="frame">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_2">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxVgene">
+           <property name="text">
+            <string>V gene</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkBoxDgene">
+           <property name="text">
+            <string>D gene</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="checkBoxJgene">
+           <property name="text">
+            <string>J gene</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QFrame" name="frame_2">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_4">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxFWR1">
+           <property name="text">
+            <string>FWR1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkBoxCDR1">
+           <property name="text">
+            <string>CDR1</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
+          <widget class="QCheckBox" name="checkBoxFWR2">
+           <property name="text">
+            <string>FWR2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QCheckBox" name="checkBoxCDR2">
+           <property name="text">
+            <string>CDR2</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="0">
+          <widget class="QCheckBox" name="checkBoxFWR3">
+           <property name="text">
+            <string>FWR3</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="QCheckBox" name="checkBoxCDR3">
+           <property name="text">
+            <string>CDR3</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="2">
+          <widget class="QCheckBox" name="checkBoxFWR4">
+           <property name="text">
+            <string>FWR4</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QFrame" name="frame_3">
+        <property name="frameShape">
+         <enum>QFrame::StyledPanel</enum>
+        </property>
+        <property name="frameShadow">
+         <enum>QFrame::Raised</enum>
+        </property>
+        <layout class="QGridLayout" name="gridLayout_5">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="checkBoxFull">
+           <property name="text">
+            <string>Full length</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="1">
+          <widget class="QCheckBox" name="checkBoxJunction">
+           <property name="text">
+            <string>Junction</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="2">
+    <widget class="QPushButton" name="pushButtonSearch">
+     <property name="text">
+      <string>Search</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" rowspan="2" colspan="4">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="minimumSize">
+      <size>
+       <width>500</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="title">
+      <string>Filter (optional)</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>V locus</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="ComboCheckBox" name="comboBoxVgene"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>D lovus</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="ComboCheckBox" name="comboBoxDgene"/>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>J locus</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="ComboCheckBox" name="comboBoxJgene"/>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="3">
+    <widget class="QPushButton" name="pushButtonCancel">
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="4">
+    <widget class="QGroupBox" name="groupBox">
+     <property name="minimumSize">
+      <size>
+       <width>500</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="title">
+      <string>Pattern</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <item row="1" column="0">
+       <widget class="QLineEdit" name="lineEdit"/>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="label">
+        <property name="text">
+         <string>Type your pattern here, please use X to represent a universal AA</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ComboCheckBox</class>
+   <extends>QComboBox</extends>
+   <header>combocheckbox.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
