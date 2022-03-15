@@ -111,6 +111,7 @@ from ui_MarkRecordsDialog import Ui_MarkRecordsDialog
 from ui_AdvanceSelectiondialog import Ui_AdvanceSelectioDialog
 from ui_TableDialog import Ui_ColorTableDialog
 from ui_PatternSearchDialog import Ui_PatternSearchDialog
+from ui_PatternSearchResultDialog import Ui_PatternSearchResultDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -4526,6 +4527,102 @@ class ProteinSimilarResultDialog(QtWidgets.QDialog, Ui_ProteinSimilarResultDialo
     def exportRes(self):
         pass
 
+class PatternSearchResultDialog(QtWidgets.QDialog, Ui_PatternSearchResultDialog):
+    ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
+    checkSignal = pyqtSignal(list)
+
+    def __init__(self, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        super(PatternSearchResultDialog, self).__init__()
+        self.ui = Ui_PatternSearchResultDialog()
+        self.ui.setupUi(self)
+
+        self.DBFilename = ""
+
+        self.ui.pushButtonReport.clicked.connect(self.Report)
+        self.ui.pushButtonClose.clicked.connect(self.reject)
+        self.ui.radioButtonCheckAll.clicked.connect(self.CheckAll)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}")
+        else:
+            pass
+
+    def CheckAll(self):
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentTable = self.ui.tables[option]
+        for index in range(currentTable.rowCount()):
+            if self.ui.radioButtonCheckAll.isChecked():
+                currentTable.cellWidget(index, 0).setChecked(True)
+            else:
+                currentTable.cellWidget(index, 0).setChecked(False)
+
+    def updateSelection(self, currentRow, currentColumn, previousRow, previousColumn):
+        sender_widget = self.sender()
+        SeqName = sender_widget.item(currentRow, 1).text()
+        self.ProteinSimilarUpdateSelectionSignal.emit(SeqName)
+
+    def Report(self):
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentTable = self.ui.tables[option]
+        SeqNames = []
+        for index in range(currentTable.rowCount()):
+            if currentTable.cellWidget(index, 0).isChecked():
+                SeqNames.append(currentTable.item(index, 1).text())
+
+        self.checkSignal.emit(SeqNames)
+        
+        return
+
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentTable = self.ui.tables[option]
+        SeqNames = {}
+        SeqNames[self.ui.lineEditTargetName.text()] = 0
+        try:
+            windowSize = int(self.ui.lineEditWindowSize.text())
+        except:
+            Msg = 'Window Size only can be integers that >= 2!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        for index in range(currentTable.rowCount()):
+            if currentTable.cellWidget(index, 0).isChecked():
+                SeqNames[currentTable.item(index, 1).text()] = float(currentTable.item(index, 2).text())
+        if len(SeqNames) < 2:
+            Msg = 'You did not check anything!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        HtmlFile, errorNum, errorFile = proteinFunction(DBFilename, SeqNames, option, windowSize,
+                                                        [self.ui.lineEditTargetName.text()])
+
+        # display
+        window_id = int(time.time() * 100)
+        VGenesTextWindows[window_id] = htmlDialog()
+        VGenesTextWindows[window_id].id = window_id
+        layout = QGridLayout(VGenesTextWindows[window_id])
+        view = QWebEngineView(self)
+        url = QUrl.fromLocalFile(str(HtmlFile))
+        view.load(url)
+        view.show()
+        layout.addWidget(view)
+        VGenesTextWindows[window_id].show()
+
 '''
 class QchartDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
@@ -4847,7 +4944,6 @@ class PatternSearchDialog(QtWidgets.QDialog):
         jlist = self.ui.comboBoxJgene.Selectlist()
         
         self.InfoSignal.emit(pattern_str, region_list, vlist, dlist, jlist)
-
 
 class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
@@ -10953,6 +11049,94 @@ class CookieThread(QThread):
         else:
             self.badNews.emit(CookieResults)
 
+class PatternThread(QThread):
+    loadProgress = pyqtSignal(int, str)
+    trigger = pyqtSignal(str, dict)
+    badNews = pyqtSignal(str)
+
+    def __int__(self):
+        super(PatternThread, self).__init__()
+        self.species = ''
+        self.fasta = ''
+        self.pattern = ''
+        self.region = []
+        self.num = 0
+
+    def run(self):
+        # run IgBlast
+        workingdir = os.path.join(working_prefix, 'IgBlast')
+        os.chdir(workingdir)
+        self.loadProgress.emit(1,'Running IgBlast ... ')
+        try:
+            start = time.time()
+            if self.species == 'Human':
+                BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + self.fasta + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+                IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+            elif self.species == 'Mouse':
+                BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + self.fasta + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+                IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+            end = time.time()
+            print('Run time for IgBlast: ' + str(end - start))
+        except:
+            ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+            self.badNews.emit(ErLog)
+            return
+            
+        # Identify pattern from IgBlast result
+        ## process pattern str
+        pattern = self.pattern.upper()
+        pattern = re.sub('X', '.', pattern)
+        pattern = re.compile(pattern)
+        ## identify pattern for each record
+        region = self.region
+        line_num = 0
+        search_index = {}
+        selected_result = {}
+        for record in IgBlastOut_fmt19:
+            if line_num == 0:  # find column index for all regions
+                fields = record.split('\t')
+                if 'Vgene' in region:
+                    search_index['Vgene'] = fields.index('v_sequence_alignment_aa')
+                if 'Dgene' in region:
+                    search_index['Dgene'] = fields.index('d_sequence_alignment_aa')
+                if 'Jgene' in region:
+                    search_index['Jgene'] = fields.index('j_sequence_alignment_aa')
+                if 'FWR1' in region:
+                    search_index['FWR1'] = fields.index('fwr1_aa')
+                if 'FWR2' in region:
+                    search_index['FWR2'] = fields.index('fwr2_aa')
+                if 'FWR3' in region:
+                    search_index['FWR3'] = fields.index('fwr3_aa')
+                if 'FWR4' in region:
+                    search_index['FWR4'] = fields.index('fwr4_aa')
+                if 'CDR1' in region:
+                    search_index['CDR1'] = fields.index('cdr1_aa')
+                if 'CDR2' in region:
+                    search_index['CDR2'] = fields.index('cdr2_aa')
+                if 'CDR3' in region:
+                    search_index['CDR3'] = fields.index('cdr3_aa')
+                if 'Full' in region:
+                    search_index['Full'] = fields.index('sequence_alignment_aa')
+                if 'Junction' in region:
+                    search_index['Junction'] = fields.index('junction_aa')
+            else:  # match all regions for each record
+                fields = record.split('\t')
+                for ele in search_index.keys():
+                    match_res = pattern.search(fields[search_index[ele]])
+                    if match_res != None:
+                        if ele in selected_result.keys():
+                            selected_result[ele].append(fields[0])
+                        else:
+                            selected_result[ele] = [fields[0]]
+
+            line_num += 1
+            progress_int = int(line_num / self.num * 100)
+            progress_str = "Working progress: " + str(line_num) + '/' + str(self.num)
+            self.loadProgress.emit(progress_int, progress_str)
+        
+        # send result back
+        self.trigger.emit(self.pattern, selected_result)
+
 class ProgressBar(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super(ProgressBar, self).__init__(parent)
@@ -11540,81 +11724,84 @@ class VGenesForm(QtWidgets.QMainWindow):
                 writeFasta.write('>' + record[0] + '\n')
                 writeFasta.write(record[index] + '\n')
         species = DataIn[0][3]
-
-        # run IgBlast
-        workingdir = os.path.join(working_prefix, 'IgBlast')
-        os.chdir(workingdir)
-        try:
-            start = time.time()
-            if species == 'Human':
-                BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + fasta_path + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
-                IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
-            elif species == 'Mouse':
-                BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + fasta_path + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
-                IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
-            end = time.time()
-            print('Run time for IgBlast: ' + str(end - start))
-        except:
-            ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
-            with open(ErlogFile,'a') as currentFile:  # using with for this automatically closes the file even if you crash
-                currentFile.write(ErLog)
-            return
-        # Identify pattern from IgBlast result
-        ## process pattern str
-        pattern = pattern.upper()
-        pattern = re.sub('X','.',pattern)
-        pattern = re.compile(pattern)
-        ## identify pattern for each record
-        line_num = 0
-        search_index = {}
-        selected_result = {}
-        for record in IgBlastOut_fmt19:
-            if line_num == 0:   # find column index for all regions
-                fields = record.split('\t')
-                if 'Vgene' in region:
-                    search_index['Vgene'] = fields.index('v_sequence_alignment_aa')
-                if 'Dgene' in region:
-                    search_index['Dgene'] = fields.index('d_sequence_alignment_aa')
-                if 'Jgene' in region:
-                    search_index['Jgene'] = fields.index('j_sequence_alignment_aa')
-                if 'FWR1' in region:
-                    search_index['FWR1'] = fields.index('fwr1_aa')
-                if 'FWR2' in region:
-                    search_index['FWR2'] = fields.index('fwr2_aa')
-                if 'FWR3' in region:
-                    search_index['FWR3'] = fields.index('fwr3_aa')
-                if 'FWR4' in region:
-                    search_index['FWR4'] = fields.index('fwr4_aa')
-                if 'CDR1' in region:
-                    search_index['CDR1'] = fields.index('cdr1_aa')
-                if 'CDR2' in region:
-                    search_index['CDR2'] = fields.index('cdr2_aa')
-                if 'CDR3' in region:
-                    search_index['CDR3'] = fields.index('cdr3_aa')
-                if 'Full' in region:
-                    search_index['Full'] = fields.index('sequence_alignment_aa')
-                if 'Junction' in region:
-                    search_index['Junction'] = fields.index('junction_aa')
-            else:   # match all regions for each record
-                fields = record.split('\t')
-                for ele in search_index.keys():
-                    match_res = pattern.search(fields[search_index[ele]])
-                    if match_res != None:
-                        if ele in selected_result.keys():
-                            selected_result[ele].append(fields[0])
-                        else:
-                            selected_result[ele] = [fields[0]]  
-            
-            line_num += 1
-
-        # present results, open a new dialog i guess?
-        a = 1
-
-
-
-
-
         
+        # open an thread to identify pattern
+        self.PatternworkThread = PatternThread(self)
+        self.PatternworkThread.species = species
+        self.PatternworkThread.fasta = fasta_path
+        self.PatternworkThread.pattern = pattern
+        self.PatternworkThread.region = region
+        self.PatternworkThread.num = len(DataIn)
+        self.PatternworkThread.start()
+
+        self.PatternworkThread.trigger.connect(self.patternResult)
+        self.PatternworkThread.loadProgress.connect(self.progressLabel)
+        self.PatternworkThread.badNews.connect(self.errorMsgFun)
+
+        self.progress = ProgressBar(self)
+        self.progress.setLabel('Pattern searching ...')
+        self.progress.show()
+
+    def patternResult(self, pattern, selected_result):
+        # close progress bar
+        try:
+            self.progress.close()
+        except:
+            pass
+        
+        # if no results
+        if len(selected_result.keys()) == 0:
+            Msg = 'We did not find any sequence that have this pattern!'
+            self.errorMsgFun(Msg)
+            return
+        
+        # show results on the UI
+        self.myPatternSearchResultDialog = PatternSearchResultDialog()
+        self.myPatternSearchResultDialog.ui.lineEdit.setText(pattern)
+
+        # create a tab widget
+        self.myPatternSearchResultDialog.ui.tabWidget = QtWidgets.QTabWidget()
+        self.myPatternSearchResultDialog.ui.tabs = {}
+        self.myPatternSearchResultDialog.ui.tables = {}
+        # recolve the results and add data and tabs
+        for region in selected_result.keys():
+            # create a tab and add tab to tab widget
+            self.myPatternSearchResultDialog.ui.tabs[region] = QtWidgets.QWidget()
+            self.myPatternSearchResultDialog.ui.tabWidget.addTab(self.myPatternSearchResultDialog.ui.tabs[region], region)
+            # create table
+            self.myPatternSearchResultDialog.ui.tabs[region].layout = QtWidgets.QVBoxLayout(self)
+            self.myPatternSearchResultDialog.ui.tables[region] = QtWidgets.QTableWidget()
+
+            horizontalHeader = ['Selected', 'Seq Name']
+            self.myPatternSearchResultDialog.ui.tables[region].setRowCount(len(selected_result[region]))
+            self.myPatternSearchResultDialog.ui.tables[region].setColumnCount(len(horizontalHeader))
+            self.myPatternSearchResultDialog.ui.tables[region].setHorizontalHeaderLabels(horizontalHeader)
+            self.myPatternSearchResultDialog.ui.tables[region].horizontalHeader().setStretchLastSection(True)
+            self.myPatternSearchResultDialog.ui.tables[region].setSelectionMode(QAbstractItemView.SingleSelection)
+            self.myPatternSearchResultDialog.ui.tables[region].setSelectionBehavior(QAbstractItemView.SelectRows)
+
+            row_index = 0
+            for Seq in selected_result[region]:
+                unit1 = QtWidgets.QCheckBox()
+                unit2 = QTableWidgetItem(Seq)
+                self.myPatternSearchResultDialog.ui.tables[region].setCellWidget(row_index, 0, unit1)
+                self.myPatternSearchResultDialog.ui.tables[region].setItem(row_index, 1, unit2)
+                row_index += 1
+            self.myPatternSearchResultDialog.ui.tables[region].currentCellChanged.connect(self.myPatternSearchResultDialog.updateSelection)
+            # add table to this tab
+            self.myPatternSearchResultDialog.ui.tabs[region].layout.addWidget(self.myPatternSearchResultDialog.ui.tables[region])
+            self.myPatternSearchResultDialog.ui.tabs[region].setLayout(self.myPatternSearchResultDialog.ui.tabs[region].layout)
+
+        # add the tab widget to the main layout
+        self.myPatternSearchResultDialog.ui.gridLayoutMain.addWidget(self.myPatternSearchResultDialog.ui.tabWidget)
+        # bind signals
+        self.myPatternSearchResultDialog.ProteinSimilarUpdateSelectionSignal.connect(self.select_tree_by_name)
+        self.myPatternSearchResultDialog.checkSignal.connect(self.updateSelectionFromDialog)
+        self.myPatternSearchResultDialog.show()
+
+    def errorMsgFun(self, Msg):
+        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
     @pyqtSlot()
     def on_actionTestMutMap_triggered(self):
         # test something
