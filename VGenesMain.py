@@ -11500,7 +11500,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPatternSearchDialog.show()
 
     def SearchPattern(self, pattern, region, vlist, dlist, jlist):
-        WHEREStatement = ' 1'
+        WHEREStatement = ' WHERE 1'
         # search range
         and_used = False
         if len(vlist) + len(dlist) + len(jlist) > 0:
@@ -11521,7 +11521,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                     WHEREStatement += 'Jlocus IN ("' + '","'.join(jlist) + '")'
         
         # fetch sequence
-        SQLStatement = "SELECT SeqName,SeqAlignment,Blank20 FROM vgenesDB" + WHEREStatement
+        SQLStatement = "SELECT SeqName,SeqAlignment,Blank20,Species FROM vgenesDB" + WHEREStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         if len(DataIn) == 0:
             Msg = 'No records were found under your searching criteria!'
@@ -11539,12 +11539,80 @@ class VGenesForm(QtWidgets.QMainWindow):
             for record in DataIn:
                 writeFasta.write('>' + record[0] + '\n')
                 writeFasta.write(record[index] + '\n')
+        species = DataIn[0][3]
 
         # run IgBlast
-        
+        workingdir = os.path.join(working_prefix, 'IgBlast')
+        os.chdir(workingdir)
+        try:
+            start = time.time()
+            if species == 'Human':
+                BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + fasta_path + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
+                IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+            elif species == 'Mouse':
+                BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + fasta_path + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
+                IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
+            end = time.time()
+            print('Run time for IgBlast: ' + str(end - start))
+        except:
+            ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+            with open(ErlogFile,'a') as currentFile:  # using with for this automatically closes the file even if you crash
+                currentFile.write(ErLog)
+            return
         # Identify pattern from IgBlast result
-        
-        # present results
+        ## process pattern str
+        pattern = pattern.upper()
+        pattern = re.sub('X','.',pattern)
+        pattern = re.compile(pattern)
+        ## identify pattern for each record
+        line_num = 0
+        search_index = {}
+        selected_result = {}
+        for record in IgBlastOut_fmt19:
+            if line_num == 0:   # find column index for all regions
+                fields = record.split('\t')
+                if 'Vgene' in region:
+                    search_index['Vgene'] = fields.index('v_sequence_alignment_aa')
+                if 'Dgene' in region:
+                    search_index['Dgene'] = fields.index('d_sequence_alignment_aa')
+                if 'Jgene' in region:
+                    search_index['Jgene'] = fields.index('j_sequence_alignment_aa')
+                if 'FWR1' in region:
+                    search_index['FWR1'] = fields.index('fwr1_aa')
+                if 'FWR2' in region:
+                    search_index['FWR2'] = fields.index('fwr2_aa')
+                if 'FWR3' in region:
+                    search_index['FWR3'] = fields.index('fwr3_aa')
+                if 'FWR4' in region:
+                    search_index['FWR4'] = fields.index('fwr4_aa')
+                if 'CDR1' in region:
+                    search_index['CDR1'] = fields.index('cdr1_aa')
+                if 'CDR2' in region:
+                    search_index['CDR2'] = fields.index('cdr2_aa')
+                if 'CDR3' in region:
+                    search_index['CDR3'] = fields.index('cdr3_aa')
+                if 'Full' in region:
+                    search_index['Full'] = fields.index('sequence_alignment_aa')
+                if 'Junction' in region:
+                    search_index['Junction'] = fields.index('junction_aa')
+            else:   # match all regions for each record
+                fields = record.split('\t')
+                for ele in search_index.keys():
+                    match_res = pattern.search(fields[search_index[ele]])
+                    if match_res != None:
+                        if ele in selected_result.keys():
+                            selected_result[ele].append(fields[0])
+                        else:
+                            selected_result[ele] = [fields[0]]  
+            
+            line_num += 1
+
+        # present results, open a new dialog i guess?
+        a = 1
+
+
+
+
 
         
     @pyqtSlot()
