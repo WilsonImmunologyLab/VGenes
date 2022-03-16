@@ -9198,7 +9198,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.progress.setLabel('Merging CSV...')
             self.progress.show()
             
-    def InitiateImportFromVDB(self, Filenamed, MaxNu):
+    def InitiateImportFromVDBOld(self, Filenamed, MaxNu):
         global FieldList
         global FieldCommentList
         global FieldTypeList
@@ -9329,6 +9329,64 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.progress.show()
         else:
             return
+
+    def InitiateImportFromVDB(self, Filenamed, MaxNu):
+        global FieldList
+        global FieldCommentList
+        global FieldTypeList
+        global RealNameList
+
+        a = FieldList
+        b = RealNameList
+
+        self.calling = 4
+        if self.ui.listWidgetVDB.count() == 0:
+            return
+        else:
+            files = []
+            for index in range(self.ui.listWidgetVDB.count()):
+                files.append(self.ui.listWidgetVDB.item(index).text())
+
+        if not os.path.isfile(DBFilename):
+            return
+
+        # initial pandas data frame
+        rawDF = pd.DataFrame(0,index=files,columns=[])
+        # collect information
+        Msg = 'We added new fileds from the follow VDBs:\n'
+        for vdb_file in files:
+            # for old version VDB, create field table
+            VGenesSQL.checkFieldTable(vdb_file)
+
+            SQLSTATEMENT = 'SELECT Field,FieldNickName,FieldComment,FieldType FROM fieldsname WHERE FieldType <> "Fixed"'
+            DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
+
+            if len(DataIn) > 0:
+                for record in DataIn:
+                    cur_name = record[0]
+                    if cur_name not in rawDF.columns:
+                        rawDF[cur_name] = [False] * len(files)
+                    rawDF[cur_name][vdb_file] = True
+
+        # show these new fields on a table
+
+        self.dislog.signal.connect(self.handleVDB)
+
+    def handleVDB(self, DBFilename, files, DF):
+
+        # try multi-thread
+        workThread = VDB_thread(self)
+        workThread.DBFilename = DBFilename
+        workThread.files = files
+        workThread.df = DF
+        workThread.start()
+        workThread.trigger.connect(self.multi_callback)
+        workThread.loadProgress.connect(self.progressLabel)
+
+        self.progress = ProgressBar(self)
+        self.progress.setLabel('Merging VDB...')
+        self.progress.show()
+
 
     def InitiateImportFromIgBlast(self, Filenamed, MaxNum):
         if os.path.isfile(self.ui.lineEditIgOut.text()) and os.path.isfile(self.ui.lineEditIgFasta.text()):
@@ -35166,7 +35224,6 @@ def MakeAIDGradient(class_name, line_name, data):
 
     return div_name, div_seq
 
-
 def gradient2color(data):
     data = data/6
 
@@ -35969,7 +36026,6 @@ def SortBySubList(sub_li, index):
     # sublist lambda has been used
     return (sorted(sub_li, key=lambda x: x[index]))
 
-
 def proteinFunction(DBFilename, SeqNames, option, windowSize, highLight):
     # step 1: fetch data
     fields = ['SeqName', 'Sequence', 'GermlineSequence', 'CDR3Length', 'CDR1From', 'CDR1To', 'CDR2From', 'CDR2To',
@@ -36228,7 +36284,6 @@ def proteinFunction(DBFilename, SeqNames, option, windowSize, highLight):
 
     # return data
     return out_html_file, badNumber, ErlogFile2
-
 
 def makeProteinHTML(dataArray, index, scale, highLight):
     scaleMin = scale[0]
@@ -36507,7 +36562,6 @@ def logoColorSchemeNT(colorOption):
         colorscheme = 'default'
 
     return colorscheme
-
 
 def MutationalAnalysis(input):
     # initialize variable
