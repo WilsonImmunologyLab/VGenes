@@ -17,7 +17,7 @@ from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
 from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
-from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter, QListWidget
+from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter, QListWidget, QHeaderView
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from PyQt5.QtChart import QChart, QChartView, QScatterSeries, QLogValueAxis, QValueAxis
 from operator import itemgetter
@@ -112,6 +112,7 @@ from ui_AdvanceSelectiondialog import Ui_AdvanceSelectioDialog
 from ui_TableDialog import Ui_ColorTableDialog
 from ui_PatternSearchDialog import Ui_PatternSearchDialog
 from ui_PatternSearchResultDialog import Ui_PatternSearchResultDialog
+from ui_VDBMergeDialog import Ui_VDBMergeDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -7877,6 +7878,89 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
     def reject(self):
         self.hide()
 
+class VDBMergeDialog(QtWidgets.QDialog, Ui_VDBMergeDialog):
+    VDBSignal = pyqtSignal(str, list, object)
+
+    def __init__(self, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        super(VDBMergeDialog, self).__init__()
+        self.ui = Ui_VDBMergeDialog()
+        self.ui.setupUi(self)
+
+        self.DBFilename = ""
+
+        self.ui.pushButtonConfirm.clicked.connect(self.accept)
+        self.ui.pushButtonCancel.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}")
+        else:
+            pass
+
+    def CheckAll(self):
+        pass
+
+    def accept(self):
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentTable = self.ui.tables[option]
+        SeqNames = []
+        for index in range(currentTable.rowCount()):
+            if currentTable.cellWidget(index, 0).isChecked():
+                SeqNames.append(currentTable.item(index, 1).text())
+
+        self.checkSignal.emit(SeqNames)
+
+        return
+
+        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
+        currentTable = self.ui.tables[option]
+        SeqNames = {}
+        SeqNames[self.ui.lineEditTargetName.text()] = 0
+        try:
+            windowSize = int(self.ui.lineEditWindowSize.text())
+        except:
+            Msg = 'Window Size only can be integers that >= 2!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        for index in range(currentTable.rowCount()):
+            if currentTable.cellWidget(index, 0).isChecked():
+                SeqNames[currentTable.item(index, 1).text()] = float(currentTable.item(index, 2).text())
+        if len(SeqNames) < 2:
+            Msg = 'You did not check anything!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        HtmlFile, errorNum, errorFile = proteinFunction(DBFilename, SeqNames, option, windowSize,
+                                                        [self.ui.lineEditTargetName.text()])
+
+        # display
+        window_id = int(time.time() * 100)
+        VGenesTextWindows[window_id] = htmlDialog()
+        VGenesTextWindows[window_id].id = window_id
+        layout = QGridLayout(VGenesTextWindows[window_id])
+        view = QWebEngineView(self)
+        url = QUrl.fromLocalFile(str(HtmlFile))
+        view.load(url)
+        view.show()
+        layout.addWidget(view)
+        VGenesTextWindows[window_id].show()
+
 class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
@@ -9331,14 +9415,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             return
 
     def InitiateImportFromVDB(self, Filenamed, MaxNu):
-        global FieldList
-        global FieldCommentList
-        global FieldTypeList
-        global RealNameList
-
-        a = FieldList
-        b = RealNameList
-
         self.calling = 4
         if self.ui.listWidgetVDB.count() == 0:
             return
@@ -9347,7 +9423,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             for index in range(self.ui.listWidgetVDB.count()):
                 files.append(self.ui.listWidgetVDB.item(index).text())
 
-        if not os.path.isfile(DBFilename):
+        if os.path.isfile(DBFilename) is not True:
             return
 
         # initial pandas data frame
@@ -9369,11 +9445,46 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                     rawDF[cur_name][vdb_file] = True
 
         # show these new fields on a table
-
-        self.dislog.signal.connect(self.handleVDB)
+        self.myVDBdialog = VDBMergeDialog()
+        
+        # make table
+        horizontalHeader = ['Database Name'] + ['New Field ' + str(i+1) for i in range(len(rawDF.columns))]
+        self.myVDBdialog.ui.tableWidget.setRowCount(len(rawDF.index) + 1)
+        self.myVDBdialog.ui.tableWidget.setColumnCount(len(horizontalHeader))
+        self.myVDBdialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
+        self.myVDBdialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.myVDBdialog.ui.tableWidget.horizontalHeader().setResizeMode(0, QHeaderView.ResizeToContents)
+        self.myVDBdialog.ui.tableWidget.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.myVDBdialog.ui.tableWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+        
+        # first row
+        col_index = 1
+        for field in rawDF.columns:
+            unit1 = QtWidgets.QLineEdit()
+            unit1.setText(field)
+            self.myVDBdialog.ui.tableWidget.setCellWidget(0, col_index, unit1)
+            unit1.textChanged.connect(self.myVDBdialog.CheckAll)
+            col_index += 1
+        
+        row_index = 1
+        for file in rawDF.index:
+            unit1 = QTableWidgetItem(file)
+            self.myVDBdialog.ui.tableWidget.setItem(row_index, 0, unit1)
+            col_index = 1
+            for field in rawDF.columns:
+                if rawDF[field][file] == True:
+                    unit = QTableWidgetItem(field)
+                    unit.setBackground(QBrush(QColor("green")))
+                else:
+                    unit = QTableWidgetItem('')
+                self.myVDBdialog.ui.tableWidget.setItem(row_index, col_index, unit)
+                col_index += 1
+            row_index += 1
+        
+        self.myVDBdialog.VDBSignal.connect(self.handleVDB)
+        self.myVDBdialog.show()
 
     def handleVDB(self, DBFilename, files, DF):
-
         # try multi-thread
         workThread = VDB_thread(self)
         workThread.DBFilename = DBFilename
