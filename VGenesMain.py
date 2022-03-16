@@ -11705,7 +11705,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                     WHEREStatement += 'Jlocus IN ("' + '","'.join(jlist) + '")'
         
         # fetch sequence
-        SQLStatement = "SELECT SeqName,SeqAlignment,Blank20,Species FROM vgenesDB" + WHEREStatement
+        SQLStatement = "SELECT SeqName,Sequence,Blank20,Species FROM vgenesDB" + WHEREStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         if len(DataIn) == 0:
             Msg = 'No records were found under your searching criteria!'
@@ -11715,7 +11715,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         # write to fasta
         time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
         fasta_path = os.path.join(temp_folder, time_stamp + '.fasta')
-        if DataIn[0][2] != "":
+        if SequenceCheck(DataIn[0][2], 'nt') == 'none':
             index = 2
         else:
             index = 1
