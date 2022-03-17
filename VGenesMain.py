@@ -7987,6 +7987,7 @@ class VDBMergeDialog(QtWidgets.QDialog, Ui_VDBMergeDialog):
 
         # send information out
         self.VDBSignal.emit(self.DBFilename, self.files, newDF)
+        self.close()
 
 class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
     def __init__(self, parent=None):
@@ -11091,10 +11092,40 @@ class VDB_thread(QThread):
         super(VDB_thread, self).__init__()
         self.DBFilename = ''
         self.files = []
+        self.df = ''
 
     def run(self):
         DBFilename = self.DBFilename
         files = self.files
+        DF = self.df
+
+        # collect information, alter the DB structure
+        for new_field in DF.columns:
+            # update table
+            SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
+            max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+            SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_field + " text"
+            SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
+                            'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_field + '", "' + new_field + \
+                            '", "Customized", "' + new_field + '", "yes", 9)'
+            try:
+                VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+            except:
+                msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+                self.trigger.emit(msg)
+                return
+
+            try:
+                VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+            except:
+                msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+                self.trigger.emit(msg)
+                return
+
+            RealNameList.append(new_field)
+            FieldCommentList.append(new_field)
+            FieldTypeList.append('Customized')
+            FieldList.append(new_field)
 
         # import data from VDBs
         print('import data from VDBs')
@@ -11102,15 +11133,32 @@ class VDB_thread(QThread):
         cursor = conn.cursor()
         process = 1
         for vdb_file in files:
+            df_slices_current_vdb = DF.loc[vdb_file]
+            projection_dict = {}
+            for sub_index in df_slices_current_vdb.index:
+                if df_slices_current_vdb[sub_index] != '':
+                    projection_dict[df_slices_current_vdb[sub_index]] = sub_index
+                    
             SQLSTATEMENT = 'SELECT Field FROM fieldsname'
             DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
-            field_str = ''
-            question_str = ''
+            fields = []
+            translated_fields = []
+            index = 0
             for item in DataIn:
-                field_str = field_str + item[0] + ','
-                question_str = question_str + '?,'
-            field_str = field_str.rstrip(',')
-            question_str = question_str.rstrip(',')
+                fields.append(item[0])
+                if index < 119:
+                    translated_fields.append(item[0])
+                else:
+                    if item[0] in projection_dict.keys():
+                        translated_fields.append(projection_dict[item[0]])
+                    else:
+                        translated_fields.append(item[0])
+                index += 1
+            questions = ['?'] * len(fields)
+            
+            field_str = ','.join(fields)
+            question_str = ','.join(questions)
+            translated_field_str = ','.join(translated_fields)
 
             SQLSTATEMENT = 'SELECT ' + field_str + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
@@ -11128,8 +11176,13 @@ class VDB_thread(QThread):
 
             # insert into DB
             #print('insert into DB')
-            SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
-            cursor.executemany(SQLSTATEMENT, InputData)
+            SQLSTATEMENT = "INSERT INTO vgenesDB(" + translated_field_str + ") VALUES(" + question_str + ")"
+            try:
+                cursor.executemany(SQLSTATEMENT, InputData)
+            except:
+                msg = "UNIQUE constraint failed: SeqName\n Please make sure all the sequence names are unique! (add sampleID to each sequence name)"
+                self.trigger.emit(msg)
+                return
             conn.commit()
 
             pct = int(process/len(files)*100)
