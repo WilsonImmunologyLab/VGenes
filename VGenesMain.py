@@ -7888,7 +7888,8 @@ class VDBMergeDialog(QtWidgets.QDialog, Ui_VDBMergeDialog):
         self.ui.setupUi(self)
 
         self.DBFilename = ""
-
+        self.files = []
+        
         self.ui.pushButtonConfirm.clicked.connect(self.accept)
         self.ui.pushButtonCancel.clicked.connect(self.reject)
 
@@ -7913,53 +7914,79 @@ class VDBMergeDialog(QtWidgets.QDialog, Ui_VDBMergeDialog):
             pass
 
     def CheckAll(self):
+        sender = self.sender()
         pass
 
     def accept(self):
-        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
-        currentTable = self.ui.tables[option]
-        SeqNames = []
-        for index in range(currentTable.rowCount()):
-            if currentTable.cellWidget(index, 0).isChecked():
-                SeqNames.append(currentTable.item(index, 1).text())
-
-        self.checkSignal.emit(SeqNames)
-
-        return
-
-        option = self.ui.tabWidget.tabText(self.ui.tabWidget.currentIndex())
-        currentTable = self.ui.tables[option]
-        SeqNames = {}
-        SeqNames[self.ui.lineEditTargetName.text()] = 0
-        try:
-            windowSize = int(self.ui.lineEditWindowSize.text())
-        except:
-            Msg = 'Window Size only can be integers that >= 2!'
-            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+        ErrorFlag = ''
+        # check field name confilict
+        unit1 = QtWidgets.QLineEdit()
+        ## collect all new field names
+        col_names = []
+        for col_index in range(1, self.ui.tableWidget.columnCount()):
+            if self.ui.tableWidget.cellWidget(0, col_index).text() == "":
+                self.ui.tableWidget.cellWidget(0, col_index).setStyleSheet("QLineEdit"
+                        "{"
+                        "background : lightblue;"
+                        "}")
+                ErrorFlag = 'Please specify a unique name for your column!'
+            else:
+                col_names.append(self.ui.tableWidget.cellWidget(0, col_index).text())
+                self.ui.tableWidget.cellWidget(0, col_index).setStyleSheet("QLineEdit"
+                                                                     "{"
+                                                                     "background : white;"
+                                                                     "}")
+        col_names = [''] + col_names
+        col_names_np = numpy.array(col_names)
+        if ErrorFlag != '':
+            QMessageBox.warning(self, 'Warning', ErrorFlag, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        for index in range(currentTable.rowCount()):
-            if currentTable.cellWidget(index, 0).isChecked():
-                SeqNames[currentTable.item(index, 1).text()] = float(currentTable.item(index, 2).text())
-        if len(SeqNames) < 2:
-            Msg = 'You did not check anything!'
-            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+        ## if find any repeat names, make sure no confilict
+        cl = Counter(col_names)
+        repeat_col_names = []
+        for key, value in cl.items():
+            if value > 1:
+                repeat_col_names.append(key)
+        if len(repeat_col_names) > 0:
+            for col_name in repeat_col_names:
+                positions = list(numpy.where(col_names_np == col_name)[0])
+                if len(positions) > 0:
+                    for row in range(1, self.ui.tableWidget.rowCount()):
+                        values = False
+                        for pos in positions:
+                            if self.ui.tableWidget.item(row, pos).text() == "":
+                                pass
+                            else:
+                                if values == False:
+                                    values = True
+                                else:
+                                    ErrorFlag += 'There is a field conflict for ' + col_name + '!\n'
+                                    # make them highlighted
+                                    for pos in positions:
+                                        self.ui.tableWidget.cellWidget(0, pos).setStyleSheet("QLineEdit"
+                                    "{"
+                                    "background : lightblue;"
+                                    "}")
+                                    continue
+
+        if ErrorFlag != '':
+            QMessageBox.warning(self, 'Warning', ErrorFlag, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        HtmlFile, errorNum, errorFile = proteinFunction(DBFilename, SeqNames, option, windowSize,
-                                                        [self.ui.lineEditTargetName.text()])
+        # make new df
+        newDF = pd.DataFrame(0, index=self.files, columns=[])
+        for col_index in range(1, self.ui.tableWidget.columnCount()):
+            cur_name = self.ui.tableWidget.cellWidget(0, col_index).text()
+            if cur_name not in newDF.columns:
+                newDF[cur_name] = [''] * len(self.files)
+            for row_index in range(1, self.ui.tableWidget.rowCount()):
+                row_name = self.ui.tableWidget.item(row_index, 0).text()
+                if self.ui.tableWidget.item(row_index, col_index).text() != '':
+                    newDF[cur_name][row_name] = self.ui.tableWidget.item(row_index, col_index).text()
 
-        # display
-        window_id = int(time.time() * 100)
-        VGenesTextWindows[window_id] = htmlDialog()
-        VGenesTextWindows[window_id].id = window_id
-        layout = QGridLayout(VGenesTextWindows[window_id])
-        view = QWebEngineView(self)
-        url = QUrl.fromLocalFile(str(HtmlFile))
-        view.load(url)
-        view.show()
-        layout.addWidget(view)
-        VGenesTextWindows[window_id].show()
+        # send information out
+        self.VDBSignal.emit(self.DBFilename, self.files, newDF)
 
 class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
     def __init__(self, parent=None):
@@ -9463,7 +9490,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             unit1 = QtWidgets.QLineEdit()
             unit1.setText(field)
             self.myVDBdialog.ui.tableWidget.setCellWidget(0, col_index, unit1)
-            unit1.textChanged.connect(self.myVDBdialog.CheckAll)
+            #unit1.textChanged.connect(self.myVDBdialog.CheckAll)
             col_index += 1
         
         row_index = 1
@@ -9480,7 +9507,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                 self.myVDBdialog.ui.tableWidget.setItem(row_index, col_index, unit)
                 col_index += 1
             row_index += 1
-        
+
+        self.myVDBdialog.DBFilename = DBFilename
+        self.myVDBdialog.files = files
+
         self.myVDBdialog.VDBSignal.connect(self.handleVDB)
         self.myVDBdialog.show()
 
@@ -11838,7 +11868,10 @@ class VGenesForm(QtWidgets.QMainWindow):
         SQLStatement = "SELECT DISTINCT DLocus FROM vgenesDB"
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         DList = [x[0] for x in DataIn]
-        DList.remove('')
+        try:
+            DList.remove('')
+        except:
+            pass
         DList.sort()
         self.myPatternSearchDialog.ui.comboBoxDgene.loadItems(DList)
 

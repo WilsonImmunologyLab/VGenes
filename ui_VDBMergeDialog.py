@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_VDBMergeDialog(object):
     def setupUi(self, VDBMergeDialog):
         VDBMergeDialog.setObjectName("VDBMergeDialog")
-        VDBMergeDialog.resize(606, 662)
+        VDBMergeDialog.resize(1029, 636)
         self.gridLayout_2 = QtWidgets.QGridLayout(VDBMergeDialog)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.frame = QtWidgets.QFrame(VDBMergeDialog)
