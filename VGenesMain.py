@@ -5214,6 +5214,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             labelTextSize='12px'
         )
 
+        # set Axis labels
+        self.w4.getAxis('bottom').setLabel(self.ui.comboBoxX.currentText())
+        self.w4.getAxis('left').setLabel(self.ui.comboBoxY.currentText())
+
         if group == '':
             if size == '':
                 field = dim1 + "," + dim2

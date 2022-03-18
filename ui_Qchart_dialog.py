@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_QchartDialog(object):
     def setupUi(self, QchartDialog):
         QchartDialog.setObjectName("QchartDialog")
-        QchartDialog.resize(1083, 831)
+        QchartDialog.resize(1283, 831)
         self.gridLayout_4 = QtWidgets.QGridLayout(QchartDialog)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.groupBox = QtWidgets.QGroupBox(QchartDialog)
@@ -210,7 +210,7 @@ class Ui_QchartDialog(object):
         self.horizontalLayout_11.addItem(spacerItem7)
         self.comboBoxGroup = QtWidgets.QComboBox(self.groupBox_3)
         self.comboBoxGroup.setMinimumSize(QtCore.QSize(100, 0))
-        self.comboBoxGroup.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.comboBoxGroup.setMaximumSize(QtCore.QSize(150, 16777215))
         self.comboBoxGroup.setObjectName("comboBoxGroup")
         self.horizontalLayout_11.addWidget(self.comboBoxGroup)
         self.pushButtonColorSetting = QtWidgets.QPushButton(self.groupBox_3)
