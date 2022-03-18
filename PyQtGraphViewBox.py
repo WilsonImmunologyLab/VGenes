@@ -14,6 +14,8 @@ from pyqtgraph.graphicsItems.GraphicsWidget import GraphicsWidget
 from pyqtgraph import debug as debug
 from pyqtgraph import getConfigOption
 from pyqtgraph.Qt import isQObjectAlive
+from PyQt5.QtWidgets import QApplication
+from AnyQt.QtCore import Qt
 
 __all__ = ['ViewBox']
 
@@ -100,6 +102,7 @@ class ViewBox(GraphicsWidget):
     ## mouse modes
     PanMode = 3
     RectMode = 1
+    SelectMode = 2
 
     ## axes
     XAxis = 0
@@ -349,8 +352,8 @@ class ViewBox(GraphicsWidget):
         In PanMode, the left mouse button pans the view and the right button scales.
         In RectMode, the left button draws a rectangle which updates the visible region (this mode is more suitable for single-button mice)
         """
-        if mode not in [ViewBox.PanMode, ViewBox.RectMode]:
-            raise Exception("Mode must be ViewBox.PanMode or ViewBox.RectMode")
+        if mode not in [ViewBox.PanMode, ViewBox.RectMode, ViewBox.SelectMode]:
+            raise Exception("Mode must be ViewBox.PanMode, ViewBox.SelectMode or ViewBox.RectMode")
         self.state['mouseMode'] = mode
         self.sigStateChanged.emit(self)
 
@@ -1261,13 +1264,47 @@ class ViewBox(GraphicsWidget):
         if ev.button() in [QtCore.Qt.MouseButton.LeftButton, QtCore.Qt.MouseButton.MiddleButton]:
             if self.state['mouseMode'] == ViewBox.RectMode and axis is None:
                 if ev.isFinish():  ## This is the final move in the drag; change the view scale now
-                    #print "finish"
+                    #print("finish")
                     self.rbScaleBox.hide()
                     ax = QtCore.QRectF(Point(ev.buttonDownPos(ev.button())), Point(pos))
                     ax = self.childGroup.mapRectFromParent(ax)
                     self.showAxRect(ax)
                     self.axHistoryPointer += 1
                     self.axHistory = self.axHistory[:self.axHistoryPointer] + [ax]
+                else:
+                    ## update shape of scale box
+                    self.updateScaleBox(ev.buttonDownPos(), ev.pos())
+            elif self.state['mouseMode'] == ViewBox.SelectMode and axis is None:
+                if ev.isFinish():  ## This is the final move in the drag; change the view scale now
+                    #print("finish")
+                    keys = QApplication.keyboardModifiers()
+
+                    self.rbScaleBox.hide()
+                    ax = QtCore.QRectF(Point(ev.buttonDownPos(ev.button())), Point(pos))
+                    ax = self.childGroup.mapRectFromParent(ax)
+
+                    x0, x1 = sorted((ax.topLeft().x(), ax.bottomRight().x()))
+                    y0, y1 = sorted((ax.topLeft().y(), ax.bottomRight().y()))
+
+                    children = self.allChildren()
+                    for child in children:
+                        if 'getData' in dir(child):
+                            xdata, ydata = child.getData()
+                            points = child.data['item']
+                            for index in range(len(xdata)):
+                                x = xdata[index]
+                                y = ydata[index]
+                                if (x0 <= x) & (x <= x1) & (y0 <= y) & (y <= y1):
+                                    #if keys & Qt.ShiftModifier:
+                                    #    # add to group
+                                    #    points[index].setPen('r', width=4)
+                                    if keys & Qt.AltModifier:
+                                        # delete from group
+                                        points[index].resetPen()
+                                    else:
+                                        # re-select
+                                        points[index].setPen('r', width=4)
+
                 else:
                     ## update shape of scale box
                     self.updateScaleBox(ev.buttonDownPos(), ev.pos())

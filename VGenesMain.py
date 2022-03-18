@@ -47,7 +47,9 @@ from matplotlib.figure import Figure
 # import PyQtGraph
 import pyqtgraph as pg
 import pyqtgraph.exporters
+# custimized plotitem and viewbox
 from PyQtGraphPlotItem import PlotItem
+from PyQtGraphViewBox import ViewBox
 
 import VReports
 from ui_VGenesMain import Ui_MainWindow
@@ -4963,7 +4965,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.lineEditMax.textChanged.connect(self.updateRange)
         self.ui.radioButtonWhiteBG.clicked.connect(self.changeBG)
         self.ui.comboBoxSize.currentTextChanged.connect(self.sizeSwitch)
-        self.ui.pushButtonSelect.clicked.connect(self.mouseModeRect)
+        self.ui.pushButtonSelect.clicked.connect(self.mouseModeSelect)
         self.ui.pushButtonZoom.clicked.connect(self.mouseModeRect)
         self.ui.pushButtonPan.clicked.connect(self.mouseModePan)
         self.ui.pushButtonReset.clicked.connect(self.resetZoom)
@@ -4978,6 +4980,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)
         self.w4.getViewBox().setMenuEnabled(False)
+        self.w4.getViewBox().setMouseMode(ViewBox.SelectMode)
         self.rangeSet = False
 
         # high light factor setting for color group
@@ -5089,19 +5092,20 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             exporter.export(Pathname)
             return
 
+    def mouseModeSelect(self):
+        self.w4.getViewBox().setMouseMode(ViewBox.SelectMode)
+        self.ui.labelMode.setText("Select mode: drag to select, drag + ALT to delete")
+
     def mouseModeRect(self):
-        self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)
+        self.w4.getViewBox().setMouseMode(ViewBox.RectMode)
+        self.ui.labelMode.setText("Rect mode: draw rect to zoom in")
 
     def mouseModePan(self):
-        self.w4.getViewBox().setMouseMode(pg.ViewBox.PanMode)
+        self.w4.getViewBox().setMouseMode(ViewBox.PanMode)
+        self.ui.labelMode.setText("Pan mode: left click + move to move figure")
 
     def resetZoom(self):
         self.w4.getViewBox().autoRange()
-
-    def Clicked(self, *args):
-        a = 1
-        b = 2
-        print('click')
     
     def sizeSwitch(self):
         if self.ui.comboBoxSize.currentText() != "":
@@ -5139,10 +5143,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     
     def updateRange(self):
         self.rangeSet = True
-
-    def select(self, event):
-        msg = 'xxx'
-        QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def activeUI(self):
         if self.ui.radioButtonNum.isChecked():
@@ -5265,8 +5265,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     name='All data points',
                     data=data_names
                 )
-
-                s4.sigClicked.connect(self.Clicked)
 
                 self.w4.addItem(s4)
 
