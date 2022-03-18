@@ -206,19 +206,6 @@
      </layout>
     </widget>
    </item>
-   <item row="5" column="0">
-    <widget class="QPushButton" name="pushButtonDraw">
-     <property name="maximumSize">
-      <size>
-       <width>350</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Draw</string>
-     </property>
-    </widget>
-   </item>
    <item row="4" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
@@ -427,21 +414,9 @@
            </spacer>
           </item>
           <item>
-           <widget class="QRadioButton" name="radioButtonLegend">
-            <property name="maximumSize">
-             <size>
-              <width>120</width>
-              <height>16777215</height>
-             </size>
-            </property>
+           <widget class="QPushButton" name="pushButtonCheckSelection">
             <property name="text">
-             <string>Display Legend</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-            <property name="autoExclusive">
-             <bool>false</bool>
+             <string>Check selection</string>
             </property>
            </widget>
           </item>
@@ -1028,6 +1003,19 @@
    </item>
    <item row="0" column="3" rowspan="6">
     <layout class="QVBoxLayout" name="PlotVerticalLayout"/>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <widget class="QPushButton" name="pushButtonDraw">
+     <property name="maximumSize">
+      <size>
+       <width>350</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Draw</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

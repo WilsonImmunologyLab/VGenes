@@ -5205,18 +5205,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             where_statement = ' WHERE 1'
 
         self.w4.clear()
-
-        if self.ui.radioButtonLegend.isChecked():
-            self.w4.addLegend(
-                pen=pg.mkPen('k', width=2),
-                brush=pg.mkBrush(0.8),
-                labelTextColor='k',
-                labelTextSize='12px'
-            )
-        else:
-            if self.w4.legend is not None:
-                self.w4.legend.scene().removeItem(self.w4.legend)
-
+        
+        # add legend
+        self.w4.addLegend(
+            pen=pg.mkPen('k', width=2),
+            brush=pg.mkBrush(0.8),
+            labelTextColor='k',
+            labelTextSize='12px'
+        )
 
         if group == '':
             if size == '':
