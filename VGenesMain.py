@@ -5214,10 +5214,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             labelTextSize='12px'
         )
 
-        # set Axis labels
-        self.w4.getAxis('bottom').setLabel(self.ui.comboBoxX.currentText())
-        self.w4.getAxis('left').setLabel(self.ui.comboBoxY.currentText())
-
         if group == '':
             if size == '':
                 field = dim1 + "," + dim2
@@ -5245,6 +5241,21 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                         QMessageBox.Ok, QMessageBox.Ok)
                     return
 
+                if self.ui.radioButtonLogX.isChecked():
+                    if numpy.min(data_series2) >= 0:
+                        data_series1 = numpy.log1p(data_series1)
+                    else:
+                        Msg = 'Negative value found! X axis can not be log mode!'
+                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                        self.ui.radioButtonLogX.setChecked(False)
+                if self.ui.radioButtonLogY.isChecked():
+                    if numpy.min(data_series2) >= 0:
+                        data_series2 = numpy.log1p(data_series2)
+                    else:
+                        Msg = 'Negative value found! Y axis can not be log mode!'
+                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                        self.ui.radioButtonLogY.setChecked(False)
+
                 # make plot
                 s4 = pg.ScatterPlotItem(
                     size=self.ui.spinBoxPointSize.value(),
@@ -5267,7 +5278,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 )
 
                 self.w4.addItem(s4)
-
             else:
                 field = dim1 + "," + dim2 + ',' + size
                 SQLStatement = 'SELECT ' + field + ',SeqName,Isotype,CDR3Length,TotMut FROM vgenesDB' + where_statement
@@ -5299,6 +5309,22 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     return
                 # process data size
                 data_size_scale = self.scaleSize(data_size, data_size, 30, 5)
+
+                # log X,Y
+                if self.ui.radioButtonLogX.isChecked():
+                    if numpy.min(data_series2) >= 0:
+                        data_series1 = numpy.log1p(data_series1)
+                    else:
+                        Msg = 'Negative value found! X axis can not be log mode!'
+                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                        self.ui.radioButtonLogX.setChecked(False)
+                if self.ui.radioButtonLogY.isChecked():
+                    if numpy.min(data_series2) >= 0:
+                        data_series2 = numpy.log1p(data_series2)
+                    else:
+                        Msg = 'Negative value found! Y axis can not be log mode!'
+                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                        self.ui.radioButtonLogY.setChecked(False)
 
                 # make plot
                 s4 = pg.ScatterPlotItem(
@@ -5357,7 +5383,19 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         QMessageBox.warning(self, 'Warning', 'No qualified records found!',
                                             QMessageBox.Ok, QMessageBox.Ok)
                         return
-    
+                    
+                    # log X,Y
+                    if self.ui.radioButtonLogX.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! X axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogX.setChecked(False)
+                    if self.ui.radioButtonLogY.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! Y axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogY.setChecked(False)
+                    
                     ''' some old code
                     # make plot
                     pos = numpy.array([0., 0.25, 0.5, 0.75, 1.])
@@ -5487,7 +5525,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     for key in sorted(data_dict.keys()):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
-    
+                        
+                        if self.ui.radioButtonLogX.isChecked():
+                            data_series1 = numpy.log1p(data_series1)
+                        if self.ui.radioButtonLogY.isChecked():
+                            data_series2 = numpy.log1p(data_series2)
+                        
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
@@ -5536,6 +5579,18 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         QMessageBox.warning(self, 'Warning', 'No qualified records found!',
                                             QMessageBox.Ok, QMessageBox.Ok)
                         return
+
+                    # log X,Y
+                    if self.ui.radioButtonLogX.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! X axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogX.setChecked(False)
+                    if self.ui.radioButtonLogY.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! Y axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogY.setChecked(False)
 
                     # process data size
                     data_size_scale = self.scaleSize(data_size, data_size, 30, 5)
@@ -5631,6 +5686,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
                         data_size = [x[2] for x in data_dict[key]]
+
+                        if self.ui.radioButtonLogX.isChecked():
+                            data_series1 = numpy.log1p(data_series1)
+                        if self.ui.radioButtonLogY.isChecked():
+                            data_series2 = numpy.log1p(data_series2)
+
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
@@ -5656,7 +5717,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     goodNum = 0
                     data_dict = {}
                     data_name_dict = {}
-                    
+                    data_series1 = []
+                    data_series2 = []
+
                     # IF USERS TRY TO HIGHLIGHT SOME GROUPS
                     if group in self.HighlightFactor:
                         for d in DataIn:
@@ -5665,6 +5728,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                 y = float(d[1])
                                 cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
                                 cur_group_info = d[2]
+                                data_series1.append(x)
+                                data_series2.append(y)
                                 # handle NA value from database
                                 if cur_group_info is None:
                                     cur_group_info = "N/A"
@@ -5689,6 +5754,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                 y = float(d[1])
                                 cur_names = '\nName:\t\t' + d[3] + '\nIsotype:\t\t' + d[4] + '\nCDR3Length:\t' + d[5] + '\nTotMut:\t\t' + d[6]
                                 cur_group_info = d[2]
+                                data_series1.append(x)
+                                data_series2.append(y)
                                 if cur_group_info is None:
                                     cur_group_info = "N/A"
                                 if cur_group_info in data_dict:
@@ -5706,6 +5773,18 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                             QMessageBox.Ok, QMessageBox.Ok)
                         return
 
+                    # log X,Y
+                    if self.ui.radioButtonLogX.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! X axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogX.setChecked(False)
+                    if self.ui.radioButtonLogY.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! Y axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogY.setChecked(False)
+
                     # generate color code
                     labels = list(data_dict.keys())
                     n_color = len(labels)
@@ -5722,6 +5801,11 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             na_group_data = data_dict.pop(group)
                             data_series1 = [x[0] for x in na_group_data]
                             data_series2 = [x[1] for x in na_group_data]
+
+                            if self.ui.radioButtonLogX.isChecked():
+                                data_series1 = numpy.log1p(data_series1)
+                            if self.ui.radioButtonLogY.isChecked():
+                                data_series2 = numpy.log1p(data_series2)
 
                             # make plot
                             s4 = pg.ScatterPlotItem(
@@ -5748,6 +5832,11 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         data_series1 = [x[0] for x in data_dict[key]]
                         data_series2 = [x[1] for x in data_dict[key]]
 
+                        if self.ui.radioButtonLogX.isChecked():
+                            data_series1 = numpy.log1p(data_series1)
+                        if self.ui.radioButtonLogY.isChecked():
+                            data_series2 = numpy.log1p(data_series2)
+
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
@@ -5773,6 +5862,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     data_dict = {}
                     data_name_dict = {}
                     data_size = []
+                    data_series1 = []
+                    data_series2 = []
 
                     # IF USERS TRY TO HIGHLIGHT SOME GROUPS
                     if group in self.HighlightFactor:
@@ -5785,6 +5876,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                             d[6] + '\nTotMut:\t\t' + d[7]
 
                                 cur_group_info = d[2]
+                                data_series1.append(x)
+                                data_series2.append(y)
                                 # handle NA value from database
                                 if cur_group_info is None:
                                     cur_group_info = "N/A"
@@ -5813,6 +5906,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                             d[6] + '\nTotMut:\t\t' + d[7]
 
                                 cur_group_info = d[2]
+                                data_series1.append(x)
+                                data_series2.append(y)
                                 if cur_group_info is None:
                                     cur_group_info = "N/A"
                                 if cur_group_info in data_dict:
@@ -5831,6 +5926,18 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                             QMessageBox.Ok, QMessageBox.Ok)
                         return
 
+                    # log X,Y
+                    if self.ui.radioButtonLogX.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! X axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogX.setChecked(False)
+                    if self.ui.radioButtonLogY.isChecked():
+                        if numpy.min(data_series2) < 0:
+                            Msg = 'Negative value found! Y axis can not be log mode!'
+                            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                            self.ui.radioButtonLogY.setChecked(False)
+
                     # generate color code
                     labels = list(data_dict.keys())
                     n_color = len(labels)
@@ -5847,6 +5954,11 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             na_group_data = data_dict.pop(group)
                             data_series1 = [x[0] for x in na_group_data]
                             data_series2 = [x[1] for x in na_group_data]
+
+                            if self.ui.radioButtonLogX.isChecked():
+                                data_series1 = numpy.log1p(data_series1)
+                            if self.ui.radioButtonLogY.isChecked():
+                                data_series2 = numpy.log1p(data_series2)
 
                             # make plot
                             s4 = pg.ScatterPlotItem(
@@ -5874,7 +5986,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         data_series2 = [x[1] for x in data_dict[key]]
                         data_size_raw = [x[2] for x in data_dict[key]]
                         data_size_scale = self.scaleSize(data_size, data_size_raw, 30, 5)
-                        
+
+                        if self.ui.radioButtonLogX.isChecked():
+                            data_series1 = numpy.log1p(data_series1)
+                        if self.ui.radioButtonLogY.isChecked():
+                            data_series2 = numpy.log1p(data_series2)
+
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
@@ -5896,6 +6013,16 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             data=data_name_dict[key]
                         )
                         self.w4.addItem(s4)
+
+        # set Axis labels
+        if self.ui.radioButtonLogX.isChecked():
+            self.w4.getAxis('bottom').setLabel('Log1p: ' + self.ui.comboBoxX.currentText())
+        else:
+            self.w4.getAxis('bottom').setLabel(self.ui.comboBoxX.currentText())
+        if self.ui.radioButtonLogY.isChecked():
+            self.w4.getAxis('left').setLabel('Log1p: ' + self.ui.comboBoxY.currentText())
+        else:
+            self.w4.getAxis('left').setLabel(self.ui.comboBoxY.currentText())
 
         self.w4.autoRange()
 
