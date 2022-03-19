@@ -4866,6 +4866,8 @@ class ColorTableDialog(QtWidgets.QDialog):
         Msg = 'High light setting saved! Try to draw plot to see the difference!'
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
         self.close()
+        
+        
 
 class PatternSearchDialog(QtWidgets.QDialog):
     InfoSignal = pyqtSignal(str, list, list, list, list)
@@ -5079,6 +5081,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
     
     def saveColor(self, field, list):
         self.HighlightFactor[field] = list
+        self.setFocus(True)
+        self.activateWindow()
     
     def exportFigure(self):
         if self.ui.radioButtonPNG.isChecked():
