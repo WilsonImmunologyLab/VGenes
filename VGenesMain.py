@@ -4971,6 +4971,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.pushButtonReset.clicked.connect(self.resetZoom)
         self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         self.ui.pushButtonColorSetting.clicked.connect(self.setColor)
+        self.ui.pushButtonCheckSelection.clicked.connect(self.CheckSelection)
         
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -5006,6 +5007,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         else:
             pass
     
+    def CheckSelection(self):
+        print(self.w4.getViewBox().selectedPoints)
+
     def setColor(self):
         group = self.ui.comboBoxGroup.currentText()
         if group == '':

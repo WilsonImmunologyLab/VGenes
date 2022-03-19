@@ -16,6 +16,7 @@ from pyqtgraph import getConfigOption
 from pyqtgraph.Qt import isQObjectAlive
 from PyQt5.QtWidgets import QApplication
 from AnyQt.QtCore import Qt
+import re
 
 __all__ = ['ViewBox']
 
@@ -236,6 +237,8 @@ class ViewBox(GraphicsWidget):
         self.register(name)
         if name is None:
             self.updateViewLists()
+
+        self.selectedPoints = []
 
     def getAspectRatio(self):
         '''return the current aspect ratio'''
@@ -1298,12 +1301,19 @@ class ViewBox(GraphicsWidget):
                                     #if keys & Qt.ShiftModifier:
                                     #    # add to group
                                     #    points[index].setPen('r', width=4)
+                                    seq_name = points[index].data()
+                                    seq_name = re.sub(r'\nName:\t\t', '', seq_name)
+                                    seq_name = re.sub(r'\n.+', '', seq_name)
                                     if keys & Qt.AltModifier:
                                         # delete from group
                                         points[index].resetPen()
+                                        if seq_name in self.selectedPoints:
+                                            self.selectedPoints.remove(seq_name)
                                     else:
-                                        # re-select
+                                        # select
                                         points[index].setPen('r', width=4)
+                                        if seq_name not in self.selectedPoints:
+                                            self.selectedPoints.append(seq_name)
 
                 else:
                     ## update shape of scale box
