@@ -4949,7 +4949,7 @@ class PatternSearchDialog(QtWidgets.QDialog):
         self.InfoSignal.emit(pattern_str, region_list, vlist, dlist, jlist)
 
 class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
-    ProteinSimilarUpdateSelectionSignal = pyqtSignal(str)
+    UpdateSelectionSignal = pyqtSignal(list)
 
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
@@ -5008,7 +5008,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             pass
     
     def CheckSelection(self):
-        print(self.w4.getViewBox().selectedPoints)
+        #print(self.w4.getViewBox().selectedPoints)
+        self.UpdateSelectionSignal.emit(self.w4.getViewBox().selectedPoints)
 
     def setColor(self):
         group = self.ui.comboBoxGroup.currentText()
@@ -21145,6 +21146,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPyqtGraphDialog.ui.comboBoxGroup.addItems(fields_name)
         self.myPyqtGraphDialog.ui.comboBoxSize.addItems(fields_name)
         self.myPyqtGraphDialog.vgenes = self
+        self.myPyqtGraphDialog.UpdateSelectionSignal.connect(self.updateSelectionFromDialog)
 
         self.myPyqtGraphDialog.show()
 
