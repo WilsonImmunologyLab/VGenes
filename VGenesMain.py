@@ -5213,7 +5213,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         else:
             where_statement = ' WHERE 1'
 
+        # clear plot and selection data
         self.w4.clear()
+        self.w4.getViewBox().selectedPoints.clear()
         
         # add legend
         self.w4.addLegend(
