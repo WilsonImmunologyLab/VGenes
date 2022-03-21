@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_QchartDialog(object):
     def setupUi(self, QchartDialog):
         QchartDialog.setObjectName("QchartDialog")
-        QchartDialog.resize(1283, 831)
+        QchartDialog.resize(1274, 828)
         self.gridLayout_4 = QtWidgets.QGridLayout(QchartDialog)
         self.gridLayout_4.setObjectName("gridLayout_4")
         self.groupBox = QtWidgets.QGroupBox(QchartDialog)
@@ -217,7 +217,7 @@ class Ui_QchartDialog(object):
         self.pushButtonColorSetting.setMaximumSize(QtCore.QSize(30, 16777215))
         self.pushButtonColorSetting.setText("")
         icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/PNG-Icons/magic_wand.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon4.addPixmap(QtGui.QPixmap(":/PNG-Icons/palette.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.pushButtonColorSetting.setIcon(icon4)
         self.pushButtonColorSetting.setIconSize(QtCore.QSize(20, 20))
         self.pushButtonColorSetting.setFlat(True)
@@ -358,6 +358,10 @@ class Ui_QchartDialog(object):
         _translate = QtCore.QCoreApplication.translate
         QchartDialog.setWindowTitle(_translate("QchartDialog", "Dialog"))
         self.groupBox.setTitle(_translate("QchartDialog", "Selecte/Zoom"))
+        self.pushButtonZoom.setToolTip(_translate("QchartDialog", "Rect mode: draw rect to zoom in"))
+        self.pushButtonPan.setToolTip(_translate("QchartDialog", "Pan mode: left click + move to move figure"))
+        self.pushButtonReset.setToolTip(_translate("QchartDialog", "Reset the figure range (also can be called by right click)"))
+        self.labelMode.setToolTip(_translate("QchartDialog", "Select mode: drag mouse to select, drag + ALT to delete from current selection"))
         self.labelMode.setText(_translate("QchartDialog", "Select mode: drag to select, drag + ALT to delete"))
         self.groupBox_3.setTitle(_translate("QchartDialog", "Figure"))
         self.label.setText(_translate("QchartDialog", "X axis"))

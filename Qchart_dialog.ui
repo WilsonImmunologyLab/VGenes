@@ -39,6 +39,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Rect mode: draw rect to zoom in</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -93,6 +96,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Pan mode: left click + move to move figure</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -130,6 +136,9 @@
           <width>44</width>
           <height>16777215</height>
          </size>
+        </property>
+        <property name="toolTip">
+         <string>Reset the figure range (also can be called by right click)</string>
         </property>
         <property name="text">
          <string/>
@@ -198,6 +207,9 @@
       </item>
       <item row="1" column="0" colspan="5">
        <widget class="QLabel" name="labelMode">
+        <property name="toolTip">
+         <string>Select mode: drag mouse to select, drag + ALT to delete from current selection</string>
+        </property>
         <property name="text">
          <string>Select mode: drag to select, drag + ALT to delete</string>
         </property>
@@ -588,7 +600,7 @@
             </property>
             <property name="icon">
              <iconset>
-              <normaloff>Resources/magic_wand.png</normaloff>Resources/magic_wand.png</iconset>
+              <normaloff>Resources/palette.png</normaloff>Resources/palette.png</iconset>
             </property>
             <property name="iconSize">
              <size>
