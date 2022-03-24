@@ -22,19 +22,19 @@ def saveFile(self, typeSave):
     import time
     options = QtWidgets.QFileDialog.Options()
     global LastFileName
-    if LastFileName != '':
-        if len(LastFileName)==1:
-            workingdir, filename = os.path.split(LastFileName)
+    try:
+        if LastFileName != '':
+            if len(LastFileName)==1:
+                workingdir, filename = os.path.split(LastFileName)
+                os.chdir(workingdir)
+            elif len(LastFileName)>1:
+                workingdir, filename = os.path.split(LastFileName[0])
+                os.chdir(workingdir)
+        else:
+            workingdir = '~/Desktop/'
             os.chdir(workingdir)
-        elif len(LastFileName)>1:
-            workingdir, filename = os.path.split(LastFileName[0])
-            os.chdir(workingdir)
-    else:
-        workingdir = '~/Desktop/'
-        try:
-            os.chdir(workingdir)
-        except:
-            pass
+    except:
+        pass
 
     if typeSave == 'db':
         queryIs = "Database " + time.strftime('%c')
