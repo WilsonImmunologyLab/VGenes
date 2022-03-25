@@ -124,6 +124,10 @@ $(document).ready(function(){
 
   $('.title0').click()
 });
+
+function messageFunction(){
+  alert("if you fail to install or open VGenes later, please come back and click the yellow rect for solution!");
+}
 </script>
 
 </head>
@@ -164,14 +168,14 @@ $(document).ready(function(){
           <h1>Download VGenes</h1>
           
           <a href="https://github.com/WilsonImmunologyLab/VGenes/releases/download/Pre-release2/VGenes-Mac.dmg" target="_blank">
-            <div class = 'download mac'>
+            <div class = 'download mac' onclick="messageFunction()">
               <img src="./img/mac.png" style="width: 23px;"> 
               <p style="margin-left: 80px; margin-right: 80px; display: inline;">Download for Mac</p>
             </div>
           </a>
           
           <a href="https://github.com/WilsonImmunologyLab/VGenes/releases/download/Pre-release2/VGenes-Win10.zip" target="_blank">
-            <div class = 'download windows' style="margin-left: 20px;">
+            <div class = 'download windows' style="margin-left: 20px;" onclick="messageFunction()">
               <img src="./img/windows.png" style="width: 21px;">
               <p style="margin-left: 80px; margin-right: 80px; display: inline;">Download for Windows</p>
             </div>
