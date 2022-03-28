@@ -5391,7 +5391,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         for element in DataIn:
             data.append(element[0])
         result = Counter(data)
-        sorted_labels = sorted(result, key=result.get, reverse=True)
+
+        # sorted_labels = sorted(result, key=result.get, reverse=True) # sort by count
+        sorted_labels = sorted(result.keys())   # sort by label
 
         header_list = ['Selected', 'Value', 'Count']
         num_row = len(sorted_labels)
@@ -5414,7 +5416,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 unit = QTableWidgetItem(sorted_labels[row_index])
                 self.tableDialog.ui.tableWidget.setItem(row_index, 1, unit)
                 # col 3:
-                unit = QTableWidgetItem(str(result[sorted_labels[row_index]]))
+                unit = QTableWidgetItem()
+                unit.setData(Qt.EditRole, result[sorted_labels[row_index]])
                 self.tableDialog.ui.tableWidget.setItem(row_index, 2, unit)
         else:
             for row_index in range(num_row):
@@ -5427,13 +5430,18 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 unit = QTableWidgetItem(sorted_labels[row_index])
                 self.tableDialog.ui.tableWidget.setItem(row_index, 1, unit)
                 # col 3:
-                unit = QTableWidgetItem(str(result[sorted_labels[row_index]]))
+                unit = QTableWidgetItem()
+                unit.setData(Qt.EditRole, result[sorted_labels[row_index]])
                 self.tableDialog.ui.tableWidget.setItem(row_index, 2, unit)
 
         # disable edit
         self.tableDialog.ui.tableWidget.setEditTriggers(QAbstractItemView.NoEditTriggers)
         # re-size column size
         self.tableDialog.ui.tableWidget.resizeColumnsToContents()
+        # setup and enable sort
+        self.tableDialog.ui.tableWidget.sortItems(1, Qt.AscendingOrder)
+        self.tableDialog.ui.tableWidget.sortItems(2, Qt.AscendingOrder)
+        self.tableDialog.ui.tableWidget.setSortingEnabled(True)
 
         # connect signal
         self.tableDialog.SelectSignal.connect(self.saveColor)
