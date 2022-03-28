@@ -1044,7 +1044,6 @@ class ChangeODialog(QtWidgets.QDialog):
 
         self.ui.pushButtonStep1.clicked.connect(self.changeOsetp1)
         self.ui.pushButtonStep3.clicked.connect(self.changeOsetp3)
-        self.ui.pushButton.clicked.connect(self.changeOrun)
         self.ui.pushButtonCancel.clicked.connect(self.reject)
 
         if system() == 'Windows':
@@ -1073,6 +1072,9 @@ class ChangeODialog(QtWidgets.QDialog):
 
     def changeOsetp3(self):
         res_file = openFile(self, 'Tsv')
+        if res_file == '' or res_file == None:
+            return
+
         if os.path.isfile(res_file):
             Err, parseRes = parseChangeOoutput(res_file)
             if Err == 1:
@@ -5227,8 +5229,6 @@ class ColorTableDialog(QtWidgets.QDialog):
         Msg = 'High light setting saved! Try to draw plot to see the difference!'
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
         self.close()
-        
-        
 
 class PatternSearchDialog(QtWidgets.QDialog):
     InfoSignal = pyqtSignal(str, list, list, list, list)

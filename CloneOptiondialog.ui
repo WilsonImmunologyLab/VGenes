@@ -49,6 +49,9 @@ Clustering</string>
        <height>130</height>
       </size>
      </property>
+     <property name="autoDefault">
+      <bool>false</bool>
+     </property>
     </widget>
    </item>
    <item row="4" column="1">
@@ -118,6 +121,9 @@ Alignment</string>
        <width>200</width>
        <height>130</height>
       </size>
+     </property>
+     <property name="autoDefault">
+      <bool>false</bool>
      </property>
     </widget>
    </item>
