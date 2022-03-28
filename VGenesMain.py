@@ -5385,7 +5385,11 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         # initial dialog
         self.tableDialog = ColorTableDialog()
         self.tableDialog.field = group
-        SQLStatement = 'SELECT ' + group + ' FROM vgenesDB'
+        if self.ui.radioButtonDataRange.isChecked():
+            where_statement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
+        else:
+            where_statement = ' WHERE 1'
+        SQLStatement = 'SELECT ' + group + ' FROM vgenesDB' + where_statement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         data = []
         for element in DataIn:
@@ -5401,6 +5405,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.tableDialog.ui.tableWidget.setRowCount(num_row)
         self.tableDialog.ui.tableWidget.setColumnCount(num_col)
         self.tableDialog.ui.tableWidget.setHorizontalHeaderLabels(header_list)
+        self.tableDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
 
         if group in self.HighlightFactor:
             for row_index in range(num_row):
@@ -5439,8 +5444,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         # re-size column size
         self.tableDialog.ui.tableWidget.resizeColumnsToContents()
         # setup and enable sort
-        self.tableDialog.ui.tableWidget.sortItems(1, Qt.AscendingOrder)
         self.tableDialog.ui.tableWidget.sortItems(2, Qt.AscendingOrder)
+        self.tableDialog.ui.tableWidget.sortItems(1, Qt.AscendingOrder)
         self.tableDialog.ui.tableWidget.setSortingEnabled(True)
 
         # connect signal
