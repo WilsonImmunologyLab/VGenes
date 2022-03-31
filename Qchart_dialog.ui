@@ -442,13 +442,26 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="pushButtonCheckSelection">
+           <widget class="QRadioButton" name="radioButtonHC">
             <property name="text">
-             <string>Check selection</string>
+             <string>Heavy Chain only</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
             </property>
            </widget>
           </item>
          </layout>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonCheckSelection">
+          <property name="text">
+           <string>Check selection</string>
+          </property>
+         </widget>
         </item>
         <item>
          <widget class="Line" name="line">

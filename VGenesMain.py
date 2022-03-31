@@ -5335,6 +5335,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         self.ui.pushButtonColorSetting.clicked.connect(self.setColor)
         self.ui.pushButtonCheckSelection.clicked.connect(self.CheckSelection)
+        self.ui.radioButtonDataRange.clicked.connect(self.updateCheck)
         
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -5369,7 +5370,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
-    
+
+    def updateCheck(self):
+        if self.ui.radioButtonDataRange.isChecked():
+            self.ui.radioButtonHC.setChecked(False)
+            self.ui.radioButtonHC.setEnabled(False)
+        else:
+            self.ui.radioButtonHC.setEnabled(True)
+
     def CheckSelection(self):
         #print(self.w4.getViewBox().selectedPoints)
         self.UpdateSelectionSignal.emit(self.w4.getViewBox().selectedPoints)
@@ -5585,7 +5593,10 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         if self.ui.radioButtonDataRange.isChecked():
             where_statement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
         else:
-            where_statement = ' WHERE 1'
+            if self.ui.radioButtonHC.isChecked():
+                where_statement = ' WHERE GeneType IN ("Heavy","Beta","Delta")'
+            else:
+                where_statement = ' WHERE 1'
 
         # clear plot and selection data
         self.w4.clear()
