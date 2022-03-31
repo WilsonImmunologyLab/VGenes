@@ -444,10 +444,20 @@
           <item>
            <widget class="QRadioButton" name="radioButtonHC">
             <property name="text">
-             <string>Heavy Chain only</string>
+             <string>HC</string>
             </property>
             <property name="checked">
              <bool>true</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButtonLC">
+            <property name="text">
+             <string>LC</string>
             </property>
             <property name="autoExclusive">
              <bool>false</bool>

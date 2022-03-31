@@ -5336,6 +5336,8 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.pushButtonColorSetting.clicked.connect(self.setColor)
         self.ui.pushButtonCheckSelection.clicked.connect(self.CheckSelection)
         self.ui.radioButtonDataRange.clicked.connect(self.updateCheck)
+        self.ui.radioButtonHC.clicked.connect(self.updateHC)
+        self.ui.radioButtonLC.clicked.connect(self.updateLC)
         
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -5371,12 +5373,33 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         else:
             pass
 
+    def updateHC(self):
+        if self.ui.radioButtonHC.isChecked():
+            pass
+        else:
+            if self.ui.radioButtonLC.isChecked():
+                pass
+            else:
+                self.ui.radioButtonLC.setChecked(True)
+
+    def updateLC(self):
+        if self.ui.radioButtonLC.isChecked():
+            pass
+        else:
+            if self.ui.radioButtonHC.isChecked():
+                pass
+            else:
+                self.ui.radioButtonHC.setChecked(True)
+
     def updateCheck(self):
         if self.ui.radioButtonDataRange.isChecked():
             self.ui.radioButtonHC.setChecked(False)
             self.ui.radioButtonHC.setEnabled(False)
+            self.ui.radioButtonLC.setChecked(False)
+            self.ui.radioButtonLC.setEnabled(False)
         else:
             self.ui.radioButtonHC.setEnabled(True)
+            self.ui.radioButtonLC.setEnabled(True)
 
     def CheckSelection(self):
         #print(self.w4.getViewBox().selectedPoints)
@@ -5593,8 +5616,12 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         if self.ui.radioButtonDataRange.isChecked():
             where_statement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
         else:
-            if self.ui.radioButtonHC.isChecked():
+            if self.ui.radioButtonHC.isChecked() and self.ui.radioButtonLC.isChecked():
+                where_statement = ' WHERE 1'
+            elif self.ui.radioButtonHC.isChecked():
                 where_statement = ' WHERE GeneType IN ("Heavy","Beta","Delta")'
+            elif self.ui.radioButtonLC.isChecked():
+                where_statement = ' WHERE GeneType NOT IN ("Heavy","Beta","Delta")'
             else:
                 where_statement = ' WHERE 1'
 
