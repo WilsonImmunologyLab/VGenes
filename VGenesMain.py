@@ -6207,7 +6207,17 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             Msg = 'Negative value found! Y axis can not be log mode!'
                             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                             self.ui.radioButtonLogY.setChecked(False)
-
+                    
+                    # ask user when there are too many groups
+                    if len(data_dict) > 100:
+                        Msg = 'There are ' + str(len(data_dict)) + \
+                              ' distinct levels in your color group, do you want to continue?\n\n' + \
+                              'If this group is numerical, please click "No" and then check the "Numerical" radio button!'
+                        buttons = 'YN'
+                        answer = questionMessage(self, Msg, buttons)
+                        if answer == 'No':
+                            return
+                    
                     # generate color code
                     labels = list(data_dict.keys())
                     n_color = len(labels)
@@ -6360,6 +6370,16 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             Msg = 'Negative value found! Y axis can not be log mode!'
                             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                             self.ui.radioButtonLogY.setChecked(False)
+
+                    # ask user when there are too many groups
+                    if len(data_dict) > 100:
+                        Msg = 'There are ' + str(len(data_dict)) + \
+                              ' distinct levels in your color group, do you want to continue?\n\n' + \
+                              'If this group is numerical, please click "No" and then check the "Numerical" radio button!'
+                        buttons = 'YN'
+                        answer = questionMessage(self, Msg, buttons)
+                        if answer == 'No':
+                            return
 
                     # generate color code
                     labels = list(data_dict.keys())
