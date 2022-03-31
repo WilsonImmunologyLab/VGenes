@@ -6211,7 +6211,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     # ask user when there are too many groups
                     if len(data_dict) > 100:
                         Msg = 'There are ' + str(len(data_dict)) + \
-                              ' distinct levels in your color group, do you want to continue?\n\n' + \
+                              ' distinct levels in your color group, do you want to continue (could be very slow)?\n\n' + \
                               'If this group is numerical, please click "No" and then check the "Numerical" radio button!'
                         buttons = 'YN'
                         answer = questionMessage(self, Msg, buttons)
@@ -6374,7 +6374,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                     # ask user when there are too many groups
                     if len(data_dict) > 100:
                         Msg = 'There are ' + str(len(data_dict)) + \
-                              ' distinct levels in your color group, do you want to continue?\n\n' + \
+                              ' distinct levels in your color group, do you want to continue (could be very slow)?\n\n' + \
                               'If this group is numerical, please click "No" and then check the "Numerical" radio button!'
                         buttons = 'YN'
                         answer = questionMessage(self, Msg, buttons)
