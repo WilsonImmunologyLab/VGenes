@@ -5400,6 +5400,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         else:
             self.ui.radioButtonHC.setEnabled(True)
             self.ui.radioButtonLC.setEnabled(True)
+            self.ui.radioButtonHC.setChecked(True)
 
     def CheckSelection(self):
         #print(self.w4.getViewBox().selectedPoints)
