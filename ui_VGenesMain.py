@@ -4975,6 +4975,8 @@ class Ui_MainWindow(object):
         icon71.addPixmap(QtGui.QPixmap(":/PNG-Icons/coffee.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionPatternSearch.setIcon(icon71)
         self.actionPatternSearch.setObjectName("actionPatternSearch")
+        self.actionRecordToNew = QtWidgets.QAction(MainWindow)
+        self.actionRecordToNew.setObjectName("actionRecordToNew")
         self.menuFile.addAction(self.action_New)
         self.menuFile.addAction(self.action_Open)
         self.menuFile.addAction(self.action_Save)
@@ -5011,6 +5013,7 @@ class Ui_MainWindow(object):
         self.menuEdit.addAction(self.actionCut)
         self.menuEdit.addAction(self.actionPaste)
         self.menuDatabase.addAction(self.actionCreateVDJdb)
+        self.menuDatabase.addAction(self.actionRecordToNew)
         self.menuDatabase.addSeparator()
         self.menuDatabase.addAction(self.actionTop)
         self.menuDatabase.addAction(self.actionBottom)
@@ -5731,4 +5734,5 @@ class Ui_MainWindow(object):
         self.actionQchart.setText(_translate("MainWindow", "Qchart"))
         self.actionpyqtGraph.setText(_translate("MainWindow", "Scatter Viewer"))
         self.actionPatternSearch.setText(_translate("MainWindow", "PatternSearch"))
+        self.actionRecordToNew.setText(_translate("MainWindow", "Create new VDB with checked records only"))
 import VgenesResources_rc

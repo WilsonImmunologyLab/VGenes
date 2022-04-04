@@ -1203,7 +1203,7 @@
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>5</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -11611,6 +11611,7 @@ If the J-end is off the J gene end may need adjusted</string>
      <string>Database</string>
     </property>
     <addaction name="actionCreateVDJdb"/>
+    <addaction name="actionRecordToNew"/>
     <addaction name="separator"/>
     <addaction name="actionTop"/>
     <addaction name="actionBottom"/>
@@ -12446,6 +12447,11 @@ If the J-end is off the J gene end may need adjusted</string>
    </property>
    <property name="text">
     <string>PatternSearch</string>
+   </property>
+  </action>
+  <action name="actionRecordToNew">
+   <property name="text">
+    <string>Create new VDB with checked records only</string>
    </property>
   </action>
  </widget>

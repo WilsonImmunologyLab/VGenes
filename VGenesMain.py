@@ -469,6 +469,39 @@ class HCLC_thread(QThread):
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
 
+class CopyRecord_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list)
+
+    def __int__(self):
+        super(CopyRecord_thread, self).__init__()
+        self.DBFilename = ''
+        self.Pathname = ''
+        self.checkRecords = []
+
+    def run(self):
+        Msg = ''
+        sign = 0
+        # Step 1: Copy current DB to new DB
+        self.HCLC_progress.emit(1, len(self.checkRecords), 1)
+        try:
+            shutil.copy(self.DBFilename, self.Pathname)
+        except:
+            Msg = 'Can not save file in this path! You do not have write permission!'
+            sign = 1
+            self.HCLC_finish.emit([sign, Msg, self.Pathname])
+
+        # Step 2: delete unchecked records from new DB
+        list_str = '("' + '","'.join(self.checkRecords) + '")'
+        SQLStatement = 'DELETE FROM vgenesdb WHERE SeqName NOT IN ' + list_str
+        VGenesSQL.RunUpdateSQL(self.Pathname, SQLStatement)
+
+        Msg = 'New DB with selected records have been created!'
+        sign = 0
+
+        # Step 3: send signal to VGenes
+        self.HCLC_finish.emit([sign, Msg, self.Pathname])
+
 class AdvanceSelectioDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(list)
 
@@ -12789,6 +12822,37 @@ class VGenesForm(QtWidgets.QMainWindow):
         channel.registerObject('connection', my_object)
         view.page().setWebChannel(channel)
         my_object.downloadFigSignal.connect(self.downloadSVG)
+
+    @pyqtSlot()
+    def on_actionRecordToNew_triggered(self):
+        if len(self.CheckedRecords) == 0:
+            msg = 'You did not check any record!'
+            QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        Pathname = saveFile(self.parent(), 'db')
+        if Pathname == None:
+            return
+
+        tmp_path, tmp_file = os.path.split(Pathname)
+        if os.access(tmp_path, os.W_OK):
+            pass
+        else:
+            msg = 'You do not have the write permission of this folder!\n' + tmp_path
+            QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        self.CopyRecord_Thread = CopyRecord_thread(self)
+        self.CopyRecord_Thread.DBFilename = DBFilename
+        self.CopyRecord_Thread.Pathname = Pathname
+        self.CopyRecord_Thread.checkRecords = self.CheckedRecords
+        self.CopyRecord_Thread.HCLC_progress.connect(self.result_display)
+        self.CopyRecord_Thread.HCLC_finish.connect(self.HCLC_finish_process)
+        self.CopyRecord_Thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
 
     @pyqtSlot()
     def on_actionPairToNewDB_triggered(self):
