@@ -10131,7 +10131,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         self.progress.setLabel('Merging VDB...')
         self.progress.show()
 
-
     def InitiateImportFromIgBlast(self, Filenamed, MaxNum):
         if os.path.isfile(self.ui.lineEditIgOut.text()) and os.path.isfile(self.ui.lineEditIgFasta.text()):
             pass
@@ -10375,6 +10374,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                         f = open(os.path.join(path, cur_file), 'r')
                         seq = f.read()
                         f.close()
+                        # remove dupulicate sequence names (if have)
+                        seq = re.sub(r'>.+\n', '', seq)
                         out_handle.write(seq + '\n')
                 fasta_files.append(cur_fasta)
                 out_handle.close()
@@ -25171,7 +25172,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             currentitemIs = item.text(0)
 
         if self.ui.rdoLocal.isChecked():
-            WHEREStatement =  ' AND SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
+            WHEREStatement = ' AND SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
         else:
             WHEREStatement = ''
 
