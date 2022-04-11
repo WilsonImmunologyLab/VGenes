@@ -5354,13 +5354,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.ui.setupUi(self)
 
         self.DBFilename = ""
+        self.fields_name = []
 
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
         self.ui.radioButtonNum.clicked.connect(self.activeUI)
         self.ui.lineEditMin.textChanged.connect(self.updateRange)
         self.ui.lineEditMax.textChanged.connect(self.updateRange)
         self.ui.radioButtonWhiteBG.clicked.connect(self.changeBG)
-        self.ui.comboBoxSize.currentTextChanged.connect(self.sizeSwitch)
+        self.ui.lineEditSize.textChanged.connect(self.sizeSwitch)
         self.ui.pushButtonSelect.clicked.connect(self.mouseModeSelect)
         self.ui.pushButtonZoom.clicked.connect(self.mouseModeRect)
         self.ui.pushButtonPan.clicked.connect(self.mouseModePan)
@@ -5435,14 +5436,29 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             self.ui.radioButtonLC.setEnabled(True)
             self.ui.radioButtonHC.setChecked(True)
 
+    def initLineedit(self, lineEdit, items_list):
+        # add auto complete
+        self.completer = QCompleter(items_list)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        # set match mode
+        self.completer.setFilterMode(Qt.MatchContains)
+        # set complete mode
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        # set QCompleter for lineEdit
+        lineEdit.setCompleter(self.completer)
+
     def CheckSelection(self):
         #print(self.w4.getViewBox().selectedPoints)
         self.UpdateSelectionSignal.emit(self.w4.getViewBox().selectedPoints)
 
     def setColor(self):
-        group = self.ui.comboBoxGroup.currentText()
+        group = self.ui.lineEditColor.text()
         if group == '':
             Msg = 'Please specify a group factor!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        elif group not in self.fields_name:
+            Msg = 'Your color group name is not in VGenes database!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
@@ -5556,7 +5572,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.w4.getViewBox().autoRange()
     
     def sizeSwitch(self):
-        if self.ui.comboBoxSize.currentText() != "":
+        if self.ui.lineEditSize.text() != "":
             self.ui.spinBoxPointSize.setEnabled(False)
             self.ui.label_6.setEnabled(False)
         else:
@@ -5632,10 +5648,30 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         return data_size_scale
 
     def Draw(self):
-        dim1 = self.ui.comboBoxX.currentText()
-        dim2 = self.ui.comboBoxY.currentText()
-        group = self.ui.comboBoxGroup.currentText()
-        size = self.ui.comboBoxSize.currentText()
+        dim1 = self.ui.lineEditX.text()
+        dim2 = self.ui.lineEditY.text()
+        group = self.ui.lineEditColor.text()
+        size = self.ui.lineEditSize.text()
+
+        if dim1 not in self.fields_name:
+            Msg = 'Your X axis name is not in VGenes database!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        
+        if dim2 not in self.fields_name:
+            Msg = 'Your Y axis name is not in VGenes database!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        
+        if group != '' and group not in self.fields_name:
+            Msg = 'Your color group name is not in VGenes database!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        if size != '' and size not in self.fields_name:
+            Msg = 'Your size factor name is not in VGenes database!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
 
         dim1 = re.sub(r'\(.+', '', dim1)
         dim2 = re.sub(r'\(.+', '', dim2)
@@ -6493,13 +6529,13 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
 
         # set Axis labels
         if self.ui.radioButtonLogX.isChecked():
-            self.w4.getAxis('bottom').setLabel('Log1p: ' + self.ui.comboBoxX.currentText())
+            self.w4.getAxis('bottom').setLabel('Log1p: ' + self.ui.lineEditX.text())
         else:
-            self.w4.getAxis('bottom').setLabel(self.ui.comboBoxX.currentText())
+            self.w4.getAxis('bottom').setLabel(self.ui.lineEditX.text())
         if self.ui.radioButtonLogY.isChecked():
-            self.w4.getAxis('left').setLabel('Log1p: ' + self.ui.comboBoxY.currentText())
+            self.w4.getAxis('left').setLabel('Log1p: ' + self.ui.lineEditY.text())
         else:
-            self.w4.getAxis('left').setLabel(self.ui.comboBoxY.currentText())
+            self.w4.getAxis('left').setLabel(self.ui.lineEditY.text())
 
         self.w4.autoRange()
 
@@ -21643,13 +21679,18 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPyqtGraphDialog = PyqtGraphDialog()
 
         self.myPyqtGraphDialog.DBFilename = DBFilename
-        self.myPyqtGraphDialog.vgene = self
 
         fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
-        self.myPyqtGraphDialog.ui.comboBoxX.addItems(fields_name)
-        self.myPyqtGraphDialog.ui.comboBoxY.addItems(fields_name)
-        self.myPyqtGraphDialog.ui.comboBoxGroup.addItems(fields_name)
-        self.myPyqtGraphDialog.ui.comboBoxSize.addItems(fields_name)
+        self.myPyqtGraphDialog.fields_name = fields_name
+        #self.myPyqtGraphDialog.ui.comboBoxX.addItems(fields_name)
+        #self.myPyqtGraphDialog.ui.comboBoxY.addItems(fields_name)
+        #self.myPyqtGraphDialog.ui.comboBoxGroup.addItems(fields_name)
+        #self.myPyqtGraphDialog.ui.comboBoxSize.addItems(fields_name)
+        self.myPyqtGraphDialog.initLineedit(self.myPyqtGraphDialog.ui.lineEditSize, fields_name)
+        self.myPyqtGraphDialog.initLineedit(self.myPyqtGraphDialog.ui.lineEditColor, fields_name)
+        self.myPyqtGraphDialog.initLineedit(self.myPyqtGraphDialog.ui.lineEditX, fields_name)
+        self.myPyqtGraphDialog.initLineedit(self.myPyqtGraphDialog.ui.lineEditY, fields_name)
+
         self.myPyqtGraphDialog.vgenes = self
         self.myPyqtGraphDialog.UpdateSelectionSignal.connect(self.updateSelectionFromDialog)
 

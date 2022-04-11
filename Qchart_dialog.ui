@@ -169,6 +169,9 @@
           <height>16777215</height>
          </size>
         </property>
+        <property name="toolTip">
+         <string>Select mode: drag to select, drag + ALT to delete</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -295,18 +298,17 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxX">
+           <widget class="QLineEdit" name="lineEditX">
             <property name="minimumSize">
              <size>
               <width>200</width>
               <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+             </font>
             </property>
            </widget>
           </item>
@@ -341,18 +343,17 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxY">
+           <widget class="QLineEdit" name="lineEditY">
             <property name="minimumSize">
              <size>
               <width>200</width>
               <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+             </font>
             </property>
            </widget>
           </item>
@@ -558,18 +559,17 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxSize">
+           <widget class="QLineEdit" name="lineEditSize">
             <property name="minimumSize">
              <size>
               <width>200</width>
               <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>200</width>
-              <height>16777215</height>
-             </size>
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+             </font>
             </property>
            </widget>
           </item>
@@ -611,18 +611,17 @@
            </spacer>
           </item>
           <item>
-           <widget class="QComboBox" name="comboBoxGroup">
+           <widget class="QLineEdit" name="lineEditColor">
             <property name="minimumSize">
              <size>
-              <width>100</width>
+              <width>160</width>
               <height>0</height>
              </size>
             </property>
-            <property name="maximumSize">
-             <size>
-              <width>150</width>
-              <height>16777215</height>
-             </size>
+            <property name="font">
+             <font>
+              <pointsize>18</pointsize>
+             </font>
             </property>
            </widget>
           </item>
