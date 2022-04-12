@@ -9,6 +9,7 @@ import shutil
 import math
 import numpy
 import pandas as pd
+import csv
 
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
@@ -3975,6 +3976,7 @@ class annotate_thread(QThread):
         super(annotate_thread, self).__init__()
         self.DBFilename = ''
         self.dialog = ''
+        self.csvFile = ''
 
     def run(self):
         global RealNameList
@@ -3994,7 +3996,6 @@ class annotate_thread(QThread):
         anchor_col_index = header.index(anchor_field)
 
         num_col = self.dialog.ui.tableWidget.columnCount()
-        num_row = self.dialog.ui.tableWidget.rowCount()
 
         pct = 1
         label = "Resolving annotation file ..."
@@ -4056,6 +4057,7 @@ class annotate_thread(QThread):
 
         count = 0
         process = 1
+        ''' old code, fetch values from the table
         for row in range(num_row):
             if row == 0:
                 continue
@@ -4069,6 +4071,38 @@ class annotate_thread(QThread):
                     SQLSTATEMENT = SQLSTATEMENT + field + ' = "' + value + '",'
 
                 current_anchor = self.dialog.ui.tableWidget.item(row, anchor_col_index).text()
+                SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
+                SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
+
+                try:
+                    count += VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
+                except:
+                    Msg = 'SQL error! Current SQL statement is:\n' + SQLSTATEMENT
+                    sign = 1
+                    self.trigger.emit([sign, Msg])
+                    return
+
+                pct = int(process / num_row * 100)
+                label = "Updating records: " + str(process) + '/' + str(num_row)
+                self.loadProgress.emit(pct, label)
+                process += 1
+        '''
+        num_row = wc_count(self.csvFile)
+        csv_reader = csv.reader(open(self.csvFile))
+        SkipHeader = True
+        for row_content in csv_reader:
+            if SkipHeader:
+                SkipHeader = False
+            else:
+                SQLSTATEMENT = "UPDATE vgenesdb SET "
+                for i in range(len(col_index)):
+                    col = col_index[i]
+                    field = col_fields[i]
+                    field = re.sub(r'\s.+', '', field)
+                    value = row_content[col]
+                    SQLSTATEMENT = SQLSTATEMENT + field + ' = "' + value + '",'
+
+                current_anchor = row_content[anchor_col_index]
                 SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
                 SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
 
@@ -7884,6 +7918,8 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
         self.ui = Ui_AnnoDialog()
         self.ui.setupUi(self)
 
+        self.csvFile = ''
+        
         self.ui.pushButtonCancel.clicked.connect(self.reject)
         self.ui.radioButton.clicked.connect(self.switchHeader)
         self.ui.pushButtonOK.clicked.connect(self.accept)
@@ -8077,6 +8113,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
         self.workThread = annotate_thread(self)
         self.workThread.dialog = self
         self.workThread.DBFilename = DBFilename
+        self.workThread.csvFile = self.csvFile
 
         self.workThread.start()
         self.workThread.trigger.connect(self.ShowMessageBox)
@@ -14431,6 +14468,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             return
 
         self.annoDialog = AnnoDielog()
+        self.annoDialog.csvFile = anno_file
         self.annoDialog.refreshDBSignal.connect(self.refreshDB)
         Content = []
 
@@ -36299,6 +36337,12 @@ def ReadFasta(file):
         res.append(tup)
 
     return res
+
+# get row count from a text file
+def wc_count(file_name):
+    import subprocess
+    out = subprocess.getoutput("wc -l %s" % file_name)
+    return int(out.split()[0])
 
 # calculate AA Similarity based on BLOSUM62 matrix
 def AASimilarity(AA):
