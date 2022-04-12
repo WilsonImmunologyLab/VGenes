@@ -14513,8 +14513,9 @@ class VGenesForm(QtWidgets.QMainWindow):
             for col_index in range(num_col):
                 self.annoDialog.ui.tableWidget.setItem(row_index + 1, col_index,
                                                        QTableWidgetItem(Content[row_index][col_index]))
-        self.annoDialog.ui.tableWidget.resizeColumnsToContents()
-
+        #self.annoDialog.ui.tableWidget.resizeColumnsToContents()
+        #self.annoDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        #self.annoDialog.ui.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
         self.annoDialog.show()
 
     @pyqtSlot()
