@@ -16,6 +16,7 @@ from pyqtgraph import getConfigOption
 from pyqtgraph.Qt import isQObjectAlive
 from PyQt5.QtWidgets import QApplication
 from AnyQt.QtCore import Qt
+from PyQt5.QtCore import pyqtSignal
 import re
 
 __all__ = ['ViewBox']
@@ -77,6 +78,8 @@ class ChildGroup(ItemGroup):
 
 
 class ViewBox(GraphicsWidget):
+    UpdateSelectionSignal = pyqtSignal(int)
+
     """
     **Bases:** :class:`GraphicsWidget <pyqtgraph.GraphicsWidget>`
 
@@ -1314,7 +1317,7 @@ class ViewBox(GraphicsWidget):
                                         points[index].setPen('r', width=4)
                                         if seq_name not in self.selectedPoints:
                                             self.selectedPoints.append(seq_name)
-
+                    self.UpdateSelectionSignal.emit(len(self.selectedPoints))
                 else:
                     ## update shape of scale box
                     self.updateScaleBox(ev.buttonDownPos(), ev.pos())

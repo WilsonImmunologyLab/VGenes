@@ -5382,6 +5382,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         self.w4.getViewBox().setMouseMode(pg.ViewBox.RectMode)
         self.w4.getViewBox().setMenuEnabled(False)
         self.w4.getViewBox().setMouseMode(ViewBox.SelectMode)
+        self.w4.getViewBox().UpdateSelectionSignal.connect(self.updateSelectNum)
         self.rangeSet = False
 
         # high light factor setting for color group
@@ -5406,7 +5407,14 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                "QMainWindow{font-size:18px;}")
         else:
             pass
-
+    
+    def updateSelectNum(self, num):
+        if num == 0:
+            self.ui.labelMode.setText('Select mode: drag to select, drag + ALT to delete')
+        else:
+            Msg = str(num) + ' points has been selected from the plot!'
+            self.ui.labelMode.setText(Msg)
+    
     def updateHC(self):
         if self.ui.radioButtonHC.isChecked():
             pass
