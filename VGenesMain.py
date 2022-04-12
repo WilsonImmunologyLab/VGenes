@@ -5737,6 +5737,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
             else:
                 where_statement = ' WHERE 1'
 
+        if self.ui.pushButtonSelect.isChecked():
+            self.ui.labelMode.setText('Select mode: drag to select, drag + ALT to delete')
+
         # clear plot and selection data
         self.w4.clear()
         self.w4.getViewBox().selectedPoints.clear()
@@ -12211,7 +12214,9 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.listWidgetAll.itemDoubleClicked.connect(self.addFieldsHeatmap)
         self.ui.listWidgetSelected.itemDoubleClicked.connect(self.delFieldsHeatmap)
         self.ui.pushButtonClear.clicked.connect(self.clearCheck)
+        self.ui.pushButtonClear1.clicked.connect(self.clearCheck)
         self.ui.pushButtonMark.clicked.connect(self.markRecords)
+        self.ui.pushButtonMark1.clicked.connect(self.markRecords)
         self.ui.radioButtonPNG.clicked.connect(self.setupPNG)
         self.ui.tabWidgetFig.currentChanged['int'].connect(self.disablePNG)
         self.ui.comboBoxTree.currentTextChanged.connect(self.updateCloneTreeInfo)
@@ -13270,14 +13275,18 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     def updateFromSampling(self, mode, names):
         if mode == 'single':
-            self.clearTreeChecks()
-            for Seqname in names:
-                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                for record in found:
-                    wasClicked = True
-                    record.setCheckState(0, Qt.Checked)
-            Msg = 'Your checked records have been updated according to your sampling!'
+            if self.ui.treeWidget.isEnabled():
+                self.clearTreeChecks()
+                for Seqname in names:
+                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                    for record in found:
+                        wasClicked = True
+                        record.setCheckState(0, Qt.Checked)
+
+            self.CheckedRecords = names
             self.match_tree_to_table()
+
+            Msg = 'Your checked records have been updated according to your sampling!'
         else:
             self.AntibodyCandidates = []
             self.ui.tableWidgetHC.setRowCount(0)
@@ -13999,17 +14008,22 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.match_table_to_tree()
         '''
         if self.ui.checkBoxExclusive.isChecked():
-            self.clearTreeChecks()
+            self.CheckedRecords = member_names
+            if self.ui.treeWidget.isEnabled():
+                self.clearTreeChecks()
             Msg = 'All members of this clone were exclusively checked!'
         else:
+            for ele in member_names:
+                if ele not in self.CheckedRecords:
+                    self.CheckedRecords.append(ele)
             Msg = 'All members of this clone were checked!'
 
-        for cur_name in member_names:
-            found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
-            if len(found) > 0:
-                for item in found:
-                    item.setCheckState(0, Qt.Checked)
-        rows = self.ui.SeqTable.rowCount()
+        if self.ui.treeWidget.isEnabled():
+            for cur_name in member_names:
+                found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+                if len(found) > 0:
+                    for item in found:
+                        item.setCheckState(0, Qt.Checked)
         self.match_tree_to_table()
 
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -14019,13 +14033,14 @@ class VGenesForm(QtWidgets.QMainWindow):
         seq_list = []
         for row in range(self.ui.tableWidgetHC.rowCount()):
             seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
-
-        self.clearTreeChecks()
-        for cur_name in seq_list:
-            found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
-            if len(found) > 0:
-                for item in found:
-                    item.setCheckState(0, Qt.Checked)
+        self.CheckedRecords = seq_list
+        if self.ui.treeWidget.isEnabled():
+            self.clearTreeChecks()
+            for cur_name in seq_list:
+                found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+                if len(found) > 0:
+                    for item in found:
+                        item.setCheckState(0, Qt.Checked)
         self.match_tree_to_table()
 
         Msg = 'All members of this HC table were exclusively checked!'
@@ -14036,13 +14051,14 @@ class VGenesForm(QtWidgets.QMainWindow):
         seq_list = []
         for row in range(self.ui.tableWidgetLC.rowCount()):
             seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
-
-        self.clearTreeChecks()
-        for cur_name in seq_list:
-            found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
-            if len(found) > 0:
-                for item in found:
-                    item.setCheckState(0, Qt.Checked)
+        self.CheckedRecords = seq_list
+        if self.ui.treeWidget.isEnabled():
+            self.clearTreeChecks()
+            for cur_name in seq_list:
+                found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+                if len(found) > 0:
+                    for item in found:
+                        item.setCheckState(0, Qt.Checked)
         self.match_tree_to_table()
 
         Msg = 'All members of this LC table were exclusively checked!'
@@ -14172,10 +14188,11 @@ class VGenesForm(QtWidgets.QMainWindow):
                             if Seqname in checkedItemsAll:
                                 continue
                             else:
-                                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                                for record in found:
-                                    wasClicked = True
-                                    record.setCheckState(0, Qt.Checked)
+                                if self.ui.treeWidget.isEnabled():
+                                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                                    for record in found:
+                                        wasClicked = True
+                                        record.setCheckState(0, Qt.Checked)
                                 checkedItemsAll.append(Seqname)
 
             self.match_tree_to_table()
@@ -14212,14 +14229,14 @@ class VGenesForm(QtWidgets.QMainWindow):
                 return
             else:
                 for record in DataIn:
-                    Seqname = record[0]
-                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                    for record in found:
-                        wasClicked = True
-                        record.setCheckState(0, Qt.Checked)
+                    if self.ui.treeWidget.isEnabled():
+                        Seqname = record[0]
+                        found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                        for record1 in found:
+                            wasClicked = True
+                            record1.setCheckState(0, Qt.Checked)
 
                 self.match_tree_to_table()
-
                 QMessageBox.information(self, 'Information',
                                         'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
                                         QMessageBox.Ok,
@@ -14625,10 +14642,11 @@ class VGenesForm(QtWidgets.QMainWindow):
                             if Seqname in checkedItemsAll:
                                 continue
                             else:
-                                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                                for record in found:
-                                    wasClicked = True
-                                    record.setCheckState(0, Qt.Checked)
+                                if self.ui.treeWidget.isEnabled():
+                                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                                    for record in found:
+                                        wasClicked = True
+                                        record.setCheckState(0, Qt.Checked)
                                 checkedItemsAll.append(Seqname)
 
             self.match_tree_to_table()
@@ -14664,12 +14682,13 @@ class VGenesForm(QtWidgets.QMainWindow):
                                     QMessageBox.Ok)
                 return
             else:
-                for record in DataIn:
-                    Seqname = record[0]
-                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                    for record in found:
-                        wasClicked = True
-                        record.setCheckState(0, Qt.Checked)
+                if self.ui.treeWidget.isEnabled():
+                    for record in DataIn:
+                        Seqname = record[0]
+                        found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                        for record1 in found:
+                            wasClicked = True
+                            record1.setCheckState(0, Qt.Checked)
 
                 self.match_tree_to_table()
 
@@ -14746,9 +14765,10 @@ class VGenesForm(QtWidgets.QMainWindow):
                                 continue
                             else:
                                 found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                                for record in found:
-                                    wasClicked = True
-                                    record.setCheckState(0, Qt.Checked)
+                                if self.ui.treeWidget.isEnabled():
+                                    for record in found:
+                                        wasClicked = True
+                                        record.setCheckState(0, Qt.Checked)
                                 checkedItemsAll.append(Seqname)
 
             self.match_tree_to_table()
@@ -14784,12 +14804,13 @@ class VGenesForm(QtWidgets.QMainWindow):
                                     QMessageBox.Ok)
                 return
             else:
-                for record in DataIn:
-                    Seqname = record[0]
-                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                    for record in found:
-                        wasClicked = True
-                        record.setCheckState(0, Qt.Checked)
+                if self.ui.treeWidget.isEnabled():
+                    for record in DataIn:
+                        Seqname = record[0]
+                        found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                        for record1 in found:
+                            wasClicked = True
+                            record1.setCheckState(0, Qt.Checked)
 
                 self.match_tree_to_table()
 
@@ -16961,8 +16982,9 @@ class VGenesForm(QtWidgets.QMainWindow):
                         re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
                         re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
                     )
-                    self.initializeTreeView(SQLFields)
-                    self.ui.treeWidget.expandAll()
+                    if self.ui.treeWidget.isEnabled():
+                        self.initializeTreeView(SQLFields)
+                        self.ui.treeWidget.expandAll()
                     self.updateF(-2)
                 else:
                     self.UpdateSeq(SeqName, CurVal, col_name)
@@ -17234,8 +17256,9 @@ class VGenesForm(QtWidgets.QMainWindow):
                 for row in range(rows):
                     self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
             # check trre
-            root = self.ui.treeWidget.invisibleRootItem()
-            self.TreeChecksAll()
+            if self.ui.treeWidget.isEnabled():
+                root = self.ui.treeWidget.invisibleRootItem()
+                self.TreeChecksAll()
             # update check list
             SQLStatement = 'SELECT SeqName from vgenesdb'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -17247,8 +17270,9 @@ class VGenesForm(QtWidgets.QMainWindow):
                 for row in range(rows):
                     self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
             # check trre
-            root = self.ui.treeWidget.invisibleRootItem()
-            self.clearTreeChecks()
+            if self.ui.treeWidget.isEnabled():
+                root = self.ui.treeWidget.invisibleRootItem()
+                self.clearTreeChecks()
             # update check list
             self.CheckedRecords = []
         MoveNotChange = False
@@ -17308,9 +17332,12 @@ class VGenesForm(QtWidgets.QMainWindow):
     def match_tree_to_table(self):
         global MoveNotChange
         # check if checked item changed
-        selected_list = self.getTreeCheckedChild()
-        selected_list = selected_list[3]
-        self.CheckedRecords = selected_list
+        if self.ui.treeWidget.isEnabled():
+            selected_list = self.getTreeCheckedChild()
+            selected_list = selected_list[3]
+            self.CheckedRecords = selected_list
+        else:
+            selected_list = self.CheckedRecords
 
         MoveNotChange = True
         rows = self.ui.SeqTable.rowCount()
@@ -17323,41 +17350,43 @@ class VGenesForm(QtWidgets.QMainWindow):
         MoveNotChange = False
 
     def match_table_to_tree(self, names, events):
-        # update the selection
-        if events == True:
-            action = Qt.Checked
-        else:
-            action = Qt.Unchecked
-
-        NumFound = len(names)
-        i = 0
-        for Seqname in names:
-            found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-            i += 1
-            for record in found:
-                if i == NumFound - 1:
-                    wasClicked = True
-                record.setCheckState(0, action)
+        if self.ui.treeWidget.isEnabled():
+            # update the selection
+            if events == True:
+                action = Qt.Checked
+            else:
+                action = Qt.Unchecked
+    
+            NumFound = len(names)
+            i = 0
+            for Seqname in names:
+                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                i += 1
+                for record in found:
+                    if i == NumFound - 1:
+                        wasClicked = True
+                    record.setCheckState(0, action)
 
     def match_table_to_tree_old(self):
-        DataIn = []
-        # get all checked table rows
-        total_rows = self.ui.SeqTable.rowCount()
-        for row in range(total_rows):
-            if self.ui.SeqTable.cellWidget(row, 0).isChecked():
-                DataIn.append(self.ui.SeqTable.item(row, 1).text())
-
-        # update the selection
-        self.clearTreeChecks()
-        NumFound = len(DataIn)
-        i = 0
-        for Seqname in DataIn:
-            found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-            i += 1
-            for record in found:
-                if i == NumFound - 1:
-                    wasClicked = True
-                record.setCheckState(0, Qt.Checked)
+        if self.ui.treeWidget.isEnabled():
+            DataIn = []
+            # get all checked table rows
+            total_rows = self.ui.SeqTable.rowCount()
+            for row in range(total_rows):
+                if self.ui.SeqTable.cellWidget(row, 0).isChecked():
+                    DataIn.append(self.ui.SeqTable.item(row, 1).text())
+    
+            # update the selection
+            self.clearTreeChecks()
+            NumFound = len(DataIn)
+            i = 0
+            for Seqname in DataIn:
+                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                i += 1
+                for record in found:
+                    if i == NumFound - 1:
+                        wasClicked = True
+                    record.setCheckState(0, Qt.Checked)
 
     def EditTableItem(self, item):
         global MoveNotChange
@@ -17406,9 +17435,9 @@ class VGenesForm(QtWidgets.QMainWindow):
                     re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
                     re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
                 )
-
-                self.initializeTreeView(SQLFields)
-                self.ui.treeWidget.expandAll()
+                if self.ui.treeWidget.isEnabled():
+                    self.initializeTreeView(SQLFields)
+                    self.ui.treeWidget.expandAll()
         except:
             MoveNotChange = True
             col = item.column()
@@ -20040,31 +20069,16 @@ class VGenesForm(QtWidgets.QMainWindow):
                 return
 
             # already checked some records?
-            #checked_names = self.getTreeCheckedChild()
-            checked_names = self.CheckedRecords
-            num_checked = 0
-            if len(checked_names) == 0:
-                # update the selection
-                self.clearTreeChecks()
-                NumFound = len(DataIn)
-                i = 0
-                for item in DataIn:
-                    Seqname = item[0]
-                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                    i += 1
-                    for record in found:
-                        if i == NumFound - 1:
-                            wasClicked = True
-                        record.setCheckState(0, Qt.Checked)
-                        num_checked += 1
-            else:
-                # update the selection
-                self.clearTreeChecks()
-                NumFound = len(DataIn)
-                i = 0
-                for item in DataIn:
-                    Seqname = item[0]
-                    if Seqname in checked_names:
+            if self.ui.treeWidget.isEnabled():
+                checked_names = self.CheckedRecords
+                num_checked = 0
+                if len(checked_names) == 0:
+                    # update the selection
+                    self.clearTreeChecks()
+                    NumFound = len(DataIn)
+                    i = 0
+                    for item in DataIn:
+                        Seqname = item[0]
                         found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
                         i += 1
                         for record in found:
@@ -20072,10 +20086,25 @@ class VGenesForm(QtWidgets.QMainWindow):
                                 wasClicked = True
                             record.setCheckState(0, Qt.Checked)
                             num_checked += 1
+                else:
+                    # update the selection
+                    self.clearTreeChecks()
+                    NumFound = len(DataIn)
+                    i = 0
+                    for item in DataIn:
+                        Seqname = item[0]
+                        if Seqname in checked_names:
+                            found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                            i += 1
+                            for record in found:
+                                if i == NumFound - 1:
+                                    wasClicked = True
+                                record.setCheckState(0, Qt.Checked)
+                                num_checked += 1
 
-            NewLbl = str(num_checked) + ' records checked'
-            self.ui.label_Name.setText(NewLbl)
-            self.match_tree_to_table()
+                NewLbl = str(num_checked) + ' records checked'
+                self.ui.label_Name.setText(NewLbl)
+                self.match_tree_to_table()
 
     def downloadSVG(self, msg):
         options = QtWidgets.QFileDialog.Options()
@@ -20332,15 +20361,16 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.TextEdit.textEdit.setText(textToShow)
 
     def initializeTreeView(self, SQLFields):
-        # clear tree
-        self.ui.treeWidget.clear()
-        # add all children
-        self.TreeAddItems(self.ui.treeWidget.invisibleRootItem(), SQLFields)
-        # rebuild name index
-        self.buildNameidnex(SQLFields)
-
-        global wasClicked
-        wasClicked = True
+        if self.ui.treeWidget.isEnabled():
+            # clear tree
+            self.ui.treeWidget.clear()
+            # add all children
+            self.TreeAddItems(self.ui.treeWidget.invisibleRootItem(), SQLFields)
+            # rebuild name index
+            self.buildNameidnex(SQLFields)
+    
+            global wasClicked
+            wasClicked = True
 
     def buildNameidnex(self,SQLFields):
         global NameIndex
@@ -20371,75 +20401,106 @@ class VGenesForm(QtWidgets.QMainWindow):
             NameIndex[NameIs] = i
 
     def TreeAddItems(self, parent, SQLFields):
-        dirnamed, filenamed = os.path.split(DBFilename)
+        if self.ui.treeWidget.isEnabled():
+            dirnamed, filenamed = os.path.split(DBFilename)
 
-        FieldNum = 0
-        Field1 = ''
-        Field2 = ''
-        Field3 = ''
-        i1 = 0
-        i2 = 0
-        i3 = 0
-        i4 = 0
-        for sfield in SQLFields:
-            if sfield != 'None' and sfield is not None:
-                if FieldNum == 0: Field1 = sfield
-                if FieldNum == 1: Field2 = sfield
-                if FieldNum == 2: Field3 = sfield
-                FieldNum += 1
+            FieldNum = 0
+            Field1 = ''
+            Field2 = ''
+            Field3 = ''
+            i1 = 0
+            i2 = 0
+            i3 = 0
+            i4 = 0
+            for sfield in SQLFields:
+                if sfield != 'None' and sfield is not None:
+                    if FieldNum == 0: Field1 = sfield
+                    if FieldNum == 1: Field2 = sfield
+                    if FieldNum == 2: Field3 = sfield
+                    FieldNum += 1
+                else:
+                    if FieldNum == 0: Field1 = 'None'
+                    if FieldNum == 1: Field2 = 'None'
+                    if FieldNum == 2: Field3 = 'None'
+                    FieldNum += 1
+
+            # todo make header actaul values not field names
+
+            HeaderLabel = Field1 + ' / ' + Field2 + ' / ' + Field3 + ':'
+            self.ui.treeWidget.setHeaderLabel(HeaderLabel)
+
+            column = 0
+            VTree_item = self.addParent(parent, column, filenamed, 'Top parent')
+
+            # Field 1 selection
+            if Field1 != 'None':  # some organizing based on item 1
+                SQLStatement = 'SELECT DISTINCT ' + Field1 + ' FROM vgenesDB ORDER BY ' + Field1
+                FieldValues = VGenesSQL.readData(DBFilename, SQLStatement)
+                for Vcolumn in FieldValues:
+                    self.addChild(VTree_item, column, Vcolumn, 'Field-1')
+                    # i += 1
+            else:  # All classification fields marked 'None'
+                SQLStatement = 'SELECT SeqName FROM vgenesDB ORDER BY Project, Grouping, SubGroup, SeqName'
+                FieldValues = VGenesSQL.readData(DBFilename, SQLStatement)
+                for Vcolumn in FieldValues:
+                    self.addChild(VTree_item, column, Vcolumn, 'Field-1')
+                self.addChild(VTree_item, column, ' ', ' ')
+                return
+
+            # Field 2
+            I1 = 0
+            if Field2 != 'None':  # There is selection criteria in field 2, iterates through for all Field1s
+                for Vcolumn in FieldValues:
+                    SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                    FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
+                    for Vcolumn2 in FieldValues2:
+                        self.addChild(VTree_item.child(i1), column, Vcolumn2, 'Field-2')
+                    i1 += 1
+
             else:
-                if FieldNum == 0: Field1 = 'None'
-                if FieldNum == 1: Field2 = 'None'
-                if FieldNum == 2: Field3 = 'None'
-                FieldNum += 1
+                for Vcolumn in FieldValues:
+                    SQLStatement2 = 'SELECT SeqName FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                    FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
+                    for Vcolumn2 in FieldValues2:
+                        self.addChild(VTree_item.child(i1), column, Vcolumn2, 'Field-2')
+                    i1 += 1
+                    # self.addChild( VTree_item, column, ' ', ' ')
+                return
 
-        # todo make header actaul values not field names
+            # Field 3
+            i1 = 0
+            i2 = 0
+            if Field3 != 'None':  # There is selection criteris in field 2, iterates through for all Field1s
+                for Vcolumn in FieldValues:
+                    SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                    FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
+                    i2 = 0
+                    for Vcolumn2 in FieldValues2:
+                        SQLStatement3 = 'SELECT DISTINCT ' + Field3 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                        FieldValues3 = VGenesSQL.readData(DBFilename, SQLStatement3)
+                        for Vcolumn3 in FieldValues3:
+                            self.addChild(VTree_item.child(i1).child(i2), column, Vcolumn3, 'Field-3')
+                        i2 += 1
+                    i1 += 1
 
-        HeaderLabel = Field1 + ' / ' + Field2 + ' / ' + Field3 + ':'
-        self.ui.treeWidget.setHeaderLabel(HeaderLabel)
+            else:
+                for Vcolumn in FieldValues:
+                    SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                    FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
+                    i2 = 0
+                    for Vcolumn2 in FieldValues2:
+                        SQLStatement3 = 'SELECT SeqName FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                        FieldValues3 = VGenesSQL.readData(DBFilename, SQLStatement3)
+                        for Vcolumn3 in FieldValues3:
+                            self.addChild(VTree_item.child(i1).child(i2), column, Vcolumn3, 'Field-3')
+                        i2 += 1
+                    i1 += 1
+                return
 
-        column = 0
-        VTree_item = self.addParent(parent, column, filenamed, 'Top parent')
-
-        # Field 1 selection
-        if Field1 != 'None':  # some organizing based on item 1
-            SQLStatement = 'SELECT DISTINCT ' + Field1 + ' FROM vgenesDB ORDER BY ' + Field1
-            FieldValues = VGenesSQL.readData(DBFilename, SQLStatement)
-            for Vcolumn in FieldValues:
-                self.addChild(VTree_item, column, Vcolumn, 'Field-1')
-                # i += 1
-        else:  # All classification fields marked 'None'
-            SQLStatement = 'SELECT SeqName FROM vgenesDB ORDER BY Project, Grouping, SubGroup, SeqName'
-            FieldValues = VGenesSQL.readData(DBFilename, SQLStatement)
-            for Vcolumn in FieldValues:
-                self.addChild(VTree_item, column, Vcolumn, 'Field-1')
-            self.addChild(VTree_item, column, ' ', ' ')
-            return
-
-        # Field 2
-        I1 = 0
-        if Field2 != 'None':  # There is selection criteria in field 2, iterates through for all Field1s
-            for Vcolumn in FieldValues:
-                SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-                FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
-                for Vcolumn2 in FieldValues2:
-                    self.addChild(VTree_item.child(i1), column, Vcolumn2, 'Field-2')
-                i1 += 1
-
-        else:
-            for Vcolumn in FieldValues:
-                SQLStatement2 = 'SELECT SeqName FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-                FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
-                for Vcolumn2 in FieldValues2:
-                    self.addChild(VTree_item.child(i1), column, Vcolumn2, 'Field-2')
-                i1 += 1
-                # self.addChild( VTree_item, column, ' ', ' ')
-            return
-
-        # Field 3
-        i1 = 0
-        i2 = 0
-        if Field3 != 'None':  # There is selection criteris in field 2, iterates through for all Field1s
+            # Last set only done if all 3 others selected
+            i1 = 0
+            i2 = 0
+            i3 = 0
             for Vcolumn in FieldValues:
                 SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
                 FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
@@ -20447,47 +20508,17 @@ class VGenesForm(QtWidgets.QMainWindow):
                 for Vcolumn2 in FieldValues2:
                     SQLStatement3 = 'SELECT DISTINCT ' + Field3 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
                     FieldValues3 = VGenesSQL.readData(DBFilename, SQLStatement3)
+                    i3 = 0
                     for Vcolumn3 in FieldValues3:
-                        self.addChild(VTree_item.child(i1).child(i2), column, Vcolumn3, 'Field-3')
+                        SQLStatement4 = 'SELECT SeqName FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+                        FieldValues4 = VGenesSQL.readData(DBFilename, SQLStatement4)
+                        for Vcolumn4 in FieldValues4:
+                            self.addChild(VTree_item.child(i1).child(i2).child(i3), column, Vcolumn4, 'Field-4')
+                            # self.addChild(VTree_item.child(i1).child(i2).child(i3), 1, 'test', 'Field-4')
+                        # self.addChild(VTree_item.child(i1).child(i2).child(i3), column, 'Blank', 'Field-4')
+                        i3 += 1
                     i2 += 1
                 i1 += 1
-
-        else:
-            for Vcolumn in FieldValues:
-                SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-                FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
-                i2 = 0
-                for Vcolumn2 in FieldValues2:
-                    SQLStatement3 = 'SELECT SeqName FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-                    FieldValues3 = VGenesSQL.readData(DBFilename, SQLStatement3)
-                    for Vcolumn3 in FieldValues3:
-                        self.addChild(VTree_item.child(i1).child(i2), column, Vcolumn3, 'Field-3')
-                    i2 += 1
-                i1 += 1
-            return
-
-        # Last set only done if all 3 others selected
-        i1 = 0
-        i2 = 0
-        i3 = 0
-        for Vcolumn in FieldValues:
-            SQLStatement2 = 'SELECT DISTINCT ' + Field2 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-            FieldValues2 = VGenesSQL.readData(DBFilename, SQLStatement2)
-            i2 = 0
-            for Vcolumn2 in FieldValues2:
-                SQLStatement3 = 'SELECT DISTINCT ' + Field3 + ' FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-                FieldValues3 = VGenesSQL.readData(DBFilename, SQLStatement3)
-                i3 = 0
-                for Vcolumn3 in FieldValues3:
-                    SQLStatement4 = 'SELECT SeqName FROM vgenesDB WHERE ' + Field1 + ' = "' + Vcolumn + '" AND ' + Field2 + ' = "' + Vcolumn2 + '" AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-                    FieldValues4 = VGenesSQL.readData(DBFilename, SQLStatement4)
-                    for Vcolumn4 in FieldValues4:
-                        self.addChild(VTree_item.child(i1).child(i2).child(i3), column, Vcolumn4, 'Field-4')
-                        # self.addChild(VTree_item.child(i1).child(i2).child(i3), 1, 'test', 'Field-4')
-                    # self.addChild(VTree_item.child(i1).child(i2).child(i3), column, 'Blank', 'Field-4')
-                    i3 += 1
-                i2 += 1
-            i1 += 1
 
     def addParent(self, parent, column, title, data):
         item = QtWidgets.QTreeWidgetItem(parent, [title])
@@ -20536,53 +20567,54 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.tree_to_table_selection()
 
     def tree_to_table_selection(self):
-        # find selection name
-        Selected = self.ui.treeWidget.selectedItems()
-        try:
-            Selected = Selected[-1]
-        except:
-            return
-        name = Selected.text(0)
-
-        print(name)
-
-        # try to match before re-generate table
-        rows = self.ui.SeqTable.rowCount()
-        for row in range(rows):
-            cur_name = self.ui.SeqTable.item(row, 1).text()
-            if cur_name == name:
-                self.ui.SeqTable.setCurrentCell(row,1)
+        if self.ui.treeWidget.isEnabled():
+            # find selection name
+            Selected = self.ui.treeWidget.selectedItems()
+            try:
+                Selected = Selected[-1]
+            except:
                 return
+            name = Selected.text(0)
 
-        # loacte records in table and update table
-        print('re-generate table!\n')
-        field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-        field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-        field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+            print(name)
 
-        orderStatement = "ORDER BY " + field1 + "," + field2 + "," + field3 + ",SeqName"
-        #SQLStatement = 'SELECT * FROM (SELECT ROW_NUMBER () OVER ( ' + orderStatement + ') RowNum,SeqName FROM vgenesDB) WHERE `SeqName` = "' + name + '"'
-        SQLStatement = 'SELECT SeqName FROM vgenesDB ' + orderStatement
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        name_list = [u[0] for u in DataIn]
-        try:
-            row_number = name_list.index(name) + 1
-        except:
-            row_number = 1
+            # try to match before re-generate table
+            rows = self.ui.SeqTable.rowCount()
+            for row in range(rows):
+                cur_name = self.ui.SeqTable.item(row, 1).text()
+                if cur_name == name:
+                    self.ui.SeqTable.setCurrentCell(row,1)
+                    return
 
-        pageSize = int(self.ui.spinBoxPageSize.text())
-        PageNumber = math.ceil(row_number/pageSize)
+            # loacte records in table and update table
+            print('re-generate table!\n')
+            field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+            field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+            field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
 
-        self.ui.labelCurPage.setText(str(PageNumber))
-        self.load_table()
-        
-        # setup focus on seqTable
-        rows = self.ui.SeqTable.rowCount()
-        for row in range(rows):
-            cur_name = self.ui.SeqTable.item(row, 1).text()
-            if cur_name == name:
-                self.ui.SeqTable.setCurrentCell(row,1)
-                return
+            orderStatement = "ORDER BY " + field1 + "," + field2 + "," + field3 + ",SeqName"
+            #SQLStatement = 'SELECT * FROM (SELECT ROW_NUMBER () OVER ( ' + orderStatement + ') RowNum,SeqName FROM vgenesDB) WHERE `SeqName` = "' + name + '"'
+            SQLStatement = 'SELECT SeqName FROM vgenesDB ' + orderStatement
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            name_list = [u[0] for u in DataIn]
+            try:
+                row_number = name_list.index(name) + 1
+            except:
+                row_number = 1
+
+            pageSize = int(self.ui.spinBoxPageSize.text())
+            PageNumber = math.ceil(row_number/pageSize)
+
+            self.ui.labelCurPage.setText(str(PageNumber))
+            self.load_table()
+
+            # setup focus on seqTable
+            rows = self.ui.SeqTable.rowCount()
+            for row in range(rows):
+                cur_name = self.ui.SeqTable.item(row, 1).text()
+                if cur_name == name:
+                    self.ui.SeqTable.setCurrentCell(row,1)
+                    return
 
     def tree_to_table_selection_old(self):
         Selected = self.ui.treeWidget.selectedItems()
@@ -20610,20 +20642,26 @@ class VGenesForm(QtWidgets.QMainWindow):
 
             print(name)
 
-            found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
-            if len(found) > 0:
-                found = found[0]
-                from_table = True
-                self.ui.treeWidget.setCurrentItem(found)
-                from_table = False
+            if self.ui.treeWidget.isEnabled():
+                found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+                if len(found) > 0:
+                    found = found[0]
+                    from_table = True
+                    self.ui.treeWidget.setCurrentItem(found)
+                    from_table = False
+            else:
+                MatchingIndex = NameIndex[name]
+                self.DialScroll(MatchingIndex, False)
+                self.updateF(MatchingIndex)
         except:
             return
 
     def select_tree_by_name(self, name):
-        found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
-        if len(found) > 0:
-            found = found[0]
-            self.ui.treeWidget.setCurrentItem(found)
+        if self.ui.treeWidget.isEnabled():
+            found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+            if len(found) > 0:
+                found = found[0]
+                self.ui.treeWidget.setCurrentItem(found)
 
     def getTreePathUp(self, item):
         path = []
@@ -20793,102 +20831,97 @@ class VGenesForm(QtWidgets.QMainWindow):
                             #     path.append(str(item.text(0)))
 
     def CheckMultiple(self):
-
-        Selected = self.ui.treeWidget.selectedItems()
-        # i = 0
-        for item in Selected:
-            # if i == 0:
-            #     currentitemIs = item.text(0)
-            # i += 1
-            if item.checkState(0) == Qt.Checked:
-                item.setCheckState(0, Qt.Unchecked)
-            else:
-                item.setCheckState(0, Qt.Checked)
-
-
-                # self.findTreeItem(currentitemIs)
+        if self.ui.treeWidget.isEnabled():
+            Selected = self.ui.treeWidget.selectedItems()
+            # i = 0
+            for item in Selected:
+                # if i == 0:
+                #     currentitemIs = item.text(0)
+                # i += 1
+                if item.checkState(0) == Qt.Checked:
+                    item.setCheckState(0, Qt.Unchecked)
+                else:
+                    item.setCheckState(0, Qt.Checked)
 
     def clearTreeChecks(self):
+        if self.ui.treeWidget.isEnabled():
+            global wasClicked
+            wasClicked = False
 
-        global wasClicked
-        wasClicked = False
+            value = self.ui.treeWidget.selectedItems()
+            # self.ui.treeWidget.selectedItems()
+            currentitemIs = ''
+            for item in value:
+                currentitemIs = item.text(0)
 
-        value = self.ui.treeWidget.selectedItems()
-        # self.ui.treeWidget.selectedItems()
-        currentitemIs = ''
-        for item in value:
-            currentitemIs = item.text(0)
-
-        root = self.ui.treeWidget.invisibleRootItem()
-        for index in range(root.childCount()):
-            fileIs = root.child(index)
-            fileIs.setCheckState(0,Qt.Unchecked)
+            root = self.ui.treeWidget.invisibleRootItem()
+            for index in range(root.childCount()):
+                fileIs = root.child(index)
+                fileIs.setCheckState(0,Qt.Unchecked)
 
 
 
-        for index in range(fileIs.childCount()):
-            project = fileIs.child(index)  # project level
-            project.setCheckState(0,Qt.Unchecked)
+            for index in range(fileIs.childCount()):
+                project = fileIs.child(index)  # project level
+                project.setCheckState(0,Qt.Unchecked)
 
-            if project.childCount() != 0:  # if project level exists
+                if project.childCount() != 0:  # if project level exists
 
-                for Pindex in range(project.childCount()):  # will iterate through group level
-                    Group = project.child(Pindex)  # each group
-                    Group.setCheckState(0,Qt.Unchecked)
+                    for Pindex in range(project.childCount()):  # will iterate through group level
+                        Group = project.child(Pindex)  # each group
+                        Group.setCheckState(0,Qt.Unchecked)
 
-                    if Group.childCount() != 0:  # if there is a subgroup level
-                        for Gindex in range(Group.childCount()):  # will iterate through subgroup level
-                            SubGroup = Group.child(Gindex)  # each subgroup
-                            SubGroup.setCheckState(0,Qt.Unchecked)
+                        if Group.childCount() != 0:  # if there is a subgroup level
+                            for Gindex in range(Group.childCount()):  # will iterate through subgroup level
+                                SubGroup = Group.child(Gindex)  # each subgroup
+                                SubGroup.setCheckState(0,Qt.Unchecked)
 
-                            if SubGroup.childCount() != 0:  # if there is a record level
+                                if SubGroup.childCount() != 0:  # if there is a record level
 
-                                for SGindex in range(SubGroup.childCount()):  # will iterate through record level
+                                    for SGindex in range(SubGroup.childCount()):  # will iterate through record level
 
-                                    Record = SubGroup.child(SGindex)  # each subgroup
-                                    Record.setCheckState(0,Qt.Unchecked)
-        return
+                                        Record = SubGroup.child(SGindex)  # each subgroup
+                                        Record.setCheckState(0,Qt.Unchecked)
 
     def TreeChecksAll(self):
+        if self.ui.treeWidget.isEnabled():
+            global wasClicked
+            wasClicked = False
 
-        global wasClicked
-        wasClicked = False
+            value = self.ui.treeWidget.selectedItems()
+            # self.ui.treeWidget.selectedItems()
+            currentitemIs = ''
+            for item in value:
+                currentitemIs = item.text(0)
 
-        value = self.ui.treeWidget.selectedItems()
-        # self.ui.treeWidget.selectedItems()
-        currentitemIs = ''
-        for item in value:
-            currentitemIs = item.text(0)
-
-        root = self.ui.treeWidget.invisibleRootItem()
-        for index in range(root.childCount()):
-            fileIs = root.child(index)
-            fileIs.setCheckState(0,Qt.Checked)
+            root = self.ui.treeWidget.invisibleRootItem()
+            for index in range(root.childCount()):
+                fileIs = root.child(index)
+                fileIs.setCheckState(0,Qt.Checked)
 
 
 
-        for index in range(fileIs.childCount()):
-            project = fileIs.child(index)  # project level
-            project.setCheckState(0,Qt.Checked)
+            for index in range(fileIs.childCount()):
+                project = fileIs.child(index)  # project level
+                project.setCheckState(0,Qt.Checked)
 
-            if project.childCount() != 0:  # if project level exists
+                if project.childCount() != 0:  # if project level exists
 
-                for Pindex in range(project.childCount()):  # will iterate through group level
-                    Group = project.child(Pindex)  # each group
-                    Group.setCheckState(0,Qt.Checked)
+                    for Pindex in range(project.childCount()):  # will iterate through group level
+                        Group = project.child(Pindex)  # each group
+                        Group.setCheckState(0,Qt.Checked)
 
-                    if Group.childCount() != 0:  # if there is a subgroup level
-                        for Gindex in range(Group.childCount()):  # will iterate through subgroup level
-                            SubGroup = Group.child(Gindex)  # each subgroup
-                            SubGroup.setCheckState(0,Qt.Checked)
+                        if Group.childCount() != 0:  # if there is a subgroup level
+                            for Gindex in range(Group.childCount()):  # will iterate through subgroup level
+                                SubGroup = Group.child(Gindex)  # each subgroup
+                                SubGroup.setCheckState(0,Qt.Checked)
 
-                            if SubGroup.childCount() != 0:  # if there is a record level
+                                if SubGroup.childCount() != 0:  # if there is a record level
 
-                                for SGindex in range(SubGroup.childCount()):  # will iterate through record level
+                                    for SGindex in range(SubGroup.childCount()):  # will iterate through record level
 
-                                    Record = SubGroup.child(SGindex)  # each subgroup
-                                    Record.setCheckState(0,Qt.Checked)
-        return
+                                        Record = SubGroup.child(SGindex)  # each subgroup
+                                        Record.setCheckState(0,Qt.Checked)
 
     def getTreePathDown(self, item):
         path = []
@@ -20907,25 +20940,93 @@ class VGenesForm(QtWidgets.QMainWindow):
         return path  # '/'.join(reversed(path))
 
     def getTreeChecked(self):
-        root = self.ui.treeWidget.invisibleRootItem()
-        for index in range(root.childCount()):
-            fileIs = root.child(index)
+        if self.ui.treeWidget.isEnabled():
+            root = self.ui.treeWidget.invisibleRootItem()
+            for index in range(root.childCount()):
+                fileIs = root.child(index)
 
-        checkedkids = []
-        checkedProjects = []
-        checkedGroups = []
-        checkedSubGroups = []
+            checkedkids = []
+            checkedProjects = []
+            checkedGroups = []
+            checkedSubGroups = []
 
-        for index in range(fileIs.childCount()):
-            project = fileIs.child(index)  # project level
-            # while item is not None:  # iterate through project level items
+            for index in range(fileIs.childCount()):
+                project = fileIs.child(index)  # project level
+                # while item is not None:  # iterate through project level items
 
 
-            if project.childCount() != 0:  # if project level exists
-                if project.checkState(0) == Qt.Checked:
-                    checkedProjects.append(project.text(0))
+                if project.childCount() != 0:  # if project level exists
+                    if project.checkState(0) == Qt.Checked:
+                        checkedProjects.append(project.text(0))
 
-                else:
+                    else:
+                        for Pindex in range(project.childCount()):  # will iterate through group level
+                            Group = project.child(Pindex)  # each group
+                            checkName = Group.text(0)
+                            # numkid =
+                            if Group.childCount() != 0:  # if there is a subgroup level
+                                if Group.checkState(0) == Qt.Checked:
+                                    ProjName = project.text(0)
+                                    GroupName = Group.text(0)
+                                    SetGroup = (ProjName, GroupName)
+                                    # checkedGroups.append(Group.text(0))
+                                    checkedGroups.append(SetGroup)
+
+                                else:
+                                    for Gindex in range(Group.childCount()):  # will iterate through subgroup level
+                                        SubGroup = Group.child(Gindex)  # each subgroup
+                                        checkName = SubGroup.text(0)
+                                        if SubGroup.childCount() != 0:  # if there is a record level
+                                            if SubGroup.checkState(0) == Qt.Checked:
+                                                ProjName = project.text(0)
+                                                GroupName = Group.text(0)
+                                                SubGroupName = SubGroup.text(0)
+                                                SetGroup = (ProjName, GroupName, SubGroupName)
+                                                # checkedSubGroups.append(SubGroup.text(0))
+                                                checkedSubGroups.append(SetGroup)
+                                            else:
+                                                for SGindex in range(
+                                                        SubGroup.childCount()):  # will iterate through record level
+                                                    Record = SubGroup.child(SGindex)  # each subgroup
+                                                    checkName = Record.text(0)
+                                                    if Record.checkState(0) == Qt.Checked:
+                                                        checkedkids.append(Record.text(0))
+
+
+                                        else:  # if group is lowest level
+                                            # for SGindex in range(SubGroup.childCount()):  # for each project if lowest level item
+                                            #      Ritem = SubGroup.child(SGindex)
+                                            if SubGroup.checkState(0) == Qt.Checked:
+                                                checkedkids.append(SubGroup.text(0))
+
+                            else:  # if group is lowest level
+                                if Group.checkState(0) == Qt.Checked:
+                                    checkedkids.append(Group.text(0))
+
+                else:  # project is lowest (record) level
+                    if project.checkState(0) == Qt.Checked:
+                        checkedkids.append(project.text(0))
+
+            return checkedProjects, checkedGroups, checkedSubGroups, checkedkids
+
+    def getTreeCheckedChild(self):
+        if self.ui.treeWidget.isEnabled():
+            root = self.ui.treeWidget.invisibleRootItem()
+            for index in range(root.childCount()):
+                fileIs = root.child(index)
+
+            checkedkids = []
+            checkedProjects = []
+            checkedGroups = []
+            checkedSubGroups = []
+
+            for index in range(fileIs.childCount()):
+                project = fileIs.child(index)  # project level
+                # while item is not None:  # iterate through project level items
+
+                if project.childCount() != 0:  # if project level exists
+                    if project.checkState(0) == Qt.Checked:
+                        checkedProjects.append(project.text(0))
                     for Pindex in range(project.childCount()):  # will iterate through group level
                         Group = project.child(Pindex)  # each group
                         checkName = Group.text(0)
@@ -20937,101 +21038,35 @@ class VGenesForm(QtWidgets.QMainWindow):
                                 SetGroup = (ProjName, GroupName)
                                 # checkedGroups.append(Group.text(0))
                                 checkedGroups.append(SetGroup)
-
-                            else:
-                                for Gindex in range(Group.childCount()):  # will iterate through subgroup level
-                                    SubGroup = Group.child(Gindex)  # each subgroup
-                                    checkName = SubGroup.text(0)
-                                    if SubGroup.childCount() != 0:  # if there is a record level
-                                        if SubGroup.checkState(0) == Qt.Checked:
-                                            ProjName = project.text(0)
-                                            GroupName = Group.text(0)
-                                            SubGroupName = SubGroup.text(0)
-                                            SetGroup = (ProjName, GroupName, SubGroupName)
-                                            # checkedSubGroups.append(SubGroup.text(0))
-                                            checkedSubGroups.append(SetGroup)
-                                        else:
-                                            for SGindex in range(
-                                                    SubGroup.childCount()):  # will iterate through record level
-                                                Record = SubGroup.child(SGindex)  # each subgroup
-                                                checkName = Record.text(0)
-                                                if Record.checkState(0) == Qt.Checked:
-                                                    checkedkids.append(Record.text(0))
-
-
-                                    else:  # if group is lowest level
-                                        # for SGindex in range(SubGroup.childCount()):  # for each project if lowest level item
-                                        #      Ritem = SubGroup.child(SGindex)
-                                        if SubGroup.checkState(0) == Qt.Checked:
-                                            checkedkids.append(SubGroup.text(0))
-
+                            for Gindex in range(Group.childCount()):  # will iterate through subgroup level
+                                SubGroup = Group.child(Gindex)  # each subgroup
+                                checkName = SubGroup.text(0)
+                                if SubGroup.childCount() != 0:  # if there is a record level
+                                    if SubGroup.checkState(0) == Qt.Checked:
+                                        ProjName = project.text(0)
+                                        GroupName = Group.text(0)
+                                        SubGroupName = SubGroup.text(0)
+                                        SetGroup = (ProjName, GroupName, SubGroupName)
+                                        # checkedSubGroups.append(SubGroup.text(0))
+                                        checkedSubGroups.append(SetGroup)
+                                    for SGindex in range(SubGroup.childCount()):
+                                        Record = SubGroup.child(SGindex)  # each subgroup
+                                        checkName = Record.text(0)
+                                        if Record.checkState(0) == Qt.Checked:
+                                            checkedkids.append(Record.text(0))
+                                else:  # if group is lowest level
+                                    # for SGindex in range(SubGroup.childCount()):  # for each project if lowest level item
+                                    #      Ritem = SubGroup.child(SGindex)
+                                    if SubGroup.checkState(0) == Qt.Checked:
+                                        checkedkids.append(SubGroup.text(0))
                         else:  # if group is lowest level
                             if Group.checkState(0) == Qt.Checked:
                                 checkedkids.append(Group.text(0))
+                else:  # project is lowest (record) level
+                    if project.checkState(0) == Qt.Checked:
+                        checkedkids.append(project.text(0))
 
-            else:  # project is lowest (record) level
-                if project.checkState(0) == Qt.Checked:
-                    checkedkids.append(project.text(0))
-
-        return checkedProjects, checkedGroups, checkedSubGroups, checkedkids
-
-    def getTreeCheckedChild(self):
-        root = self.ui.treeWidget.invisibleRootItem()
-        for index in range(root.childCount()):
-            fileIs = root.child(index)
-
-        checkedkids = []
-        checkedProjects = []
-        checkedGroups = []
-        checkedSubGroups = []
-
-        for index in range(fileIs.childCount()):
-            project = fileIs.child(index)  # project level
-            # while item is not None:  # iterate through project level items
-
-            if project.childCount() != 0:  # if project level exists
-                if project.checkState(0) == Qt.Checked:
-                    checkedProjects.append(project.text(0))
-                for Pindex in range(project.childCount()):  # will iterate through group level
-                    Group = project.child(Pindex)  # each group
-                    checkName = Group.text(0)
-                    # numkid =
-                    if Group.childCount() != 0:  # if there is a subgroup level
-                        if Group.checkState(0) == Qt.Checked:
-                            ProjName = project.text(0)
-                            GroupName = Group.text(0)
-                            SetGroup = (ProjName, GroupName)
-                            # checkedGroups.append(Group.text(0))
-                            checkedGroups.append(SetGroup)
-                        for Gindex in range(Group.childCount()):  # will iterate through subgroup level
-                            SubGroup = Group.child(Gindex)  # each subgroup
-                            checkName = SubGroup.text(0)
-                            if SubGroup.childCount() != 0:  # if there is a record level
-                                if SubGroup.checkState(0) == Qt.Checked:
-                                    ProjName = project.text(0)
-                                    GroupName = Group.text(0)
-                                    SubGroupName = SubGroup.text(0)
-                                    SetGroup = (ProjName, GroupName, SubGroupName)
-                                    # checkedSubGroups.append(SubGroup.text(0))
-                                    checkedSubGroups.append(SetGroup)
-                                for SGindex in range(SubGroup.childCount()):
-                                    Record = SubGroup.child(SGindex)  # each subgroup
-                                    checkName = Record.text(0)
-                                    if Record.checkState(0) == Qt.Checked:
-                                        checkedkids.append(Record.text(0))
-                            else:  # if group is lowest level
-                                # for SGindex in range(SubGroup.childCount()):  # for each project if lowest level item
-                                #      Ritem = SubGroup.child(SGindex)
-                                if SubGroup.checkState(0) == Qt.Checked:
-                                    checkedkids.append(SubGroup.text(0))
-                    else:  # if group is lowest level
-                        if Group.checkState(0) == Qt.Checked:
-                            checkedkids.append(Group.text(0))
-            else:  # project is lowest (record) level
-                if project.checkState(0) == Qt.Checked:
-                    checkedkids.append(project.text(0))
-
-        return checkedProjects, checkedGroups, checkedSubGroups, checkedkids
+            return checkedProjects, checkedGroups, checkedSubGroups, checkedkids
 
     @pyqtSlot()
     def on_actionGL_triggered(self):
@@ -21157,17 +21192,17 @@ class VGenesForm(QtWidgets.QMainWindow):
         try:
             cursor.execute(CMD, copy_data)
             conn.commit()  # saves data into file
-
             self.refreshDB()
-            self.on_btnUpdateTree_clicked()
 
-            found = self.ui.treeWidget.findItems(new_name, Qt.MatchRecursive, 0)
-            if len(found) > 0:
-                found = found[0]
-                from_table = True
-                self.ui.treeWidget.setCurrentItem(found)
-                from_table = False
-                self.tree_to_table_selection()
+            if self.ui.treeWidget.isEnabled():
+                self.on_btnUpdateTree_clicked()
+                found = self.ui.treeWidget.findItems(new_name, Qt.MatchRecursive, 0)
+                if len(found) > 0:
+                    found = found[0]
+                    from_table = True
+                    self.ui.treeWidget.setCurrentItem(found)
+                    from_table = False
+                    self.tree_to_table_selection()
         except:
             QMessageBox.warning(self, 'Warning', 'Failed to make a copy of current record!\nMost likely you already have a copy of current record!\nTo make a new copy, please rename the old copy first!',
                                     QMessageBox.Ok, QMessageBox.Ok)
@@ -22306,8 +22341,6 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.load_table()
         #answer = informationMessage(self, 'Close and restart database to see changes', 'OK')
 
-    
-
     @pyqtSlot()
     def on_actionclearTrash_triggered(self):
         question = 'Clean all TEMP files?'
@@ -22842,41 +22875,36 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.AlignSequences(DataIs)
 
     def getTreeSelected(self):
-        root = self.ui.treeWidget.invisibleRootItem()
-        ListSelected = []
-        for item in self.ui.treeWidget.selectedItems():
-            ListSelected.append(str(item.text(0)))
-            # (item.parent() or root).removeChild(item)
+        if self.ui.treeWidget.isEnabled():
+            root = self.ui.treeWidget.invisibleRootItem()
+            ListSelected = []
+            for item in self.ui.treeWidget.selectedItems():
+                ListSelected.append(str(item.text(0)))
+                # (item.parent() or root).removeChild(item)
 
-        return ListSelected
+            return ListSelected
 
     @pyqtSlot()
     def TreeSelectChanged(self):
-        global from_table
+        if self.ui.treeWidget.isEnabled():
+            global from_table
 
-        value = self.ui.treeWidget.selectedItems()
+            value = self.ui.treeWidget.selectedItems()
 
-        name = ''
-        for item in value:
-            name = item.text(0)
-        try:
-            MatchingIndex = NameIndex[name]
-            self.DialScroll(MatchingIndex, False)
-        except:
-            print('wrong')
-            return
-        SelectedItems = self.getTreeSelected()
-        NumSelected = len(SelectedItems)
-        if NumSelected > 1:
-            NewHead = str(NumSelected) + ' items selected'
-            self.ui.label_Name.setText(NewHead)
-
-        #if from_table:
-        #	return
-        #else:
-        #	pass
-        #	self.tree_to_table_selection()
-        #	self.match_tree_to_table()
+            name = ''
+            for item in value:
+                name = item.text(0)
+            try:
+                MatchingIndex = NameIndex[name]
+                self.DialScroll(MatchingIndex, False)
+            except:
+                print('wrong')
+                return
+            SelectedItems = self.getTreeSelected()
+            NumSelected = len(SelectedItems)
+            if NumSelected > 1:
+                NewHead = str(NumSelected) + ' items selected'
+                self.ui.label_Name.setText(NewHead)
 
     def MatchingValue(self, IndexIs):
         try:
@@ -23976,52 +24004,52 @@ class VGenesForm(QtWidgets.QMainWindow):
                 FieldsChanged.clear
 
     def MoveRecord(self, direction):
+        if self.ui.treeWidget.isEnabled():
+            FieldCheck = self.FieldChangeCheck()
+            if FieldCheck == 'exit':
+                return
 
-        FieldCheck = self.FieldChangeCheck()
-        if FieldCheck == 'exit':
-            return
+            Selected = self.ui.treeWidget.selectedItems()
+            Selected = Selected[-1]
+            name = Selected.text(0)
+            currentRow = NameIndex[name]
 
-        Selected = self.ui.treeWidget.selectedItems()
-        Selected = Selected[-1]
-        name = Selected.text(0)
-        currentRow = NameIndex[name]
+            records = len(NameIndex)
 
-        records = len(NameIndex)
+            if direction == 'up':
+                if currentRow > 0:
+                    currentRow -= 1
 
-        if direction == 'up':
-            if currentRow > 0:
-                currentRow -= 1
+            elif direction == 'down':
+                if currentRow < records:
+                    currentRow += 1
 
-        elif direction == 'down':
-            if currentRow < records:
-                currentRow += 1
+                else:
+                    currentRow = records
+            elif direction == 'top':
+                currentRow = 0
 
-            else:
-                currentRow = records
-        elif direction == 'top':
-            currentRow = 0
+            elif direction == 'bottom':
+                currentRow = records - 1
+            global JustMoved
+            JustMoved = True
 
-        elif direction == 'bottom':
-            currentRow = records - 1
-        global JustMoved
-        JustMoved = True
+            if currentRow == -1:
+                currentRow = 0
 
-        if currentRow == -1:
-            currentRow = 0
+            name = list(NameIndex.keys())[list(NameIndex.values()).index(int(currentRow))]
+            found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
+            if len(found) > 0:
+                found = found[0]
+                self.ui.treeWidget.setCurrentItem(found)
+            self.tree_to_table_selection()
+            self.ui.radioButtonSeqView.setChecked(True)
 
-        name = list(NameIndex.keys())[list(NameIndex.values()).index(int(currentRow))]
-        found = self.ui.treeWidget.findItems(name, Qt.MatchRecursive, 0)
-        if len(found) > 0:
-            found = found[0]
-            self.ui.treeWidget.setCurrentItem(found)
-        self.tree_to_table_selection()
-        self.ui.radioButtonSeqView.setChecked(True)
-
-        try:
-            self.SeqButton(LastPushed)
-        except:
-            self.SeqButton('v')
-        JustMoved = False
+            try:
+                self.SeqButton(LastPushed)
+            except:
+                self.SeqButton('v')
+            JustMoved = False
 
     def createView(self, model):
         # def createView(title, model):
@@ -24369,15 +24397,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def NameChange(self, ToName):
-        item = self.ui.treeWidget.currentItem()
-        # global OldName
-        OldName = str(item.text(0))
-        TreeIndex = NameIndex[OldName]
-        del NameIndex[OldName]
-        NameIndex[ToName] = TreeIndex
+        if self.ui.treeWidget.isEnabled():
+            item = self.ui.treeWidget.currentItem()
+            # global OldName
+            OldName = str(item.text(0))
+            TreeIndex = NameIndex[OldName]
+            del NameIndex[OldName]
+            NameIndex[ToName] = TreeIndex
 
-        item.setText(0, ToName)
-        # item.setData(0,)
+            item.setText(0, ToName)
 
     @pyqtSlot()
     def on_txtReadingFrame_textChanged(self):
@@ -24989,272 +25017,266 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionSuggestCanonical_triggered(self):
-        self.ui.treeWidget.expandAll()
+        if self.ui.treeWidget.isEnabled():
+            self.ui.treeWidget.expandAll()
 
-        # fields = self.ui.cboTreeOp1.currentText()
-        # field1 = self.TransLateFieldtoReal(fields, True)
-        field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-        i = 0
-        for item in FieldList:
-            if field1 == item:
-                field1Value = data[i]
-            i += 1
+            # fields = self.ui.cboTreeOp1.currentText()
+            # field1 = self.TransLateFieldtoReal(fields, True)
+            field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+            i = 0
+            for item in FieldList:
+                if field1 == item:
+                    field1Value = data[i]
+                i += 1
 
-        # fields = self.ui.cboTreeOp2.currentText()
-        # field2 = self.TransLateFieldtoReal(fields, True)
-        field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-        i = 0
-        for item in FieldList:
-            if field2 == item:
-                field2Value = data[i]
-            i += 1
+            # fields = self.ui.cboTreeOp2.currentText()
+            # field2 = self.TransLateFieldtoReal(fields, True)
+            field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+            i = 0
+            for item in FieldList:
+                if field2 == item:
+                    field2Value = data[i]
+                i += 1
 
-        # fields = self.ui.cboTreeOp3.currentText()
-        # field3 = self.TransLateFieldtoReal(fields, True)
-        field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-        i = 0
-        for item in FieldList:
-            if field3 == item:
-                field3Value = data[i]
-            i += 1
+            # fields = self.ui.cboTreeOp3.currentText()
+            # field3 = self.TransLateFieldtoReal(fields, True)
+            field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+            i = 0
+            for item in FieldList:
+                if field3 == item:
+                    field3Value = data[i]
+                i += 1
 
-        if field1 == '': field1 = 'None'
-        if field2 == '': field1 = 'None'
-        if field3 == '': field1 = 'None'
-
-
-        fields = ['SeqName', 'Sequence', 'VLocus', 'JLocus', 'Vbeg', 'Jend', 'SubGroup']
-        # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-        SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-        # DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-        # SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"' # AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
-        foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        NumFound = len(foundRecs)
-        # foundRecs.sort(key=itemgetter(0))
-        i = 0
-        Genes = []
-        gene = []
-        ToCLustalgene = []
-        ToClustal = []
-        LastSeq = 'FirstOne'  # ('FirstOne', 'x', 'x', 'x', 'x', 'x')
-        ErrMes = ''
-        self.clearTreeChecks()
-        foundRecs.sort(key=itemgetter(0))
-        NumRecords = len(foundRecs)
-        NumDone = 0
-
-        for item in foundRecs:
-            NumDone += 1
-            gene.clear()
-            for i in range(0, 6):
-                gene.append(item[i])
-            SeqName = item[0]
-            if NumDone == 1:
-                currentitemIs = SeqName
-
-            # Sequence = item[1]
-            # Vgene = item[2]
-            # Jgene = item[3]
-            # Vbeg = item[4]
-            # Jend = item[5]
-            # if SeqName  == 'A116_1F02H-3':
-            #     print('stop')
-            if SeqName[len(SeqName) - 2] == '-':
-                NameComp = SeqName[:len(SeqName) - 2]
-            elif SeqName[len(SeqName) - 3] == '-':
-                NameComp = SeqName[:len(SeqName) - 3]
-            else:
-                answer = informationMessage(self,
-                                            'Make sure individual sequence sets are named the same\nwith only "-#" at the end as in: "045-2B06-1, 045-2B05-2"',
-                                            'OK')
-                return
-
-            if LastSeq != 'FirstOne':
-                # if LastSeq[len(LastSeq)-2] == '-':
-                #     LastSeqC = LastSeq[:len(LastSeq)-2]
-                # elif LastSeq[len(LastSeq)-3] == '-':
-                #     LastSeqC = LastSeq[:len(LastSeq)-3]
+            if field1 == '': field1 = 'None'
+            if field2 == '': field1 = 'None'
+            if field3 == '': field1 = 'None'
 
 
-                if NameComp == LastSeq:
-                    Genes.append(tuple(gene))
+            fields = ['SeqName', 'Sequence', 'VLocus', 'JLocus', 'Vbeg', 'Jend', 'SubGroup']
+            # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
+            SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
+            # DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
+            # SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE ' + fieldsearch + ' = "' + search + '" AND ' + field1 + ' = "' + field1Value + '"' # AND ' + Field3 + ' = "' + Vcolumn3 + '" ORDER BY Project, Grouping, SubGroup, SeqName'
+            foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            NumFound = len(foundRecs)
+            # foundRecs.sort(key=itemgetter(0))
+            i = 0
+            Genes = []
+            gene = []
+            ToCLustalgene = []
+            ToClustal = []
+            LastSeq = 'FirstOne'  # ('FirstOne', 'x', 'x', 'x', 'x', 'x')
+            ErrMes = ''
+            self.clearTreeChecks()
+            foundRecs.sort(key=itemgetter(0))
+            NumRecords = len(foundRecs)
+            NumDone = 0
+
+            for item in foundRecs:
+                NumDone += 1
+                gene.clear()
+                for i in range(0, 6):
+                    gene.append(item[i])
+                SeqName = item[0]
+                if NumDone == 1:
+                    currentitemIs = SeqName
+
+                # Sequence = item[1]
+                # Vgene = item[2]
+                # Jgene = item[3]
+                # Vbeg = item[4]
+                # Jend = item[5]
+                # if SeqName  == 'A116_1F02H-3':
+                #     print('stop')
+                if SeqName[len(SeqName) - 2] == '-':
+                    NameComp = SeqName[:len(SeqName) - 2]
+                elif SeqName[len(SeqName) - 3] == '-':
+                    NameComp = SeqName[:len(SeqName) - 3]
                 else:
-                    #         code to compare sequences and then clear genes and start with current one
-                    if len(Genes) > 1:
-                        longest = 0
-                        Nucs = {'As': 0, 'Gs': 0, 'Cs': 0, 'Ts': 0, 'Ns': 0}
-                        LostCon = False
-                        Consensus = ''
-                        for i in range(0, len(Genes)):  # first get start and end
-                            SeqName = Genes[i][0]
-                            Sequence = Genes[i][1]
-                            Sequence = Sequence[(int(Genes[i][4])):(int(Genes[i][5]))]
-                            Sequence = Sequence.upper()
-                            # if len(Sequence)>longest: longest = len(Sequence)
-                            ToCLustalgene.append(SeqName)
-                            ToCLustalgene.append(Sequence)
-                            ToClustal.append(tuple(ToCLustalgene))
-                            ToCLustalgene.clear()
+                    answer = informationMessage(self,
+                                                'Make sure individual sequence sets are named the same\nwith only "-#" at the end as in: "045-2B06-1, 045-2B05-2"',
+                                                'OK')
+                    return
 
-                        outfilename = VGenesSeq.ClustalO(ToClustal, 1000, True)
-                        # ClustalOut = VGenesSeq.ClustalO(ToClustal, 1000, False)
-                        ToClustal.clear()
-                        # outfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega',
-                        #                            'my-out-seqs.fa')
-                        Aligned = VGenesSeq.readClustalOutput(outfilename)
+                if LastSeq != 'FirstOne':
+                    # if LastSeq[len(LastSeq)-2] == '-':
+                    #     LastSeqC = LastSeq[:len(LastSeq)-2]
+                    # elif LastSeq[len(LastSeq)-3] == '-':
+                    #     LastSeqC = LastSeq[:len(LastSeq)-3]
 
-                        os.remove(outfilename)
 
-                        Genes.clear()
-                        GeneDict = {}
-                        for i in range(0, len(Aligned)):
-                            SeqName = Aligned[i][0]
-                            Seq = Aligned[i][1]
-                            longest = len(Seq)
-                            GeneDict.update({SeqName: 0})
-                        # x.update({3:4})
-                        for j in range(0, longest):  # build consensus
-                            Nucs = {'A': 0, 'G': 0, 'C': 0, 'T': 0, 'N': 0}
-                            for i in range(0, len(Aligned)):
-                                try:
-                                    nuc = Aligned[i][1][j]
-                                except:
-                                    print('stop')
-                                if nuc == 'A' or nuc == 'a':
-                                    Nucs['A'] += 1
-                                elif nuc == 'G' or nuc == 'g':
-                                    Nucs['G'] += 1
-                                elif nuc == 'C' or nuc == 'c':
-                                    Nucs['C'] += 1
-                                elif nuc == 'T' or nuc == 't':
-                                    Nucs['T'] += 1
-                                else:
-                                    Nucs['N'] += 1
-                            Cnuc = max(Nucs, key=Nucs.get)
-                            Cfreq = Nucs[Cnuc]
-                            PerC = Cfreq / len(Aligned)
-                            if Cfreq / len(Aligned) >= 0.5:
-                                Consensus += Cnuc
-                            else:
-                                if LastSeq == 'LastOne':
-                                    print('stop')
+                    if NameComp == LastSeq:
+                        Genes.append(tuple(gene))
 
-                                ErrMes += LastSeq + ' has no consensus sequence.\n'
-                                LostCon = True
-                                Consensus += 'X'
+                    else:
+                        #         code to compare sequences and then clear genes and start with current one
+                        if len(Genes) > 1:
+                            longest = 0
+                            Nucs = {'As': 0, 'Gs': 0, 'Cs': 0, 'Ts': 0, 'Ns': 0}
+                            LostCon = False
+                            Consensus = ''
+                            for i in range(0, len(Genes)):  # first get start and end
+                                SeqName = Genes[i][0]
+                                Sequence = Genes[i][1]
+                                Sequence = Sequence[(int(Genes[i][4])):(int(Genes[i][5]))]
+                                Sequence = Sequence.upper()
+                                # if len(Sequence)>longest: longest = len(Sequence)
+                                ToCLustalgene.append(SeqName)
+                                ToCLustalgene.append(Sequence)
+                                ToClustal.append(tuple(ToCLustalgene))
+                                ToCLustalgene.clear()
 
-                        for j in range(0, longest):
+                            outfilename = VGenesSeq.ClustalO(ToClustal, 1000, True)
+                            # ClustalOut = VGenesSeq.ClustalO(ToClustal, 1000, False)
+                            ToClustal.clear()
+                            # outfilename = os.path.join(os.path.expanduser('~'), 'Applications', 'VGenes', 'ClustalOmega',
+                            #                            'my-out-seqs.fa')
+                            Aligned = VGenesSeq.readClustalOutput(outfilename)
 
+                            os.remove(outfilename)
+
+                            Genes.clear()
+                            GeneDict = {}
                             for i in range(0, len(Aligned)):
                                 SeqName = Aligned[i][0]
-                                try:
-                                    nuc = Aligned[i][1][j]
-                                except:
-                                    print('stop')
-                                ConNuc = Consensus[j]
-                                # SetVal = int(Genes[i][1])
-                                if nuc != ConNuc:
-                                    GeneDict[SeqName] += 1
-                                    # SetVal = int(Genes[i][1])
-                                    # SetVal += 1
-                                    # Genes[i][1] = SetVal
+                                Seq = Aligned[i][1]
+                                longest = len(Seq)
+                                GeneDict.update({SeqName: 0})
+                            # x.update({3:4})
+                            for j in range(0, longest):  # build consensus
+                                Nucs = {'A': 0, 'G': 0, 'C': 0, 'T': 0, 'N': 0}
+                                for i in range(0, len(Aligned)):
+                                    try:
+                                        nuc = Aligned[i][1][j]
+                                    except:
+                                        print('stop')
+                                    if nuc == 'A' or nuc == 'a':
+                                        Nucs['A'] += 1
+                                    elif nuc == 'G' or nuc == 'g':
+                                        Nucs['G'] += 1
+                                    elif nuc == 'C' or nuc == 'c':
+                                        Nucs['C'] += 1
+                                    elif nuc == 'T' or nuc == 't':
+                                        Nucs['T'] += 1
+                                    else:
+                                        Nucs['N'] += 1
+                                Cnuc = max(Nucs, key=Nucs.get)
+                                Cfreq = Nucs[Cnuc]
+                                PerC = Cfreq / len(Aligned)
+                                if Cfreq / len(Aligned) >= 0.5:
+                                    Consensus += Cnuc
+                                else:
+                                    if LastSeq == 'LastOne':
+                                        print('stop')
 
-                        NumRecs = len(Aligned)
-                        ConFound = False
-                        for i in range(0, NumRecs):
-                            SeqName = Aligned[i][0]
-                            # if SeqName  == 'A116_1E01H-1':
-                            #     print('it')
-                            Mutations = GeneDict[SeqName]
-                            if Mutations == 0:
-                                found = self.ui.treeWidget.findItems(SeqName, Qt.MatchRecursive, 0)
-                                ConFound = True
-                                for record in found:
-                                    record.setCheckState(0, Qt.Checked)
-                                break
-                        if ConFound == False:
+                                    ErrMes += LastSeq + ' has no consensus sequence.\n'
+                                    LostCon = True
+                                    Consensus += 'X'
+
+                            for j in range(0, longest):
+
+                                for i in range(0, len(Aligned)):
+                                    SeqName = Aligned[i][0]
+                                    try:
+                                        nuc = Aligned[i][1][j]
+                                    except:
+                                        print('stop')
+                                    ConNuc = Consensus[j]
+                                    # SetVal = int(Genes[i][1])
+                                    if nuc != ConNuc:
+                                        GeneDict[SeqName] += 1
+                                        # SetVal = int(Genes[i][1])
+                                        # SetVal += 1
+                                        # Genes[i][1] = SetVal
+
+                            NumRecs = len(Aligned)
+                            ConFound = False
+                            for i in range(0, NumRecs):
+                                SeqName = Aligned[i][0]
+                                # if SeqName  == 'A116_1E01H-1':
+                                #     print('it')
+                                Mutations = GeneDict[SeqName]
+                                if Mutations == 0:
+                                    found = self.ui.treeWidget.findItems(SeqName, Qt.MatchRecursive, 0)
+                                    ConFound = True
+                                    for record in found:
+                                        record.setCheckState(0, Qt.Checked)
+                                    break
+                            if ConFound == False:
+                                if LastSeq == 'LastOne':
+                                    print('stop')
+                                ErrMes += LastSeq + ' has no consensus sequence.\n'
+                        else:
                             if LastSeq == 'LastOne':
                                 print('stop')
                             ErrMes += LastSeq + ' has no consensus sequence.\n'
+                            LostCon = True
 
+                        Genes.clear()
+                        Genes.append(tuple(gene))
 
-
-
-
-
-
-                    else:
-                        if LastSeq == 'LastOne':
-                            print('stop')
-                        ErrMes += LastSeq + ' has no consensus sequence.\n'
-                        LostCon = True
-
-                    Genes.clear()
+                else:
                     Genes.append(tuple(gene))
 
-            else:
-                Genes.append(tuple(gene))
-
-            LastSeq = NameComp
-            if NumDone == NumRecords - 1:
-                LastSeq = "LastOne"
+                LastSeq = NameComp
+                if NumDone == NumRecords - 1:
+                    LastSeq = "LastOne"
 
 
-                # def on_btnFieldBulk_clicked(self):
-                #     search = self.ui.txtFieldSearch.toPlainText()
-                #     field = self.ui.cboFindField.currentText()
+                    # def on_btnFieldBulk_clicked(self):
+                    #     search = self.ui.txtFieldSearch.toPlainText()
+                    #     field = self.ui.cboFindField.currentText()
 
-        QueryIS = 'Would you like to move the sequences selected for expression to a new Subgroup?'
-        buttons = 'YN'
-        answer = questionMessage(self, QueryIS, buttons)
+            QueryIS = 'Would you like to move the sequences selected for expression to a new Subgroup?'
+            buttons = 'YN'
+            answer = questionMessage(self, QueryIS, buttons)
 
-        if answer == 'Yes':
-            QueryIS = 'Enter text to be concatenated to the sub group name'
-            DefaultText = '-Expressed'  # data[77] + '-Expressed'
-            EditSubgroup = setText(self, QueryIS, DefaultText)
+            if answer == 'Yes':
+                QueryIS = 'Enter text to be concatenated to the sub group name'
+                DefaultText = '-Expressed'  # data[77] + '-Expressed'
+                EditSubgroup = setText(self, QueryIS, DefaultText)
 
-        elif answer == 'No':
-            EditSubgroup = 'Cancelled Action'
+            elif answer == 'No':
+                EditSubgroup = 'Cancelled Action'
 
-        if EditSubgroup != 'Cancelled Action':
-            fields = ['SeqName', 'SubGroup']
-            # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-            SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-            foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-            for item in foundRecs:
-                SeqName = item[0]
-                Subgroup = item[1]
-                NewSub = Subgroup + EditSubgroup
-
+            if EditSubgroup != 'Cancelled Action':
+                fields = ['SeqName', 'SubGroup']
                 # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
                 SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
+                foundRecs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-                WhereStart = SQLStatement.find('WHERE')
-                WhereState = SQLStatement[WhereStart - 1:]  # + ' AND '
-                SQLStatement = 'UPDATE vgenesDB SET Subgroup = "' + NewSub + '" WHERE SeqName = "' + SeqName + '"'
+                for item in foundRecs:
+                    SeqName = item[0]
+                    Subgroup = item[1]
+                    NewSub = Subgroup + EditSubgroup
 
-                foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+                    # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
+                    SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
 
-            #model = self.ui.tableView.model()
-            #model.refresh()
+                    WhereStart = SQLStatement.find('WHERE')
+                    WhereState = SQLStatement[WhereStart - 1:]  # + ' AND '
+                    SQLStatement = 'UPDATE vgenesDB SET Subgroup = "' + NewSub + '" WHERE SeqName = "' + SeqName + '"'
 
-            self.on_btnUpdateTree_clicked()
-            # self.ui.txtFieldSearch.setPlainText(EditSubgroup)
-            # self.ui.cboFindField.setCurrentText('Subgroup')
-            # Doit = self.on_btnFieldBulk_clicked()
-            # self.on_btnUpdateTree_clicked()
+                    foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
 
-        if ErrMes != '':
-            Style = 'standard'
+                #model = self.ui.tableView.model()
+                #model.refresh()
 
-            self.ShowVGenesTextEdit(ErrMes, Style)
-        self.ui.treeWidget.collapseAll()
+                self.on_btnUpdateTree_clicked()
+                # self.ui.txtFieldSearch.setPlainText(EditSubgroup)
+                # self.ui.cboFindField.setCurrentText('Subgroup')
+                # Doit = self.on_btnFieldBulk_clicked()
+                # self.on_btnUpdateTree_clicked()
 
-        if currentitemIs:
-            self.findTreeItem(currentitemIs)
+            if ErrMes != '':
+                Style = 'standard'
+
+                self.ShowVGenesTextEdit(ErrMes, Style)
+            self.ui.treeWidget.collapseAll()
+
+            if currentitemIs:
+                self.findTreeItem(currentitemIs)
 
     @pyqtSlot()
     def on_pushButtonSimilar_clicked(self):
@@ -25269,13 +25291,6 @@ class VGenesForm(QtWidgets.QMainWindow):
                                         'OK')
             return
         search = LastSelected[1]
-
-        value = self.ui.treeWidget.selectedItems()
-        currentitemIs = ''
-
-        for item in value:
-            currentitemIs = item.text(0)
-
         if self.ui.rdoLocal.isChecked():
             WHEREStatement = ' AND SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
         else:
@@ -25292,19 +25307,21 @@ class VGenesForm(QtWidgets.QMainWindow):
         for item in foundRecs:
             Seqname = item[0]
             self.CheckedRecords.append(Seqname)
-            found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-            i += 1
-            for record in found:
-                if i == NumFound - 1:
-                    wasClicked = True
-                record.setCheckState(0, Qt.Checked)
-                num_checked += 1
+            if self.ui.treeWidget.isEnabled():
+                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                i += 1
+                for record in found:
+                    if i == NumFound - 1:
+                        wasClicked = True
+                    record.setCheckState(0, Qt.Checked)
+                    num_checked += 1
 
-        NewLbl = str(num_checked) + ' records checked'
-        self.ui.label_Name.setText(NewLbl)
-
-        self.findTreeItem(currentitemIs)
-
+        if self.ui.treeWidget.isEnabled():
+            NewLbl = str(num_checked) + ' records checked'
+            self.ui.label_Name.setText(NewLbl)
+        
+        Msg = 'Matched records have been checked!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     @pyqtSlot()
     def on_btnFieldSearch_clicked(self):
@@ -25363,18 +25380,20 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.CheckedRecords.append(Seqname)
             if i == 1:
                 FindName = Seqname
-            found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-            for record in found:
-                # global wasClicked
-                # wasClicked = True
-                if i == NumFound - 1:
-                    wasClicked = True
-                record.setCheckState(0, Qt.Checked)
+            if self.ui.treeWidget.isEnabled():
+                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                for record in found:
+                    # global wasClicked
+                    # wasClicked = True
+                    if i == NumFound - 1:
+                        wasClicked = True
+                    record.setCheckState(0, Qt.Checked)
 
-        self.findTreeItem(FindName)
-        NewLbl = self.ui.label_Name.text()
-        NewLbl += ', ' + str(NumFound) + ' selected'
-        self.ui.label_Name.setText(NewLbl)
+        if self.ui.treeWidget.isEnabled():
+            self.findTreeItem(FindName)
+            NewLbl = self.ui.label_Name.text()
+            NewLbl += ', ' + str(NumFound) + ' selected'
+            self.ui.label_Name.setText(NewLbl)
 
     @pyqtSlot()
     def on_pushButtonStat_clicked(self):
@@ -25417,20 +25436,20 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.on_actionpyqtGraph_triggered()
 
     def updateSelectionFromDialog(self, data):
-        self.clearTreeChecks()
-        num_checked = len(data)
-
-        for item in data:
-            Seqname = item
-            found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-            for record in found:
-                record.setCheckState(0, Qt.Checked)
-
-        NewLbl = str(num_checked) + ' records checked'
-        self.ui.label_Name.setText(NewLbl)
-
+        self.CheckedRecords = data
+        if self.ui.treeWidget.isEnabled():
+            self.clearTreeChecks()
+            num_checked = len(data)
+    
+            for item in data:
+                Seqname = item
+                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                for record in found:
+                    record.setCheckState(0, Qt.Checked)
+    
+            NewLbl = str(num_checked) + ' records checked'
+            self.ui.label_Name.setText(NewLbl)
         self.match_tree_to_table()
-
         Msg = 'Update finished!'
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
@@ -25620,8 +25639,9 @@ class VGenesForm(QtWidgets.QMainWindow):
             re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
         )
 
-        self.initializeTreeView(SQLFields)
-        self.ui.treeWidget.expandAll()
+        if self.ui.treeWidget.isEnabled():
+            self.initializeTreeView(SQLFields)
+            self.ui.treeWidget.expandAll()
         self.refreshDB()
 
     @pyqtSlot()
@@ -25810,8 +25830,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             SETStatement += 'Blank6 = "' + self.ui.Autoreactivity.currentText() + '",'
             SETStatement += 'Comments = "' + self.ui.txtComments.toPlainText() + '" '
 
-            value = self.ui.treeWidget.selectedItems()
-            name = value[-1].text(0)
+            name = data[0]
             WHEREStatement = 'WHERE SeqName = "' + name + '"'
 
             SQLStatement = 'UPDATE vgenesDB ' + SETStatement + WHEREStatement
@@ -25844,8 +25863,10 @@ class VGenesForm(QtWidgets.QMainWindow):
                     re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
                 )
 
-                self.initializeTreeView(SQLFields)
-                self.ui.treeWidget.expandAll()
+                if self.ui.treeWidget.isEnabled():
+                    self.initializeTreeView(SQLFields)
+                    self.ui.treeWidget.expandAll()
+                self.refreshDB()
 
             Msg = 'Change saved!'
             QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -29136,116 +29157,117 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_btnUpdateTree_clicked(self):
-        if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
-            return
-        '''
-        fields = self.ui.cboTreeOp1.currentText()
-        field1Index = self.ui.cboTreeOp1.currentIndex()
+        if self.ui.treeWidget.isEnabled():
+            if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+                return
+            '''
+            fields = self.ui.cboTreeOp1.currentText()
+            field1Index = self.ui.cboTreeOp1.currentIndex()
+    
+            value = self.ui.treeWidget.selectedItems()
+            currentitemIs = ''
+    
+            for item in value:
+                currentitemIs = item.text(0)
+    
+            field1 = self.TransLateFieldtoReal(fields, True)
+    
+            fields = self.ui.cboTreeOp2.currentText()
+    
+            field2 = self.TransLateFieldtoReal(fields, True)
+            field2Index = self.ui.cboTreeOp2.currentIndex()
+    
+            fields = self.ui.cboTreeOp3.currentText()
+    
+            # self.ui.lblTreeOtions3.setText(data[self.ui.cboTreeOp3.currentIndex()])
+            field3 = self.TransLateFieldtoReal(fields, True)
+            field3Index = self.ui.cboTreeOp3.currentIndex()
+            if field1 == '': field1 = 'None'
+            if field2 == '': field1 = 'None'
+            if field3 == '': field1 = 'None'
+            '''
 
-        value = self.ui.treeWidget.selectedItems()
-        currentitemIs = ''
+            field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+            i = 0
+            for item in FieldList:
+                if field1 == item:
+                    field1Value = data[i]
+                i += 1
 
-        for item in value:
-            currentitemIs = item.text(0)
+            field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+            i = 0
+            for item in FieldList:
+                if field2 == item:
+                    field2Value = data[i]
+                i += 1
 
-        field1 = self.TransLateFieldtoReal(fields, True)
+            field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+            i = 0
+            for item in FieldList:
+                if field3 == item:
+                    field3Value = data[i]
+                i += 1
 
-        fields = self.ui.cboTreeOp2.currentText()
+            if field1 == '': field1 = 'None'
+            if field2 == '': field1 = 'None'
+            if field3 == '': field1 = 'None'
 
-        field2 = self.TransLateFieldtoReal(fields, True)
-        field2Index = self.ui.cboTreeOp2.currentIndex()
+            SQLFields = []
+            SQLFields.append(field1)
+            SQLFields.append(field2)
+            SQLFields.append(field3)
 
-        fields = self.ui.cboTreeOp3.currentText()
+            value = self.ui.treeWidget.selectedItems()
+            currentitemIs = ''
 
-        # self.ui.lblTreeOtions3.setText(data[self.ui.cboTreeOp3.currentIndex()])
-        field3 = self.TransLateFieldtoReal(fields, True)
-        field3Index = self.ui.cboTreeOp3.currentIndex()
-        if field1 == '': field1 = 'None'
-        if field2 == '': field1 = 'None'
-        if field3 == '': field1 = 'None'
-        '''
+            for item in value:
+                currentitemIs = item.text(0)
 
-        field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-        i = 0
-        for item in FieldList:
-            if field1 == item:
-                field1Value = data[i]
-            i += 1
+            #model = self.ui.tableView.model()
 
-        field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-        i = 0
-        for item in FieldList:
-            if field2 == item:
-                field2Value = data[i]
-            i += 1
+            # global RefreshSQL
+            if field1 == 'None' or field1 is None:
+                RefreshSQL = 'select * from vgenesdb ORDER BY SeqName'
+            elif field2 == 'None' or field2 is None:
+                RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', SeqName'
+            elif field3 == 'None' or field3 is None:
+                RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
+            else:
+                RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 
-        field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-        i = 0
-        for item in FieldList:
-            if field3 == item:
-                field3Value = data[i]
-            i += 1
+            #model.refresh()
 
-        if field1 == '': field1 = 'None'
-        if field2 == '': field1 = 'None'
-        if field3 == '': field1 = 'None'
+            #self.ui.tableView.sortByColumn(field1Index, Qt.AscendingOrder)
+            #self.ui.tableView.sortByColumn(0, Qt.AscendingOrder)
+            #self.ui.tableView.sortByColumn(field3Index, Qt.AscendingOrder)
+            #self.ui.tableView.sortByColumn(field2Index, Qt.AscendingOrder)
 
-        SQLFields = []
-        SQLFields.append(field1)
-        SQLFields.append(field2)
-        SQLFields.append(field3)
+            self.initializeTreeView(SQLFields)
+            global DontFindTwice
+            DontFindTwice = True
+            self.findTreeItem(currentitemIs)
+            self.tree_to_table_selection()
+            # self.ui.treeWidget.
+            DontFindTwice = False
 
-        value = self.ui.treeWidget.selectedItems()
-        currentitemIs = ''
-
-        for item in value:
-            currentitemIs = item.text(0)
-
-        #model = self.ui.tableView.model()
-
-        # global RefreshSQL
-        if field1 == 'None' or field1 is None:
-            RefreshSQL = 'select * from vgenesdb ORDER BY SeqName'
-        elif field2 == 'None' or field2 is None:
-            RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', SeqName'
-        elif field3 == 'None' or field3 is None:
-            RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
-        else:
-            RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
-
-        #model.refresh()
-
-        #self.ui.tableView.sortByColumn(field1Index, Qt.AscendingOrder)
-        #self.ui.tableView.sortByColumn(0, Qt.AscendingOrder)
-        #self.ui.tableView.sortByColumn(field3Index, Qt.AscendingOrder)
-        #self.ui.tableView.sortByColumn(field2Index, Qt.AscendingOrder)
-
-        self.initializeTreeView(SQLFields)
-        global DontFindTwice
-        DontFindTwice = True
-        self.findTreeItem(currentitemIs)
-        self.tree_to_table_selection()
-        # self.ui.treeWidget.
-        DontFindTwice = False
-
-        self.ui.checkBoxAll.setChecked(False)
-        self.ui.checkBoxAll1.setChecked(False)
-        self.ui.treeWidget.expandAll()
+            self.ui.checkBoxAll.setChecked(False)
+            self.ui.checkBoxAll1.setChecked(False)
+            self.ui.treeWidget.expandAll()
 
     def findTreeItem(self, ChildName):
+        if self.ui.treeWidget.isEnabled():
+            found = self.ui.treeWidget.findItems(ChildName, Qt.MatchRecursive, 0)
 
-        found = self.ui.treeWidget.findItems(ChildName, Qt.MatchRecursive, 0)
-
-        for item in found:
-            currentRecord = item.text(0)
-            if len(found) > 1: break
-
-            # print(currentRecord)
-        if len(found) > 0: self.ui.treeWidget.setCurrentItem(item)
-        try:
-            return item
-        except:
-            print("line 7598 exception")
+            for item in found:
+                currentRecord = item.text(0)
+                if len(found) > 1: break
+    
+                # print(currentRecord)
+            if len(found) > 0: self.ui.treeWidget.setCurrentItem(item)
+            try:
+                return item
+            except:
+                print("error!")
 
     def on_radioButtonSeqView_clicked(self):
         global JustMoved

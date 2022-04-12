@@ -7,8 +7,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1598</width>
-    <height>1069</height>
+    <width>1683</width>
+    <height>1096</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -766,21 +766,6 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="3">
-           <widget class="QLineEdit" name="lineEditReplace">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="font">
-             <font>
-              <family>Lucida Grande</family>
-             </font>
-            </property>
-           </widget>
-          </item>
           <item row="0" column="3">
            <widget class="QPushButton" name="btnFieldBulk">
             <property name="enabled">
@@ -819,8 +804,8 @@
             </property>
            </widget>
           </item>
-          <item row="3" column="0" colspan="2">
-           <widget class="QLineEdit" name="lineEditTarget">
+          <item row="3" column="3">
+           <widget class="QLineEdit" name="lineEditReplace">
             <property name="minimumSize">
              <size>
               <width>0</width>
@@ -831,16 +816,6 @@
              <font>
               <family>Lucida Grande</family>
              </font>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="0" colspan="4">
-           <widget class="QComboBox" name="cboFindField1"/>
-          </item>
-          <item row="2" column="0" colspan="4">
-           <widget class="QRadioButton" name="radioButtonReg">
-            <property name="text">
-             <string>Regular Expression allowed</string>
             </property>
            </widget>
           </item>
@@ -878,6 +853,31 @@
              <bool>true</bool>
             </property>
            </widget>
+          </item>
+          <item row="2" column="0" colspan="4">
+           <widget class="QRadioButton" name="radioButtonReg">
+            <property name="text">
+             <string>Regular Expression allowed</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="0" colspan="2">
+           <widget class="QLineEdit" name="lineEditTarget">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>30</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <family>Lucida Grande</family>
+             </font>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="4">
+           <widget class="QComboBox" name="cboFindField1"/>
           </item>
          </layout>
         </widget>
@@ -1228,34 +1228,7 @@
         <string>Database</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_42">
-        <item row="0" column="0">
-         <widget class="QCheckBox" name="checkBoxAll">
-          <property name="text">
-           <string>Check all</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QCheckBox" name="checkBoxRowSelection">
-          <property name="text">
-           <string>Select entire row</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <spacer name="horizontalSpacer_21">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>865</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="3">
+        <item row="0" column="8">
          <widget class="QPushButton" name="ShowTable">
           <property name="maximumSize">
            <size>
@@ -1284,181 +1257,7 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="5">
-         <widget class="QPushButton" name="StatUpdate">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Stat of values of selected field</string>
-          </property>
-          <property name="text">
-           <string>Stat/Edit</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="7">
-         <widget class="QPushButton" name="CopyValue">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Copy values from a column to another</string>
-          </property>
-          <property name="text">
-           <string>Copy values </string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="9">
-         <widget class="QPushButton" name="EditLock">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Lock/Unlock Edit</string>
-          </property>
-          <property name="text">
-           <string>Edit locked</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="11">
-         <widget class="QPushButton" name="pushButtonRefresh">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Refresh DB to load most recent changes</string>
-          </property>
-          <property name="text">
-           <string>Refresh DB</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="13">
-         <widget class="QPushButton" name="pushButtonAlter">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Alter data table (add field, delete field, rename field)</string>
-          </property>
-          <property name="text">
-           <string>Alter DB</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="14">
-         <widget class="QPushButton" name="pushButtonTable">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="toolTip">
-           <string>Alter data table (add field, delete field, rename field)</string>
-          </property>
-          <property name="text">
-           <string>Display fields</string>
-          </property>
-          <property name="icon">
-           <iconset resource="Resources/VgenesResources.qrc">
-            <normaloff>:/PNG-Icons/settings.png</normaloff>:/PNG-Icons/settings.png</iconset>
-          </property>
-          <property name="iconSize">
-           <size>
-            <width>30</width>
-            <height>30</height>
-           </size>
-          </property>
-          <property name="flat">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0" colspan="15">
+        <item row="1" column="0" colspan="20">
          <widget class="QTableWidget" name="SeqTable">
           <property name="font">
            <font>
@@ -1471,7 +1270,7 @@
           </property>
          </widget>
         </item>
-        <item row="2" column="0" colspan="15">
+        <item row="2" column="0" colspan="20">
          <layout class="QHBoxLayout" name="horizontalLayout_16">
           <item>
            <widget class="QPushButton" name="pushButtonFirstPage">
@@ -1625,6 +1424,257 @@
           </item>
          </layout>
         </item>
+        <item row="0" column="4">
+         <spacer name="horizontalSpacer_21">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>865</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="0" column="7">
+         <widget class="QPushButton" name="pushButtonMark1">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Quick Mark</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/comment.png</normaloff>:/PNG-Icons/comment.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1" colspan="2">
+         <layout class="QVBoxLayout" name="verticalLayout_13">
+          <item>
+           <widget class="QCheckBox" name="checkBoxAll">
+            <property name="text">
+             <string>Check all</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="checkBoxRowSelection">
+            <property name="text">
+             <string>Select entire row</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item row="0" column="9">
+         <widget class="QPushButton" name="StatUpdate">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Stat of values of selected field</string>
+          </property>
+          <property name="text">
+           <string>Stat/Edit</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="10">
+         <widget class="QPushButton" name="CopyValue">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Copy values from a column to another</string>
+          </property>
+          <property name="text">
+           <string>Copy values </string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="11">
+         <widget class="QPushButton" name="EditLock">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Lock/Unlock Edit</string>
+          </property>
+          <property name="text">
+           <string>Edit locked</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="12">
+         <widget class="QPushButton" name="pushButtonRefresh">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Refresh DB to load most recent changes</string>
+          </property>
+          <property name="text">
+           <string>Refresh</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="13">
+         <widget class="QPushButton" name="pushButtonAlter">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Alter data table (add field, delete field, rename field)</string>
+          </property>
+          <property name="text">
+           <string>Alter DB</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="14" colspan="2">
+         <widget class="QPushButton" name="pushButtonTable">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="toolTip">
+           <string>Alter data table (add field, delete field, rename field)</string>
+          </property>
+          <property name="text">
+           <string>Display fields</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/settings.png</normaloff>:/PNG-Icons/settings.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5" colspan="2">
+         <widget class="QPushButton" name="pushButtonClear1">
+          <property name="text">
+           <string>ClearCheck</string>
+          </property>
+          <property name="icon">
+           <iconset resource="Resources/VgenesResources.qrc">
+            <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
+          </property>
+          <property name="iconSize">
+           <size>
+            <width>30</width>
+            <height>30</height>
+           </size>
+          </property>
+          <property name="flat">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
        </layout>
       </widget>
       <widget class="QWidget" name="tabRecord">
@@ -1642,7 +1692,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1226</width>
+             <width>1311</width>
              <height>821</height>
             </rect>
            </property>
@@ -4701,7 +4751,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1226</width>
+             <width>1311</width>
              <height>750</height>
             </rect>
            </property>
@@ -6622,7 +6672,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1226</width>
+             <width>1311</width>
              <height>911</height>
             </rect>
            </property>
@@ -11554,7 +11604,7 @@ If the J-end is off the J gene end may need adjusted</string>
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1598</width>
+     <width>1683</width>
      <height>22</height>
     </rect>
    </property>
