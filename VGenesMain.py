@@ -12237,6 +12237,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.rdoAll.clicked.connect(self.on_cboFindField_currentTextChanged)
         self.ui.rdoLocal.clicked.connect(self.on_cboFindField_currentTextChanged)
         self.ui.pushButtonUserList.clicked.connect(self.openUserList)
+        self.ui.radioButtonEnableTree.clicked.connect(self.enableTree)
         # self.ui.listViewSpecificity.highlighted['QString'].connect(self.SpecSet)
         # self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
@@ -12320,6 +12321,17 @@ class VGenesForm(QtWidgets.QMainWindow):
                                "QSpinBox{font-size:18px;}")
         else:
             pass
+
+    def enableTree(self):
+        if self.ui.radioButtonEnableTree.isChecked():
+            self.ui.treeWidget.setEnabled(True)
+            self.ui.groupBox_2.setEnabled(True)
+            self.on_btnUpdateTree_clicked()
+        else:
+            self.ui.treeWidget.clear()
+            self.ui.treeWidget.setEnabled(False)
+            self.ui.groupBox_2.setEnabled(False)
+
 
     def markRecords(self):
         if len(self.CheckedRecords) == 0:
@@ -14471,12 +14483,17 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.annoDialog.csvFile = anno_file
         self.annoDialog.refreshDBSignal.connect(self.refreshDB)
         Content = []
-
+        max_row = 100
         try:
             csvFile = open(anno_file, "r")
             reader = csv.reader(csvFile)
+            row = 0
             for item in reader:
-                Content.append(item)
+                if row < max_row:
+                    Content.append(item)
+                    row += 1
+                else:
+                    break
             csvFile.close()
         except:
             Msg = 'Can not process your file as CSV! Please check your input!'
@@ -29213,6 +29230,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         self.ui.checkBoxAll.setChecked(False)
         self.ui.checkBoxAll1.setChecked(False)
+        self.ui.treeWidget.expandAll()
 
     def findTreeItem(self, ChildName):
 
