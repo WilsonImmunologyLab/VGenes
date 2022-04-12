@@ -17026,108 +17026,104 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.SeqTable.setColumnCount(0)
         self.ui.SeqTable.setRowCount(0)
 
-        # load data for new table
-        if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
-            #self.progress = ProgressBar(self)
-            #self.progress.setLabel('Modifying barcodes ...')
-            #self.progress.show()
+        try:
+            # load data for new table
+            if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
+                #self.progress = ProgressBar(self)
+                #self.progress.setLabel('Modifying barcodes ...')
+                #self.progress.show()
 
-            #pct = 0
-            #label = "Fetching data ..."
-            #self.progressLabel(pct, label)
-
-            field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-            field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-            field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-
-            # paging system
-            pageSize = int(self.ui.spinBoxPageSize.text())
-            if self.ui.SeqTable.pageSize == pageSize:
-                pass
-            else:
-                self.ui.SeqTable.pageSize = pageSize
-                self.ui.labelCurPage.setText('1')
-
-            CurPage = int(self.ui.labelCurPage.text()) - 1
-            #RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str((CurPage + 1) * pageSize)
-            RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str(pageSize)
-            SQLStatement = 'SELECT COUNT(*) FROM vgenesdb'
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            TotalRecords = DataIn[0][0]
-            TotalRecordsStr = str(math.ceil(TotalRecords/pageSize))
-            self.ui.labelTotalPage.setText(TotalRecordsStr)
-
-            SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID'
-            HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            current_field_list = [i[0] for i in HeaderIn]
-            current_nickname_list = [i[1] for i in HeaderIn]
-            fields = ','.join(current_field_list)
-            if fields == '':
-                fields = '*'
-            SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
-            SQLStatement += RecordLimitStatement
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-            #pct = 0
-            #label = "Initial Table ..."
-            #self.progressLabel(pct, label)
-
-            num_row = len(DataIn)
-            num_col = len(current_field_list)
-            self.ui.SeqTable.setRowCount(num_row)
-            self.ui.SeqTable.setColumnCount(num_col + 1)
-
-            horizontalHeader = [''] + current_nickname_list
-            self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
-            self.ui.SeqTable.fields = horizontalHeader
-            # re-size column size
-            self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
-            self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-            if self.ui.checkBoxRowSelection.isChecked():
-                self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-            else:
-                self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
-            
-            #process = 1
-            for row_index in range(num_row):
-                cell_checkBox = QCheckBox()
-                cell_checkBox.id = str(DataIn[row_index][0])
-                # cell_checkBox.setText(DataIn[row_index][0])
-                if str(DataIn[row_index][0]) in self.CheckedRecords:
-                    cell_checkBox.setChecked(True)
-                else:
-                    cell_checkBox.setChecked(False)
-                cell_checkBox.stateChanged.connect(self.multipleSelection)
-                self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
-
-                for col_index in range(num_col):
-                    unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
-                    unit.last_name = DataIn[row_index][col_index]
-                    self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
-
-                #pct = int(process / num_row * 100)
-                #label = "Loading records: " + str(process) + '/' + str(num_row)
+                #pct = 0
+                #label = "Fetching data ..."
                 #self.progressLabel(pct, label)
-                #process += 1
+
+                field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+                field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+                field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+
+                # paging system
+                pageSize = int(self.ui.spinBoxPageSize.text())
+                if self.ui.SeqTable.pageSize == pageSize:
+                    pass
+                else:
+                    self.ui.SeqTable.pageSize = pageSize
+                    self.ui.labelCurPage.setText('1')
+
+                CurPage = int(self.ui.labelCurPage.text()) - 1
+                #RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str((CurPage + 1) * pageSize)
+                RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str(pageSize)
+                SQLStatement = 'SELECT COUNT(*) FROM vgenesdb'
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+                TotalRecords = DataIn[0][0]
+                TotalRecordsStr = str(math.ceil(TotalRecords/pageSize))
+                self.ui.labelTotalPage.setText(TotalRecordsStr)
+
+                SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID LIMIT 0,200'
+                HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+                current_field_list = [i[0] for i in HeaderIn]
+                current_nickname_list = [i[1] for i in HeaderIn]
+                fields = ','.join(current_field_list)
+                if fields == '':
+                    fields = '*'
+                SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ',' + field2 + ',' + field3 + ',SeqName'
+                SQLStatement += RecordLimitStatement
+                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+                #pct = 0
+                #label = "Initial Table ..."
+                #self.progressLabel(pct, label)
+
+                num_row = len(DataIn)
+                num_col = len(current_field_list)
+                self.ui.SeqTable.setRowCount(num_row)
+                self.ui.SeqTable.setColumnCount(num_col + 1)
+
+                horizontalHeader = [''] + current_nickname_list
+                self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
+                self.ui.SeqTable.fields = horizontalHeader
+                # re-size column size
+                self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
+                self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
+                if self.ui.checkBoxRowSelection.isChecked():
+                    self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
+                else:
+                    self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
+
+                #process = 1
+                for row_index in range(num_row):
+                    cell_checkBox = QCheckBox()
+                    cell_checkBox.id = str(DataIn[row_index][0])
+                    # cell_checkBox.setText(DataIn[row_index][0])
+                    if str(DataIn[row_index][0]) in self.CheckedRecords:
+                        cell_checkBox.setChecked(True)
+                    else:
+                        cell_checkBox.setChecked(False)
+                    cell_checkBox.stateChanged.connect(self.multipleSelection)
+                    self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
+
+                    for col_index in range(num_col):
+                        unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
+                        unit.last_name = DataIn[row_index][col_index]
+                        self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
+
+                    #pct = int(process / num_row * 100)
+                    #label = "Loading records: " + str(process) + '/' + str(num_row)
+                    #self.progressLabel(pct, label)
+                    #process += 1
 
 
-            # disable edit
-            if self.ui.SeqTable.EditTag == True:
-                self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
-            else:
-                self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-            # show sort indicator
-            self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
-            # connect sort indicator to slot function
-            self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
-            self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
-
-
-
-            #self.match_tree_to_table()
-            #msg = 'Table fully loaded!'
-            #self.ShowMessageBox([0, msg])
-
+                # disable edit
+                if self.ui.SeqTable.EditTag == True:
+                    self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
+                else:
+                    self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+                # show sort indicator
+                self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
+                # connect sort indicator to slot function
+                self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
+                self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
+        except:
+            return
         # try multi-thread
         '''
         if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
@@ -24099,6 +24095,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     def GenerateNameIndex(self):
         global NameIndex
+
         model = self.ui.tableView.model()
         index = model.index(0, 0)
         self.ui.tableView.setCurrentIndex(index)
@@ -24112,40 +24109,17 @@ class VGenesForm(QtWidgets.QMainWindow):
     def OnOpen(self):
         time_start = time.time()
         global MoveNotChange
+        global DontFindTwice
         MoveNotChange = True
-        # self.ui.tableView.ColumnsToContents()
-        #self.ui.tableView.resizeColumnsToContents()
+        DontFindTwice = True
 
         self.ui.lcdNumber_current.display(1)
-        # self.ui.txtGotoRecord.setPlainText('1')
-        #model = self.ui.tableView.model()
-
-        #index = model.index(0, 0)
-        #self.ui.tableView.setCurrentIndex(index)
-        #self.GenerateNameIndex()
 
         self.ui.cboFindField.clear()
         self.ui.cboFindField1.clear()
         self.ui.cboTreeOp1.clear()
         self.ui.cboTreeOp2.clear()
         self.ui.cboTreeOp3.clear()
-
-        '''
-        self.ui.cboFindField.addItem("Project")
-        self.ui.cboFindField.addItem("Grouping")
-        self.ui.cboFindField.addItem("Subgroup")
-
-        self.ui.cboFindField1.addItem("Project")
-        self.ui.cboFindField1.addItem("Grouping")
-        self.ui.cboFindField1.addItem("Subgroup")
-
-        for item in RealNameList:
-            self.ui.cboFindField.addItem(item)
-            self.ui.cboFindField1.addItem(item)
-            self.ui.cboTreeOp1.addItem(item)
-            self.ui.cboTreeOp2.addItem(item)
-            self.ui.cboTreeOp3.addItem(item)
-        '''
 
         field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
         self.ui.cboFindField.addItems(field_list)
@@ -24166,22 +24140,42 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.cboTreeOp3.setCurrentText(FieldList[77] + '(' + RealNameList[77] + ')')
 
         MoveNotChange = False
+        DontFindTwice = False
         time_end = time.time()
         print('\tOn open, step1 time cost: ', time_end - time_start, 's')
         try:
             SQLFields = ('Project', 'Grouping', 'SubGroup')
             time_start = time.time()
-            self.initializeTreeView(SQLFields)
-            time_end = time.time()
-            print('\tOn open, initializeTreeView time cost: ', time_end - time_start, 's')
-            time_start = time.time()
-            self.updateF(-2)
-            time_end = time.time()
-            print('\tOn open, updateF time cost: ', time_end - time_start, 's')
-            time_start = time.time()
-            self.findTreeItem(data[0])
-            time_end = time.time()
-            print('\tOn open, findTreeItem time cost: ', time_end - time_start, 's')
+            # if the database is too big
+            SQLStatement = 'select count(*) from vgenesdb'
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            NumRows = DataIn[0][0]
+            if NumRows > 2000000:
+                self.ui.radioButtonEnableTree.setChecked(False)
+                self.ui.treeWidget.clear()
+                self.ui.treeWidget.setEnabled(False)
+                self.ui.groupBox_2.setEnabled(False)
+                time_end = time.time()
+                print('\tOn open, initializeTreeView time cost: ', time_end - time_start, 's')
+                time_start = time.time()
+                self.updateF(-2)
+                time_end = time.time()
+                print('\tOn open, updateF time cost: ', time_end - time_start, 's')
+                time_start = time.time()
+                time_end = time.time()
+                print('\tOn open, findTreeItem time cost: ', time_end - time_start, 's')
+            else:
+                self.initializeTreeView(SQLFields)
+                time_end = time.time()
+                print('\tOn open, initializeTreeView time cost: ', time_end - time_start, 's')
+                time_start = time.time()
+                self.updateF(-2)
+                time_end = time.time()
+                print('\tOn open, updateF time cost: ', time_end - time_start, 's')
+                time_start = time.time()
+                self.findTreeItem(data[0])
+                time_end = time.time()
+                print('\tOn open, findTreeItem time cost: ', time_end - time_start, 's')
         except:
             return
 
@@ -29188,26 +29182,29 @@ class VGenesForm(QtWidgets.QMainWindow):
             '''
 
             field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
+            '''
             i = 0
             for item in FieldList:
                 if field1 == item:
                     field1Value = data[i]
                 i += 1
-
+            '''
             field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
+            '''
             i = 0
             for item in FieldList:
                 if field2 == item:
                     field2Value = data[i]
                 i += 1
-
+            '''
             field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
+            '''
             i = 0
             for item in FieldList:
                 if field3 == item:
                     field3Value = data[i]
                 i += 1
-
+            '''
             if field1 == '': field1 = 'None'
             if field2 == '': field1 = 'None'
             if field3 == '': field1 = 'None'
@@ -29263,7 +29260,8 @@ class VGenesForm(QtWidgets.QMainWindow):
                 if len(found) > 1: break
     
                 # print(currentRecord)
-            if len(found) > 0: self.ui.treeWidget.setCurrentItem(item)
+            if len(found) > 0:
+                self.ui.treeWidget.setCurrentItem(item)
             try:
                 return item
             except:
