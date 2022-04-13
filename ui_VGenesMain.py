@@ -5167,7 +5167,7 @@ class Ui_MainWindow(object):
 "Select"))
         self.pushButtonAdvance.setText(_translate("MainWindow", "Advance\n"
 "Search"))
-        self.pushButtonScatter.setText(_translate("MainWindow", "Data\n"
+        self.pushButtonScatter.setText(_translate("MainWindow", "Scatter\n"
 "Viewer"))
         self.label_61.setText(_translate("MainWindow", "To"))
         self.btnFieldBulk.setToolTip(_translate("MainWindow", "Edit search field of all checked records to match edit/search box value"))

@@ -43,7 +43,6 @@ matplotlib.use("Qt5Agg")
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-#import pyqtgraph.examples
 
 # import PyQtGraph
 import pyqtgraph as pg
@@ -12762,8 +12761,9 @@ class VGenesForm(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_actionTestMutMap_triggered(self):
         # test something
-        #pyqtgraph.examples.run()
-        #return
+        import pyqtgraph.examples
+        pyqtgraph.examples.run()
+        return
         # fetch data
         cur_name = self.ui.txtName.toPlainText()
         WHEREStatement = 'WHERE SeqName IN ("' + cur_name + '")'
