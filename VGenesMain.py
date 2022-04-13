@@ -17460,14 +17460,14 @@ class VGenesForm(QtWidgets.QMainWindow):
             unlock_icon = QIcon()
             unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
             self.ui.EditLock.setIcon(unlock_icon)
-            self.ui.EditLock.setText('Edit unlock')
+            self.ui.EditLock.setText('Edit \nunlock')
             self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
             self.ui.SeqTable.EditTag = True
         else:
             lock_icon = QIcon()
             lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
             self.ui.EditLock.setIcon(lock_icon)
-            self.ui.EditLock.setText('Edit locked')
+            self.ui.EditLock.setText('Edit \nlocked')
             self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
             self.ui.SeqTable.EditTag = False
 

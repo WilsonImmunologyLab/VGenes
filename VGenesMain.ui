@@ -325,7 +325,8 @@
              <string>Click a field from the Record tab and records with similar values will be checked</string>
             </property>
             <property name="text">
-             <string>Match</string>
+             <string>Match
+Record</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -554,41 +555,6 @@
           <property name="bottomMargin">
            <number>3</number>
           </property>
-          <item row="4" column="0" colspan="2">
-           <widget class="QPushButton" name="btnFieldSearch">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Search</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="0">
            <widget class="QLabel" name="label_13">
             <property name="text">
@@ -642,41 +608,6 @@
             </item>
            </widget>
           </item>
-          <item row="4" column="2" colspan="4">
-           <widget class="QPushButton" name="pushButtonStat">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>60</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string>Select records from distribution</string>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="3" colspan="6">
            <widget class="QLineEdit" name="txtFieldSearch">
             <property name="minimumSize">
@@ -692,57 +623,134 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="8">
-           <widget class="QPushButton" name="pushButtonScatter">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/scatter.png</normaloff>:/PNG-Icons/scatter.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="7">
-           <widget class="QPushButton" name="pushButtonAdvance">
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="text">
-             <string/>
-            </property>
-            <property name="icon">
-             <iconset resource="Resources/VgenesResources.qrc">
-              <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
-            </property>
-            <property name="iconSize">
-             <size>
-              <width>30</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="flat">
-             <bool>true</bool>
-            </property>
-           </widget>
+          <item row="3" column="0" colspan="9">
+           <layout class="QHBoxLayout" name="horizontalLayout_22">
+            <item>
+             <widget class="QPushButton" name="btnFieldSearch">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Search</string>
+              </property>
+              <property name="text">
+               <string>Search</string>
+              </property>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonStat">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="toolTip">
+               <string>Select records from distribution</string>
+              </property>
+              <property name="text">
+               <string>STAT
+Select</string>
+              </property>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonAdvance">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Advance
+Search</string>
+              </property>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pushButtonScatter">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Data
+Viewer</string>
+              </property>
+              <property name="icon">
+               <iconset resource="Resources/VgenesResources.qrc">
+                <normaloff>:/PNG-Icons/scatter.png</normaloff>:/PNG-Icons/scatter.png</iconset>
+              </property>
+              <property name="iconSize">
+               <size>
+                <width>30</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="flat">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
@@ -787,7 +795,8 @@
              <string>Edit search field of all checked records to match edit/search box value</string>
             </property>
             <property name="text">
-             <string>Bulk Edit</string>
+             <string>Bulk 
+Edit</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -955,6 +964,72 @@
        <string>Tree navigation order (choose then update):</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_11">
+       <item row="4" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp1">
+         <property name="minimumSize">
+          <size>
+           <width>180</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" colspan="2">
+        <widget class="QComboBox" name="cboTreeOp2">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>27</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <widget class="QPushButton" name="pushButtonMark">
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Quick mark</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/comment.png</normaloff>:/PNG-Icons/comment.png</iconset>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="pushButtonClear">
+         <property name="maximumSize">
+          <size>
+           <width>120</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>Clear Check</string>
+         </property>
+         <property name="icon">
+          <iconset resource="Resources/VgenesResources.qrc">
+           <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>18</width>
+           <height>18</height>
+          </size>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
        <item row="1" column="1">
         <widget class="QPushButton" name="btnUpdateTree">
          <property name="maximumSize">
@@ -1004,72 +1079,6 @@
          </property>
          <property name="text">
           <string>Check All</string>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp1">
-         <property name="minimumSize">
-          <size>
-           <width>180</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="5" column="0" colspan="2">
-        <widget class="QComboBox" name="cboTreeOp2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>27</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QPushButton" name="pushButtonClear">
-         <property name="maximumSize">
-          <size>
-           <width>120</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Clear Check</string>
-         </property>
-         <property name="icon">
-          <iconset resource="Resources/VgenesResources.qrc">
-           <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>18</width>
-           <height>18</height>
-          </size>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QPushButton" name="pushButtonMark">
-         <property name="maximumSize">
-          <size>
-           <width>120</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Quick mark</string>
-         </property>
-         <property name="icon">
-          <iconset resource="Resources/VgenesResources.qrc">
-           <normaloff>:/PNG-Icons/comment.png</normaloff>:/PNG-Icons/comment.png</iconset>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -1446,7 +1455,8 @@
            </size>
           </property>
           <property name="text">
-           <string>Quick Mark</string>
+           <string>Quick 
+Mark</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1493,7 +1503,8 @@
            <string>Stat of values of selected field</string>
           </property>
           <property name="text">
-           <string>Stat/Edit</string>
+           <string>Stat
+Edit</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1522,7 +1533,8 @@
            <string>Copy values from a column to another</string>
           </property>
           <property name="text">
-           <string>Copy values </string>
+           <string>Copy 
+values </string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1551,7 +1563,8 @@
            <string>Lock/Unlock Edit</string>
           </property>
           <property name="text">
-           <string>Edit locked</string>
+           <string>Edit 
+locked</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1609,7 +1622,8 @@
            <string>Alter data table (add field, delete field, rename field)</string>
           </property>
           <property name="text">
-           <string>Alter DB</string>
+           <string>Alter 
+DB</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1638,7 +1652,8 @@
            <string>Alter data table (add field, delete field, rename field)</string>
           </property>
           <property name="text">
-           <string>Display fields</string>
+           <string>Display 
+fields</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1658,7 +1673,8 @@
         <item row="0" column="5" colspan="2">
          <widget class="QPushButton" name="pushButtonClear1">
           <property name="text">
-           <string>ClearCheck</string>
+           <string>Clear
+Check</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -1692,7 +1708,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1311</width>
+             <width>1299</width>
              <height>821</height>
             </rect>
            </property>
@@ -4594,7 +4610,8 @@
               <string>Make a copy of current DB</string>
              </property>
              <property name="text">
-              <string>Save as</string>
+              <string>Save 
+as</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -4621,7 +4638,8 @@
            <item>
             <widget class="QPushButton" name="StatUpdate1">
              <property name="text">
-              <string>Stat/Edit</string>
+              <string>Stat
+Edit</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -4751,7 +4769,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1311</width>
+             <width>1299</width>
              <height>750</height>
             </rect>
            </property>
@@ -6635,14 +6653,30 @@
               <string>Generate protein report</string>
              </property>
              <property name="text">
-              <string>Generate report</string>
+              <string>Generate 
+report</string>
+             </property>
+             <property name="icon">
+              <iconset resource="Resources/VgenesResources.qrc">
+               <normaloff>:/PNG-Icons/page.png</normaloff>:/PNG-Icons/page.png</iconset>
+             </property>
+             <property name="iconSize">
+              <size>
+               <width>40</width>
+               <height>40</height>
+              </size>
+             </property>
+             <property name="flat">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
-           <item row="1" column="0">
+           <item row="0" column="1">
             <widget class="QCheckBox" name="chkShowInEditor">
              <property name="text">
-              <string>Show in pop-up</string>
+              <string>Show in 
+pop-up 
+window</string>
              </property>
              <property name="checked">
               <bool>false</bool>
@@ -6672,7 +6706,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1311</width>
+             <width>1299</width>
              <height>911</height>
             </rect>
            </property>
@@ -7877,25 +7911,6 @@ If the J-end is off the J gene end may need adjusted</string>
        <layout class="QGridLayout" name="gridLayout_28">
         <item row="0" column="2">
          <layout class="QGridLayout" name="gridLayout_29">
-          <item row="1" column="1">
-           <widget class="QCheckBox" name="checkBoxFigLegend">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>20</height>
-             </size>
-            </property>
-            <property name="toolTip">
-             <string extracomment="Display Figure legend">Display Figure legend</string>
-            </property>
-            <property name="text">
-             <string extracomment="Display Figure legend">Legend</string>
-            </property>
-            <property name="checked">
-             <bool>true</bool>
-            </property>
-           </widget>
-          </item>
           <item row="2" column="0" colspan="2">
            <widget class="QCheckBox" name="checkBoxUpdateSelection">
             <property name="toolTip">
@@ -7910,7 +7925,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonDownload">
             <property name="minimumSize">
              <size>
-              <width>90</width>
+              <width>100</width>
               <height>0</height>
              </size>
             </property>
@@ -7924,7 +7939,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Download figure as a svg file</string>
             </property>
             <property name="text">
-             <string>Download</string>
+             <string>Download
+Figure</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -7959,7 +7975,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Generate figure based on current selection</string>
             </property>
             <property name="text">
-             <string>Draw</string>
+             <string>Draw
+Figure</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -7976,7 +7993,33 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
            </widget>
           </item>
-          <item row="1" column="0">
+          <item row="3" column="0">
+           <widget class="QRadioButton" name="radioButtonPNG">
+            <property name="text">
+             <string>plot with matplotlib</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QCheckBox" name="checkBoxFigLegend">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string extracomment="Display Figure legend">Display Figure legend</string>
+            </property>
+            <property name="text">
+             <string extracomment="Display Figure legend">Legend</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0" colspan="2">
            <widget class="QCheckBox" name="checkBoxSelection">
             <property name="toolTip">
              <string extracomment="Generate figure only based on current selection">Generate figure only based on current selected records</string>
@@ -7988,14 +8031,7 @@ If the J-end is off the J gene end may need adjusted</string>
              <string extracomment="Generate figure only based on current selection"/>
             </property>
             <property name="text">
-             <string extracomment="Generate figure only based on current selection">on CurSel</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QRadioButton" name="radioButtonPNG">
-            <property name="text">
-             <string>plot with matplotlib</string>
+             <string extracomment="Generate figure only based on current selection">focus on Current Selected records</string>
             </property>
            </widget>
           </item>
@@ -8016,7 +8052,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>0</number>
+           <number>9</number>
           </property>
           <widget class="QWidget" name="tabPie">
            <attribute name="title">
@@ -9089,7 +9125,8 @@ If the J-end is off the J gene end may need adjusted</string>
         <item row="0" column="10">
          <widget class="QRadioButton" name="radioButtonPop">
           <property name="text">
-           <string>Open Alignment Logo on a pop-up page</string>
+           <string>Open Alignment Logo 
+on a pop-up page</string>
           </property>
          </widget>
         </item>
@@ -9108,7 +9145,8 @@ If the J-end is off the J gene end may need adjusted</string>
         <item row="0" column="5">
          <widget class="QLabel" name="label_106">
           <property name="text">
-           <string>AA</string>
+           <string>AA
+Logo</string>
           </property>
          </widget>
         </item>
@@ -9124,7 +9162,8 @@ If the J-end is off the J gene end may need adjusted</string>
            <string>Generate peptide sequence logo</string>
           </property>
           <property name="text">
-           <string/>
+           <string>AA
+Logo</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -9137,7 +9176,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="flat">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
@@ -9192,7 +9231,8 @@ If the J-end is off the J gene end may need adjusted</string>
            <string>Generate nucleotide sequence logo</string>
           </property>
           <property name="text">
-           <string/>
+           <string>NT
+Logo</string>
           </property>
           <property name="icon">
            <iconset resource="Resources/VgenesResources.qrc">
@@ -9205,14 +9245,15 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="flat">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </item>
         <item row="0" column="7">
          <widget class="QLabel" name="label_107">
           <property name="text">
-           <string>NT</string>
+           <string>NT
+Logo</string>
           </property>
          </widget>
         </item>
@@ -9248,7 +9289,8 @@ If the J-end is off the J gene end may need adjusted</string>
            </font>
           </property>
           <property name="text">
-           <string>Color Scheme:</string>
+           <string>Color 
+Scheme:</string>
           </property>
          </widget>
         </item>
@@ -9272,7 +9314,7 @@ If the J-end is off the J gene end may need adjusted</string>
            </size>
           </property>
           <property name="currentIndex">
-           <number>2</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="tab_5">
            <attribute name="title">
@@ -9551,12 +9593,13 @@ If the J-end is off the J gene end may need adjusted</string>
             <widget class="QPushButton" name="pushButtonPublicClone">
              <property name="maximumSize">
               <size>
-               <width>100</width>
+               <width>150</width>
                <height>16777215</height>
               </size>
              </property>
              <property name="text">
-              <string>Find Public</string>
+              <string>Find/Highlight 
+Public</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -9564,8 +9607,8 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
              <property name="iconSize">
               <size>
-               <width>25</width>
-               <height>25</height>
+               <width>35</width>
+               <height>35</height>
               </size>
              </property>
              <property name="flat">
@@ -9601,7 +9644,8 @@ If the J-end is off the J gene end may need adjusted</string>
            <item row="0" column="4">
             <widget class="QRadioButton" name="radioButtonHConly">
              <property name="text">
-              <string>HC only</string>
+              <string>HC Clone
+only</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -9619,12 +9663,13 @@ If the J-end is off the J gene end may need adjusted</string>
             <widget class="QPushButton" name="pushButtonPairClone">
              <property name="maximumSize">
               <size>
-               <width>16777215</width>
-               <height>25</height>
+               <width>180</width>
+               <height>40</height>
               </size>
              </property>
              <property name="text">
-              <string/>
+              <string>Pair HC/LCs
+for current clone</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -9633,7 +9678,7 @@ If the J-end is off the J gene end may need adjusted</string>
              <property name="iconSize">
               <size>
                <width>60</width>
-               <height>30</height>
+               <height>40</height>
               </size>
              </property>
              <property name="flat">
@@ -9671,8 +9716,8 @@ If the J-end is off the J gene end may need adjusted</string>
              </property>
              <property name="iconSize">
               <size>
-               <width>25</width>
-               <height>25</height>
+               <width>35</width>
+               <height>35</height>
               </size>
              </property>
              <property name="flat">
@@ -9969,7 +10014,8 @@ If the J-end is off the J gene end may need adjusted</string>
                    </size>
                   </property>
                   <property name="text">
-                   <string>Download</string>
+                   <string>Download
+Figure</string>
                   </property>
                   <property name="icon">
                    <iconset resource="Resources/VgenesResources.qrc">
@@ -10216,7 +10262,7 @@ If the J-end is off the J gene end may need adjusted</string>
                      </size>
                     </property>
                     <property name="flat">
-                     <bool>true</bool>
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -10283,7 +10329,7 @@ If the J-end is off the J gene end may need adjusted</string>
                      </size>
                     </property>
                     <property name="flat">
-                     <bool>true</bool>
+                     <bool>false</bool>
                     </property>
                    </widget>
                   </item>
@@ -10389,14 +10435,129 @@ If the J-end is off the J gene end may need adjusted</string>
                   <string>Alignment</string>
                  </attribute>
                  <layout class="QGridLayout" name="gridLayout_67">
-                  <item row="0" column="4">
+                  <item row="0" column="0">
+                   <widget class="QRadioButton" name="radioButtonCloneMSA">
+                    <property name="text">
+                     <string>show on a 
+popup window</string>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="2">
+                   <widget class="QPushButton" name="pushButtonSeqIdCloneHTML">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>32</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>100</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Sequence identity (%)</string>
+                    </property>
+                    <property name="text">
+                     <string>Sequence
+Identity</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="Resources/VgenesResources.qrc">
+                      <normaloff>:/PNG-Icons/SeqID.png</normaloff>:/PNG-Icons/SeqID.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>30</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="3">
+                   <widget class="QPushButton" name="pushButtonCloneAlignHTML">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>32</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>70</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Multiple sequence alignment (HTML)</string>
+                    </property>
+                    <property name="text">
+                     <string>MSA</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="Resources/VgenesResources.qrc">
+                      <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>30</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="5">
                    <widget class="Line" name="line_16">
                     <property name="orientation">
                      <enum>Qt::Vertical</enum>
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="5">
+                  <item row="0" column="4">
+                   <widget class="QPushButton" name="pushButtonCloneProtein">
+                    <property name="minimumSize">
+                     <size>
+                      <width>0</width>
+                      <height>32</height>
+                     </size>
+                    </property>
+                    <property name="maximumSize">
+                     <size>
+                      <width>90</width>
+                      <height>16777215</height>
+                     </size>
+                    </property>
+                    <property name="toolTip">
+                     <string>Protein report</string>
+                    </property>
+                    <property name="text">
+                     <string>Protein
+Report</string>
+                    </property>
+                    <property name="icon">
+                     <iconset resource="Resources/VgenesResources.qrc">
+                      <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
+                    </property>
+                    <property name="iconSize">
+                     <size>
+                      <width>30</width>
+                      <height>30</height>
+                     </size>
+                    </property>
+                    <property name="flat">
+                     <bool>true</bool>
+                    </property>
+                   </widget>
+                  </item>
+                  <item row="0" column="6">
                    <widget class="QPushButton" name="pushButtonCloneAlignTXT">
                     <property name="minimumSize">
                      <size>
@@ -10431,117 +10592,18 @@ If the J-end is off the J gene end may need adjusted</string>
                     </property>
                    </widget>
                   </item>
-                  <item row="0" column="2">
-                   <widget class="QPushButton" name="pushButtonCloneAlignHTML">
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>50</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Multiple sequence alignment (HTML)</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="Resources/VgenesResources.qrc">
-                      <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>30</width>
-                      <height>30</height>
-                     </size>
-                    </property>
-                    <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="0">
-                   <widget class="QRadioButton" name="radioButtonCloneMSA">
-                    <property name="text">
-                     <string>show on a popup window</string>
-                    </property>
-                   </widget>
-                  </item>
-                  <item row="0" column="3">
-                   <widget class="QPushButton" name="pushButtonCloneProtein">
-                    <property name="minimumSize">
-                     <size>
-                      <width>0</width>
-                      <height>32</height>
-                     </size>
-                    </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>50</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Protein report</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="Resources/VgenesResources.qrc">
-                      <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>30</width>
-                      <height>30</height>
-                     </size>
-                    </property>
-                    <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
-                  </item>
                   <item row="0" column="1">
-                   <widget class="QPushButton" name="pushButtonSeqIdCloneHTML">
-                    <property name="minimumSize">
+                   <spacer name="horizontalSpacer_30">
+                    <property name="orientation">
+                     <enum>Qt::Horizontal</enum>
+                    </property>
+                    <property name="sizeHint" stdset="0">
                      <size>
-                      <width>0</width>
-                      <height>32</height>
+                      <width>40</width>
+                      <height>20</height>
                      </size>
                     </property>
-                    <property name="maximumSize">
-                     <size>
-                      <width>50</width>
-                      <height>16777215</height>
-                     </size>
-                    </property>
-                    <property name="toolTip">
-                     <string>Sequence identity (%)</string>
-                    </property>
-                    <property name="text">
-                     <string/>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="Resources/VgenesResources.qrc">
-                      <normaloff>:/PNG-Icons/SeqID.png</normaloff>:/PNG-Icons/SeqID.png</iconset>
-                    </property>
-                    <property name="iconSize">
-                     <size>
-                      <width>30</width>
-                      <height>30</height>
-                     </size>
-                    </property>
-                    <property name="flat">
-                     <bool>true</bool>
-                    </property>
-                   </widget>
+                   </spacer>
                   </item>
                  </layout>
                 </widget>
@@ -10602,6 +10664,12 @@ If the J-end is off the J gene end may need adjusted</string>
            <enum>QFrame::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_59">
+           <property name="topMargin">
+            <number>0</number>
+           </property>
+           <property name="bottomMargin">
+            <number>0</number>
+           </property>
            <item row="0" column="6">
             <widget class="QComboBox" name="comboBoxHCLC">
              <property name="maximumSize">
@@ -10661,7 +10729,7 @@ If the J-end is off the J gene end may need adjusted</string>
             <widget class="QPushButton" name="pushButtonHeatmap">
              <property name="maximumSize">
               <size>
-               <width>50</width>
+               <width>100</width>
                <height>32</height>
               </size>
              </property>
@@ -10669,7 +10737,8 @@ If the J-end is off the J gene end may need adjusted</string>
               <string>Heatmap plot for HCs and LCs</string>
              </property>
              <property name="text">
-              <string/>
+              <string>Heatmap
+Plot</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -10695,7 +10764,8 @@ If the J-end is off the J gene end may need adjusted</string>
               </size>
              </property>
              <property name="text">
-              <string>Check details</string>
+              <string>Check 
+details</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -10704,7 +10774,7 @@ If the J-end is off the J gene end may need adjusted</string>
              <property name="iconSize">
               <size>
                <width>60</width>
-               <height>16</height>
+               <height>30</height>
               </size>
              </property>
              <property name="flat">
@@ -10723,7 +10793,7 @@ If the J-end is off the J gene end may need adjusted</string>
             <widget class="QPushButton" name="pushButtonCircos">
              <property name="maximumSize">
               <size>
-               <width>50</width>
+               <width>100</width>
                <height>32</height>
               </size>
              </property>
@@ -10731,7 +10801,8 @@ If the J-end is off the J gene end may need adjusted</string>
               <string>Circos plot for HCs and LCs</string>
              </property>
              <property name="text">
-              <string/>
+              <string>Circos
+Plot</string>
              </property>
              <property name="icon">
               <iconset resource="Resources/VgenesResources.qrc">
@@ -10841,7 +10912,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonCheckHC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>80</width>
               <height>32</height>
              </size>
             </property>
@@ -10849,7 +10920,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Check the following HCs exclusively</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Check
+all</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10870,7 +10942,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonProteinHC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -10878,7 +10950,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Protein report for HCs</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Protrein
+Report</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10899,7 +10972,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonAlignHC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -10907,7 +10980,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Multiple sequence alignment for HCs (HTML)</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Sequence
+Alignment</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -10928,7 +11002,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonTreeHC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -10936,7 +11010,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Phylogenetic tree for HCs</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Build
+Tree</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -11011,7 +11086,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonCheckLC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -11019,7 +11094,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Check the following LCs exclusively</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Check
+all</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -11040,7 +11116,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonProteinLC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -11048,7 +11124,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Protein report for LCs</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Protrein
+Report</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -11069,7 +11146,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonAlignLC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -11077,7 +11154,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Multiple sequence alignment for LCs (HTML)</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Sequence
+Alignment</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -11098,7 +11176,7 @@ If the J-end is off the J gene end may need adjusted</string>
            <widget class="QPushButton" name="pushButtonTreeLC">
             <property name="maximumSize">
              <size>
-              <width>50</width>
+              <width>100</width>
               <height>32</height>
              </size>
             </property>
@@ -11106,7 +11184,8 @@ If the J-end is off the J gene end may need adjusted</string>
              <string>Phylogenetic tree for LCs</string>
             </property>
             <property name="text">
-             <string/>
+             <string>Build
+Tree</string>
             </property>
             <property name="icon">
              <iconset resource="Resources/VgenesResources.qrc">
@@ -11294,7 +11373,7 @@ If the J-end is off the J gene end may need adjusted</string>
             </property>
             <property name="maximumSize">
              <size>
-              <width>80</width>
+              <width>100</width>
               <height>16777215</height>
              </size>
             </property>
@@ -11589,8 +11668,13 @@ If the J-end is off the J gene end may need adjusted</string>
     </item>
     <item row="1" column="0">
      <widget class="QRadioButton" name="radioButtonEnableTree">
+      <property name="font">
+       <font>
+        <pointsize>15</pointsize>
+       </font>
+      </property>
       <property name="text">
-       <string>Enable Tree</string>
+       <string>Enable Tree (Disable to improve efficiency)</string>
       </property>
       <property name="checked">
        <bool>true</bool>
