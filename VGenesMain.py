@@ -115,6 +115,7 @@ from ui_TableDialog import Ui_ColorTableDialog
 from ui_PatternSearchDialog import Ui_PatternSearchDialog
 from ui_PatternSearchResultDialog import Ui_PatternSearchResultDialog
 from ui_VDBMergeDialog import Ui_VDBMergeDialog
+from ui_HistGramdialog import Ui_HistGramDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -1010,6 +1011,141 @@ class MarkRecordsDialog(QtWidgets.QDialog):
             return
         # send result out
         self.BatchSignal.emit(field_name, bigText)
+
+class HistGramDialog(QtWidgets.QDialog):
+    BatchSignal = pyqtSignal(str, str)
+
+    def __init__(self):
+        super(HistGramDialog, self).__init__()
+        self.ui = Ui_HistGramDialog()
+        self.ui.setupUi(self)
+        self.fields_name = []
+
+        self.view = pg.GraphicsLayoutWidget()
+        self.ui.PlotVerticalLayout.addWidget(self.view)
+        
+        self.ui.lineEdit.setFixedHeight(25)
+        self.ui.pushButtonAddMore.clicked.connect(self.addLineEdit)
+        self.ui.pushButtonDraw.clicked.connect(self.Draw)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def addLineEdit(self):
+        widgetCount = self.ui.FeatureLayout.count()
+        if widgetCount > 11:
+            Msg = 'Up to 12 features are allowed at a time for better visualization!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        
+        item = QLineEdit()
+        item.setFixedHeight(25)
+        # link value list to lineEdit
+        self.initLineedit(item, self.fields_name)
+        self.ui.FeatureLayout.addWidget(item)
+    
+    def Draw(self):
+        self.view.clear()
+        widgetCount = self.ui.FeatureLayout.count()
+
+        # count feature numbers for layout
+        featureNum = 0
+        for i in range(widgetCount):
+            cuttentItem = self.ui.FeatureLayout.itemAt(i).widget()
+            currentFeature = cuttentItem.text()
+            if currentFeature != '':
+                featureNum += 1
+        
+        # determine column number for layouts
+        colSize = 2
+        if featureNum > 4:
+            colSize = 3
+
+        # draw
+        curCol = 0
+        curRow = 0
+        for i in range(widgetCount):
+            cuttentItem = self.ui.FeatureLayout.itemAt(i).widget()
+            currentFeature = cuttentItem.text()
+
+            if currentFeature not in self.fields_name:
+                myplot = PlotItem()
+                myplot.setTitle('Distribution of ' + currentFeature)
+                text = pg.TextItem(
+                    html='<div style="text-align: center"><span style="color: #FFF;font-size: 16pt;">This feature does not exists</span><br><span style="color: #FF0; font-size: 16pt;">' + currentFeature + '</span></div>',
+                    anchor=(-0.3, 0.5), angle=0, border='w', fill=(0, 0, 255, 100))
+                myplot.addItem(text)
+                text.setPos(-4, 0)
+                myplot.autoRange()
+                self.view.addItem(myplot, row = curRow, col = curCol)
+            else:
+                if currentFeature == '':
+                    pass
+                else:
+                    # clean feature name
+                    currentFeature = re.sub(r'\(.+', '', currentFeature)
+                    # fetch data
+                    SQLStatement = 'SELECT ' + currentFeature + ' FROM vgenesDB'
+                    DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+                    # clean data
+                    vals = []
+                    for ele in DataIn:
+                        try:
+                            vals.append(float(ele[0]))
+                        except:
+                            pass
+                    if len(vals) > 0:
+                        # add plot item
+                        myplot = PlotItem()
+                        myplot.setTitle('Distribution of ' + currentFeature)
+                        self.view.addItem(myplot, row = curRow, col = curCol)
+                        y, x = numpy.histogram(vals)
+                        myplot.plot(x, y, stepMode="center", fillLevel=0, fillOutline=True, brush=(0,0,255,150))
+                    else:
+                        myplot = PlotItem()
+                        myplot.setTitle('Distribution of ' + currentFeature)
+                        text = pg.TextItem(
+                            html='<div style="text-align: center"><span style="color: #FFF;font-size: 16pt;">No numbers found in this feature</span><br><span style="color: #FF0; font-size: 16pt;">' + currentFeature + '</span></div>',
+                            anchor=(-0.3, 0.5), angle=0, border='w', fill=(0, 0, 255, 100))
+                        myplot.addItem(text)
+                        text.setPos(-4, 0)
+                        myplot.autoRange()
+                        self.view.addItem(myplot, row = curRow, col = curCol)
+            # update col and row
+            curCol += 1
+            if curCol == colSize:
+                curRow += 1
+                curCol = 0
+            
+
+    def initLineedit(self, lineEdit, items_list):
+        # add auto complete
+        self.completer = QCompleter(items_list)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        # set match mode
+        self.completer.setFilterMode(Qt.MatchContains)
+        # set complete mode
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        # set QCompleter for lineEdit
+        lineEdit.setCompleter(self.completer)
 
 class UserListDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(list)
@@ -25428,6 +25564,16 @@ class VGenesForm(QtWidgets.QMainWindow):
     @pyqtSlot()
     def on_pushButtonScatter_clicked(self):
         self.on_actionpyqtGraph_triggered()
+
+    @pyqtSlot()
+    def on_pushButtonHistViewer_clicked(self):
+        # open a dialog for settings
+        self.myHistGramDialog = HistGramDialog()
+        self.myHistGramDialog.DBFilename = DBFilename
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myHistGramDialog.fields_name = fields_name
+        self.myHistGramDialog.initLineedit(self.myHistGramDialog.ui.lineEdit, fields_name)
+        self.myHistGramDialog.show()
 
     def updateSelectionFromDialog(self, data):
         self.CheckedRecords = data

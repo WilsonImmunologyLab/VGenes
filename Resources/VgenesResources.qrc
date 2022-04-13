@@ -1,5 +1,8 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>bar.png</file>
+    <file>heat.png</file>
+    <file>hist.png</file>
     <file>scatter.png</file>
     <file>hand.png</file>
     <file>reset.png</file>
