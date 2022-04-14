@@ -1091,14 +1091,6 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
         else:
             WHEREStatement = ' WHERE 1'
 
-        # check figure type
-        if self.ui.checkBoxDisplayScatter.isChecked() or self.ui.checkBoxDisplayBar.isChecked():
-            pass
-        else:
-            Msg = 'Please at least plot something, either Scatter or Box, or both...'
-            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-            return
-
         # check input (field names)
         if self.ui.lineEditData.text() not in self.fields_name:
             Msg = 'The data field name is not exist in your VGenes DB! Check your input!'
@@ -1146,34 +1138,41 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
         self.view.addItem(myplot)
 
         ## Make bar graph
-        if self.ui.checkBoxDisplayBar.isChecked():
-            Q1 = []
-            Q3 = []
-            IQR = []
-            halfErrorBarLen = []
-            meanMM = []
-            median = []
-            for group in ordered_group:
-                my_Q1 = numpy.percentile(numpy.array(data[group]), 25)
-                my_median = numpy.percentile(numpy.array(data[group]), 50)
-                my_Q3 = numpy.percentile(numpy.array(data[group]), 75)
-                my_IQR = my_Q3 - my_Q1
-                my_min = my_Q1 - 1.5 * my_IQR
-                my_max = my_Q3 + 1.5 * my_IQR
-                if my_min < min(numpy.array(data[group])):
-                    my_min = min(numpy.array(data[group]))
-                if my_max > max(numpy.array(data[group])):
-                    my_max = max(numpy.array(data[group]))
-                my_meanMM = (my_max + my_min) / 2
-                my_halfBarLen = my_max - my_min
+        Q1 = []
+        Q3 = []
+        IQR = []
+        halfErrorBarLen = []
+        meanMM = []
+        median = []
+        meanData = []
+        STD = []
 
-                Q1.append(my_Q1)
-                median.append(my_median)
-                Q3.append(my_Q3)
-                IQR.append(my_IQR)
-                halfErrorBarLen.append(my_halfBarLen)
-                meanMM.append(my_meanMM)
-            
+        for group in ordered_group:
+            my_Q1 = numpy.percentile(numpy.array(data[group]), 25)
+            my_median = numpy.percentile(numpy.array(data[group]), 50)
+            my_Q3 = numpy.percentile(numpy.array(data[group]), 75)
+            my_IQR = my_Q3 - my_Q1
+            my_min = my_Q1 - 1.5 * my_IQR
+            my_max = my_Q3 + 1.5 * my_IQR
+            if my_min < min(numpy.array(data[group])):
+                my_min = min(numpy.array(data[group]))
+            if my_max > max(numpy.array(data[group])):
+                my_max = max(numpy.array(data[group]))
+            my_meanMM = (my_max + my_min) / 2
+            my_halfBarLen = my_max - my_min
+            my_mean = numpy.mean(data[group])
+            my_STD = numpy.std(data[group])
+
+            Q1.append(my_Q1)
+            median.append(my_median)
+            Q3.append(my_Q3)
+            IQR.append(my_IQR)
+            halfErrorBarLen.append(my_halfBarLen)
+            meanMM.append(my_meanMM)
+            meanData.append(my_mean)
+            STD.append(my_STD)
+
+        if self.ui.radioButtonBox.isChecked():
             # error bar
             err = pg.ErrorBarItem(x=numpy.array(range(len(ordered_group))), y=numpy.array(meanMM),height=numpy.array(halfErrorBarLen), beam=0.5, pen={'color': 'w', 'width': 2})
             myplot.addItem(err)
@@ -1183,16 +1182,26 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
             # madian value
             for i in range(len(ordered_group)):
                 myplot.plot(x=[i - 0.25, i + 0.25], y=[median[i], median[i]], pen={'color': 'r', 'width': 4})
+        elif self.ui.radioButtonMean.isChecked():
+            # error bar (SD)
+            err = pg.ErrorBarItem(x=numpy.array(range(len(ordered_group))), y=numpy.array(meanData),
+                                  height=numpy.array(STD), beam=0.3, pen={'color': 'w', 'width': 2})
+            myplot.addItem(err)
+            # mean value
+            for i in range(len(ordered_group)):
+                myplot.plot(x=[i - 0.25, i + 0.25], y=[meanData[i], meanData[i]], pen={'color': 'r', 'width': 4})
+        else:
+            pass
 
         ## add scatter plots on top
-        n_color = len(ordered_group)
-        colors = self.makeColors(n_color, self.ui.comboBoxColor.currentText())
-        color_dict = {}
-        for i in range(len(ordered_group)):
-            cur_color = [x * 255 for x in colors[i]]
-            color_dict[ordered_group[i]] = cur_color
-
         if self.ui.checkBoxDisplayScatter.isChecked():
+            n_color = len(ordered_group)
+            colors = self.makeColors(n_color, self.ui.comboBoxColor.currentText())
+            color_dict = {}
+            for i in range(len(ordered_group)):
+                cur_color = [x * 255 for x in colors[i]]
+                color_dict[ordered_group[i]] = cur_color
+
             i = 0
             for group in ordered_group:
                 xvals = (numpy.random.random(len(data[group])) - 0.5) * self.ui.horizontalSliderRange.value() * 0.1
