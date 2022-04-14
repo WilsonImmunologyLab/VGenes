@@ -14,6 +14,66 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="1" column="0">
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="maximumSize">
+      <size>
+       <width>250</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="title">
+      <string>Download Figure</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_3">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushButtonExport">
+        <property name="text">
+         <string>Export</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer_5">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="2">
+       <widget class="QRadioButton" name="radioButtonPNG">
+        <property name="text">
+         <string>PNG</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QRadioButton" name="radioButtonSVG">
+        <property name="text">
+         <string>SVG</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="0" column="1" rowspan="4">
+    <layout class="QVBoxLayout" name="PlotVerticalLayout"/>
+   </item>
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox">
      <property name="minimumSize">
@@ -37,6 +97,23 @@
       <string>Features for plots</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QPushButton" name="pushButtonAddMore">
+        <property name="text">
+         <string>Add 1 more feature</string>
+        </property>
+        <property name="flat">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0">
+       <widget class="QRadioButton" name="radioButtonChecked">
+        <property name="text">
+         <string>only plot my checked records</string>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0">
        <layout class="QVBoxLayout" name="FeatureLayout">
         <item>
@@ -51,16 +128,6 @@
         </item>
        </layout>
       </item>
-      <item row="0" column="0">
-       <widget class="QPushButton" name="pushButtonAddMore">
-        <property name="text">
-         <string>Add 1 more feature</string>
-        </property>
-        <property name="flat">
-         <bool>false</bool>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0">
        <spacer name="verticalSpacer_3">
         <property name="orientation">
@@ -74,20 +141,17 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="0">
-       <widget class="QRadioButton" name="radioButtonChecked">
-        <property name="text">
-         <string>only plot my checked records</string>
-        </property>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
-   <item row="0" column="1" rowspan="3">
-    <layout class="QVBoxLayout" name="PlotVerticalLayout"/>
+   <item row="3" column="0">
+    <widget class="QPushButton" name="pushButtonDraw">
+     <property name="text">
+      <string>Draw</string>
+     </property>
+    </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
@@ -95,17 +159,10 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>380</height>
+       <height>40</height>
       </size>
      </property>
     </spacer>
-   </item>
-   <item row="2" column="0">
-    <widget class="QPushButton" name="pushButtonDraw">
-     <property name="text">
-      <string>Draw</string>
-     </property>
-    </widget>
    </item>
   </layout>
  </widget>

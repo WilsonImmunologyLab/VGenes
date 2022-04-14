@@ -1025,6 +1025,7 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
 
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
+        self.ui.pushButtonExport_2.clicked.connect(self.exportFigure)
 
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
 
@@ -1048,6 +1049,24 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
                                "QLineEdit{font-size:18px;}"
                                "QTreeWidget{font-size:18px;}"
                                "QSpinBox{font-size:18px;}")
+
+    def exportFigure(self):
+        if self.ui.radioButtonPNG_2.isChecked():
+            Pathname = saveFile(self.parent(), 'png')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.ImageExporter(self.view.scene())
+            exporter.export(Pathname)
+
+        if self.ui.radioButtonSVG_2.isChecked():
+            Pathname = saveFile(self.parent(), 'svg')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.SVGExporter(self.view.scene())
+            exporter.export(Pathname)
+
+        Msg = 'You figure has been exported to ' + Pathname + '!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def makeColors(self, n_color, plate_name):
         try:    # continuous colors
@@ -1211,6 +1230,7 @@ class HistGramDialog(QtWidgets.QDialog):
         
         self.ui.lineEdit.setFixedHeight(25)
         self.ui.pushButtonAddMore.clicked.connect(self.addLineEdit)
+        self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
 
         if system() == 'Windows':
@@ -1233,6 +1253,24 @@ class HistGramDialog(QtWidgets.QDialog):
                                "QLineEdit{font-size:18px;}"
                                "QTreeWidget{font-size:18px;}"
                                "QSpinBox{font-size:18px;}")
+
+    def exportFigure(self):
+        if self.ui.radioButtonPNG.isChecked():
+            Pathname = saveFile(self.parent(), 'png')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.ImageExporter(self.view.scene())
+            exporter.export(Pathname)
+
+        if self.ui.radioButtonSVG.isChecked():
+            Pathname = saveFile(self.parent(), 'svg')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.SVGExporter(self.view.scene())
+            exporter.export(Pathname)
+
+        Msg = 'You figure has been exported to ' + Pathname + '!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def addLineEdit(self):
         widgetCount = self.ui.FeatureLayout.count()
@@ -5914,7 +5952,6 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 return
             exporter = pg.exporters.ImageExporter(self.view.scene())
             exporter.export(Pathname)
-            return
 
         if self.ui.radioButtonSVG.isChecked():
             Pathname = saveFile(self.parent(), 'svg')
@@ -5922,7 +5959,9 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 return
             exporter = pg.exporters.SVGExporter(self.view.scene())
             exporter.export(Pathname)
-            return
+
+        Msg = 'You figure has been exported to ' + Pathname + '!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def mouseModeSelect(self):
         self.w4.getViewBox().setMouseMode(ViewBox.SelectMode)
