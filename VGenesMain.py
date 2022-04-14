@@ -1141,20 +1141,14 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
                 meanMM.append(my_meanMM)
             
             # error bar
-            err = pg.ErrorBarItem(x=numpy.array(range(len(ordered_group))), y=numpy.array(meanMM),
-                                  height=numpy.array(halfErrorBarLen), beam=0.5, pen={'color': 'w', 'width': 2})
+            err = pg.ErrorBarItem(x=numpy.array(range(len(ordered_group))), y=numpy.array(meanMM),height=numpy.array(halfErrorBarLen), beam=0.5, pen={'color': 'w', 'width': 2})
             myplot.addItem(err)
-            
             # box
-            bar = pg.BarGraphItem(x=numpy.array(range(len(ordered_group))), y0=numpy.array(Q1), height=numpy.array(IQR),
-                                  width=0.5, brush=0.4)
+            bar = pg.BarGraphItem(x=numpy.array(range(len(ordered_group))), y0=numpy.array(Q1), height=numpy.array(IQR),width=0.5, brush=0.6)
             myplot.addItem(bar)
-            
             # madian value
-            i = 0
-            for group in ordered_group:
+            for i in range(len(ordered_group)):
                 myplot.plot(x=[i - 0.25, i + 0.25], y=[median[i], median[i]], pen={'color': 'r', 'width': 4})
-                i += 1
 
         ## add scatter plots on top
         if self.ui.checkBoxDisplayScatter.isChecked():
@@ -1164,7 +1158,10 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
                 myplot.plot(x=xvals + i, y=data[group], pen=None, symbol='o', symbolBrush=pg.intColor(i, 6, maxValue=128))
                 i += 1
         
-        # asign group label on X axis, and limit the X range
+        # assign group label on X axis, and limit the X range
+        myplot.getAxis('bottom').setTicks([[(v, ordered_group[v]) for v in range(len(ordered_group)) ]])
+        myplot.getAxis('bottom').setLabel(self.ui.lineEditGroup.text())
+        myplot.getAxis('left').setLabel(self.ui.lineEditData.text())
 
     def initLineedit(self, lineEdit, items_list):
         # add auto complete
