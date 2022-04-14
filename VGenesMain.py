@@ -1020,6 +1020,7 @@ class HistGramDialog(QtWidgets.QDialog):
         self.ui = Ui_HistGramDialog()
         self.ui.setupUi(self)
         self.fields_name = []
+        self.vgenes = ''
 
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
@@ -1079,6 +1080,12 @@ class HistGramDialog(QtWidgets.QDialog):
         if featureNum > 4:
             colSize = 3
 
+        # plot all or selected
+        if self.ui.radioButtonChecked.isChecked():
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
+        else:
+            WHEREStatement = ' WHERE 1'
+
         # draw
         curCol = 0
         curRow = 0
@@ -1103,7 +1110,7 @@ class HistGramDialog(QtWidgets.QDialog):
                     # clean feature name
                     currentFeature = re.sub(r'\(.+', '', currentFeature)
                     # fetch data
-                    SQLStatement = 'SELECT ' + currentFeature + ' FROM vgenesDB'
+                    SQLStatement = 'SELECT ' + currentFeature + ' FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     # clean data
                     vals = []
@@ -25570,6 +25577,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         # open a dialog for settings
         self.myHistGramDialog = HistGramDialog()
         self.myHistGramDialog.DBFilename = DBFilename
+        self.myHistGramDialog.vgenes = self
         fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
         self.myHistGramDialog.fields_name = fields_name
         self.myHistGramDialog.initLineedit(self.myHistGramDialog.ui.lineEdit, fields_name)
