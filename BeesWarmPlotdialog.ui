@@ -44,6 +44,25 @@
         </property>
        </widget>
       </item>
+      <item row="8" column="1">
+       <widget class="QSlider" name="horizontalSliderRange">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>5</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>3</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
       <item row="2" column="0" colspan="2">
        <widget class="QCheckBox" name="checkBoxDisplayScatter">
         <property name="text">
@@ -64,6 +83,13 @@
         </property>
        </widget>
       </item>
+      <item row="8" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="text">
+         <string>Range</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QLineEdit" name="lineEditGroup"/>
       </item>
@@ -81,20 +107,7 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QComboBox" name="comboBoxColor"/>
-      </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEditData"/>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_2">
-        <property name="text">
-         <string>Group</string>
-        </property>
-       </widget>
-      </item>
-      <item row="6" column="1">
+      <item row="9" column="1">
        <spacer name="verticalSpacer_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -106,6 +119,86 @@
          </size>
         </property>
        </spacer>
+      </item>
+      <item row="4" column="1">
+       <widget class="QComboBox" name="comboBoxColor">
+        <item>
+         <property name="text">
+          <string>Paired</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Set2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Dark2</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>hls</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>rainbow</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>turbo</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>ManyColor1</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>ManyColor2</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="lineEditData"/>
+      </item>
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Group</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Size</string>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="1">
+       <widget class="QSlider" name="horizontalSliderSize">
+        <property name="minimum">
+         <number>1</number>
+        </property>
+        <property name="maximum">
+         <number>5</number>
+        </property>
+        <property name="pageStep">
+         <number>1</number>
+        </property>
+        <property name="value">
+         <number>3</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
@@ -121,7 +214,7 @@
      <property name="sizeHint" stdset="0">
       <size>
        <width>20</width>
-       <height>380</height>
+       <height>364</height>
       </size>
      </property>
     </spacer>

@@ -1049,6 +1049,21 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
                                "QTreeWidget{font-size:18px;}"
                                "QSpinBox{font-size:18px;}")
 
+    def makeColors(self, n_color, plate_name):
+        try:    # continuous colors
+            colors = sns.color_palette(plate_name, n_color)
+        except: # discrete colors
+            if plate_name == 'ManyColor1':
+                colors = sns.color_palette('Dark2', 8)
+                colors += sns.color_palette('Paired', n_color - 8)
+            if plate_name == 'ManyColor2':
+                colors = sns.color_palette('Set2', 8)
+                colors += sns.color_palette('Paired', n_color - 8)
+            else:
+                colors = sns.color_palette('Paired', n_color)
+
+        return colors
+
     def Draw(self):
         self.view.clear()
         # plot all or selected
@@ -1144,18 +1159,25 @@ class BeesWarmPlotDialog(QtWidgets.QDialog):
             err = pg.ErrorBarItem(x=numpy.array(range(len(ordered_group))), y=numpy.array(meanMM),height=numpy.array(halfErrorBarLen), beam=0.5, pen={'color': 'w', 'width': 2})
             myplot.addItem(err)
             # box
-            bar = pg.BarGraphItem(x=numpy.array(range(len(ordered_group))), y0=numpy.array(Q1), height=numpy.array(IQR),width=0.5, brush=0.6)
+            bar = pg.BarGraphItem(x=numpy.array(range(len(ordered_group))), y0=numpy.array(Q1), height=numpy.array(IQR),width=0.5, brush=0.2)
             myplot.addItem(bar)
             # madian value
             for i in range(len(ordered_group)):
                 myplot.plot(x=[i - 0.25, i + 0.25], y=[median[i], median[i]], pen={'color': 'r', 'width': 4})
 
         ## add scatter plots on top
+        n_color = len(ordered_group)
+        colors = self.makeColors(n_color, self.ui.comboBoxColor.currentText())
+        color_dict = {}
+        for i in range(len(ordered_group)):
+            cur_color = [x * 255 for x in colors[i]]
+            color_dict[ordered_group[i]] = cur_color
+
         if self.ui.checkBoxDisplayScatter.isChecked():
             i = 0
             for group in ordered_group:
-                xvals = (numpy.random.random(len(data[group])) - 0.5) * 0.2
-                myplot.plot(x=xvals + i, y=data[group], pen=None, symbol='o', symbolBrush=pg.intColor(i, 6, maxValue=128))
+                xvals = (numpy.random.random(len(data[group])) - 0.5) * self.ui.horizontalSliderRange.value() * 0.1
+                myplot.plot(x=xvals + i, y=data[group], pen=None, symbolSize = self.ui.horizontalSliderSize.value()*2, symbol='o', symbolBrush=pg.mkBrush(color_dict[group]))
                 i += 1
         
         # assign group label on X axis, and limit the X range
