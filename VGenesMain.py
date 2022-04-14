@@ -116,6 +116,7 @@ from ui_PatternSearchDialog import Ui_PatternSearchDialog
 from ui_PatternSearchResultDialog import Ui_PatternSearchResultDialog
 from ui_VDBMergeDialog import Ui_VDBMergeDialog
 from ui_HistGramdialog import Ui_HistGramDialog
+from ui_BeesWarmPlotdialog import Ui_BeesWarmPlotDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -1011,6 +1012,170 @@ class MarkRecordsDialog(QtWidgets.QDialog):
             return
         # send result out
         self.BatchSignal.emit(field_name, bigText)
+
+class BeesWarmPlotDialog(QtWidgets.QDialog):
+    BatchSignal = pyqtSignal(str, str)
+
+    def __init__(self):
+        super(BeesWarmPlotDialog, self).__init__()
+        self.ui = Ui_BeesWarmPlotDialog()
+        self.ui.setupUi(self)
+        self.fields_name = []
+        self.vgenes = ''
+
+        self.view = pg.GraphicsLayoutWidget()
+        self.ui.PlotVerticalLayout.addWidget(self.view)
+
+        self.ui.pushButtonDraw.clicked.connect(self.Draw)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def Draw(self):
+        self.view.clear()
+        # plot all or selected
+        if self.ui.radioButtonChecked.isChecked():
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
+        else:
+            WHEREStatement = ' WHERE 1'
+
+        # check figure type
+        if self.ui.checkBoxDisplayScatter.isChecked() or self.ui.checkBoxDisplayBar.isChecked():
+            pass
+        else:
+            Msg = 'Please at least plot something, either Scatter or Box, or both...'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        # check input (field names)
+        if self.ui.lineEditData.text() not in self.fields_name:
+            Msg = 'The data field name is not exist in your VGenes DB! Check your input!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+        if self.ui.lineEditGroup.text() not in self.fields_name:
+            Msg = 'The group field name is not exist in your VGenes DB! Check your input!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        # clean feature name
+        currentData = re.sub(r'\(.+', '', self.ui.lineEditData.text())
+        currentGroup = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
+
+        # fetch data
+        SQLStatement = 'SELECT ' + currentData + ',' + currentGroup + ' FROM vgenesDB' + WHEREStatement
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        # clean data
+        data = {}
+        for ele in DataIn:
+            try:
+                vals = float(ele[0])
+                if ele[1] in data.keys():
+                    data[ele[1]].append(vals)
+                else:
+                    data[ele[1]] = [vals]
+            except:
+                pass
+        ordered_group = list(data.keys())
+        ordered_group.sort()
+
+        # check group levels
+        if len(data.keys()) > 20:
+            question = 'Your group has ' + str(len(data.keys())) +  ' different levels, do you want to continue anyway?\n'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                pass
+            else:
+                return
+
+        # add plot item
+        myplot = PlotItem()
+        myplot.setTitle('Distribution of ' + currentData)
+        self.view.addItem(myplot)
+
+        ## Make bar graph
+        if self.ui.checkBoxDisplayBar.isChecked():
+            Q1 = []
+            Q3 = []
+            IQR = []
+            halfErrorBarLen = []
+            meanMM = []
+            median = []
+            for group in ordered_group:
+                my_Q1 = numpy.percentile(numpy.array(data[group]), 25)
+                my_median = numpy.percentile(numpy.array(data[group]), 50)
+                my_Q3 = numpy.percentile(numpy.array(data[group]), 75)
+                my_IQR = my_Q3 - my_Q1
+                my_min = my_Q1 - 1.5 * my_IQR
+                my_max = my_Q3 + 1.5 * my_IQR
+                if my_min < min(numpy.array(data[group])):
+                    my_min = min(numpy.array(data[group]))
+                if my_max > max(numpy.array(data[group])):
+                    my_max = max(numpy.array(data[group]))
+                my_meanMM = (my_max + my_min) / 2
+                my_halfBarLen = my_max - my_min
+
+                Q1.append(my_Q1)
+                median.append(my_median)
+                Q3.append(my_Q3)
+                IQR.append(my_IQR)
+                halfErrorBarLen.append(my_halfBarLen)
+                meanMM.append(my_meanMM)
+            
+            # error bar
+            err = pg.ErrorBarItem(x=numpy.array(range(len(ordered_group))), y=numpy.array(meanMM),
+                                  height=numpy.array(halfErrorBarLen), beam=0.5, pen={'color': 'w', 'width': 2})
+            myplot.addItem(err)
+            
+            # box
+            bar = pg.BarGraphItem(x=numpy.array(range(len(ordered_group))), y0=numpy.array(Q1), height=numpy.array(IQR),
+                                  width=0.5, brush=0.4)
+            myplot.addItem(bar)
+            
+            # madian value
+            i = 0
+            for group in ordered_group:
+                myplot.plot(x=[i - 0.25, i + 0.25], y=[median[i], median[i]], pen={'color': 'r', 'width': 4})
+                i += 1
+
+        ## add scatter plots on top
+        if self.ui.checkBoxDisplayScatter.isChecked():
+            i = 0
+            for group in ordered_group:
+                xvals = (numpy.random.random(len(data[group])) - 0.5) * 0.2
+                myplot.plot(x=xvals + i, y=data[group], pen=None, symbol='o', symbolBrush=pg.intColor(i, 6, maxValue=128))
+                i += 1
+        
+        # asign group label on X axis, and limit the X range
+
+    def initLineedit(self, lineEdit, items_list):
+        # add auto complete
+        self.completer = QCompleter(items_list)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        # set match mode
+        self.completer.setFilterMode(Qt.MatchContains)
+        # set complete mode
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        # set QCompleter for lineEdit
+        lineEdit.setCompleter(self.completer)
 
 class HistGramDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(str, str)
@@ -25582,6 +25747,18 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myHistGramDialog.fields_name = fields_name
         self.myHistGramDialog.initLineedit(self.myHistGramDialog.ui.lineEdit, fields_name)
         self.myHistGramDialog.show()
+
+    @pyqtSlot()
+    def on_pushButtonBoxplotViewer_clicked(self):
+        # open a dialog for settings
+        self.myBeesWarmPlotDialog = BeesWarmPlotDialog()
+        self.myBeesWarmPlotDialog.DBFilename = DBFilename
+        self.myBeesWarmPlotDialog.vgenes = self
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myBeesWarmPlotDialog.fields_name = fields_name
+        self.myBeesWarmPlotDialog.initLineedit(self.myBeesWarmPlotDialog.ui.lineEditData, fields_name)
+        self.myBeesWarmPlotDialog.initLineedit(self.myBeesWarmPlotDialog.ui.lineEditGroup, fields_name)
+        self.myBeesWarmPlotDialog.show()
 
     def updateSelectionFromDialog(self, data):
         self.CheckedRecords = data
