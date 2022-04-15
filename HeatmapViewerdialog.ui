@@ -24,7 +24,7 @@
      </property>
      <property name="maximumSize">
       <size>
-       <width>250</width>
+       <width>350</width>
        <height>16777215</height>
       </size>
      </property>
@@ -37,7 +37,7 @@
       <string>Features for plots</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="4" column="1">
+      <item row="5" column="1">
        <widget class="QComboBox" name="comboBoxColor">
         <property name="minimumSize">
          <size>
@@ -87,21 +87,21 @@
         </item>
        </widget>
       </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>Color</string>
         </property>
        </widget>
       </item>
-      <item row="3" column="0" colspan="2">
+      <item row="4" column="0" colspan="2">
        <widget class="QLineEdit" name="lineEditGroup"/>
       </item>
-      <item row="1" column="0" colspan="2">
+      <item row="2" column="0" colspan="2">
        <widget class="QTableWidget" name="tableWidget">
         <property name="minimumSize">
          <size>
-          <width>0</width>
+          <width>300</width>
           <height>300</height>
          </size>
         </property>
@@ -114,17 +114,24 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <widget class="QLabel" name="label_2">
         <property name="text">
          <string>Order records by:</string>
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="6" column="0" colspan="2">
        <widget class="QRadioButton" name="radioButtonChecked">
         <property name="text">
          <string>only plot my checked records</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="2">
+       <widget class="QCheckBox" name="checkBoxAll">
+        <property name="text">
+         <string>Check all</string>
         </property>
        </widget>
       </item>
@@ -138,7 +145,7 @@
     <widget class="QGroupBox" name="groupBox_2">
      <property name="maximumSize">
       <size>
-       <width>250</width>
+       <width>350</width>
        <height>16777215</height>
       </size>
      </property>

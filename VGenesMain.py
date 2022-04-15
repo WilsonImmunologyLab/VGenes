@@ -1029,7 +1029,8 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
 
         self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
-
+        self.ui.checkBoxAll.clicked.connect(self.checkAll)
+        
         if system() == 'Windows':
             # set style for windows
             self.setStyleSheet("QLabel{font-size:18px;}"
@@ -1050,6 +1051,23 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                                "QLineEdit{font-size:18px;}"
                                "QTreeWidget{font-size:18px;}"
                                "QSpinBox{font-size:18px;}")
+
+    def updateText(self):
+        sender_widget = self.sender()
+        if sender_widget.isChecked():
+            self.ui.tableWidget.item(sender_widget.row, 0).setData(Qt.DisplayRole, 1)
+        else:
+            self.ui.tableWidget.item(sender_widget.row, 0).setData(Qt.DisplayRole, 0)
+
+    def checkAll(self):
+        rowCount = self.ui.tableWidget.rowCount()
+        for row in range(rowCount):
+            if self.ui.checkBoxAll.isChecked():
+                self.ui.tableWidget.cellWidget(row, 0).setChecked(True)
+                self.ui.tableWidget.item(row, 0).setText('1')
+            else:
+                self.ui.tableWidget.cellWidget(row, 0).setChecked(False)
+                self.ui.tableWidget.item(row, 0).setText('0')
 
     def sortTable(self, index):
         self.ui.tableWidget.sortByColumn(index, self.ui.tableWidget.horizontalHeader().sortIndicatorOrder())
@@ -1102,16 +1120,19 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 checkedFeatures.append(featureText)
         
         # fetch data
-        SQLStatement = 'SELECT ' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
+        SQLStatement = 'SELECT SeqName,' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         # clean data
         dataMatrix = []
         for ele in DataIn:
             try:
-                myArray = numpy.array(ele)
+                myArray = numpy.array(ele[1:])
                 myArray = myArray.astype(float)
-                dataMatrix.append(myArray)
+                if numpy.isnan(myArray).any():
+                    pass
+                else:
+                    dataMatrix.append(myArray)
             except:
                 pass
         
@@ -1125,13 +1146,15 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
             myplot.addItem(imgItem)
             
             # color bar
-            cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
+            try:
+                cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
+            except:
+                cmap = pg.colormap.get(self.ui.comboBoxColor.currentText(), source='matplotlib', skipCache=True)
             bar = pg.ColorBarItem(
                 values=(dataMatrix.min(), dataMatrix.max()),
                 colorMap=cmap,
                 label='horizontal color bar',
                 limits=(0, None),
-                rounding=1000,
                 orientation='h',
                 pen='#8888FF', hoverPen='#EEEEFF', hoverBrush='#EEEEFF80'
             )
@@ -25987,12 +26010,17 @@ class VGenesForm(QtWidgets.QMainWindow):
             featureName = FieldList[i] + '(' + RealNameList[i] + ')'
             myCheckbox = QCheckBox()
             myCheckbox.setChecked(False)
+            myCheckbox.row = i
+            myCheckbox.stateChanged.connect(self.myHeatmapViewerDialog.updateText)
             self.myHeatmapViewerDialog.ui.tableWidget.setCellWidget(i,0,myCheckbox)
+            unit0 = QTableWidgetItem('')
+            self.myHeatmapViewerDialog.ui.tableWidget.setItem(i, 0, unit0)
             unit = QTableWidgetItem(featureName)
             self.myHeatmapViewerDialog.ui.tableWidget.setItem(i, 1, unit)
 
         self.myHeatmapViewerDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
         self.myHeatmapViewerDialog.ui.tableWidget.setColumnWidth(0,30)
+        self.myHeatmapViewerDialog.ui.tableWidget.verticalHeader().hide()
         # disable edit
         self.myHeatmapViewerDialog.ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
         # show sort indicator

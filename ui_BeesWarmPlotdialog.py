@@ -14,7 +14,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_BeesWarmPlotDialog(object):
     def setupUi(self, BeesWarmPlotDialog):
         BeesWarmPlotDialog.setObjectName("BeesWarmPlotDialog")
-        BeesWarmPlotDialog.resize(961, 748)
+        BeesWarmPlotDialog.resize(1059, 777)
         self.gridLayout = QtWidgets.QGridLayout(BeesWarmPlotDialog)
         self.gridLayout.setObjectName("gridLayout")
         spacerItem = QtWidgets.QSpacerItem(20, 274, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -67,6 +67,7 @@ class Ui_BeesWarmPlotDialog(object):
         self.lineEditGroup.setObjectName("lineEditGroup")
         self.gridLayout_2.addWidget(self.lineEditGroup, 1, 1, 1, 1)
         self.radioButtonChecked = QtWidgets.QRadioButton(self.groupBox)
+        self.radioButtonChecked.setAutoExclusive(False)
         self.radioButtonChecked.setObjectName("radioButtonChecked")
         self.gridLayout_2.addWidget(self.radioButtonChecked, 6, 0, 1, 2)
         self.lineEditData = QtWidgets.QLineEdit(self.groupBox)
