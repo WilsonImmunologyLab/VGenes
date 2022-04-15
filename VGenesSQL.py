@@ -1403,7 +1403,7 @@ def MakeSQLStatement(self, fields, SeqName):
     return SQLStatement
 
 def MakeSQLStatementNew(self, fields, SeqName):
-    checkedProjects, checkedGroups, checkedSubGroups, checkedkids = self.getTreeCheckedChild()
+    checkedkids = self.CheckedRecords
 
     SQLStatement = 'SELECT '
     SQLStatement_all = ''

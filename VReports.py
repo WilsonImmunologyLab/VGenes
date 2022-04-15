@@ -305,7 +305,6 @@ class HCLC_thread(QThread):
                     sign = 1
         self.HCLC_finish.emit([sign, Msg])
 
-
 def StandardReports(self, option, SequenceName, DBFilename):
     import os
     # first get list of seqs and info as tuple from DB:
@@ -318,13 +317,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
         '''
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -404,13 +401,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -445,13 +440,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -485,13 +478,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -525,13 +516,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
     elif option == 'FASTA raw Nucleotide sequences':
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -568,13 +557,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
         '''
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -892,13 +879,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -1042,13 +1027,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -1166,13 +1149,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -1367,13 +1348,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         if len(selected_list) == 0:
             question = 'You did not select any records, export all?'
@@ -1407,13 +1386,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -1465,8 +1442,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         if self.ui.checkBoxAll.isChecked():
             listItems = []
         else:
-            listItems = self.getTreeCheckedChild()
-            listItems = listItems[3]
+            listItems = self.CheckedRecords
             if len(listItems) == 0:
                 pass
             else:
@@ -1545,13 +1521,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
     elif option == 'Count AA mutations':
         if self.ui.tabWidget.currentIndex() == 11:
             if len(self.AntibodyCandidates) == 0:
-                selected_list = self.getTreeCheckedChild()
-                selected_list = selected_list[3]
+                selected_list = self.CheckedRecords
             else:
                 selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -1664,8 +1638,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
             self.ShowVGenesText(Pathname)
     elif option == 'Sequence for GibsonClone':
         if len(self.AntibodyCandidates) == 0:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
         else:
             selected_list = self.AntibodyCandidates
 
@@ -1776,8 +1749,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.myGibsonDialog.show()
     elif option == 'CSV format customized fields':
         if len(self.AntibodyCandidates) == 0:
-            selected_list = self.getTreeCheckedChild()
-            selected_list = selected_list[3]
+            selected_list = self.CheckedRecords
         else:
             selected_list = self.AntibodyCandidates
 
