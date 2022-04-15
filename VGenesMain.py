@@ -117,6 +117,7 @@ from ui_PatternSearchResultDialog import Ui_PatternSearchResultDialog
 from ui_VDBMergeDialog import Ui_VDBMergeDialog
 from ui_HistGramdialog import Ui_HistGramDialog
 from ui_BeesWarmPlotdialog import Ui_BeesWarmPlotDialog
+from ui_HeatmapViewerdialog import Ui_HeatmapViewerDialog
 from VGenesProgressBar import ui_ProgressBar
 # from VGenesPYQTSqL import EditableSqlModel, initializeModel , createConnection
 
@@ -1012,6 +1013,150 @@ class MarkRecordsDialog(QtWidgets.QDialog):
             return
         # send result out
         self.BatchSignal.emit(field_name, bigText)
+
+class HeatmapViewerDialog(QtWidgets.QDialog):
+    BatchSignal = pyqtSignal(str, str)
+
+    def __init__(self):
+        super(HeatmapViewerDialog, self).__init__()
+        self.ui = Ui_HeatmapViewerDialog()
+        self.ui.setupUi(self)
+        self.fields_name = []
+        self.vgenes = ''
+
+        self.view = pg.GraphicsLayoutWidget()
+        self.ui.PlotVerticalLayout.addWidget(self.view)
+
+        self.ui.pushButtonExport.clicked.connect(self.exportFigure)
+        self.ui.pushButtonDraw.clicked.connect(self.Draw)
+
+        if system() == 'Windows':
+            # set style for windows
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}")
+
+    def sortTable(self, index):
+        self.ui.tableWidget.sortByColumn(index, self.ui.tableWidget.horizontalHeader().sortIndicatorOrder())
+
+    def exportFigure(self):
+        if self.ui.radioButtonPNG.isChecked():
+            Pathname = saveFile(self.parent(), 'png')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.ImageExporter(self.view.scene())
+            exporter.export(Pathname)
+
+        if self.ui.radioButtonSVG.isChecked():
+            Pathname = saveFile(self.parent(), 'svg')
+            if Pathname == None:
+                return
+            exporter = pg.exporters.SVGExporter(self.view.scene())
+            exporter.export(Pathname)
+
+        Msg = 'You figure has been exported to ' + Pathname + '!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+    def Draw(self):
+        self.view.clear()
+        # plot all or selected
+        if self.ui.radioButtonChecked.isChecked():
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
+        else:
+            WHEREStatement = ' WHERE 1'
+
+        # cell group/order by:
+        ORDERStatement = ' ORDER BY SeqName'
+        xLabel = 'Cells'
+        if self.ui.lineEditGroup.text() != '':
+            if self.ui.lineEditGroup.text() not in self.fields_name:
+                Msg = 'Your order factor is not in VGenes DB! Will order cells by their names!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            else:
+                group_name = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
+                ORDERStatement = ' ORDER BY ' + group_name
+                xLabel = 'Cells, ordered by ' + group_name
+
+        # get selected feature names
+        checkedFeatures = []
+        rowCount = self.ui.tableWidget.rowCount()
+        for row in range(rowCount):
+            if self.ui.tableWidget.cellWidget(row, 0).isChecked():
+                featureText = self.ui.tableWidget.item(row, 1).text()
+                featureText = re.sub(r'\(.+', '', featureText)
+                checkedFeatures.append(featureText)
+        
+        # fetch data
+        SQLStatement = 'SELECT ' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        # clean data
+        dataMatrix = []
+        for ele in DataIn:
+            try:
+                myArray = numpy.array(ele)
+                myArray = myArray.astype(float)
+                dataMatrix.append(myArray)
+            except:
+                pass
+        
+        if len(dataMatrix) > 0:
+            # add plot item
+            dataMatrix = numpy.array(dataMatrix)
+            myplot = PlotItem()
+            myplot.setTitle('Heatmap')
+            self.view.addItem(myplot)
+            imgItem = pg.ImageItem(image=dataMatrix)
+            myplot.addItem(imgItem)
+            
+            # color bar
+            cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
+            bar = pg.ColorBarItem(
+                values=(dataMatrix.min(), dataMatrix.max()),
+                colorMap=cmap,
+                label='horizontal color bar',
+                limits=(0, None),
+                rounding=1000,
+                orientation='h',
+                pen='#8888FF', hoverPen='#EEEEFF', hoverBrush='#EEEEFF80'
+            )
+            bar.setImageItem(imgItem, insert_in=myplot)
+            
+            # annotate Y axis label
+            myplot.getAxis('left').setTicks([[(v, checkedFeatures[v]) for v in range(len(checkedFeatures))]])
+            myplot.getAxis('left').setLabel('Features')
+            myplot.getAxis('bottom').setLabel(xLabel)
+            
+        else:
+            Msg = 'There is no records lefe after remove all non-numerical values!\n' \
+                  'Some of your features maybe non-numerical! Removed them and try again!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+    def initLineedit(self, lineEdit, items_list):
+        # add auto complete
+        self.completer = QCompleter(items_list)
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+        # set match mode
+        self.completer.setFilterMode(Qt.MatchContains)
+        # set complete mode
+        self.completer.setCompletionMode(QCompleter.PopupCompletion)
+        # set QCompleter for lineEdit
+        lineEdit.setCompleter(self.completer)
 
 class BeesWarmPlotDialog(QtWidgets.QDialog):
     BatchSignal = pyqtSignal(str, str)
@@ -25826,6 +25971,39 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myBeesWarmPlotDialog.initLineedit(self.myBeesWarmPlotDialog.ui.lineEditData, fields_name)
         self.myBeesWarmPlotDialog.initLineedit(self.myBeesWarmPlotDialog.ui.lineEditGroup, fields_name)
         self.myBeesWarmPlotDialog.show()
+
+    @pyqtSlot()
+    def on_pushButtonHeatmapViewer_clicked(self):
+        # open a dialog for settings
+        self.myHeatmapViewerDialog = HeatmapViewerDialog()
+        self.myHeatmapViewerDialog.DBFilename = DBFilename
+        self.myHeatmapViewerDialog.vgenes = self
+        # set up table
+        tableHeader = ['', 'Feature']
+        self.myHeatmapViewerDialog.ui.tableWidget.setColumnCount(len(tableHeader))
+        self.myHeatmapViewerDialog.ui.tableWidget.setRowCount(len(FieldList))
+        self.myHeatmapViewerDialog.ui.tableWidget.setHorizontalHeaderLabels(tableHeader)
+        for i in range(len(FieldList)):
+            featureName = FieldList[i] + '(' + RealNameList[i] + ')'
+            myCheckbox = QCheckBox()
+            myCheckbox.setChecked(False)
+            self.myHeatmapViewerDialog.ui.tableWidget.setCellWidget(i,0,myCheckbox)
+            unit = QTableWidgetItem(featureName)
+            self.myHeatmapViewerDialog.ui.tableWidget.setItem(i, 1, unit)
+
+        self.myHeatmapViewerDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
+        self.myHeatmapViewerDialog.ui.tableWidget.setColumnWidth(0,30)
+        # disable edit
+        self.myHeatmapViewerDialog.ui.tableWidget.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+        # show sort indicator
+        self.myHeatmapViewerDialog.ui.tableWidget.horizontalHeader().setSortIndicatorShown(True)
+        # connect sort indicator to slot function
+        self.myHeatmapViewerDialog.ui.tableWidget.horizontalHeader().sectionClicked.connect(self.myHeatmapViewerDialog.sortTable)
+
+        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        self.myHeatmapViewerDialog.fields_name = fields_name
+        self.myHeatmapViewerDialog.initLineedit(self.myHeatmapViewerDialog.ui.lineEditGroup, fields_name)
+        self.myHeatmapViewerDialog.show()
 
     def updateSelectionFromDialog(self, data):
         self.CheckedRecords = data
