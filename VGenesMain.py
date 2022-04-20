@@ -26658,6 +26658,8 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_btnExtractRecords_clicked(self):
+        self.on_actionRecordToNew_triggered()
+        '''
         global DBFilename
         global temp_folder
 
@@ -26688,6 +26690,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         if answer == 'Yes':
             DBFilename = filename
             self.GOOpen(False)
+        '''
 
     @pyqtSlot()
     def on_action_Help_triggered(self):
