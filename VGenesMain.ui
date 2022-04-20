@@ -4760,50 +4760,6 @@ Edit</string>
              </property>
             </spacer>
            </item>
-           <item>
-            <widget class="QPushButton" name="btnMatchHL">
-             <property name="enabled">
-              <bool>true</bool>
-             </property>
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="minimumSize">
-              <size>
-               <width>0</width>
-               <height>0</height>
-              </size>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>50</height>
-              </size>
-             </property>
-             <property name="toolTip">
-              <string>Match HC/LC for selected sequence</string>
-             </property>
-             <property name="text">
-              <string>HC/LC</string>
-             </property>
-             <property name="icon">
-              <iconset resource="Resources/VgenesResources.qrc">
-               <normaloff>:/PNG-Icons/mAB_match.png</normaloff>:/PNG-Icons/mAB_match.png</iconset>
-             </property>
-             <property name="iconSize">
-              <size>
-               <width>25</width>
-               <height>25</height>
-              </size>
-             </property>
-             <property name="flat">
-              <bool>true</bool>
-             </property>
-            </widget>
-           </item>
           </layout>
          </widget>
         </item>

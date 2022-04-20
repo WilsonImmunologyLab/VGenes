@@ -472,6 +472,64 @@ class HCLC_thread(QThread):
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([sign, Msg, self.Pathname])
 
+class HCLC_pair_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list, list, str)
+
+    def __int__(self):
+        super(HCLC_thread, self).__init__()
+        self.DBFilename = ''
+        self.checkRecords = []
+
+    def run(self):
+        progress = 1
+        new_checks = []
+        
+        # if users checked any records, will search paired HC/LC for all checked records
+        if len(self.checkRecords) > 0:
+            ErrMsgType1 = ''
+            ErrMsgType2 = ''
+            ErrMsgType3 = ''
+            for item in self.checkRecords:
+                SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + item + '"'
+                DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+                barcode = DataIn[0][1]
+                if barcode == 'Blank10' or barcode == '':
+                    ErrMsgType1 += "Sequence " + item + "does not have barcode information!\n"
+                    continue
+                else:
+                    SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
+                    DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+                    i = len(DataIn) - 1
+                    if i == 0:
+                        ErrMsgType2 += "For " + item + ", did not find any Heavy/Light chain using same barcode!\n"
+                        continue
+                    else:
+                        ErrMsgType3 += "For " + item + ", find " + str(i) + " Heavy/Light chain using same barcode!\n"
+                        for record in DataIn:
+                            Seqname = record[0]
+                            if Seqname in self.checkRecords:
+                                pass
+                            else:
+                                new_checks.append(Seqname)
+
+                self.HCLC_progress.emit(progress, len(self.checkRecords), int(progress / len(self.checkRecords) * 100))
+                progress += 1
+                print(item)
+
+            ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
+            with open(ErlogFile, 'w') as currentFile:
+                currentFile.write('Running finished!\n')
+                currentFile.write('\nThe following records have paired HC/LC:\n')
+                currentFile.write(ErrMsgType3)
+                currentFile.write('\nThe following records do not have barcode information:\n')
+                currentFile.write(ErrMsgType1)
+                currentFile.write('\nThe following records do not have any paired HC/LC:\n')
+                currentFile.write(ErrMsgType2)
+
+        # send signal to VGenes
+        self.HCLC_finish.emit(self.checkRecords, new_checks, ErlogFile)
+
 class CopyRecord_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -14699,157 +14757,22 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionPairAndJump_triggered(self):
-        # step 1, get all checked sequences
-        #checkedItems = self.getTreeCheckedChild()
-        checkedItems = self.CheckedRecords
-        checkedItemsAll = checkedItems.copy()
-        
-        # step 2, pair HC/LCs for these sequences
-        # if users checked any records, will search paired HC/LC for all checked records
-        if len(checkedItems) > 0:
-            ErrMsgType1 = ''
-            ErrMsgType2 = ''
-            ErrMsgType3 = ''
-            for item in checkedItems:
-                SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + item + '"'
-                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                barcode = DataIn[0][1]
-                if barcode == 'Blank10' or barcode == '':
-                    ErrMsgType1 += "Sequence " + item + "does not have barcode information!\n"
-                    continue
-                else:
-                    SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
-                    DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                    i = len(DataIn) - 1
-                    if i == 0:
-                        ErrMsgType2 += "For " + item + ", did not find any Heavy/Light chain using same barcode!\n"
-                        continue
-                    else:
-                        ErrMsgType3 += "For " + item + ", find " + str(i) + " Heavy/Light chain using same barcode!\n"
-                        for record in DataIn:
-                            Seqname = record[0]
-                            if Seqname in checkedItemsAll:
-                                continue
-                            else:
-                                if self.ui.treeWidget.isEnabled():
-                                    found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                                    for record in found:
-                                        wasClicked = True
-                                        record.setCheckState(0, Qt.Checked)
-                                checkedItemsAll.append(Seqname)
-
-            self.match_tree_to_table()
-
-            ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
-            with open(ErlogFile, 'w') as currentFile:
-                currentFile.write('Running finished!\n')
-                currentFile.write('\nThe following records have paired HC/LC:\n')
-                currentFile.write(ErrMsgType3)
-                currentFile.write('\nThe following records do not have barcode information:\n')
-                currentFile.write(ErrMsgType1)
-                currentFile.write('\nThe following records do not have any paired HC/LC:\n')
-                currentFile.write(ErrMsgType2)
-            self.ShowVGenesText(ErlogFile)
-        # if users didn't check any records, will search paired HC/LC for current selection
+        listItems = self.CheckedRecords
+        if len(listItems) > 0:
+            pass
         else:
-            cur_seq_name = self.ui.txtName.toPlainText()
-            SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + cur_seq_name + '"'
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            barcode = DataIn[0][1]
-            if barcode == 'Blank10' or barcode == '':
-                QMessageBox.warning(self, 'Warning', 'Your barcode information is empty!',
-                                    QMessageBox.Ok,
-                                    QMessageBox.Ok)
-                return
+            msg = 'Please check some sequences to start!'
+            QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
 
-            SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            i = len(DataIn) - 1
-            if i == 0:
-                QMessageBox.warning(self, 'Warning', 'Did not find any Heavy/Light chain using same barcode!',
-                                    QMessageBox.Ok,
-                                    QMessageBox.Ok)
-                return
-            else:
-                for record in DataIn:
-                    if self.ui.treeWidget.isEnabled():
-                        Seqname = record[0]
-                        found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                        for record1 in found:
-                            wasClicked = True
-                            record1.setCheckState(0, Qt.Checked)
+        self.HCLC_Thread = HCLC_pair_thread(self)
+        self.HCLC_Thread.DBFilename = DBFilename
+        self.HCLC_Thread.checkRecords = listItems
+        self.HCLC_Thread.HCLC_progress.connect(self.result_display)
+        self.HCLC_Thread.HCLC_finish.connect(self.jump_to_HCLC)
+        self.HCLC_Thread.start()
 
-                self.match_tree_to_table()
-                QMessageBox.information(self, 'Information',
-                                        'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
-                                        QMessageBox.Ok,
-                                        QMessageBox.Ok)
-
-        # step 3, add them into HC/LC list
-        shared = list(set(checkedItemsAll).intersection(self.AntibodyCandidates))
-        novel_ele = list(set(checkedItemsAll).difference(self.AntibodyCandidates))
-        notice = 'Checked records'
-
-        # warn redundant sequences
-        if len(shared) > 0:
-            Msg = "Those sequences are already in the list:\n" + ", ".join(shared)
-            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-
-        # update Antibody Candidate list if there is new sequences
-        if len(novel_ele) > 0:
-            self.AntibodyCandidates = self.AntibodyCandidates + novel_ele
-
-            WhereState = 'SeqName IN ("' + '","'.join(novel_ele) + '")'
-
-            SQLStatement = 'SELECT SeqName,GeneType,ClonalPool,V1,D1,J1,TotalMuts,Isotype,Blank10 FROM vgenesDB WHERE ' + WhereState
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            for item in DataIn:
-                SeqName = item[0]
-                Genetype = item[1]
-                Clone = item[2]
-                Vgene = item[3]
-                Dgene = item[4]
-                Jgene = item[5]
-                TotalMuts = item[6]
-                Isotype = item[7]
-                barcode = item[8]
-
-                if Genetype in ['Heavy', 'Beta', 'Delta']:
-                    rowPosition = self.ui.tableWidgetHC.rowCount()
-                    self.ui.tableWidgetHC.insertRow(rowPosition)
-                    self.ui.tableWidgetHC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 4, QTableWidgetItem(Dgene))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 5, QTableWidgetItem(Jgene))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 6, QTableWidgetItem(TotalMuts))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 7, QTableWidgetItem(Isotype))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 8, QTableWidgetItem(barcode))
-                    self.ui.tableWidgetHC.setItem(rowPosition, 9, QTableWidgetItem(notice))
-                else:
-                    rowPosition = self.ui.tableWidgetLC.rowCount()
-                    self.ui.tableWidgetLC.insertRow(rowPosition)
-                    self.ui.tableWidgetLC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 4, QTableWidgetItem(Jgene))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 5, QTableWidgetItem(TotalMuts))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 6, QTableWidgetItem(Isotype))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 7, QTableWidgetItem(barcode))
-                    self.ui.tableWidgetLC.setItem(rowPosition, 8, QTableWidgetItem(notice))
-
-            self.ui.tableWidgetHC.resizeColumnsToContents()
-            self.ui.tableWidgetHC.horizontalHeader().setSortIndicatorShown(True)
-            self.ui.tableWidgetHC.horizontalHeader().sectionClicked.connect(self.sortHCtable)
-
-            self.ui.tableWidgetLC.resizeColumnsToContents()
-            self.ui.tableWidgetLC.horizontalHeader().setSortIndicatorShown(True)
-            self.ui.tableWidgetLC.horizontalHeader().sectionClicked.connect(self.sortLCtable)
-
-        # step 4, jump to HC/LC list
-        self.ui.tabWidget.setCurrentIndex(11)
+        self.progress = ProgressBar(self)
+        self.progress.show()
 
     @pyqtSlot()
     def on_pushButtonPairClone_clicked(self):
@@ -15154,9 +15077,24 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionmatchHCLC_triggered(self):
-        global wasClicked
+        listItems = self.CheckedRecords
+        if len(listItems) > 0:
+            pass
+        else:
+            msg = 'Please check some sequences to start!'
+            QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
 
-        #checkedItems = self.getTreeCheckedChild()
+        self.HCLC_Thread = HCLC_pair_thread(self)
+        self.HCLC_Thread.DBFilename = DBFilename
+        self.HCLC_Thread.checkRecords = listItems
+        self.HCLC_Thread.HCLC_progress.connect(self.result_display)
+        self.HCLC_Thread.HCLC_finish.connect(self.update_check_from_list)
+        self.HCLC_Thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
+        '''
         checkedItems = self.CheckedRecords
         checkedItemsAll = checkedItems.copy()
         # if users checked any records, will search paired HC/LC for all checked records
@@ -15240,127 +15178,109 @@ class VGenesForm(QtWidgets.QMainWindow):
                                     QMessageBox.Ok,
                                     QMessageBox.Ok)
 
-
-    @pyqtSlot()
-    def on_btnMatchHL_clicked(self):
         '''
-        cur_seq_name = self.ui.txtName.toPlainText()
-        SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + cur_seq_name + '"'
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        barcode = DataIn[0][1]
-        if barcode == 'Blank10' or barcode == '':
-            QMessageBox.warning(self, 'Warning', 'Your barcode information is empty!',
-                                QMessageBox.Ok,
-                                QMessageBox.Ok)
-            return
 
-        SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        i = len(DataIn) - 1
-        if i == 0:
-            QMessageBox.warning(self, 'Warning', 'Did not find any Heavy/Light chain using same barcode!',
-                                QMessageBox.Ok,
-                                QMessageBox.Ok)
-            return
-        else:
-            for record in DataIn:
-                Seqname = record[0]
+    def update_check_from_list(self, old_list, new_list, error_file):
+        # close ProgressBar
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
+        # update the checked list
+        self.CheckedRecords = self.CheckedRecords + new_list
+        # update tree checks if the tree is enabled
+        if self.ui.treeWidget.isEnabled():
+            for Seqname in new_list:
                 found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
                 for record in found:
-                    wasClicked = True
                     record.setCheckState(0, Qt.Checked)
+        # open log file
+        self.ShowVGenesText(error_file)
 
-            self.match_tree_to_table()
+    def jump_to_HCLC(self, old_list, new_list, error_file):
+        # close ProgressBar
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
+        # update the checked list
+        self.CheckedRecords = self.CheckedRecords + new_list
+        # update tree checks if the tree is enabled
+        if self.ui.treeWidget.isEnabled():
+            for Seqname in new_list:
+                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
+                for record in found:
+                    record.setCheckState(0, Qt.Checked)
+        # open log file
+        self.ShowVGenesText(error_file)
 
-            QMessageBox.information(self, 'Information', 'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
-                                QMessageBox.Ok,
-                                QMessageBox.Ok)
-        '''
-        global wasClicked
+        # add them into HC/LC list
+        shared = list(set(self.CheckedRecords).intersection(self.AntibodyCandidates))
+        novel_ele = list(set(self.CheckedRecords).difference(self.AntibodyCandidates))
+        notice = 'Checked records'
 
-        #checkedItems = self.getTreeCheckedChild()
-        checkedItems = self.CheckedRecords
-        checkedItemsAll = checkedItems.copy()
-        # if users checked any records, will search paired HC/LC for all checked records
-        if len(checkedItems) > 0:
-            ErrMsgType1 = ''
-            ErrMsgType2 = ''
-            ErrMsgType3 = ''
-            for item in checkedItems:
-                SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + item + '"'
-                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                barcode = DataIn[0][1]
-                if barcode == 'Blank10' or barcode == '':
-                    ErrMsgType1 += "Sequence " + item + "does not have barcode information!\n"
-                    continue
+        # warn redundant sequences
+        if len(shared) > 0:
+            Msg = "Those sequences are already in the list:\n" + ", ".join(shared)
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+        # update Antibody Candidate list if there is new sequences
+        if len(novel_ele) > 0:
+            self.AntibodyCandidates = self.AntibodyCandidates + novel_ele
+
+            WhereState = 'SeqName IN ("' + '","'.join(novel_ele) + '")'
+
+            SQLStatement = 'SELECT SeqName,GeneType,ClonalPool,V1,D1,J1,TotalMuts,Isotype,Blank10 FROM vgenesDB WHERE ' + WhereState
+            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            for item in DataIn:
+                SeqName = item[0]
+                Genetype = item[1]
+                Clone = item[2]
+                Vgene = item[3]
+                Dgene = item[4]
+                Jgene = item[5]
+                TotalMuts = item[6]
+                Isotype = item[7]
+                barcode = item[8]
+
+                if Genetype in ['Heavy', 'Beta', 'Delta']:
+                    rowPosition = self.ui.tableWidgetHC.rowCount()
+                    self.ui.tableWidgetHC.insertRow(rowPosition)
+                    self.ui.tableWidgetHC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 4, QTableWidgetItem(Dgene))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 5, QTableWidgetItem(Jgene))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 6, QTableWidgetItem(TotalMuts))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 7, QTableWidgetItem(Isotype))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 8, QTableWidgetItem(barcode))
+                    self.ui.tableWidgetHC.setItem(rowPosition, 9, QTableWidgetItem(notice))
                 else:
-                    SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
-                    DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                    i = len(DataIn) - 1
-                    if i == 0:
-                        ErrMsgType2 += "For " + item + ", did not find any Heavy/Light chain using same barcode!\n"
-                        continue
-                    else:
-                        ErrMsgType3 += "For " + item + ", find " + str(i) + " Heavy/Light chain using same barcode!\n"
-                        for record in DataIn:
-                            Seqname = record[0]
-                            if Seqname in checkedItemsAll:
-                                continue
-                            else:
-                                found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                                if self.ui.treeWidget.isEnabled():
-                                    for record in found:
-                                        wasClicked = True
-                                        record.setCheckState(0, Qt.Checked)
-                                checkedItemsAll.append(Seqname)
+                    rowPosition = self.ui.tableWidgetLC.rowCount()
+                    self.ui.tableWidgetLC.insertRow(rowPosition)
+                    self.ui.tableWidgetLC.setItem(rowPosition, 0, QTableWidgetItem(SeqName))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 1, QTableWidgetItem(Genetype))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 2, QTableWidgetItem(Clone))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 3, QTableWidgetItem(Vgene))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 4, QTableWidgetItem(Jgene))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 5, QTableWidgetItem(TotalMuts))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 6, QTableWidgetItem(Isotype))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 7, QTableWidgetItem(barcode))
+                    self.ui.tableWidgetLC.setItem(rowPosition, 8, QTableWidgetItem(notice))
 
-            self.match_tree_to_table()
+            self.ui.tableWidgetHC.resizeColumnsToContents()
+            self.ui.tableWidgetHC.horizontalHeader().setSortIndicatorShown(True)
+            self.ui.tableWidgetHC.horizontalHeader().sectionClicked.connect(self.sortHCtable)
 
-            ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
-            with open(ErlogFile, 'w') as currentFile:
-                currentFile.write('Running finished!\n')
-                currentFile.write('\nThese records have paired HC/LC:\n')
-                currentFile.write(ErrMsgType3)
-                currentFile.write('\nThese records do not have barcode information:\n')
-                currentFile.write(ErrMsgType1)
-                currentFile.write('\nThese records do not have any paired HC/LC:\n')
-                currentFile.write(ErrMsgType2)
-            self.ShowVGenesText(ErlogFile)
-        # if users didn't check any records, will search paired HC/LC for current selection
-        else:
-            cur_seq_name = self.ui.txtName.toPlainText()
-            SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + cur_seq_name + '"'
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            barcode = DataIn[0][1]
-            if barcode == 'Blank10' or barcode == '':
-                QMessageBox.warning(self, 'Warning', 'Your barcode information is empty!',
-                                    QMessageBox.Ok,
-                                    QMessageBox.Ok)
-                return
+            self.ui.tableWidgetLC.resizeColumnsToContents()
+            self.ui.tableWidgetLC.horizontalHeader().setSortIndicatorShown(True)
+            self.ui.tableWidgetLC.horizontalHeader().sectionClicked.connect(self.sortLCtable)
 
-            SQLStatement = 'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + barcode + '"'
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            i = len(DataIn) - 1
-            if i == 0:
-                QMessageBox.warning(self, 'Warning', 'Did not find any Heavy/Light chain using same barcode!',
-                                    QMessageBox.Ok,
-                                    QMessageBox.Ok)
-                return
-            else:
-                if self.ui.treeWidget.isEnabled():
-                    for record in DataIn:
-                        Seqname = record[0]
-                        found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
-                        for record1 in found:
-                            wasClicked = True
-                            record1.setCheckState(0, Qt.Checked)
-
-                self.match_tree_to_table()
-
-                QMessageBox.information(self, 'Information',
-                                        'Found and checked ' + str(i) + ' Heavy/Light chain using same barcode!',
-                                        QMessageBox.Ok,
-                                        QMessageBox.Ok)
+        # step 4, jump to HC/LC list
+        self.ui.tabWidget.setCurrentIndex(11)
 
     @pyqtSlot()
     def on_actionAlignment_triggered(self):
