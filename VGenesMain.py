@@ -22335,6 +22335,18 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myPyqtGraphDialog.show()
 
     @pyqtSlot()
+    def on_actionHistViewer_triggered(self):
+        self.on_pushButtonHistViewer_clicked()
+
+    @pyqtSlot()
+    def on_actionBoxPlotViewer_triggered(self):
+        self.on_pushButtonBoxplotViewer_clicked()
+
+    @pyqtSlot()
+    def on_actionHeatmapViewer_triggered(self):
+        self.on_pushButtonHeatmapViewer_clicked()
+
+    @pyqtSlot()
     def on_actionAnalyze_Mutations_triggered(self):
         import VMapHotspots
         # setItem(self, items, title):

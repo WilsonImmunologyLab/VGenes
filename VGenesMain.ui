@@ -11831,11 +11831,15 @@ Tree</string>
     <addaction name="actionaddABlist"/>
     <addaction name="actionSampling"/>
     <addaction name="separator"/>
+    <addaction name="actionpyqtGraph"/>
+    <addaction name="actionHistViewer"/>
+    <addaction name="actionBoxPlotViewer"/>
+    <addaction name="actionHeatmapViewer"/>
+    <addaction name="separator"/>
     <addaction name="actiontranslate"/>
     <addaction name="actionTestMutMap"/>
     <addaction name="actionStructure"/>
     <addaction name="actionBatchChangeName"/>
-    <addaction name="actionpyqtGraph"/>
     <addaction name="actionPatternSearch"/>
    </widget>
    <widget class="QMenu" name="menuHelp">
@@ -12703,6 +12707,33 @@ Tree</string>
   <action name="actionRecordToNew">
    <property name="text">
     <string>Create new VDB with checked records only</string>
+   </property>
+  </action>
+  <action name="actionHistViewer">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/hist.png</normaloff>:/PNG-Icons/hist.png</iconset>
+   </property>
+   <property name="text">
+    <string>Hist Viewer</string>
+   </property>
+  </action>
+  <action name="actionBoxPlotViewer">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/bar.png</normaloff>:/PNG-Icons/bar.png</iconset>
+   </property>
+   <property name="text">
+    <string>Box Plot Viewer</string>
+   </property>
+  </action>
+  <action name="actionHeatmapViewer">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/heat.png</normaloff>:/PNG-Icons/heat.png</iconset>
+   </property>
+   <property name="text">
+    <string>Heatmap Viewer</string>
    </property>
   </action>
  </widget>
