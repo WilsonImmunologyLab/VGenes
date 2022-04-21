@@ -15860,48 +15860,16 @@ class VGenesForm(QtWidgets.QMainWindow):
         seq_list = []
         for row in range(self.ui.tableWidgetHC.rowCount()):
             seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
-        WhereState = 'SeqName IN ("' + '","'.join(seq_list) + '")'
-        field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
-        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        DataSet = []
-        for item in DataIn:
-            SeqName = item[0]
-            Sequence = item[1]
-            SeqFrom = int(item[2])
-            SeqTo = int(item[14])
-            Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
-            Sequence = Sequence.upper()
-            EachIn = (
-            SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
-            item[11], item[12], item[13], item[14], item[15], item[16])
-            DataSet.append(EachIn)
-        # make HTML
-        ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
-        if ErrMsg != 'OK':
-            QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
-            if html_file == '':
-                return
-        # delete close window objects
-        del_list = []
-        for id, obj in VGenesTextWindows.items():
-            if obj.isVisible() == False:
-                del_list.append(id)
-        for id in del_list:
-            del_obj = VGenesTextWindows.pop(id)
 
-        # display
-        window_id = int(time.time() * 100)
-        VGenesTextWindows[window_id] = htmlDialog()
-        VGenesTextWindows[window_id].id = window_id
-        layout = QGridLayout(VGenesTextWindows[window_id])
-        view = QWebEngineView(self)
-        # view.load(QUrl("file://" + html_file))
-        url = QUrl.fromLocalFile(str(html_file))
-        view.load(url)
-        view.show()
-        layout.addWidget(view)
-        VGenesTextWindows[window_id].show()
+        self.Alignment_thread = Alignment_thread(self)
+        self.Alignment_thread.DBFilename = DBFilename
+        self.Alignment_thread.checkRecords = seq_list
+        self.Alignment_thread.HCLC_progress.connect(self.result_display)
+        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html)
+        self.Alignment_thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
 
     @pyqtSlot()
     def on_pushButtonAlignLC_clicked(self):
@@ -15916,48 +15884,16 @@ class VGenesForm(QtWidgets.QMainWindow):
         seq_list = []
         for row in range(self.ui.tableWidgetLC.rowCount()):
             seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
-        WhereState = 'SeqName IN ("' + '","'.join(seq_list) + '")'
-        field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
-        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        DataSet = []
-        for item in DataIn:
-            SeqName = item[0]
-            Sequence = item[1]
-            SeqFrom = int(item[2])
-            SeqTo = int(item[14])
-            Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
-            Sequence = Sequence.upper()
-            EachIn = (
-                SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
-                item[11], item[12], item[13], item[14], item[15], item[16])
-            DataSet.append(EachIn)
-        # make HTML
-        ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
-        if ErrMsg != 'OK':
-            QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
-            if html_file == '':
-                return
-        # delete close window objects
-        del_list = []
-        for id, obj in VGenesTextWindows.items():
-            if obj.isVisible() == False:
-                del_list.append(id)
-        for id in del_list:
-            del_obj = VGenesTextWindows.pop(id)
 
-        # display
-        window_id = int(time.time() * 100)
-        VGenesTextWindows[window_id] = htmlDialog()
-        VGenesTextWindows[window_id].id = window_id
-        layout = QGridLayout(VGenesTextWindows[window_id])
-        view = QWebEngineView(self)
-        # view.load(QUrl("file://" + html_file))
-        url = QUrl.fromLocalFile(str(html_file))
-        view.load(url)
-        view.show()
-        layout.addWidget(view)
-        VGenesTextWindows[window_id].show()
+        self.Alignment_thread = Alignment_thread(self)
+        self.Alignment_thread.DBFilename = DBFilename
+        self.Alignment_thread.checkRecords = seq_list
+        self.Alignment_thread.HCLC_progress.connect(self.result_display)
+        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html)
+        self.Alignment_thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
 
     @pyqtSlot()
     def on_pushButtonTreeHC_clicked(self):
