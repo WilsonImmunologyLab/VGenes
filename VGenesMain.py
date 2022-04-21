@@ -439,6 +439,193 @@ class Alignment_thread(QThread):
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([ErrMsg, html_file])
 
+class SeqSimilarity_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list)
+
+    def __int__(self):
+        super(SeqSimilarity_thread, self).__init__()
+        self.DBFilename = ''
+        self.checkRecords = []
+
+    def run(self):
+        # Step 1: Fetch data
+        self.HCLC_progress.emit(1, 4, 30)
+        WhereState = 'SeqName IN ("' + '","'.join(self.checkRecords) + '")'
+        field = 'SeqName,Sequence,FR1From,Jend,Blank7'
+        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        AAseqArray = []
+        NTseqArray = []
+        for item in DataIn:
+            SeqName = item[0]
+            Sequence = item[1]
+            SeqFrom = int(item[2])
+            SeqTo = int(item[3])
+            Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+            Sequence = Sequence.upper()
+            try:
+                ORF = int(item[4])
+            except:
+                ORF = 0
+
+            AASequence, msg = Translator(Sequence, ORF)
+            EachIn = (SeqName, Sequence)
+            AAEachIn = (SeqName, AASequence)
+            NTseqArray.append(EachIn)
+            AAseqArray.append(AAEachIn)
+
+        # Step 2: align sequenmce
+        self.HCLC_progress.emit(2, 4, 50)
+        NTseqArrayAlign = AlignSeqMuscle(NTseqArray, muscle_path, temp_folder)
+        AAseqArrayAlign = AlignSeqMuscle(AAseqArray, muscle_path, temp_folder)
+
+        # Step 3: calculate similar percent matrix
+        self.HCLC_progress.emit(3, 4, 70)
+        min_value = 80
+        NTdata = []
+        seq_names = []
+        for i in range(len(NTseqArrayAlign)):
+            seq_names.append(NTseqArrayAlign[i][0])
+            unit = [i, i, 100.00]
+            NTdata.append(unit)
+            for j in range(i + 1, len(NTseqArrayAlign)):
+                identPct = SequenceIdentity(NTseqArrayAlign[i][1], NTseqArrayAlign[j][1])
+                if identPct < min_value:
+                    min_value = identPct
+                unit = [i, j, round(identPct, 2)]
+                NTdata.append(unit)
+                unit = [j, i, round(identPct, 2)]
+                NTdata.append(unit)
+
+        AAdata = []
+        for i in range(len(AAseqArrayAlign)):
+            unit = [i, i, 100.00]
+            AAdata.append(unit)
+            for j in range(i + 1, len(AAseqArrayAlign)):
+                identPct = SequenceIdentity(AAseqArrayAlign[i][1], AAseqArrayAlign[j][1])
+                if identPct < min_value:
+                    min_value = identPct
+                unit = [i, j, round(identPct, 2)]
+                AAdata.append(unit)
+                unit = [j, i, round(identPct, 2)]
+                AAdata.append(unit)
+
+        xaxis_data = seq_names
+        yaxis_data = seq_names
+
+        # Step 4: render HTML NT
+        self.HCLC_progress.emit(4, 4, 90)
+        my_pyecharts = HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+        my_pyecharts.add_xaxis(xaxis_data)
+        my_pyecharts.add_yaxis(
+            "Sequence identity(%)",
+            yaxis_data,
+            NTdata,
+            label_opts=opts.LabelOpts(
+                is_show=True,
+                position="inside",
+                color='black',
+                font_weight=2,
+                formatter=JsCode("""
+                            function(params) {
+                                mydata = params.data;
+                                return mydata[2] + '%';
+                            }					
+                        """)
+            )
+        )
+        my_pyecharts.set_series_opts()
+        my_pyecharts.set_global_opts(
+            title_opts=opts.TitleOpts(title="Sequence similarity HeatMap\nLeft: NT, Right: AA"),
+            visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=100, range_color=['#ffffcc', '#006699']),
+            tooltip_opts=opts.TooltipOpts(
+                formatter=JsCode("""
+                            function(params) {
+                                mydata = params.data;
+                                return 'Seq1: ' + Seqdata[mydata[0]] + '<br>' + 'Seq2: ' + Seqdata[mydata[1]] + '<br>' + 'Similarity: ' + mydata[2] + '%';
+                            }	
+                        """)
+            ),
+            xaxis_opts=opts.AxisOpts(
+                type_="category",
+                axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
+                splitarea_opts=opts.SplitAreaOpts(is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1))
+            )
+        )
+
+        # render HTML AA
+        my_pyechartsAA = HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+        my_pyechartsAA.add_xaxis(xaxis_data)
+        my_pyechartsAA.add_yaxis(
+            "Sequence identity(%)",
+            yaxis_data,
+            AAdata,
+            label_opts=opts.LabelOpts(
+                is_show=True,
+                position="inside",
+                color='black',
+                font_weight=2,
+                formatter=JsCode("""
+                            function(params) {
+                                mydata = params.data;
+                                return mydata[2] + '%';
+                            }					
+                        """)
+            )
+        )
+        my_pyechartsAA.set_series_opts()
+        my_pyechartsAA.set_global_opts(
+            visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=100, range_color=['#ffffcc', '#006699']),
+            tooltip_opts=opts.TooltipOpts(
+                formatter=JsCode("""
+                                        function(params) {
+                                            mydata = params.data;
+                                            return 'Seq1: ' + Seqdata[mydata[0]] + '<br>' + 'Seq2: ' + Seqdata[mydata[1]] + '<br>' + 'Similarity: ' + mydata[2] + '%';
+                                        }	
+                                    """)
+            ),
+            xaxis_opts=opts.AxisOpts(
+                type_="category",
+                axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
+                splitarea_opts=opts.SplitAreaOpts(is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1))
+            )
+        )
+
+        grid = Grid()
+        grid.add(my_pyecharts, grid_opts=opts.GridOpts(pos_bottom="20%", pos_left="20%", pos_right="50%"))
+        grid.add(my_pyechartsAA, grid_opts=opts.GridOpts(pos_bottom="20%", pos_left="65%", pos_right="5%"))
+        time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+        html_path = os.path.join(temp_folder, time_stamp + '.html')
+        grid.render(path=html_path)
+
+        # modify HTML
+        file_handle = open(html_path, 'r')
+        lines = file_handle.readlines()
+        file_handle.close()
+        ## edit js line
+        js_line = '<script type="text/javascript" src="' + \
+                  os.path.join(working_prefix, 'Js', 'echarts.js') + '"></script>' + \
+                  '<script src="' + os.path.join(working_prefix, 'Js', 'jquery.js') + '"></script>'
+        SeqdataLine = '<script>Seqdata=["'
+        SeqdataLine += '","'.join(seq_names)
+        SeqdataLine += '"]</script>'
+        lines[5] = js_line + "\n" + SeqdataLine
+        ## edit style line
+        style_line = lines[9]
+        style_pos = style_line.find('style')
+        style_line = style_line[0:style_pos] + \
+                     'style="position: fixed; top: 0px; left: 5%;width:95%; height:600px;"></div>'
+        lines[9] = style_line
+        content = '\n'.join(lines)
+        file_handle = open(html_path, 'w')
+        file_handle.write(content)
+        file_handle.close()
+
+        # Step 5: send signal to VGenes
+        self.HCLC_finish.emit(['OK', html_path])
+
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -15331,186 +15518,16 @@ class VGenesForm(QtWidgets.QMainWindow):
                                 QMessageBox.Ok,
                                 QMessageBox.Ok)
             return
-        WhereState = 'SeqName IN ("' + '","'.join(listItems) + '")'
-        field = 'SeqName,Sequence,FR1From,Jend,Blank7'
-        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-        AAseqArray = []
-        NTseqArray = []
-        for item in DataIn:
-            SeqName = item[0]
-            Sequence = item[1]
-            SeqFrom = int(item[2])
-            SeqTo = int(item[3])
-            Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
-            Sequence = Sequence.upper()
-            try:
-                ORF = int(item[4])
-            except:
-                ORF = 0
+        self.SeqSimilarity_thread = SeqSimilarity_thread(self)
+        self.SeqSimilarity_thread.DBFilename = DBFilename
+        self.SeqSimilarity_thread.checkRecords = listItems
+        self.SeqSimilarity_thread.HCLC_progress.connect(self.result_display)
+        self.SeqSimilarity_thread.HCLC_finish.connect(self.handle_alignment_html)
+        self.SeqSimilarity_thread.start()
 
-            AASequence, msg = Translator(Sequence, ORF)
-            EachIn = (SeqName, Sequence)
-            AAEachIn = (SeqName, AASequence)
-            NTseqArray.append(EachIn)
-            AAseqArray.append(AAEachIn)
-
-        # align sequenmce
-        NTseqArrayAlign = AlignSeqMuscle(NTseqArray, muscle_path, temp_folder)
-        AAseqArrayAlign = AlignSeqMuscle(AAseqArray, muscle_path, temp_folder)
-
-        # calculate similar percent matrix
-        min_value = 80
-        NTdata = []
-        seq_names = []
-        for i in range(len(NTseqArrayAlign)):
-            seq_names.append(NTseqArrayAlign[i][0])
-            unit = [i, i, 100.00]
-            NTdata.append(unit)
-            for j in range(i + 1, len(NTseqArrayAlign)):
-                identPct = SequenceIdentity(NTseqArrayAlign[i][1], NTseqArrayAlign[j][1])
-                if identPct < min_value:
-                    min_value = identPct
-                unit = [i, j, round(identPct,2)]
-                NTdata.append(unit)
-                unit = [j, i, round(identPct,2)]
-                NTdata.append(unit)
-
-        AAdata = []
-        for i in range(len(AAseqArrayAlign)):
-            unit = [i, i, 100.00]
-            AAdata.append(unit)
-            for j in range(i + 1, len(AAseqArrayAlign)):
-                identPct = SequenceIdentity(AAseqArrayAlign[i][1], AAseqArrayAlign[j][1])
-                if identPct < min_value:
-                    min_value = identPct
-                unit = [i, j, round(identPct, 2)]
-                AAdata.append(unit)
-                unit = [j, i, round(identPct, 2)]
-                AAdata.append(unit)
-
-        xaxis_data = seq_names
-        yaxis_data = seq_names
-
-        # render HTML NT
-        my_pyecharts = HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-        my_pyecharts.add_xaxis(xaxis_data)
-        my_pyecharts.add_yaxis(
-            "Sequence identity(%)",
-            yaxis_data,
-            NTdata,
-            label_opts=opts.LabelOpts(
-                is_show=True,
-                position="inside",
-                color='black',
-                font_weight=2,
-                formatter=JsCode("""
-                    function(params) {
-                        mydata = params.data;
-                        return mydata[2] + '%';
-                    }					
-                """)
-            )
-        )
-        my_pyecharts.set_series_opts()
-        my_pyecharts.set_global_opts(
-            title_opts=opts.TitleOpts(title="Sequence similarity HeatMap\nLeft: NT, Right: AA"),
-            visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=100, range_color=['#ffffcc', '#006699']),
-            tooltip_opts=opts.TooltipOpts(
-                formatter=JsCode("""
-                    function(params) {
-                        mydata = params.data;
-                        return 'Seq1: ' + Seqdata[mydata[0]] + '<br>' + 'Seq2: ' + Seqdata[mydata[1]] + '<br>' + 'Similarity: ' + mydata[2] + '%';
-                    }	
-                """)
-            ),
-            xaxis_opts=opts.AxisOpts(
-                type_="category",
-                axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
-                splitarea_opts=opts.SplitAreaOpts(is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1))
-            )
-        )
-
-        # render HTML AA
-        my_pyechartsAA = HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
-        my_pyechartsAA.add_xaxis(xaxis_data)
-        my_pyechartsAA.add_yaxis(
-            "Sequence identity(%)",
-            yaxis_data,
-            AAdata,
-            label_opts=opts.LabelOpts(
-                is_show=True,
-                position="inside",
-                color='black',
-                font_weight=2,
-                formatter=JsCode("""
-                    function(params) {
-                        mydata = params.data;
-                        return mydata[2] + '%';
-                    }					
-                """)
-            )
-        )
-        my_pyechartsAA.set_series_opts()
-        my_pyechartsAA.set_global_opts(
-            visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=100, range_color=['#ffffcc', '#006699']),
-            tooltip_opts=opts.TooltipOpts(
-                formatter=JsCode("""
-                                function(params) {
-                                    mydata = params.data;
-                                    return 'Seq1: ' + Seqdata[mydata[0]] + '<br>' + 'Seq2: ' + Seqdata[mydata[1]] + '<br>' + 'Similarity: ' + mydata[2] + '%';
-                                }	
-                            """)
-            ),
-            xaxis_opts=opts.AxisOpts(
-                type_="category",
-                axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
-                splitarea_opts=opts.SplitAreaOpts(is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1))
-            )
-        )
-
-        grid = Grid()
-        grid.add(my_pyecharts, grid_opts=opts.GridOpts(pos_bottom="20%", pos_left="20%", pos_right="50%"))
-        grid.add(my_pyechartsAA, grid_opts=opts.GridOpts(pos_bottom="20%", pos_left="65%", pos_right="5%"))
-        time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
-        html_path = os.path.join(temp_folder, time_stamp + '.html')
-        grid.render(path=html_path)
-
-        # modify HTML
-        file_handle = open(html_path, 'r')
-        lines = file_handle.readlines()
-        file_handle.close()
-        ## edit js line
-        js_line = '<script type="text/javascript" src="' + \
-                  os.path.join(working_prefix,  'Js', 'echarts.js') + '"></script>' + \
-                  '<script src="' + os.path.join(working_prefix,  'Js', 'jquery.js') + '"></script>'
-        SeqdataLine = '<script>Seqdata=["'
-        SeqdataLine += '","'.join(seq_names)
-        SeqdataLine += '"]</script>'
-        lines[5] = js_line + "\n" + SeqdataLine
-        ## edit style line
-        style_line = lines[9]
-        style_pos = style_line.find('style')
-        style_line = style_line[0:style_pos] + \
-                     'style="position: fixed; top: 0px; left: 5%;width:95%; height:600px;"></div>'
-        lines[9] = style_line
-        content = '\n'.join(lines)
-        file_handle = open(html_path, 'w')
-        file_handle.write(content)
-        file_handle.close()
-
-        # show local HTML
-        window_id = int(time.time() * 100)
-        VGenesTextWindows[window_id] = htmlDialog()
-        VGenesTextWindows[window_id].id = window_id
-        layout = QGridLayout(VGenesTextWindows[window_id])
-        view = QWebEngineView(self)
-        url = QUrl.fromLocalFile(str(html_path))
-        view.load(url)
-        view.show()
-        layout.addWidget(view)
-        VGenesTextWindows[window_id].show()
+        self.progress = ProgressBar(self)
+        self.progress.show()
 
     @pyqtSlot()
     def on_actionStructure_triggered(self):
