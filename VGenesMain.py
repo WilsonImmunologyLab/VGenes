@@ -26994,50 +26994,52 @@ class VGenesForm(QtWidgets.QMainWindow):
             item = self.ui.listWidgetCloneMember.item(i)
             member_names.append(item.text())
 
-        # fetch sequence data
-        DataSet = []
-        if n_member < 1:
-            msg = 'Please select(check) at one clone first!'
-            QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
-            return
-        else:
-            WhereState = 'SeqName IN ("' + '","'.join(member_names) + '")'
-            field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        self.Alignment_thread = Alignment_thread(self)
+        self.Alignment_thread.DBFilename = DBFilename
+        self.Alignment_thread.checkRecords = member_names
+        self.Alignment_thread.HCLC_progress.connect(self.result_display)
+        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html_clone)
+        self.Alignment_thread.start()
 
-            for item in DataIn:
-                SeqName = item[0]
-                Sequence = item[1]
-                SeqFrom = int(item[2])
-                SeqTo = int(item[14])
-                Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
-                Sequence = Sequence.upper()
-                EachIn = (SeqName, Sequence, item[2], item[3], item[4],item[5],item[6],item[7],item[8],item[9],item[10],item[11],item[12],item[13],item[14],item[15],item[16])
-                DataSet.append(EachIn)
+        self.progress = ProgressBar(self)
+        self.progress.show()
+    
+    def handle_alignment_html_clone(self, res):
+        global VGenesTextWindows
 
-        # make HTML
-        ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
-        if ErrMsg != 'OK':
-            QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
-            if html_file == '':
-                return
+        # close ProgressBar
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
+
+        # check results
+        if res[0] != 'OK':
+            QMessageBox.warning(self, 'Warning', res[0], QMessageBox.Ok, QMessageBox.Ok)
 
         # display
         if self.ui.radioButtonCloneMSA.isChecked():
+            # delete close window objects
+            del_list = []
+            for id, obj in VGenesTextWindows.items():
+                if obj.isVisible() == False:
+                    del_list.append(id)
+            for id in del_list:
+                del_obj = VGenesTextWindows.pop(id)
+
             window_id = int(time.time() * 100)
             VGenesTextWindows[window_id] = htmlDialog()
             VGenesTextWindows[window_id].id = window_id
             layout = QGridLayout(VGenesTextWindows[window_id])
             view = QWebEngineView(self)
-            # view.load(QUrl("file://" + html_file))
-            url = QUrl.fromLocalFile(str(html_file))
+            url = QUrl.fromLocalFile(str(res[1]))
             view.load(url)
             view.show()
             layout.addWidget(view)
             VGenesTextWindows[window_id].show()
         else:
-            url = QUrl.fromLocalFile(str(html_file))
+            url = QUrl.fromLocalFile(str(res[1]))
             self.ui.HTMLviewClone.load(url)
             self.ui.HTMLviewClone.html = ''
             self.ui.HTMLviewClone.show()
