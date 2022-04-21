@@ -403,6 +403,42 @@ class MyQList(QListWidget):
         except Exception as e:
             print(e)
 
+class Alignment_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list)
+
+    def __int__(self):
+        super(Alignment_thread, self).__init__()
+        self.DBFilename = ''
+        self.checkRecords = []
+
+    def run(self):
+        # Step 1: Fetch data
+        self.HCLC_progress.emit(1, 2, 30)
+        WhereState = 'SeqName IN ("' + '","'.join(self.checkRecords) + '")'
+        field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
+        DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
+        DataSet = []
+        for item in DataIn:
+            SeqName = item[0]
+            Sequence = item[1]
+            SeqFrom = int(item[2])
+            SeqTo = int(item[14])
+            Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
+            Sequence = Sequence.upper()
+            EachIn = (
+                SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
+                item[11], item[12], item[13], item[14], item[15], item[16])
+            DataSet.append(EachIn)
+
+        #Step 2: make HTML
+        self.HCLC_progress.emit(2, 2, 70)
+        ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
+
+        # Step 4: send signal to VGenes
+        self.HCLC_finish.emit([ErrMsg, html_file])
+
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -477,7 +513,7 @@ class HCLC_pair_thread(QThread):
     HCLC_finish = pyqtSignal(list, list, str)
 
     def __int__(self):
-        super(HCLC_thread, self).__init__()
+        super(HCLC_pair_thread, self).__init__()
         self.DBFilename = ''
         self.checkRecords = []
 
@@ -15702,37 +15738,37 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_actionAlignmentHTML_triggered(self):
-        global VGenesTextWindows
         # load data
-        #listItems = self.getTreeCheckedChild()
         listItems = self.CheckedRecords
         if len(listItems) == 0:
-            QMessageBox.warning(self, 'Warning', 'Please check sequence from active sequence panel!',
-                                QMessageBox.Ok,
-                                QMessageBox.Ok)
+            Msg = 'Please check sequence from active sequence panel!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
-        WhereState = 'SeqName IN ("' + '","'.join(listItems) + '")'
-        field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
-        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-        DataSet = []
-        for item in DataIn:
-            SeqName = item[0]
-            Sequence = item[1]
-            SeqFrom = int(item[2])
-            SeqTo = int(item[14])
-            Sequence = Sequence[SeqFrom - 1:SeqTo]  # only keep V(D)J section
-            Sequence = Sequence.upper()
-            EachIn = (
-            SeqName, Sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
-            item[11], item[12], item[13], item[14], item[15], item[16])
-            DataSet.append(EachIn)
-        # make HTML
-        ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
-        if ErrMsg != 'OK':
-            QMessageBox.warning(self, 'Warning', ErrMsg, QMessageBox.Ok, QMessageBox.Ok)
-            if html_file == '':
-                return
+
+        self.Alignment_thread = Alignment_thread(self)
+        self.Alignment_thread.DBFilename = DBFilename
+        self.Alignment_thread.checkRecords = listItems
+        self.Alignment_thread.HCLC_progress.connect(self.result_display)
+        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html)
+        self.Alignment_thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
+    def handle_alignment_html(self, res):
+        global VGenesTextWindows
+
+        # close ProgressBar
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
+        
+        # check results
+        if res[0] != 'OK':
+            QMessageBox.warning(self, 'Warning', res[0], QMessageBox.Ok, QMessageBox.Ok)
+
         # delete close window objects
         del_list = []
         for id, obj in VGenesTextWindows.items():
@@ -15742,6 +15778,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             del_obj = VGenesTextWindows.pop(id)
 
         # display
+        html_file = res[1]
         window_id = int(time.time() * 100)
         VGenesTextWindows[window_id] = htmlDialog()
         VGenesTextWindows[window_id].id = window_id
