@@ -15145,6 +15145,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             msg = 'Please check some sequences to start!'
             QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
 
         self.HCLC_Thread = HCLC_pair_thread(self)
         self.HCLC_Thread.DBFilename = DBFilename
@@ -15465,6 +15466,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             msg = 'Please check some sequences to start!'
             QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
+            return
 
         self.HCLC_Thread = HCLC_pair_thread(self)
         self.HCLC_Thread.DBFilename = DBFilename
