@@ -439,6 +439,165 @@ class Alignment_thread(QThread):
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([ErrMsg, html_file])
 
+class Tree_thread(QThread):
+    HCLC_progress = pyqtSignal(int, int, int)
+    HCLC_finish = pyqtSignal(list)
+
+    def __int__(self):
+        super(Tree_thread, self).__init__()
+        self.DBFilename = ''
+        self.checkRecords = []
+
+    def run(self):
+        # Step 1: Fetch data
+        self.HCLC_progress.emit(1, 6, 10)
+        WhereState = 'SeqName IN ("' + '","'.join(self.checkRecords) + '")'
+        field = 'SeqName,Sequence,GermlineSequence,Vbeg,Jend'
+        SQLStatement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + WhereState
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        # Step 2: write sequences into file
+        self.HCLC_progress.emit(2, 6, 30)
+        time_stamp = str(int(time.time() * 100))
+        this_folder = os.path.join(temp_folder, time_stamp)
+        cmd = 'mkdir ' + this_folder
+        try:
+            os.system(cmd)
+        except:
+            Msg = 'Fail to make temp folder!'
+            self.HCLC_finish.emit([Msg, ''])
+            return
+
+        # Step 3: alignment
+        self.HCLC_progress.emit(3, 6, 40)
+        aafilename = this_folder + "/input.fas"
+        outfilename = this_folder + "/alignment.fas"
+        treefilename = 'tree'
+        out_handle = open(aafilename, 'w')
+
+        ## make a consensus germline seq and write to file
+        GermSequences = [item[2] for item in DataIn]
+        GermConsensusSeq = CalConsensus(GermSequences)
+        ## if the length of those germline sequences are not same, which is unlikely
+        if GermConsensusSeq == 'bad':
+            print('align germline seq...')
+            ConRawfilename = this_folder + "/con_raw_input.fas"
+            Conoutfilename = this_folder + "/con_alignment.fas"
+            with open(ConRawfilename, 'w') as f:
+                for item in DataIn:
+                    f.write('>' + item[0] + '\n')
+                    f.write(item[2] + '\n')
+
+            # align all consensus seqs
+            cmd = muscle_path
+            cmd += " -in " + ConRawfilename + " -out " + Conoutfilename
+            try:
+                os.system(cmd)
+            except:
+                Msg = 'Fail to run muscle! Check your muscle path!'
+                self.HCLC_finish.emit([Msg, ''])
+                return
+
+            if os.path.exists(Conoutfilename) == False:
+                Msg = 'Fail to run muscle! Check your muscle path!'
+                self.HCLC_finish.emit([Msg, ''])
+                return
+
+            ConAli = ReadFasta(Conoutfilename)
+            GermSequences = [item[1] for item in ConAli]
+            GermConsensusSeq = CalConsensus(GermSequences)
+
+        out_handle.write('>Germline_consensus\n')
+        out_handle.write(GermConsensusSeq + '\n')
+        ## write sequences into file
+        for item in DataIn:
+            SeqName = item[0]
+            Sequence = item[1]
+            try:
+                Vbeg = int(item[3]) - 1
+            except:
+                Vbeg = 0
+
+            try:
+                Jend = int(item[4])
+            except:
+                Jend = len(Sequence)
+
+            VDJSequence = Sequence[Vbeg:Jend]
+
+            # parse seq name
+            SeqName = re.sub(r'[^\w\d\/\>]', '_', SeqName)
+            SeqName = re.sub(r'_+', '_', SeqName)
+            SeqName = SeqName.strip('_')
+
+            out_handle.write('>' + SeqName + '\n')
+            out_handle.write(VDJSequence + '\n')
+        out_handle.close()
+
+        # Step 4: alignment aiagn
+        self.HCLC_progress.emit(4, 6, 50)
+        cmd = muscle_path
+        cmd += " -in " + aafilename + " -out " + outfilename
+        try:
+            os.system(cmd)
+        except:
+            Msg = 'Fail to run muscle! Check your muscle path!'
+            self.HCLC_finish.emit([Msg, ''])
+            return
+
+        # Step 5: generate tree
+        self.HCLC_progress.emit(4, 6, 70)
+        # cmd = 'cd ' + this_folder + ';'
+        # cmd += raxml_path
+        # cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+        if system() == 'Windows':
+            cmd = 'cd ' + this_folder + ' & '
+            cmd += raxml_path
+            cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+        elif system() == 'Darwin':
+            cmd = 'cd ' + this_folder + ';'
+            cmd += raxml_path
+            cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+        elif system() == 'Linux':
+            cmd = 'cd ' + this_folder + ';'
+            cmd += raxml_path
+            cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+        else:
+            cmd = ''
+        os.system(cmd)
+        print("tree done!")
+
+        # Step 6: generate html page
+        self.HCLC_progress.emit(6, 6, 90)
+        treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
+        if os.path.exists(treefile):
+            pass
+        else:
+            Msg = 'Fail to generate tree!'
+            self.HCLC_finish.emit([Msg, ''])
+            return
+
+        f = open(treefile, 'r')
+        tree_str = f.readline()
+        f.close()
+        tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
+
+        out_html_file = os.path.join(this_folder, 'tree.html')
+        header_file = os.path.join(working_prefix, 'Data', 'template_raxml_tree.html')
+        shutil.copyfile(header_file, out_html_file)
+
+        foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+               '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+               'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+               '});\n</script>\n</body>\n</html>'
+        out_file_handle = open(out_html_file, 'a')
+        out_file_handle.write(tree_str)
+        out_file_handle.write(foot)
+        out_file_handle.close()
+
+        # Step 5: send signal to VGenes
+        self.HCLC_finish.emit(['OK', out_html_file])
+
 class SeqSimilarity_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -16240,7 +16399,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         clone_name = re.sub('Clone','',tmp[1])
 
         WHEREStatement = 'WHERE ClonalPool = "' + clone_name + '"'
-        SQLStatement = 'SELECT SeqName,Sequence,GermlineSequence,Vbeg,Jend FROM vgenesDB ' + WHEREStatement
+        SQLStatement = 'SELECT SeqName,ClonalPool FROM vgenesDB ' + WHEREStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         if len(DataIn) < 3:
@@ -16248,144 +16407,32 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        # write sequences into file
-        time_stamp = str(int(time.time() * 100))
-        this_folder = os.path.join(temp_folder, time_stamp)
-        cmd = 'mkdir ' + this_folder
+        listItems = [ele[0] for ele in DataIn]
+
+        self.Tree_thread = Tree_thread(self)
+        self.Tree_thread.DBFilename = DBFilename
+        self.Tree_thread.checkRecords = listItems
+        self.Tree_thread.HCLC_progress.connect(self.result_display)
+        self.Tree_thread.HCLC_finish.connect(self.handle_tree_html_clone)
+        self.Tree_thread.start()
+
+        self.progress = ProgressBar(self)
+        self.progress.show()
+
+    def handle_tree_html_clone(self, res):
+        global VGenesTextWindows
+
+        # close ProgressBar
         try:
-            os.system(cmd)
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
         except:
-            QMessageBox.warning(self, 'Warning', 'Fail to make temp folder!', QMessageBox.Ok,
-                                QMessageBox.Ok)
-            return
-
-        # alignment
-        aafilename = this_folder + "/input.fas"
-        outfilename = this_folder + "/alignment.fas"
-        treefilename = 'tree'
-        out_handle = open(aafilename, 'w')
-
-        # make a consensus germline seq and write to file
-        GermSequences = [item[2] for item in DataIn]
-        GermConsensusSeq = CalConsensus(GermSequences)
-        ## if the length of those germline sequences are not same, which is unlikely
-        if GermConsensusSeq == 'bad':
-            print('align germline seq...')
-            ConRawfilename = this_folder + "/con_raw_input.fas"
-            Conoutfilename = this_folder + "/con_alignment.fas"
-            with open(ConRawfilename, 'w') as f:
-                for item in DataIn:
-                    f.write('>' + item[0] + '\n')
-                    f.write(item[2] + '\n')
-
-            # align all consensus seqs
-            cmd = muscle_path
-            cmd += " -in " + ConRawfilename + " -out " + Conoutfilename
-            try:
-                os.system(cmd)
-            except:
-                Msg = 'Fail to run muscle! Check your muscle path!'
-                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-                return
-
-            if os.path.exists(Conoutfilename) == False:
-                Msg = 'Fail to run muscle! Check your muscle path!'
-                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-                return
-
-            ConAli = ReadFasta(Conoutfilename)
-            GermSequences = [item[1] for item in ConAli]
-            GermConsensusSeq = CalConsensus(GermSequences)
-
-        out_handle.write('>Germline_consensus\n')
-        out_handle.write(GermConsensusSeq + '\n')
-        # write sequences into file
-        for item in DataIn:
-            SeqName = item[0]
-            Sequence = item[1]
-            try:
-                Vbeg = int(item[3]) - 1
-            except:
-                Vbeg = 0
-
-            try:
-                Jend = int(item[4])
-            except:
-                Jend = len(Sequence)
-
-            VDJSequence = Sequence[Vbeg:Jend]
-
-            # parse seq name
-            SeqName = re.sub(r'[^\w\d\/\>]', '_', SeqName)
-            SeqName = re.sub(r'_+', '_', SeqName)
-            SeqName = SeqName.strip('_')
-
-            out_handle.write('>' + SeqName + '\n')
-            out_handle.write(VDJSequence + '\n')
-        out_handle.close()
-
-        # alignment
-        cmd = muscle_path
-        cmd += " -in " + aafilename + " -out " + outfilename
-        try:
-            os.system(cmd)
-        except:
-            QMessageBox.warning(self, 'Warning', 'Fail to run muscle! Check your muscle path!', QMessageBox.Ok,
-                                QMessageBox.Ok)
-            return
-
-        # generate tree
-        #cmd = 'cd ' + this_folder + ';'
-        #cmd += raxml_path
-        #cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
-        if system() == 'Windows':
-            cmd = 'cd ' + this_folder + ' & '
-            cmd += raxml_path
-            cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
-        elif system() == 'Darwin':
-            cmd = 'cd ' + this_folder + ';'
-            cmd += raxml_path
-            cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
-        elif system() == 'Linux':
-            cmd = 'cd ' + this_folder + ';'
-            cmd += raxml_path
-            cmd += ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
-        else:
-            cmd = ''
-
-        os.system(cmd)
-        print("tree done!")
-
-        # generate html page
-        treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
-        if os.path.exists(treefile):
             pass
-        else:
-            QMessageBox.warning(self, 'Warning', 'Fail to generate tree!', QMessageBox.Ok,
-                                QMessageBox.Ok)
-            ErlogFile = os.path.join(this_folder, 'RAxML_info.tree')
-            if os.path.exists(ErlogFile):
-                self.ShowVGenesText(ErlogFile)
+
+        if res[0] != 'OK':
+            QMessageBox.warning(self, 'Warning', res[0], QMessageBox.Ok, QMessageBox.Ok)
             return
-
-        f = open(treefile, 'r')
-        tree_str = f.readline()
-        f.close()
-        tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
-
-        out_html_file = os.path.join(this_folder, 'tree.html')
-        header_file = os.path.join(working_prefix, 'Data', 'template_raxml_tree.html')
-        shutil.copyfile(header_file, out_html_file)
-
-        foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
-               '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
-               'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
-               '});\n</script>\n</body>\n</html>'
-        out_file_handle = open(out_html_file, 'a')
-        out_file_handle.write(tree_str)
-        out_file_handle.write(foot)
-        out_file_handle.close()
-
+        
         if self.ui.radioButtonNewick.isChecked():
             # display
             window_id = int(time.time() * 100)
@@ -16393,8 +16440,8 @@ class VGenesForm(QtWidgets.QMainWindow):
             VGenesTextWindows[window_id].id = window_id
             layout = QGridLayout(VGenesTextWindows[window_id])
             view = QWebEngineView(self)
-            #view.load(QUrl("file://" + out_html_file))
-            url = QUrl.fromLocalFile(str(out_html_file))
+            # view.load(QUrl("file://" + out_html_file))
+            url = QUrl.fromLocalFile(str(res[1]))
             view.load(url)
             view.show()
             layout.addWidget(view)
@@ -16402,8 +16449,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             # display
             view = QWebEngineView()
-            #view.load(QUrl("file://" + out_html_file))
-            url = QUrl.fromLocalFile(str(out_html_file))
+            # view.load(QUrl("file://" + out_html_file))
+            url = QUrl.fromLocalFile(str(res[1]))
             view.load(url)
             view.show()
 
