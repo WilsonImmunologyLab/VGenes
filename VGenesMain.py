@@ -11815,19 +11815,33 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             barcodeDict = self.readBarcode(self.anno_path_name, self.type10x)
             IsoDict = self.readInfo(self.anno_path_name, self.type10x, 'c_gene')
 
+            if self.type10x == 'contig':
+                unique_barcode = list(Counter(barcodeDict.values()).keys())
+                barcode_dict = zip(unique_barcode, list(range(1, len(unique_barcode) + 1)))
+                barcode_dict = dict(barcode_dict)
+
             for record in IgBLASTAnalysis:
+                # add barcode info
                 if record[0] in barcodeDict.keys():
                     record[108] = barcodeDict[record[0]]
-
+                # add isotype info from 10X file
                 if record[0] in IsoDict.keys():
                     if len(IsoDict[record[0]]) > 3:
                         record[101] = isotypeTranslation(IsoDict[record[0]])
-
-                if self.rep2 == "byChain":
-                    rep2 = record[2][0]
+                # modify sequence name
+                if self.type10x == 'contig':
+                    tmp_name = re.sub(r'_contig.+', '', record[0])
+                    if tmp_name in barcode_dict.keys():
+                        record[0] = re.sub(tmp_name, str(barcode_dict[tmp_name]), record[0])
+                    if self.rep2 == "byChain":
+                        record[0] = re.sub('contig_', record[2][0], record[0])
                 else:
-                    rep2 = self.rep2
-                record[0] = reName(record[0], self.rep1, rep2, self.prefix)
+                    if self.rep2 == "byChain":
+                        rep2 = record[2][0]
+                    else:
+                        rep2 = self.rep2
+                    record[0] = reName(record[0], self.rep1, rep2, self.prefix)
+
         elif self.calling == 2:
             for record in IgBLASTAnalysis:
                 sampleName = record[0].split('_')[0]
@@ -31431,8 +31445,6 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
     start = time.time()
     # parse IgBlast out fmt 19
-    #with open(igblast_out_fmt19, 'r') as IGBLAST_fmt19:
-    #	result = csv.reader(IGBLAST_fmt19, delimiter="\t")
     line_id = 0
     bad_line = []
     for record in IgBlastOut_fmt19:
