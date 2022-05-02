@@ -365,12 +365,12 @@
            <widget class="QRadioButton" name="radioButtonLogY">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>60</width>
               <height>16777215</height>
              </size>
             </property>
             <property name="text">
-             <string> Log Y axis</string>
+             <string> LogY</string>
             </property>
             <property name="autoExclusive">
              <bool>false</bool>
@@ -381,12 +381,12 @@
            <widget class="QRadioButton" name="radioButtonLogX">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>60</width>
               <height>16777215</height>
              </size>
             </property>
             <property name="text">
-             <string> Log X axis</string>
+             <string> LogX</string>
             </property>
             <property name="autoExclusive">
              <bool>false</bool>
@@ -397,12 +397,25 @@
            <widget class="QRadioButton" name="radioButtonWhiteBG">
             <property name="maximumSize">
              <size>
-              <width>100</width>
+              <width>80</width>
               <height>16777215</height>
              </size>
             </property>
             <property name="text">
-             <string>White BG</string>
+             <string>BG Color</string>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QRadioButton" name="radioButton">
+            <property name="text">
+             <string>Border</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
             </property>
             <property name="autoExclusive">
              <bool>false</bool>

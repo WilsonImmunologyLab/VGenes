@@ -6858,10 +6858,19 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
         # clear plot and selection data
         self.w4.clear()
         self.w4.getViewBox().selectedPoints.clear()
-        
+
+        # determine the pen size
+        if self.ui.radioButton.isChecked():
+            penForDots = pg.mkPen('k', width=2)
+            if self.ui.spinBoxPointSize.value() < 5:
+                Msg = 'You are using a small dot size with dot border option on\nPlease uncheck "Border" box if you can not see any dots!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+        else:
+            penForDots = pg.mkPen(None)
+
         # add legend
         self.w4.addLegend(
-            pen=pg.mkPen('k', width=2),
+            pen=penForDots,
             brush=pg.mkBrush(0.8),
             labelTextColor='k',
             labelTextSize='12px'
@@ -6912,7 +6921,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 # make plot
                 s4 = pg.ScatterPlotItem(
                     size=self.ui.spinBoxPointSize.value(),
-                    pen=pg.mkPen('k', width=2),
+                    pen=penForDots,
                     brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
                     hoverSymbol='o',
@@ -6982,7 +6991,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                 # make plot
                 s4 = pg.ScatterPlotItem(
                     size=self.ui.spinBoxPointSize.value(),
-                    pen=pg.mkPen('k', width=2),
+                    pen=penForDots,
                     brush=pg.mkBrush(255, 255, 255, 20),
                     hoverable=True,
                     hoverSymbol='o',
@@ -7187,7 +7196,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
-                            pen=pg.mkPen('k', width=2),
+                            pen=penForDots,
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
                             hoverSymbol='o',
@@ -7348,7 +7357,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
-                            pen=pg.mkPen('k', width=2),
+                            pen=penForDots,
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
                             hoverSymbol='o',
@@ -7471,9 +7480,13 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                                 data_series2 = numpy.log1p(data_series2)
 
                             # make plot
+                            if self.ui.radioButton.isChecked():
+                                penSize = 0
+                            else:
+                                penSize = 2
                             s4 = pg.ScatterPlotItem(
                                 size=self.ui.spinBoxPointSize.value(),
-                                pen=pg.mkPen('k', width=2),
+                                pen=penForDots,
                                 brush=pg.mkBrush(255, 255, 255, 20),
                                 hoverable=True,
                                 hoverSymbol='o',
@@ -7503,7 +7516,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
-                            pen=pg.mkPen('k', width=2),
+                            pen=penForDots,
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
                             hoverSymbol='o',
@@ -7636,7 +7649,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                             # make plot
                             s4 = pg.ScatterPlotItem(
                                 size=self.ui.spinBoxPointSize.value(),
-                                pen=pg.mkPen('k', width=2),
+                                pen=penForDots,
                                 brush=pg.mkBrush(255, 255, 255, 20),
                                 hoverable=True,
                                 hoverSymbol='o',
@@ -7668,7 +7681,7 @@ class PyqtGraphDialog(QtWidgets.QDialog, Ui_QchartDialog):
                         # make plot
                         s4 = pg.ScatterPlotItem(
                             size=self.ui.spinBoxPointSize.value(),
-                            pen=pg.mkPen('k', width=2),
+                            pen=penForDots,
                             brush=pg.mkBrush(255, 255, 255, 20),
                             hoverable=True,
                             hoverSymbol='o',
