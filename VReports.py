@@ -158,7 +158,8 @@ class CSVRepAll_thread(QThread):
         fields = [i[0] for i in DataIn]
         field_names = [i[1] for i in DataIn]
 
-        SQLStatement = VGenesSQL.MakeSQLStatementNew(Vgenes, fields, SequenceName)
+        #SQLStatement = VGenesSQL.MakeSQLStatementNew(Vgenes, fields, SequenceName)
+        SQLStatement = 'SELECT * from vgenesDB'
         (dirname, filename) = os.path.split(DBFilename)
         filename = filename[:(len(filename) - 4)]
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)

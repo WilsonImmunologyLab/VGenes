@@ -12931,31 +12931,32 @@ class VDB_thread(QThread):
 
         # collect information, alter the DB structure
         for new_field in DF.columns:
-            # update table
-            SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-            max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
-            SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_field + " text"
-            SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
-                            'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_field + '", "' + new_field + \
-                            '", "Customized", "' + new_field + '", "yes", 9)'
-            try:
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
-            except:
-                msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
-                self.trigger.emit(msg)
-                return
+            if new_field not in RealNameList:
+                # update table
+                SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
+                max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+                SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_field + " text"
+                SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
+                                'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_field + '", "' + new_field + \
+                                '", "Customized", "' + new_field + '", "yes", 9)'
+                try:
+                    VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
+                except:
+                    msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
+                    self.trigger.emit(msg)
+                    return
 
-            try:
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
-            except:
-                msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
-                self.trigger.emit(msg)
-                return
+                try:
+                    VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+                except:
+                    msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+                    self.trigger.emit(msg)
+                    return
 
-            RealNameList.append(new_field)
-            FieldCommentList.append(new_field)
-            FieldTypeList.append('Customized')
-            FieldList.append(new_field)
+                RealNameList.append(new_field)
+                FieldCommentList.append(new_field)
+                FieldTypeList.append('Customized')
+                FieldList.append(new_field)
 
         # import data from VDBs
         print('import data from VDBs')
