@@ -1671,18 +1671,6 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
         else:
             WHEREStatement = ' WHERE 1'
 
-        # cell group/order by:
-        ORDERStatement = ' ORDER BY SeqName'
-        xLabel = 'Cells'
-        if self.ui.lineEditGroup.text() != '':
-            if self.ui.lineEditGroup.text() not in self.fields_name:
-                Msg = 'Your order factor is not in VGenes DB! Will order cells by their names!'
-                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-            else:
-                group_name = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
-                ORDERStatement = ' ORDER BY ' + group_name
-                xLabel = 'Cells, ordered by ' + group_name
-
         # get selected feature names
         checkedFeatures = []
         rowCount = self.ui.tableWidget.rowCount()
@@ -1691,57 +1679,141 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 featureText = self.ui.tableWidget.item(row, 1).text()
                 featureText = re.sub(r'\(.+', '', featureText)
                 checkedFeatures.append(featureText)
-        
+
+        # cell group/order by:
+        group_split_flag = False
+        ORDERStatement = ' ORDER BY SeqName'
+        xLabel = 'Cells'
+        if self.ui.lineEditGroup.text() != '':
+            if self.ui.lineEditGroup.text() not in self.fields_name:
+                Msg = 'Your order factor is not in VGenes DB! Will order cells by their names!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                SQLStatement = 'SELECT SeqName,' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
+            else:
+                group_split_flag = True
+                group_name = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
+                ORDERStatement = ' ORDER BY ' + group_name
+                xLabel = 'Cells, ordered by ' + group_name
+                SQLStatement = 'SELECT SeqName,' + group_name + ',' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
+        else:
+            SQLStatement = 'SELECT SeqName,' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
+
         # fetch data
-        SQLStatement = 'SELECT SeqName,' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         # clean data
-        dataMatrix = []
-        for ele in DataIn:
-            try:
-                myArray = numpy.array(ele[1:])
-                myArray = myArray.astype(float)
-                if numpy.isnan(myArray).any():
+        if group_split_flag == False:
+            # make data
+            dataMatrix = []
+            for ele in DataIn:
+                try:
+                    myArray = numpy.array(ele[1:])
+                    myArray = myArray.astype(float)
+                    if numpy.isnan(myArray).any():
+                        pass
+                    else:
+                        dataMatrix.append(myArray)
+                except:
                     pass
-                else:
-                    dataMatrix.append(myArray)
-            except:
-                pass
-        
-        if len(dataMatrix) > 0:
-            # add plot item
-            dataMatrix = numpy.array(dataMatrix)
-            myplot = PlotItem()
-            myplot.setTitle('Heatmap')
-            self.view.addItem(myplot)
-            imgItem = pg.ImageItem(image=dataMatrix)
-            myplot.addItem(imgItem)
-            
-            # color bar
-            try:
-                cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
-            except:
-                cmap = pg.colormap.get(self.ui.comboBoxColor.currentText(), source='matplotlib', skipCache=True)
-            bar = pg.ColorBarItem(
-                values=(dataMatrix.min(), dataMatrix.max()),
-                colorMap=cmap,
-                label='horizontal color bar',
-                limits=(0, None),
-                orientation='h',
-                pen='#8888FF', hoverPen='#EEEEFF', hoverBrush='#EEEEFF80'
-            )
-            bar.setImageItem(imgItem, insert_in=myplot)
-            
-            # annotate Y axis label
-            myplot.getAxis('left').setTicks([[(v, checkedFeatures[v]) for v in range(len(checkedFeatures))]])
-            myplot.getAxis('left').setLabel('Features')
-            myplot.getAxis('bottom').setLabel(xLabel)
-            
+
+            # DRAW HEATMAP
+            if len(dataMatrix) > 0:
+                # add plot item
+                dataMatrix = numpy.array(dataMatrix)
+                myplot = PlotItem()
+                myplot.setTitle('Heatmap')
+                self.view.addItem(myplot)
+                imgItem = pg.ImageItem(image=dataMatrix)
+                myplot.addItem(imgItem)
+
+                # color bar
+                try:
+                    cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
+                except:
+                    cmap = pg.colormap.get(self.ui.comboBoxColor.currentText(), source='matplotlib', skipCache=True)
+                bar = pg.ColorBarItem(
+                    values=(dataMatrix.min(), dataMatrix.max()),
+                    colorMap=cmap,
+                    label='horizontal color bar',
+                    limits=(0, None),
+                    orientation='h',
+                    pen='#8888FF', hoverPen='#EEEEFF', hoverBrush='#EEEEFF80'
+                )
+                bar.setImageItem(imgItem, insert_in=myplot)
+
+                # annotate Y axis label
+                myplot.getAxis('left').setTicks([[(v, checkedFeatures[v]) for v in range(len(checkedFeatures))]])
+                myplot.getAxis('left').setLabel('Features')
+                myplot.getAxis('bottom').setLabel(xLabel)
+
+            else:
+                Msg = 'There is no records lefe after remove all non-numerical values!\n' \
+                      'Some of your features maybe non-numerical! Removed them and try again!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
         else:
-            Msg = 'There is no records lefe after remove all non-numerical values!\n' \
-                  'Some of your features maybe non-numerical! Removed them and try again!'
-            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            # make data
+            data_dict = {}
+            group_names = []
+            for ele in DataIn:
+                cur_group = ele[1]
+                try:
+                    myArray = numpy.array(ele[2:])
+                    myArray = myArray.astype(float)
+                    if numpy.isnan(myArray).any():
+                        pass
+                    else:
+                        if cur_group in data_dict:
+                            data_dict[cur_group].append(myArray)
+                        else:
+                            data_dict[cur_group] = [myArray]
+                            group_names.append(cur_group)
+                except:
+                    pass
+
+            # DRAW HEATMAP
+            if len(group_names) > 0:
+                plot_items = []
+                First = True
+                for group in group_names:
+                    # add plot item
+                    dataMatrix = numpy.array(data_dict[group])
+                    myplot = PlotItem()
+                    myplot.setTitle('Heatmap')
+                    self.view.addItem(myplot)
+                    imgItem = pg.ImageItem(image=dataMatrix)
+                    myplot.addItem(imgItem)
+
+                    # annotate Y axis label
+                    if First == True:
+                        myplot.getAxis('left').setTicks([[(v, checkedFeatures[v]) for v in range(len(checkedFeatures))]])
+                        myplot.getAxis('left').setLabel('Features')
+                        First = False
+                    else:
+                        myplot.getAxis('left').setTicks([])
+                    myplot.getAxis('bottom').setLabel(group)
+                    plot_items.append(imgItem)
+
+                # color bar
+                try:
+                    cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
+                except:
+                    cmap = pg.colormap.get(self.ui.comboBoxColor.currentText(), source='matplotlib',
+                                           skipCache=True)
+                bar = pg.ColorBarItem(
+                    values=(dataMatrix.min(), dataMatrix.max()),
+                    colorMap=cmap,
+                    label='horizontal color bar',
+                    limits=(0, None),
+                    orientation='h',
+                    pen='#8888FF', hoverPen='#EEEEFF', hoverBrush='#EEEEFF80'
+                )
+                bar.setImageItem(plot_items)
+                self.view.addItem(bar, 1, 0, 1, len(group_names))
+            else:
+                Msg = 'There is no records lefe after remove all non-numerical values!\n' \
+                      'Some of your features maybe non-numerical! Removed them and try again!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
 
     def initLineedit(self, lineEdit, items_list):
         # add auto complete
