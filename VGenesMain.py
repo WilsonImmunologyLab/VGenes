@@ -1720,7 +1720,7 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 checkedFeatures.append(featureText)
 
         # cell group/order by:
-        group_split_flag = False
+        group_split_flag = 0
         ORDERStatement = ' ORDER BY SeqName'
         xLabel = 'Cells'
         if self.ui.lineEditGroup.text() != '':
@@ -1729,11 +1729,19 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                 SQLStatement = 'SELECT SeqName,' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
             else:
-                group_split_flag = True
-                group_name = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
-                ORDERStatement = ' ORDER BY ' + group_name
-                xLabel = 'Cells, ordered by ' + group_name
-                SQLStatement = 'SELECT SeqName,' + group_name + ',' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
+                if self.ui.checkBoxNum.isChecked():
+                    group_split_flag = 1
+                    group_name = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
+                    xLabel = 'Cells, ordered by ' + group_name
+                    if group_name in checkedFeatures:
+                        checkedFeatures.remove(group_name)
+                    SQLStatement = 'SELECT SeqName,' + group_name + ',' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement
+                else:
+                    group_split_flag = 2
+                    group_name = re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
+                    ORDERStatement = ' ORDER BY ' + group_name
+                    xLabel = 'Cells, ordered by ' + group_name
+                    SQLStatement = 'SELECT SeqName,' + group_name + ',' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
         else:
             SQLStatement = 'SELECT SeqName,' + ','.join(checkedFeatures) + ' FROM vgenesDB' + WHEREStatement + ORDERStatement
 
@@ -1741,7 +1749,7 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         # clean data
-        if group_split_flag == False:
+        if group_split_flag == 0: # no group
             # make data
             dataMatrix = []
             for ele in DataIn:
@@ -1756,7 +1764,7 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                     pass
 
             # DRAW HEATMAP
-            if len(dataMatrix) > 0:
+            if len(dataMatrix) > 0: 
                 # add plot item
                 dataMatrix = numpy.array(dataMatrix)
                 myplot = PlotItem()
@@ -1781,7 +1789,8 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 bar.setImageItem(imgItem, insert_in=myplot)
 
                 # annotate Y axis label
-                myplot.getAxis('left').setTicks([[(v, checkedFeatures[v]) for v in range(len(checkedFeatures))]])
+                ticks_name = [[(v, checkedFeatures[v]) for v in range(len(checkedFeatures))]]
+                myplot.getAxis('left').setTicks(ticks_name)
                 myplot.getAxis('left').setLabel('Features')
                 myplot.getAxis('bottom').setLabel(xLabel)
 
@@ -1789,7 +1798,72 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 Msg = 'There is no records lefe after remove all non-numerical values!\n' \
                       'Some of your features maybe non-numerical! Removed them and try again!'
                 QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-        else:
+        elif group_split_flag == 1: # Number group
+            # make data
+            dataMatrix = []
+            for ele in DataIn:
+                try:
+                    myArray = numpy.array(ele[1:])
+                    myArray = myArray.astype(float)
+                    if numpy.isnan(myArray).any():
+                        pass
+                    else:
+                        dataMatrix.append(myArray)
+                except:
+                    pass
+
+            # DRAW HEATMAP
+            if len(dataMatrix) > 0:
+                # add plot item
+                dataMatrix = numpy.array(dataMatrix)
+                dataMatrix = dataMatrix[dataMatrix[:, 0].argsort()]
+                
+                #heatmapData = dataMatrix[:,1:]
+                #lineData = dataMatrix[:,0]
+                
+                # plot heatmap
+                myplot = PlotItem()
+                myplot.setTitle('Heatmap')
+                self.view.addItem(myplot)
+                imgItem = pg.ImageItem(image=dataMatrix)
+                myplot.addItem(imgItem)
+
+                # color bar
+                try:
+                    cmap = pg.colormap.get(self.ui.comboBoxColor.currentText())
+                except:
+                    cmap = pg.colormap.get(self.ui.comboBoxColor.currentText(), source='matplotlib',
+                                           skipCache=True)
+                bar = pg.ColorBarItem(
+                    values=(dataMatrix.min(), dataMatrix.max()),
+                    colorMap=cmap,
+                    label='horizontal color bar',
+                    limits=(0, None),
+                    orientation='h',
+                    pen='#8888FF', hoverPen='#EEEEFF', hoverBrush='#EEEEFF80'
+                )
+                bar.setImageItem(imgItem, insert_in=myplot)
+
+                # annotate Y axis label
+                order_name = 'Order by ' + re.sub(r'\(.+', '', self.ui.lineEditGroup.text())
+                ticks_name = [(0, order_name)]
+                for v in range(len(checkedFeatures)):
+                    ticks_name.append((v+1, checkedFeatures[v]))
+                myplot.getAxis('left').setTicks([ticks_name])
+                myplot.getAxis('left').setLabel('Features')
+                myplot.getAxis('bottom').setLabel(xLabel)
+
+                # plot line
+                #myline = PlotItem()
+                #myline.setTitle(re.sub(r'\(.+', '', self.ui.lineEditGroup.text()))
+                #myline.plot(numpy.array(range(0,len(lineData))), lineData, pen=(1, 3))
+                #self.view.addItem(myline, 1, 0, 1, 1)
+            else:
+                Msg = 'There is no records lefe after remove all non-numerical values!\n' \
+                      'Some of your features maybe non-numerical! Removed them and try again!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+        elif group_split_flag == 2: # level group
             # make data
             data_dict = {}
             group_names = []
