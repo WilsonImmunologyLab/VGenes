@@ -1603,7 +1603,10 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
         self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
         self.ui.checkBoxAll.clicked.connect(self.checkAll)
-        
+        self.ui.radioButtonHC.clicked.connect(self.updateHC)
+        self.ui.radioButtonLC.clicked.connect(self.updateLC)
+        self.ui.radioButtonChecked.clicked.connect(self.updateCheck)
+
         if system() == 'Windows':
             # set style for windows
             self.setStyleSheet("QLabel{font-size:18px;}"
@@ -1624,6 +1627,35 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                                "QLineEdit{font-size:18px;}"
                                "QTreeWidget{font-size:18px;}"
                                "QSpinBox{font-size:18px;}")
+
+    def updateCheck(self):
+        if self.ui.radioButtonChecked.isChecked():
+            self.ui.radioButtonHC.setChecked(False)
+            self.ui.radioButtonHC.setEnabled(False)
+            self.ui.radioButtonLC.setChecked(False)
+            self.ui.radioButtonLC.setEnabled(False)
+        else:
+            self.ui.radioButtonHC.setEnabled(True)
+            self.ui.radioButtonLC.setEnabled(True)
+            self.ui.radioButtonHC.setChecked(True)
+
+    def updateHC(self):
+        if self.ui.radioButtonHC.isChecked():
+            pass
+        else:
+            if self.ui.radioButtonLC.isChecked():
+                pass
+            else:
+                self.ui.radioButtonLC.setChecked(True)
+
+    def updateLC(self):
+        if self.ui.radioButtonLC.isChecked():
+            pass
+        else:
+            if self.ui.radioButtonHC.isChecked():
+                pass
+            else:
+                self.ui.radioButtonHC.setChecked(True)
 
     def updateText(self):
         sender_widget = self.sender()
@@ -1669,7 +1701,14 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
         if self.ui.radioButtonChecked.isChecked():
             WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.vgenes.CheckedRecords) + '")'
         else:
-            WHEREStatement = ' WHERE 1'
+            if self.ui.radioButtonHC.isChecked() and self.ui.radioButtonLC.isChecked():
+                WHEREStatement = ' WHERE 1'
+            elif self.ui.radioButtonHC.isChecked():
+                WHEREStatement = ' WHERE GeneType IN ("Heavy","Beta","Delta")'
+            elif self.ui.radioButtonLC.isChecked():
+                WHEREStatement = ' WHERE GeneType NOT IN ("Heavy","Beta","Delta")'
+            else:
+                WHEREStatement = ' WHERE 1'
 
         # get selected feature names
         checkedFeatures = []
