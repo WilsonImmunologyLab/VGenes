@@ -1862,7 +1862,6 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                 Msg = 'There is no records lefe after remove all non-numerical values!\n' \
                       'Some of your features maybe non-numerical! Removed them and try again!'
                 QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-
         elif group_split_flag == 2: # level group
             # make data
             data_dict = {}
@@ -1882,6 +1881,17 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                             group_names.append(cur_group)
                 except:
                     pass
+
+            if len(group_names) > 15:
+                question = 'Your group has ' + str(len(group_names)) + \
+                           ' different levels, do you want to continue anyway?\n' \
+                           'If it is a numerical factor, please click No and check "Numerical" checkbox!'
+                buttons = 'YN'
+                answer = questionMessage(self, question, buttons)
+                if answer == 'Yes':
+                    pass
+                else:
+                    return
 
             # DRAW HEATMAP
             if len(group_names) > 0:
