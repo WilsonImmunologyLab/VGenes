@@ -1778,7 +1778,7 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                     # add plot item
                     dataMatrix = numpy.array(data_dict[group])
                     myplot = PlotItem()
-                    myplot.setTitle('Heatmap')
+                    myplot.setTitle(group)
                     self.view.addItem(myplot)
                     imgItem = pg.ImageItem(image=dataMatrix)
                     myplot.addItem(imgItem)
@@ -1790,7 +1790,7 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                         First = False
                     else:
                         myplot.getAxis('left').setTicks([])
-                    myplot.getAxis('bottom').setLabel(group)
+                    #myplot.getAxis('bottom').setLabel(group)
                     plot_items.append(imgItem)
 
                 # color bar
