@@ -5145,8 +5145,8 @@ class Ui_MainWindow(object):
         self.retranslateUi(MainWindow)
         self.tabWidget.setCurrentIndex(1)
         self.tabWidgetFig.setCurrentIndex(0)
-        self.tabWidgetTree.setCurrentIndex(3)
-        self.tabWidgetClone.setCurrentIndex(4)
+        self.tabWidgetTree.setCurrentIndex(2)
+        self.tabWidgetClone.setCurrentIndex(3)
         self.cboTreeOp1.currentTextChanged['QString'].connect(self.btnUpdateTree.setFocus) # type: ignore
         self.cboTreeOp2.currentTextChanged['QString'].connect(self.btnUpdateTree.setFocus) # type: ignore
         self.cboTreeOp3.currentTextChanged['QString'].connect(self.btnUpdateTree.setFocus) # type: ignore
@@ -5212,7 +5212,7 @@ class Ui_MainWindow(object):
 "DataViewer"))
         self.pushButtonHistViewer.setText(_translate("MainWindow", "Hist\n"
 "DataViewer"))
-        self.pushButtonBoxplotViewer.setText(_translate("MainWindow", "BarPlot\n"
+        self.pushButtonBoxplotViewer.setText(_translate("MainWindow", "BoxPlot\n"
 "DataViewer"))
         self.pushButtonHeatmapViewer.setText(_translate("MainWindow", "Heatmap\n"
 "DataViewer"))

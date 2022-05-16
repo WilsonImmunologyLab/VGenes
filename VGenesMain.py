@@ -1937,7 +1937,6 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                       'Some of your features maybe non-numerical! Removed them and try again!'
                 QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
-
     def initLineedit(self, lineEdit, items_list):
         # add auto complete
         self.completer = QCompleter(items_list)
