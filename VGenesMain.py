@@ -1595,18 +1595,21 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
         self.ui = Ui_HeatmapViewerDialog()
         self.ui.setupUi(self)
         self.fields_name = []
+        self.features = []
         self.vgenes = ''
+        self.sign = False
 
         self.view = pg.GraphicsLayoutWidget()
         self.ui.PlotVerticalLayout.addWidget(self.view)
 
         self.ui.pushButtonExport.clicked.connect(self.exportFigure)
         self.ui.pushButtonDraw.clicked.connect(self.Draw)
-        self.ui.checkBoxAll.clicked.connect(self.checkAll)
         self.ui.radioButtonHC.clicked.connect(self.updateHC)
         self.ui.radioButtonLC.clicked.connect(self.updateLC)
         self.ui.radioButtonChecked.clicked.connect(self.updateCheck)
-
+        self.ui.lineEditFeature.textChanged.connect(self.addToList)
+        self.ui.listWidget.doubleClicked.connect(self.removeFeature)
+        
         if system() == 'Windows':
             # set style for windows
             self.setStyleSheet("QLabel{font-size:18px;}"
@@ -1627,6 +1630,31 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                                "QLineEdit{font-size:18px;}"
                                "QTreeWidget{font-size:18px;}"
                                "QSpinBox{font-size:18px;}")
+
+    def removeFeature(self):
+        feature = self.ui.listWidget.currentItem().text()
+        self.ui.listWidget.takeItem(self.ui.listWidget.currentRow())
+        self.features.remove(feature)
+        Msg = 'Feature ' + feature + ' removed!'
+        self.ui.labelInfo.setText(Msg)
+
+    def addToList(self):
+        if self.ui.lineEditFeature.text() == '':
+            return
+        if self.sign == True:
+            self.sign = False
+            return
+
+        if self.ui.lineEditFeature.text() in self.fields_name:
+            if self.ui.lineEditFeature.text() not in self.features:
+                self.ui.listWidget.addItem(self.ui.lineEditFeature.text())
+                self.features.append(self.ui.lineEditFeature.text())
+                Msg = 'Feature ' + self.ui.lineEditFeature.text() + ' added!'
+                self.ui.labelInfo.setText(Msg)
+                self.sign = True
+            else:
+                Msg = 'Feature ' + self.ui.lineEditFeature.text() + ' exists!'
+                self.ui.labelInfo.setText(Msg)
 
     def updateCheck(self):
         if self.ui.radioButtonChecked.isChecked():
@@ -1712,12 +1740,9 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
 
         # get selected feature names
         checkedFeatures = []
-        rowCount = self.ui.tableWidget.rowCount()
-        for row in range(rowCount):
-            if self.ui.tableWidget.cellWidget(row, 0).isChecked():
-                featureText = self.ui.tableWidget.item(row, 1).text()
-                featureText = re.sub(r'\(.+', '', featureText)
-                checkedFeatures.append(featureText)
+        for feature in self.features:
+            feature = re.sub(r'\(.+', '', feature)
+            checkedFeatures.append(feature)
 
         # cell group/order by:
         group_split_flag = 0
@@ -25412,6 +25437,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myHeatmapViewerDialog.DBFilename = DBFilename
         self.myHeatmapViewerDialog.vgenes = self
         # set up table
+        '''
         tableHeader = ['', 'Feature']
         self.myHeatmapViewerDialog.ui.tableWidget.setColumnCount(len(tableHeader))
         self.myHeatmapViewerDialog.ui.tableWidget.setRowCount(len(FieldList))
@@ -25437,10 +25463,11 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myHeatmapViewerDialog.ui.tableWidget.horizontalHeader().setSortIndicatorShown(True)
         # connect sort indicator to slot function
         self.myHeatmapViewerDialog.ui.tableWidget.horizontalHeader().sectionClicked.connect(self.myHeatmapViewerDialog.sortTable)
-
-        fields_name = [""] + [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
+        '''
+        fields_name = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
         self.myHeatmapViewerDialog.fields_name = fields_name
         self.myHeatmapViewerDialog.initLineedit(self.myHeatmapViewerDialog.ui.lineEditGroup, fields_name)
+        self.myHeatmapViewerDialog.initLineedit(self.myHeatmapViewerDialog.ui.lineEditFeature, fields_name)
         self.myHeatmapViewerDialog.show()
 
     def updateSelectionFromDialog(self, data):
