@@ -12066,6 +12066,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             barcodeDict = self.readBarcode(self.anno_path_name, self.type10x)
             IsoDict = self.readInfo(self.anno_path_name, self.type10x, 'c_gene')
 
+            # generate a dict to replace barcodes by numbers
             if self.type10x == 'contig':
                 unique_barcode = list(Counter(barcodeDict.values()).keys())
                 barcode_dict = zip(unique_barcode, list(range(1, len(unique_barcode) + 1)))
@@ -12082,10 +12083,21 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                 # modify sequence name
                 if self.type10x == 'contig':
                     tmp_name = re.sub(r'_contig.+', '', record[0])
+                    # replace barcodes by numbers
                     if tmp_name in barcode_dict.keys():
-                        record[0] = re.sub(tmp_name, str(barcode_dict[tmp_name]), record[0])
+                        modified_name = re.sub(tmp_name, str(barcode_dict[tmp_name]), record[0])
+                    else:
+                        modified_name = record[0]
+                    # rename sequence by subtype or given identifier
                     if self.rep2 == "byChain":
-                        record[0] = re.sub('contig_', record[2][0], record[0])
+                        modified_name = re.sub('contig_', record[2][0], modified_name)
+                    else:
+                        modified_name = re.sub('contig_', self.rep2, modified_name)
+                    # add prefix if given
+                    if self.prefix != '':
+                        modified_name = self.prefix + '_' + modified_name
+
+                    record[0] = modified_name
                 else:
                     if self.rep2 == "byChain":
                         rep2 = record[2][0]
