@@ -1773,6 +1773,8 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
         # fetch data
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
+        original_num = len(DataIn)
+
         # clean data
         if group_split_flag == 0: # no group
             # make data
@@ -1787,6 +1789,11 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                         dataMatrix.append(myArray)
                 except:
                     pass
+
+            if len(dataMatrix) < original_num/2:
+                Msg = 'Less than half of your selected records can not be numericalized and plotted, ' \
+                      'you might have some bad features in your selected feature list!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
             # DRAW HEATMAP
             if len(dataMatrix) > 0: 
@@ -1836,6 +1843,11 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                         dataMatrix.append(myArray)
                 except:
                     pass
+
+            if len(dataMatrix) < original_num/2:
+                Msg = 'Less than half of your selected records can not be numericalized and plotted, ' \
+                      'you might have some bad features in your selected feature list!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
             # DRAW HEATMAP
             if len(dataMatrix) > 0:
@@ -1917,6 +1929,13 @@ class HeatmapViewerDialog(QtWidgets.QDialog):
                     pass
                 else:
                     return
+            new_num = 0
+            for group in group_names:
+                new_num += len(data_dict[group])
+            if new_num < original_num/2:
+                Msg = 'Less than half of your selected records can not be numericalized and plotted, ' \
+                      'you might have some bad features in your selected feature list!'
+                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
             # DRAW HEATMAP
             if len(group_names) > 0:
