@@ -1678,6 +1678,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 Jend = int(records[4])
 
                 VDJseq = Sequence[Vbeg - 1:Jend]
+                VDJseq = re.sub(r'\W+','',VDJseq)   # remove all alignment gaps
+
                 JendSeq = VDJseq[-6:]
                 checkRes = checkJend(GeneType, JendSeq)
                 try:
