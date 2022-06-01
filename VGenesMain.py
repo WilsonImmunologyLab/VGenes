@@ -13720,6 +13720,39 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             pass
 
+    @pyqtSlot()
+    def on_actionReverse_Current_Selection_triggered(self):
+        # notice when DB is huge
+        if self.ui.lcdNumber_max.value() > 10000:
+            question = 'Your dataset is huge, doing this may take very long time, Do you still want to do it?\n'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer != 'Yes':
+                return
+
+        # updated selected list
+        SQLStatement = 'SELECT SeqName FROM vgenesdb'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        if len(DataIn) == 0:
+            return
+        
+        allRecords = set([ele[0] for ele in DataIn])
+        checkedRecords = set(self.CheckedRecords)
+
+        self.CheckedRecords = list(allRecords - checkedRecords)
+        # refersh DB table
+        if self.ui.SeqTable.rowCount() > 0:
+            self.ui.pushButtonRefresh.click()
+
+        # update tree (if active)
+        if self.ui.treeWidget.isEnabled():
+            self.clearTreeChecks()
+            for cur_name in self.CheckedRecords:
+                found = self.ui.treeWidget.findItems(cur_name, Qt.MatchRecursive, 0)
+                if len(found) > 0:
+                    for item in found:
+                        item.setCheckState(0, Qt.Checked)
+
     def enableTree(self):
         if self.ui.radioButtonEnableTree.isChecked():
             self.ui.treeWidget.setEnabled(True)

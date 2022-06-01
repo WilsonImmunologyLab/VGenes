@@ -827,11 +827,6 @@ Edit</string>
               <string>Sequence for GibsonClone</string>
              </property>
             </item>
-            <item>
-             <property name="text">
-              <string>Antibody Patent report</string>
-             </property>
-            </item>
            </widget>
           </item>
           <item row="0" column="2">
@@ -988,7 +983,7 @@ DataViewer</string>
             </size>
            </property>
            <property name="text">
-            <string>BarPlot
+            <string>BoxPlot
 DataViewer</string>
            </property>
            <property name="icon">
@@ -10112,7 +10107,7 @@ Figure</string>
                  </size>
                 </property>
                 <property name="currentIndex">
-                 <number>4</number>
+                 <number>3</number>
                 </property>
                 <widget class="QWidget" name="tab_8">
                  <attribute name="title">
@@ -11831,6 +11826,7 @@ Tree</string>
     <addaction name="separator"/>
     <addaction name="actionpreviousChecked"/>
     <addaction name="actionnextChecked"/>
+    <addaction name="actionReverse_Current_Selection"/>
     <addaction name="separator"/>
     <addaction name="actionDelete_record"/>
     <addaction name="actionDuplicate_current"/>
@@ -12690,6 +12686,15 @@ Tree</string>
    </property>
    <property name="text">
     <string>Heatmap Viewer</string>
+   </property>
+  </action>
+  <action name="actionReverse_Current_Selection">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/repeat.png</normaloff>:/PNG-Icons/repeat.png</iconset>
+   </property>
+   <property name="text">
+    <string>Reverse Current Selection</string>
    </property>
   </action>
  </widget>
