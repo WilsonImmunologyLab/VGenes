@@ -142,12 +142,14 @@ class CSVRepAll_thread(QThread):
         self.SequenceName = ''
         self.Pathname = ''
         self.vgene = ''
+        self.list = []
 
     def run(self):
         DBFilename = self.DBFilename
         SequenceName = self.SequenceName
         Pathname = self.Pathname
         Vgenes = self.vgene
+        list = self.list
 
         pct = 0
         label = "Fetching records from DB: " + DBFilename
@@ -159,7 +161,11 @@ class CSVRepAll_thread(QThread):
         field_names = [i[1] for i in DataIn]
 
         #SQLStatement = VGenesSQL.MakeSQLStatementNew(Vgenes, fields, SequenceName)
-        SQLStatement = 'SELECT * from vgenesDB'
+        if len(list) == 0:
+            WHEREStatement = ' WHERE 1'
+        else:
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(list) + '")'
+        SQLStatement = 'SELECT * from vgenesDB' + WHEREStatement
         (dirname, filename) = os.path.split(DBFilename)
         filename = filename[:(len(filename) - 4)]
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -1371,6 +1377,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
         self.workThread.DBFilename = DBFilename
         self.workThread.SequenceName = SequenceName
         self.workThread.Pathname = Pathname
+        self.workThread.list = selected_list
         self.workThread.vgene = self
         self.workThread.start()
         self.workThread.trigger.connect(self.ShowMessageBox)
