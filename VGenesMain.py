@@ -9,6 +9,7 @@ import shutil
 import math
 import numpy
 import pandas as pd
+import traceback
 import csv
 
 #import asyncio
@@ -10805,7 +10806,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             csvFile.close()
         return barcode_dict
 
-
     def readInfo(self, anno_path_name, type10x, field_name):
         # read annotation content
         barcode_dict = {}
@@ -12050,6 +12050,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
     @pyqtSlot()
     def multi_callback(self):
         global IgBLASTAnalysis
+
+        #if info != 'Data import finished!':
+        #    QMessageBox.warning(self, 'Warning', info, QMessageBox.Ok, QMessageBox.Ok)
+        #    return
 
         Startprocessed = 0
         try:
@@ -13328,11 +13332,12 @@ class CSV_thread(QThread):
 
             # insert into DB
             SQLSTATEMENT = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
+
             try:
                 cursor.executemany(SQLSTATEMENT, InputData)
                 conn.commit()
-            except:
-                self.trigger.emit('Data import error! Please remove any duplicate sequence names in you file!')
+            except Exception as e:
+                self.trigger.emit('Error detected! \nError Message:' + traceback.format_exc())
 
             pct = int(process/len(files)*100)
             label = "Processing CSV file: " + csv_file
