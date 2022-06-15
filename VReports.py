@@ -1758,10 +1758,13 @@ def StandardReports(self, option, SequenceName, DBFilename):
         # show dialog
         self.myGibsonDialog.show()
     elif option == 'CSV format customized fields':
-        if len(self.AntibodyCandidates) == 0:
-            selected_list = self.CheckedRecords
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.CheckedRecords
+            else:
+                selected_list = self.AntibodyCandidates
         else:
-            selected_list = self.AntibodyCandidates
+            selected_list = self.CheckedRecords
 
         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
         if len(selected_list) == 0:
@@ -1809,7 +1812,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         # show dialog
         self.myExportOptionDialog.show()
-
     elif option == 'Antibody Patent report':
         if len(self.AntibodyCandidates) == 0:
             Msg = 'Nothing in Antibody candidate list!'
@@ -1884,7 +1886,6 @@ def StandardReports(self, option, SequenceName, DBFilename):
             self.myPatentDialog.ui.tableWidget.resizeRowsToContents()
             self.myPatentDialog.show()
     print('done')
-
 
 def checkJend(GeneType, JendSeq):
     if GeneType == 'Heavy':
