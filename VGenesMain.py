@@ -13249,23 +13249,29 @@ class VDB_thread(QThread):
             DataIn = VGenesSQL.RunSQL(vdb_file, SQLSTATEMENT)
 
             # update ID (ID should be unique)
-            SQLSTATEMENT = 'SELECT COUNT(ID) FROM vgenesDB'
-            Count = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
-            Count = Count[0][0]
+            SQLSTATEMENT = 'SELECT ID FROM vgenesDB'
+            Res = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
+            if len(Res) > 0:
+                Count = [int(ele[0]) for ele in Res]
+                maxCount = max(Count)
+            else:
+                maxCount = 0
 
             InputData = []
             for records in DataIn:
                 cur_line = list(records)
-                cur_line[119] = int(records[119]) + Count
+                cur_line[119] = int(records[119]) + maxCount
                 InputData.append(cur_line)
 
             # insert into DB
-            #print('insert into DB')
+            print(vdb_file)
             SQLSTATEMENT = "INSERT INTO vgenesDB(" + translated_field_str + ") VALUES(" + question_str + ")"
             try:
                 cursor.executemany(SQLSTATEMENT, InputData)
-            except:
+            except Exception as e:
+                print(traceback.format_exc())
                 msg = "UNIQUE constraint failed: SeqName\n Please make sure all the sequence names are unique! (add sampleID to each sequence name)"
+                #print(msg)
                 self.trigger.emit(msg)
                 return
             conn.commit()
