@@ -12047,13 +12047,19 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #self.disableWidgets()
             return
 
-    @pyqtSlot()
-    def multi_callback(self):
+    def multi_callback(self, signal, info):
         global IgBLASTAnalysis
 
-        #if info != 'Data import finished!':
-        #    QMessageBox.warning(self, 'Warning', info, QMessageBox.Ok, QMessageBox.Ok)
-        #    return
+        if signal == 1:
+            QMessageBox.warning(self, 'Warning', info, QMessageBox.Ok, QMessageBox.Ok)
+
+            try:
+                self.progress.FeatProgressBar.setValue(100)
+                self.progress.close()
+            except:
+                pass
+
+            return
 
         Startprocessed = 0
         try:
@@ -12192,7 +12198,6 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         except:
             pass
 
-    @pyqtSlot()
     def multiIMGT_callback(self):
         global IMGTAnalysis
 
@@ -13125,7 +13130,7 @@ class MyObjectCls(QObject):
 
 class WorkThread(QThread):
     loadProgress = pyqtSignal(int, str)
-    trigger = pyqtSignal(str)
+    trigger = pyqtSignal(int, str)
 
     def __int__(self):
         super(WorkThread, self).__init__()
@@ -13150,11 +13155,11 @@ class WorkThread(QThread):
             else:
                 return
 
-        self.trigger.emit(self.item)
+        self.trigger.emit(0, self.item)
 
 class WorkThread1(QThread):
     loadProgress = pyqtSignal(int, str)
-    trigger = pyqtSignal(str)
+    trigger = pyqtSignal(int, str)
 
     def __int__(self):
         super(WorkThread1, self).__init__()
@@ -13166,11 +13171,11 @@ class WorkThread1(QThread):
     def run(self):
         global IgBLASTAnalysis
         IgBLASTAnalysis = IgBLASTer.IgBLASTitResults(self.item, self.igOut, self.datalist, self.loadProgress)
-        self.trigger.emit(self.item)
+        self.trigger.emit(0, self.item)
 
 class VDB_thread(QThread):
-    loadProgress =  pyqtSignal(int, str)
-    trigger = pyqtSignal(str)
+    loadProgress = pyqtSignal(int, str)
+    trigger = pyqtSignal(int, str)
 
     def __int__(self):
         super(VDB_thread, self).__init__()
@@ -13197,14 +13202,14 @@ class VDB_thread(QThread):
                     VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
                 except:
                     msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT1
-                    self.trigger.emit(msg)
+                    self.trigger.emit(1, msg)
                     return
 
                 try:
                     VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
                 except:
                     msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
-                    self.trigger.emit(msg)
+                    self.trigger.emit(1, msg)
                     return
 
                 RealNameList.append(new_field)
@@ -13272,7 +13277,7 @@ class VDB_thread(QThread):
                 print(traceback.format_exc())
                 msg = "UNIQUE constraint failed: SeqName\n Please make sure all the sequence names are unique! (add sampleID to each sequence name)"
                 #print(msg)
-                self.trigger.emit(msg)
+                self.trigger.emit(1, msg)
                 return
             conn.commit()
 
@@ -13282,11 +13287,11 @@ class VDB_thread(QThread):
             process += 1
             #print(vdb_file)
         conn.close()
-        self.trigger.emit('Data import finished!')
+        self.trigger.emit(0, 'Data import finished!')
 
 class CSV_thread(QThread):
-    loadProgress =  pyqtSignal(int, str)
-    trigger = pyqtSignal(str)
+    loadProgress = pyqtSignal(int, str)
+    trigger = pyqtSignal(int, str)
 
     def __int__(self):
         super(CSV_thread, self).__init__()
@@ -13343,7 +13348,8 @@ class CSV_thread(QThread):
                 cursor.executemany(SQLSTATEMENT, InputData)
                 conn.commit()
             except Exception as e:
-                self.trigger.emit('Error detected! \nError Message:' + traceback.format_exc())
+                self.trigger.emit(1,'Error detected! \nError Message:' + traceback.format_exc())
+                return
 
             pct = int(process/len(files)*100)
             label = "Processing CSV file: " + csv_file
@@ -13351,7 +13357,7 @@ class CSV_thread(QThread):
             process += 1
             #print(vdb_file)
         conn.close()
-        self.trigger.emit('Data import finished!')
+        self.trigger.emit(0,'Data import finished!')
 
 class WorkThreadIMGTparser(QThread):
     loadProgress = pyqtSignal(int, str)
