@@ -11774,6 +11774,7 @@ Tree</string>
     <addaction name="actionMultiple_Alignement"/>
     <addaction name="actionAlignment"/>
     <addaction name="actionAnalyze_Mutations"/>
+    <addaction name="actionReAnalyze"/>
     <addaction name="separator"/>
     <addaction name="actionFind_Clonal"/>
     <addaction name="actionIdentifyPublicClone"/>
@@ -12697,6 +12698,15 @@ Tree</string>
     <string>Reverse Current Selection</string>
    </property>
   </action>
+  <action name="actionReAnalyze">
+   <property name="icon">
+    <iconset resource="Resources/VgenesResources.qrc">
+     <normaloff>:/PNG-Icons/headphones.png</normaloff>:/PNG-Icons/headphones.png</iconset>
+   </property>
+   <property name="text">
+    <string>ReAnalyze</string>
+   </property>
+  </action>
  </widget>
  <resources>
   <include location="Resources/VgenesResources.qrc"/>
@@ -12771,7 +12781,7 @@ Tree</string>
  </connections>
  <buttongroups>
   <buttongroup name="buttonGroup_2"/>
-  <buttongroup name="buttonGroup"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>

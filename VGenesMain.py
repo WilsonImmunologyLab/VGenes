@@ -21851,6 +21851,109 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.on_pushButtonHeatmapViewer_clicked()
 
     @pyqtSlot()
+    def on_actionReAnalyze_triggered(self):
+        # determine selected sequences
+        selected_names = self.CheckedRecords
+        if len(selected_names) == 0:
+            Msg = 'Please select some records first!'
+            QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,QMessageBox.Ok)
+            return
+        
+        # determine species
+        species = 'Human'
+        Question = 'Please select reference genomes:\n Yes for human\n No for Mouse\n Cancel to exit'
+        options = 'YNC'
+        answer = questionMessage(self, Question, options)
+        if answer == 'Yes':
+            species = 'Human'
+        elif answer == 'No':
+            species = 'Mouse'
+        elif answer == 'Cancel':
+            return
+        else:
+            return
+
+        # determine BCR/TCR
+        dataType = 'BCR'
+        Question = 'Please select sequence type:\n Yes for BCR\n No for TCR\n Cancel to exit'
+        options = 'YNC'
+        answer = questionMessage(self, Question, options)
+        if answer == 'Yes':
+            dataType = 'BCR'
+        elif answer == 'No':
+            dataType = 'TCR'
+        elif answer == 'Cancel':
+            return
+        else:
+            return
+
+        # fetch data
+        WhereStatement = ' WHERE SeqName IN ("' + '","'.join(selected_names) + '")'
+        SQLStatement = 'SELECT SeqName, Sequence, Blank20 FROM vgenesDB' + WhereStatement
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        seq_index = 1
+        if len(DataIs) > 0:
+            if len(DataIs[0][2]) > 50:
+                seq_index = 2
+        else:
+            return
+        
+        # write sequences into FASTA file
+        time_stamp = str(int(time.time() * 100)) + '.fasta'
+        seq_pathname = os.path.join(temp_folder, time_stamp)
+        with open(seq_pathname, 'w') as currentFile:
+            for record in DataIs:
+                currentFile.write('>' + record[0] + '\n')
+                currentFile.write(record[seq_index] + '\n')
+        
+        # open a thread, run these records
+        datalist = ['none','none','none',species,0,10000]
+
+        workThread = WorkThread(self)
+        workThread.item = seq_pathname
+        workThread.datalist = datalist
+        workThread.method = 'fast'
+        workThread.datatype = dataType
+        workThread.start()
+        workThread.trigger.connect(self.reAnalyze_callback)
+        workThread.loadProgress.connect(self.progressLabel)
+
+
+    def reAnalyze_callback(self, signal, info):
+        global IgBLASTAnalysis
+
+        if signal == 1:
+            QMessageBox.warning(self, 'Warning', info, QMessageBox.Ok, QMessageBox.Ok)
+            try:
+                self.progress.FeatProgressBar.setValue(100)
+                self.progress.close()
+            except:
+                pass
+            return
+
+        #a = IgBLASTAnalysis
+
+        # annotate the SQL DB using
+        field_id_list = list(range(1,75)) + list(range(79,86)) + list(range(90,94)) + list(range(96,106))
+        for record in IgBLASTAnalysis:
+            SQLStatement = 'UPDATE vgenesDB SET '
+            updateList = []
+            for index in field_id_list:
+                updateList.append(FieldList[index] + ' = "' + str(record[index]) + '"')
+            SQLStatement += ','.join(updateList)
+            SQLStatement += ' WHERE SeqName = "' + record[0] + '"'
+            VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
+        
+        Msg = 'ReAnalysis finished!'
+        QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+
+    @pyqtSlot()
     def on_actionAnalyze_Mutations_triggered(self):
         import VMapHotspots
         # setItem(self, items, title):
