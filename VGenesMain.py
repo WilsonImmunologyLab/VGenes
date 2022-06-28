@@ -21934,7 +21934,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         #a = IgBLASTAnalysis
 
         # annotate the SQL DB using
-        field_id_list = list(range(1,75)) + list(range(79,86)) + list(range(90,94)) + list(range(96,106))
+        field_id_list = list(range(1,75)) + list(range(78,86)) + list(range(90,94)) + list(range(96,106))
         for record in IgBLASTAnalysis:
             SQLStatement = 'UPDATE vgenesDB SET '
             updateList = []
