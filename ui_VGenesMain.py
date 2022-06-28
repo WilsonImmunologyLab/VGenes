@@ -5027,7 +5027,7 @@ class Ui_MainWindow(object):
         self.actionReverse_Current_Selection.setObjectName("actionReverse_Current_Selection")
         self.actionReAnalyze = QtWidgets.QAction(MainWindow)
         icon76 = QtGui.QIcon()
-        icon76.addPixmap(QtGui.QPixmap(":/PNG-Icons/headphones.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon76.addPixmap(QtGui.QPixmap(":/PNG-Icons/reRun.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         self.actionReAnalyze.setIcon(icon76)
         self.actionReAnalyze.setObjectName("actionReAnalyze")
         self.menuFile.addAction(self.action_New)

@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="PNG-Icons">
+    <file>reRun.png</file>
     <file>bar.png</file>
     <file>heat.png</file>
     <file>hist.png</file>

@@ -12701,7 +12701,7 @@ Tree</string>
   <action name="actionReAnalyze">
    <property name="icon">
     <iconset resource="Resources/VgenesResources.qrc">
-     <normaloff>:/PNG-Icons/headphones.png</normaloff>:/PNG-Icons/headphones.png</iconset>
+     <normaloff>:/PNG-Icons/reRun.png</normaloff>:/PNG-Icons/reRun.png</iconset>
    </property>
    <property name="text">
     <string>ReAnalyze</string>
