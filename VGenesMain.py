@@ -4884,8 +4884,17 @@ class Batch_thread(QThread):
             num_list[-1] = num_list[-1] + 1
 
             # start update records
+            # where statement
+            if self.dialog.ui.radioButtonAll.isChecked():
+                WHEREStatement = ' WHERE 1'
+            else:
+                if len(self.dialog.vgene.CheckedRecords) > 0:
+                    WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.dialog.vgene.CheckedRecords) + '")'
+                else:
+                    WHEREStatement = ' WHERE 1'
+
             field = re.sub(r'\(.+', '', self.dialog.ui.comboBox.currentText())
-            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             
             process = 1
@@ -8589,13 +8598,17 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
         self.ui.LineEditCutoff.max = 0
         self.ui.gridLayout.num_widget = 0
         self.ui.gridLayoutChar.num_widget = 0
+        self.vgene = ''
 
         self.ui.pushButtonCancel.clicked.connect(self.reject)
         self.ui.pushButtonOK.clicked.connect(self.accept)
         self.ui.comboBox.currentTextChanged.connect(self.StatFig)
+        self.ui.radioButtonAll.clicked.connect(self.StatFig)
+        self.ui.radioButtonChecked.clicked.connect(self.StatFig)
         self.ui.radioButton.clicked.connect(self.StatFig)
         self.ui.LineEditCutoff.textChanged.connect(self.StatFig)
         self.ui.DisplayTip.clicked.connect(self.StatFig)
+
 
         if system() == 'Windows':
             # set style for windows
@@ -8651,6 +8664,16 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
         if self.ui.gridLayoutFig.count() > 0:
             for i in range(self.ui.gridLayoutFig.count()):
                 self.ui.gridLayoutFig.itemAt(i).widget().deleteLater()
+
+        # where statement
+        if self.ui.radioButtonAll.isChecked():
+            WHEREStatement = ' WHERE 1'
+        else:
+            if len(self.vgene.CheckedRecords) > 0:
+                WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.vgene.CheckedRecords) + '")'
+            else:
+                WHEREStatement = ' WHERE 1'
+
         try:
             # numeric value
             if self.ui.radioButton.isChecked():
@@ -8665,7 +8688,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
                 self.ui.LineEditCutoff.setHidden(False)
                 field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = []
                 char_list = []
@@ -8714,7 +8737,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                         num_list.sort()
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 F = MyFigure(width=3, height=3, dpi=160)
@@ -8739,12 +8762,12 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                     return
                 elif self.initial == 1:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     value_list = [row[0] for row in DataIn]
                 elif self.initial == 2:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     value_list = [row[0] for row in DataIn]
 
@@ -8767,7 +8790,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                 self.load_data(value_list)
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 data = []
@@ -25700,6 +25723,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         #self.myBatchDialog.load_data(value_list)
         field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
         self.myBatchDialog.ui.comboBox.addItems(field_list)
+        self.myBatchDialog.vgene = self
         self.myBatchDialog.initial = 1
         self.myBatchDialog.ui.comboBox.setCurrentText(self.ui.cboFindField1.currentText())
         self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
@@ -25739,6 +25763,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         # self.myBatchDialog.load_data(value_list)
         field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
         self.myBatchDialog.ui.comboBox.addItems(field_list)
+        self.myBatchDialog.vgene = self
         self.myBatchDialog.initial = 1
         self.myBatchDialog.ui.comboBox.setCurrentText(field_list[2])
         self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)
@@ -25753,6 +25778,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         # self.myBatchDialog.load_data(value_list)
         field_list = [FieldList[i] + '(' + RealNameList[i] + ')' for i in range(len(FieldList))]
         self.myBatchDialog.ui.comboBox.addItems(field_list)
+        self.myBatchDialog.vgene = self
         self.myBatchDialog.initial = 1
         self.myBatchDialog.ui.comboBox.setCurrentText(field_list[2])
         self.myBatchDialog.BatchSignal.connect(self.updateFieldBatch)

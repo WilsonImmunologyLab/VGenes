@@ -13,8 +13,15 @@
   <property name="windowTitle">
    <string>Know your data</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2">
-   <item row="5" column="2">
+  <layout class="QGridLayout" name="gridLayout_4">
+   <item row="5" column="0" colspan="2">
+    <widget class="QRadioButton" name="radioButton">
+     <property name="text">
+      <string>This column is numerical</string>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="3">
     <widget class="QPushButton" name="pushButtonCancel">
      <property name="maximumSize">
       <size>
@@ -27,7 +34,59 @@
      </property>
     </widget>
    </item>
-   <item row="4" column="0" colspan="4">
+   <item row="0" column="0" colspan="5">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QGridLayout" name="gridLayout_2">
+      <item row="0" column="0">
+       <widget class="QLabel" name="label_2">
+        <property name="text">
+         <string>Focus on:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QRadioButton" name="radioButtonAll">
+        <property name="text">
+         <string>All records</string>
+        </property>
+        <property name="checked">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QRadioButton" name="radioButtonChecked">
+        <property name="text">
+         <string>Checked records</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="7" column="4">
+    <widget class="QPushButton" name="pushButtonOK">
+     <property name="maximumSize">
+      <size>
+       <width>120</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Save Change</string>
+     </property>
+     <property name="default">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0" colspan="5">
     <widget class="QScrollArea" name="scrollArea">
      <property name="widgetResizable">
       <bool>true</bool>
@@ -38,7 +97,7 @@
         <x>0</x>
         <y>0</y>
         <width>575</width>
-        <height>508</height>
+        <height>450</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">
@@ -65,55 +124,7 @@
      </widget>
     </widget>
    </item>
-   <item row="0" column="0">
-    <widget class="QLabel" name="label">
-     <property name="font">
-      <font>
-       <pointsize>15</pointsize>
-      </font>
-     </property>
-     <property name="text">
-      <string>Edit the values of :</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="3">
-    <widget class="QComboBox" name="comboBox"/>
-   </item>
-   <item row="2" column="0" colspan="4">
-    <layout class="QGridLayout" name="gridLayoutFig"/>
-   </item>
-   <item row="5" column="3">
-    <widget class="QPushButton" name="pushButtonOK">
-     <property name="maximumSize">
-      <size>
-       <width>120</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Save Change</string>
-     </property>
-     <property name="default">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="0">
-    <widget class="QRadioButton" name="radioButton">
-     <property name="text">
-      <string>This column is numerical</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1" colspan="3">
-    <widget class="QLineEdit" name="LineEditCutoff">
-     <property name="text">
-      <string>Type cutoff here, seprate by ,  (e.g.  500,600,700)</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="0" colspan="2">
+   <item row="7" column="0" colspan="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -126,7 +137,17 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="3">
+   <item row="4" column="0" colspan="5">
+    <layout class="QGridLayout" name="gridLayoutFig"/>
+   </item>
+   <item row="5" column="2">
+    <widget class="QLineEdit" name="LineEditCutoff">
+     <property name="text">
+      <string>Type cutoff here, seprate by ,  (e.g.  500,600,700)</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="4">
     <widget class="QPushButton" name="DisplayTip">
      <property name="font">
       <font>
@@ -139,7 +160,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0" colspan="3">
+   <item row="3" column="0" colspan="4">
     <widget class="QLabel" name="labelTip">
      <property name="font">
       <font>
@@ -155,6 +176,21 @@
       <bool>false</bool>
      </property>
     </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <pointsize>15</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Edit the values of :</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="1" rowspan="2" colspan="4">
+    <widget class="QComboBox" name="comboBox"/>
    </item>
   </layout>
  </widget>
