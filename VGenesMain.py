@@ -15878,6 +15878,10 @@ class VGenesForm(QtWidgets.QMainWindow):
         HeaderIn = VGenesSQL.RunSQL(DBFilename, HEADERStatement)
         Fields = [i[0] + '  (' + i[1] + ')' for i in HeaderIn]
         self.annoDialog.ui.comboBox2.addItems(Fields)
+        try:
+            self.annoDialog.ui.comboBox2.setCurrentIndex(108)
+        except:
+            pass
 
         num_col = len(horizontalHeader)
         num_row = len(Content)
