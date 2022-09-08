@@ -14,30 +14,73 @@
    <string>Import Annotation from CSV</string>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="4" column="0" colspan="4">
-    <widget class="QTableWidget" name="tableWidget"/>
+   <item row="5" column="5">
+    <widget class="QPushButton" name="pushButtonOK">
+     <property name="maximumSize">
+      <size>
+       <width>80</width>
+       <height>16777215</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>OK</string>
+     </property>
+     <property name="default">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
-   <item row="1" column="0" colspan="4">
+   <item row="1" column="0" colspan="2">
     <widget class="QLabel" name="label_2">
      <property name="text">
       <string>Determine field name for each column (leave blank for columns you don't want):</string>
      </property>
     </widget>
    </item>
-   <item row="5" column="0" colspan="2">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="2" column="4" colspan="2">
+    <widget class="QPushButton" name="pushButtonCopyName">
+     <property name="text">
+      <string>Use field names in my CSV</string>
      </property>
-     <property name="sizeHint" stdset="0">
+    </widget>
+   </item>
+   <item row="5" column="4">
+    <widget class="QPushButton" name="pushButtonCancel">
+     <property name="maximumSize">
       <size>
-       <width>384</width>
-       <height>20</height>
+       <width>80</width>
+       <height>16777215</height>
       </size>
      </property>
-    </spacer>
+     <property name="text">
+      <string>Cancel</string>
+     </property>
+    </widget>
    </item>
-   <item row="0" column="0" colspan="4">
+   <item row="3" column="0">
+    <widget class="QRadioButton" name="radioButton">
+     <property name="text">
+      <string>First row of CSV is Column name</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QRadioButton" name="radioButtonUpdateName">
+     <property name="text">
+      <string>Update Field Nick name</string>
+     </property>
+     <property name="autoExclusive">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="6">
     <widget class="QFrame" name="frame">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
@@ -81,34 +124,53 @@
      </layout>
     </widget>
    </item>
-   <item row="5" column="3">
-    <widget class="QPushButton" name="pushButtonOK">
-     <property name="maximumSize">
-      <size>
-       <width>80</width>
-       <height>16777215</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>OK</string>
-     </property>
-     <property name="default">
-      <bool>true</bool>
-     </property>
-    </widget>
+   <item row="3" column="3" colspan="3">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Annotate:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="radioButtonAll">
+       <property name="text">
+        <string>All</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="radioButtonHC">
+       <property name="text">
+        <string>HC</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="radioButtonLC">
+       <property name="text">
+        <string>LC</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item row="5" column="2">
-    <widget class="QPushButton" name="pushButtonCancel">
-     <property name="maximumSize">
+   <item row="5" column="0" colspan="2">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
       <size>
-       <width>80</width>
-       <height>16777215</height>
+       <width>384</width>
+       <height>20</height>
       </size>
      </property>
-     <property name="text">
-      <string>Cancel</string>
-     </property>
-    </widget>
+    </spacer>
    </item>
    <item row="2" column="0" colspan="2">
     <widget class="QLabel" name="label_4">
@@ -117,35 +179,21 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="2" colspan="2">
-    <widget class="QRadioButton" name="radioButtonUpdateName">
-     <property name="text">
-      <string>Update Field Nick name</string>
-     </property>
-     <property name="autoExclusive">
-      <bool>false</bool>
-     </property>
-    </widget>
+   <item row="4" column="0" colspan="6">
+    <widget class="QTableWidget" name="tableWidget"/>
    </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="QRadioButton" name="radioButton">
-     <property name="text">
-      <string>First row of CSV is Column name</string>
+   <item row="3" column="2">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-     <property name="checked">
-      <bool>true</bool>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
      </property>
-     <property name="autoExclusive">
-      <bool>false</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="2" colspan="2">
-    <widget class="QPushButton" name="pushButtonCopyName">
-     <property name="text">
-      <string>Use field names in my CSV</string>
-     </property>
-    </widget>
+    </spacer>
    </item>
   </layout>
  </widget>

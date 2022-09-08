@@ -433,7 +433,7 @@ class Alignment_thread(QThread):
                 item[11], item[12], item[13], item[14], item[15], item[16])
             DataSet.append(EachIn)
 
-        #Step 2: make HTML
+        # Step 2: make HTML
         self.HCLC_progress.emit(2, 2, 70)
         ErrMsg, html_file = AlignSequencesHTMLBCR(DataSet, '')
 
@@ -5339,6 +5339,7 @@ class annotate_thread(QThread):
         self.DBFilename = ''
         self.dialog = ''
         self.csvFile = ''
+        self.chains = 'All'
 
     def run(self):
         global RealNameList
@@ -5466,7 +5467,17 @@ class annotate_thread(QThread):
 
                 current_anchor = row_content[anchor_col_index]
                 SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
-                SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
+
+                if self.chains == 'All':
+                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '"'
+                elif self.chains == 'HC':
+                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '" AND GeneType IN ("Heavy","Beta","Delta")'
+                elif self.chains == 'LC':
+                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '" AND GeneType NOT IN ("Heavy","Beta","Delta")'
+                else:
+                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '"'
+
+                SQLSTATEMENT = SQLSTATEMENT + WHEREStatement
 
                 try:
                     count += VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
@@ -9507,6 +9518,14 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
         self.workThread.dialog = self
         self.workThread.DBFilename = DBFilename
         self.workThread.csvFile = self.csvFile
+        if self.ui.radioButtonAll.isChecked():
+            self.workThread.chains = 'All'
+        elif self.ui.radioButtonHC.isChecked():
+            self.workThread.chains = 'HC'
+        elif self.ui.radioButtonLC.isChecked():
+            self.workThread.chains = 'LC'
+        else:
+            self.workThread.chains = 'All'
 
         self.workThread.start()
         self.workThread.trigger.connect(self.ShowMessageBox)
