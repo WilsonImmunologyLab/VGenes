@@ -5,21 +5,21 @@ sys.setrecursionlimit(5000)
 block_cipher = None
 
 added_files = [
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Js/*','Js'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Conf/path_setting.txt','Conf'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Conf/RecentPaths.vtx','Conf'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Temp/ErLog.txt','Temp'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Temp/ErLog2.txt','Temp'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/raxml','Tools'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/clustalo','Tools'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/muscle','Tools'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Tools/makeblastdb','Tools'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/Data','Data'),
-             ('/Users/lel4003/Documents/Projects/VGene/VGenes/IgBlast','IgBlast'),
+             ('./Js/*','Js'),
+             ('./Conf/path_setting.txt','Conf'),
+             ('./Conf/RecentPaths.vtx','Conf'),
+             ('./Temp/ErLog.txt','Temp'),
+             ('./Temp/ErLog2.txt','Temp'),
+             ('./Tools/raxml','Tools'),
+             ('./Tools/clustalo','Tools'),
+             ('./Tools/muscle','Tools'),
+             ('./Tools/makeblastdb','Tools'),
+             ('./Data','Data'),
+             ('./IgBlast','IgBlast'),
              ]
 
 a = Analysis(['VGenesMain.py'],
-             pathex=['/Users/lel4003/Documents/Projects/VGene/VGenes'],
+             pathex=['.'],
              binaries=[],
              datas=added_files,
              hiddenimports=['scipy.special.cython_special','cmath'],
@@ -55,6 +55,6 @@ app = BUNDLE(coll,
              icon='mAB.icns',
              bundle_identifier=None,
              info_plist={
-              'NSHumanReadableCopyright':"Copyright @ 2021, Wilson Lab, All Rights Reserved",
+              'NSHumanReadableCopyright':"Copyright @ 2023, Wilson Lab, All Rights Reserved",
               'NSHighResolutionCapable': 'True'
              })
