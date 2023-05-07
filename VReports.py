@@ -453,25 +453,58 @@ def StandardReports(self, option, SequenceName, DBFilename):
         else:
             selected_list = self.CheckedRecords
 
-        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
-        if len(selected_list) == 0:
-            question = 'You did not select any records, export all?'
-            buttons = 'YN'
-            answer = questionMessage(self, question, buttons)
-            if answer == 'Yes':
-                WHEREStatement = ' WHERE 1'
-            else:
-                return
+        query = 'By default, IgBlast will not predict the insertions between V-D and D-J ' \
+                'sequences in these regions will be NNNN. ' \
+                'Would you like to replace these NNNN with the NTs from your BCR sequence?'
+        answer = questionMessage(self, query, 'YNC')
+        if answer == 'Yes':
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+            if len(selected_list) == 0:
+                question = 'You did not select any records, export all?'
+                buttons = 'YN'
+                answer = questionMessage(self, question, buttons)
+                if answer == 'Yes':
+                    WHEREStatement = ' WHERE 1'
+                else:
+                    return
 
-        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
-        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            SQLStatement = 'SELECT SeqName,Sequence,Germlinesequence FROM vgenesdb' + WHEREStatement
+            DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-        FASTAFile = ''
-        for item in DataIs:
-            Seqname = item[0]
-            Sequence = item[1].upper()
-            Sequence = Sequence.replace('-', '')
-            FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
+            FASTAFile = ''
+            for item in DataIs:
+                Seqname = item[0]
+                Sequence = item[1].upper()
+                Germline = item[2].upper()
+
+                position = Germline.find('N')
+                while position != -1:
+                    Germline = Germline[0:position] + Sequence[position:position+1] + Germline[position+1:]
+                    position = Germline.find('N')
+
+                FASTAFile = FASTAFile + '>' + Seqname + '\n' + Germline + '\n'
+        elif answer == 'No':
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+            if len(selected_list) == 0:
+                question = 'You did not select any records, export all?'
+                buttons = 'YN'
+                answer = questionMessage(self, question, buttons)
+                if answer == 'Yes':
+                    WHEREStatement = ' WHERE 1'
+                else:
+                    return
+
+            SQLStatement = 'SELECT SeqName,Germlinesequence FROM vgenesdb' + WHEREStatement
+            DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            FASTAFile = ''
+            for item in DataIs:
+                Seqname = item[0]
+                Sequence = item[1].upper()
+                Sequence = Sequence.replace('-', '')
+                FASTAFile = FASTAFile + '>' + Seqname + '\n' + Sequence + '\n'
+        elif answer == 'Cancel':
+            return
 
         Pathname = saveFile(self, 'FASTA')
         if Pathname == None:
@@ -491,26 +524,59 @@ def StandardReports(self, option, SequenceName, DBFilename):
         else:
             selected_list = self.CheckedRecords
 
-        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
-        if len(selected_list) == 0:
-            question = 'You did not select any records, export all?'
-            buttons = 'YN'
-            answer = questionMessage(self, question, buttons)
-            if answer == 'Yes':
-                WHEREStatement = ' WHERE 1'
-            else:
-                return
+        query = 'By default, IgBlast will not predict the insertions between V-D and D-J ' \
+                'sequences in these regions will be NNNN. ' \
+                'Would you like to replace these NNNN with the NTs from your BCR sequence?'
+        answer = questionMessage(self, query, 'YNC')
+        if answer == 'Yes':
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+            if len(selected_list) == 0:
+                question = 'You did not select any records, export all?'
+                buttons = 'YN'
+                answer = questionMessage(self, question, buttons)
+                if answer == 'Yes':
+                    WHEREStatement = ' WHERE 1'
+                else:
+                    return
 
-        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
-        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            SQLStatement = 'SELECT SeqName,Sequence,Germlinesequence FROM vgenesdb' + WHEREStatement
+            DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
-        FASTAFile = ''
-        for item in DataIs:
-            Seqname = item[0]
-            Sequence = item[1].upper()
-            Sequence = Sequence.replace('-', '')
-            AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
-            FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
+            FASTAFile = ''
+            for item in DataIs:
+                Seqname = item[0]
+                Sequence = item[1].upper()
+                Germline = item[2].upper()
+
+                position = Germline.find('N')
+                while position != -1:
+                    Germline = Germline[0:position] + Sequence[position:position + 1] + Germline[position + 1:]
+                    position = Germline.find('N')
+                AASeq, ErMessage = VGenesSeq.Translator(Germline, 0)
+                FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
+        elif answer == 'No':
+            WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+            if len(selected_list) == 0:
+                question = 'You did not select any records, export all?'
+                buttons = 'YN'
+                answer = questionMessage(self, question, buttons)
+                if answer == 'Yes':
+                    WHEREStatement = ' WHERE 1'
+                else:
+                    return
+
+            SQLStatement = 'SELECT SeqName,Germlinesequence FROM vgenesdb' + WHEREStatement
+            DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+            FASTAFile = ''
+            for item in DataIs:
+                Seqname = item[0]
+                Sequence = item[1].upper()
+                Sequence = Sequence.replace('-', '')
+                AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
+                FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
+        elif answer == 'Cancel':
+            return
 
         Pathname = saveFile(self, 'FASTA')
         if Pathname == None:
