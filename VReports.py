@@ -525,8 +525,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
             selected_list = self.CheckedRecords
 
         query = 'By default, IgBlast will not predict the insertions between V-D and D-J ' \
-                'sequences in these regions will be NNNN. ' \
-                'Would you like to replace these NNNN with the NTs from your BCR sequence?'
+                'AA sequences in these regions will be XXX. ' \
+                'Would you like to replace these XXX with the AAs from your BCR sequence?'
         answer = questionMessage(self, query, 'YNC')
         if answer == 'Yes':
             WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
@@ -574,6 +574,8 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 Sequence = item[1].upper()
                 Sequence = Sequence.replace('-', '')
                 AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
+                AASeq = re.sub(r'\W','X',AASeq)
+                AASeq = AASeq.strip('X')
                 FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
         elif answer == 'Cancel':
             return
