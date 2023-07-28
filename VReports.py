@@ -1659,9 +1659,9 @@ def StandardReports(self, option, SequenceName, DBFilename):
                     else:
                         # check all possible segment:
                         find_tag = False
-                        for i in range(1,len(split_res)-1):
+                        for i in range(1,len(split_res)):
                             leader_seq = ''
-                            for j in range(i,len(split_res)-1):
+                            for j in range(i,len(split_res)):
                                 leader_seq += 'atg' + split_res[j].lower()
                             if len(leader_seq) % 3 == 0 and len(leader_seq) > 50 and len(leader_seq) < 65:
                                 Seq_count += 1
@@ -1687,7 +1687,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
 
         self.ShowVGenesText(ErlogFile)
         msg = 'Among ' + str(len(DataIs)) + ' records you selected, we found leader seq + VDJ for ' + str(Seq_count) + \
-              ' records, and can not find leader seq + VDJ for ' + str(Err_count) + ' records. Please becareful with ' \
+              ' records, and can not find leader seq + VDJ for ' + str(Err_count) + ' records. \n\nPlease becareful with ' \
                                                                                     'the end of J sequences, some of them may miss the last NT'
         QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 
