@@ -1592,6 +1592,106 @@ def StandardReports(self, option, SequenceName, DBFilename):
                                 QMessageBox.Ok)
             return
         '''
+    elif option == 'V(D)J with Leader Sequences':
+        # fetch vdj sequence and raw sequence
+        # this method is strange for some sequences, need improvement in the future
+        if self.ui.tabWidget.currentIndex() == 11:
+            if len(self.AntibodyCandidates) == 0:
+                selected_list = self.CheckedRecords
+            else:
+                selected_list = self.AntibodyCandidates
+        else:
+            selected_list = self.CheckedRecords
+
+        WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(selected_list) + '")'
+        if len(selected_list) == 0:
+            question = 'You did not select any records, export all?'
+            buttons = 'YN'
+            answer = questionMessage(self, question, buttons)
+            if answer == 'Yes':
+                WHEREStatement = ' WHERE 1'
+            else:
+                return
+
+        SQLStatement = 'SELECT SeqName,Sequence,Blank20,Vbeg,Jend FROM vgenesdb' + WHEREStatement
+        DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+
+        FASTAFile = ''
+        ErrMsg = ''
+        Seq_count = 0
+        Err_count = 0
+        
+        for item in DataIs:
+            Seqname = item[0]
+            Sequence = item[1]
+            Sequence = Sequence.replace('-', '')
+            raw_seq = item[2]
+            Vbeg = int(item[3]) - 1
+            Jend = int(item[4]) - 1
+
+            if len(raw_seq) <= len(Sequence):
+                Err_count += 1
+                ErrMsg += Seqname + ' there is no raw sequence for this record or ' \
+                                    'raw seq length is smaller than that of VDJ sequence\n'
+                continue
+            else:
+                vdj_seq = Sequence[Vbeg:Jend]
+                res = raw_seq.split(vdj_seq)
+                if len(res) != 2:
+                    Err_count += 1
+                    ErrMsg += Seqname + ' Sequence error, can not find the vdj sequence in the raw sequence\n'
+                else:
+                    pre_vdj = res[0]
+                    totlen = len(pre_vdj)
+                    split_res = pre_vdj.split('ATG')
+                    if len(split_res) == 1:
+                        Err_count += 1
+                        ErrMsg += Seqname + ' Sequence error, can not find ATG pattern in NT sequence before VDJ\n'
+                    elif len(split_res) == 2:
+                        if len(split_res[1]) % 3 == 0 and len(split_res[1]) > 50 and len(split_res[1]) < 65:
+                            Seq_count += 1
+                            leader_seq = 'atg' + split_res[1].lower()
+                            FASTAFile += '>' + Seqname + '\n' + leader_seq + vdj_seq.upper() + '\n'
+                        else:
+                            Err_count += 1
+                            ErrMsg += Seqname + ' Sequence error, can not find appropriate ATG pattern ' \
+                                                'in NT sequence before VDJ\n'
+                    else:
+                        # check all possible segment:
+                        find_tag = False
+                        for i in range(1,len(split_res)-1):
+                            leader_seq = ''
+                            for j in range(i,len(split_res)-1):
+                                leader_seq += 'atg' + split_res[j].lower()
+                            if len(leader_seq) % 3 == 0 and len(leader_seq) > 50 and len(leader_seq) < 65:
+                                Seq_count += 1
+                                leader_seq = 'atg' + split_res[1].lower()
+                                FASTAFile += '>' + Seqname + '\n' + leader_seq + vdj_seq.upper() + '\n'
+                                find_tag = True
+                                break
+                        if find_tag == False:
+                            Err_count += 1
+                            ErrMsg += Seqname + ' Sequence error, can not find appropriate ATG pattern ' \
+                                                'in NT sequence before VDJ\n'
+
+        Pathname = saveFile(self, 'FASTA')
+        if Pathname == None:
+            return
+
+        with open(Pathname, 'w') as currentfile:
+            currentfile.write(FASTAFile)
+
+        ErlogFile = Pathname + '_Errorlog.txt'
+        with open(ErlogFile, 'w') as currentfile:
+            currentfile.write(ErrMsg)
+
+        self.ShowVGenesText(ErlogFile)
+        msg = 'Among ' + str(len(DataIs)) + ' records you selected, we found leader seq + VDJ for ' + str(Seq_count) + \
+              ' records, and can not find leader seq + VDJ for ' + str(Err_count) + ' records. Please becareful with ' \
+                                                                                    'the end of J sequences, some of them may miss the last NT'
+        QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
+
+
     elif option == 'Custom report':
         pass
     elif option == 'Count AA mutations':
@@ -1752,7 +1852,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
                 Vbeg = int(records[3])
                 Jend = int(records[4])
 
-                VDJseq = Sequence[Vbeg - 1:Jend]
+                VDJseq = Sequence[Vbeg - 1:Jend -1]
                 VDJseq = re.sub(r'\W+','',VDJseq)   # remove all alignment gaps
 
                 JendSeq = VDJseq[-6:]

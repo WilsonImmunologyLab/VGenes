@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>1683</width>
-    <height>1096</height>
+    <height>970</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -188,7 +188,7 @@
                <string>Search</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
               </property>
               <property name="iconSize">
@@ -224,7 +224,7 @@
 Select</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/bar_chart.png</normaloff>:/PNG-Icons/bar_chart.png</iconset>
               </property>
               <property name="iconSize">
@@ -251,7 +251,7 @@ Select</string>
 Search</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
               </property>
               <property name="iconSize">
@@ -289,7 +289,7 @@ Search</string>
           <string/>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="Resources/VgenesResources.qrc">
            <normaloff>:/PNG-Icons/computer_mouse.png</normaloff>:/PNG-Icons/computer_mouse.png</iconset>
          </property>
          <property name="iconSize">
@@ -389,7 +389,7 @@ Search</string>
 Record</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
             </property>
             <property name="iconSize">
@@ -649,7 +649,7 @@ Record</string>
 Edit</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
             </property>
             <property name="iconSize">
@@ -699,7 +699,7 @@ Edit</string>
              <string>Lock</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
             </property>
             <property name="iconSize">
@@ -827,6 +827,11 @@ Edit</string>
               <string>Sequence for GibsonClone</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>V(D)J with Leader Sequences</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="0" column="2">
@@ -882,7 +887,7 @@ Edit</string>
              <string/>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/Query.png</normaloff>:/PNG-Icons/Query.png</iconset>
             </property>
             <property name="iconSize">
@@ -933,7 +938,7 @@ Edit</string>
 DataViewer</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/scatter.png</normaloff>:/PNG-Icons/scatter.png</iconset>
            </property>
            <property name="iconSize">
@@ -960,7 +965,7 @@ DataViewer</string>
 DataViewer</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/hist.png</normaloff>:/PNG-Icons/hist.png</iconset>
            </property>
            <property name="iconSize">
@@ -987,7 +992,7 @@ DataViewer</string>
 DataViewer</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/bar.png</normaloff>:/PNG-Icons/bar.png</iconset>
            </property>
            <property name="iconSize">
@@ -1014,7 +1019,7 @@ DataViewer</string>
 DataViewer</string>
            </property>
            <property name="icon">
-            <iconset>
+            <iconset resource="Resources/VgenesResources.qrc">
              <normaloff>:/PNG-Icons/heat.png</normaloff>:/PNG-Icons/heat.png</iconset>
            </property>
            <property name="iconSize">
@@ -1082,7 +1087,7 @@ DataViewer</string>
           <string>Quick mark</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="Resources/VgenesResources.qrc">
            <normaloff>:/PNG-Icons/comment.png</normaloff>:/PNG-Icons/comment.png</iconset>
          </property>
          <property name="flat">
@@ -1102,7 +1107,7 @@ DataViewer</string>
           <string>Clear Check</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="Resources/VgenesResources.qrc">
            <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
          </property>
          <property name="iconSize">
@@ -1128,7 +1133,7 @@ DataViewer</string>
           <string>Update tree</string>
          </property>
          <property name="icon">
-          <iconset>
+          <iconset resource="Resources/VgenesResources.qrc">
            <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
          </property>
          <property name="iconSize">
@@ -1243,10 +1248,10 @@ DataViewer</string>
       <attribute name="headerCascadingSectionResizes">
        <bool>false</bool>
       </attribute>
-      <attribute name="headerMinimumSectionSize">
+      <attribute name="headerDefaultSectionSize">
        <number>500</number>
       </attribute>
-      <attribute name="headerDefaultSectionSize">
+      <attribute name="headerMinimumSectionSize">
        <number>500</number>
       </attribute>
       <column>
@@ -1304,7 +1309,7 @@ DataViewer</string>
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -1338,7 +1343,7 @@ DataViewer</string>
            <string>Table</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
           </property>
           <property name="iconSize">
@@ -1490,7 +1495,7 @@ DataViewer</string>
              <string>Refresh</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
             </property>
             <property name="iconSize">
@@ -1545,7 +1550,7 @@ DataViewer</string>
 Mark</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/comment.png</normaloff>:/PNG-Icons/comment.png</iconset>
           </property>
           <property name="iconSize">
@@ -1593,7 +1598,7 @@ Mark</string>
 Edit</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
           </property>
           <property name="iconSize">
@@ -1623,7 +1628,7 @@ Edit</string>
 values </string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/SelectSimilar.png</normaloff>:/PNG-Icons/SelectSimilar.png</iconset>
           </property>
           <property name="iconSize">
@@ -1653,7 +1658,7 @@ values </string>
 locked</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
           </property>
           <property name="iconSize">
@@ -1682,7 +1687,7 @@ locked</string>
            <string>Refresh</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
           </property>
           <property name="iconSize">
@@ -1712,7 +1717,7 @@ locked</string>
 DB</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
           </property>
           <property name="iconSize">
@@ -1742,7 +1747,7 @@ DB</string>
 fields</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/settings.png</normaloff>:/PNG-Icons/settings.png</iconset>
           </property>
           <property name="iconSize">
@@ -1763,7 +1768,7 @@ fields</string>
 Check</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
           </property>
           <property name="iconSize">
@@ -1794,7 +1799,7 @@ Check</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1299</width>
+             <width>1278</width>
              <height>821</height>
             </rect>
            </property>
@@ -4515,7 +4520,7 @@ Check</string>
               <string>Edit</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
              </property>
              <property name="iconSize">
@@ -4559,7 +4564,7 @@ Check</string>
               <string>Save</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/SaveIcon.png</normaloff>:/PNG-Icons/SaveIcon.png</iconset>
              </property>
              <property name="iconSize">
@@ -4607,7 +4612,7 @@ Check</string>
               <string>Copy</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/Duplicate.png</normaloff>:/PNG-Icons/Duplicate.png</iconset>
              </property>
              <property name="iconSize">
@@ -4648,7 +4653,7 @@ Check</string>
               <string>Extract</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/Insert.png</normaloff>:/PNG-Icons/Insert.png</iconset>
              </property>
              <property name="iconSize">
@@ -4700,7 +4705,7 @@ Check</string>
 as</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/SaveAsIcon.png</normaloff>:/PNG-Icons/SaveAsIcon.png</iconset>
              </property>
              <property name="iconSize">
@@ -4728,7 +4733,7 @@ as</string>
 Edit</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
              </property>
              <property name="iconSize">
@@ -4811,7 +4816,7 @@ Edit</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1299</width>
+             <width>1278</width>
              <height>750</height>
             </rect>
            </property>
@@ -6083,7 +6088,7 @@ Edit</string>
                  <string>Copy selected DNA sequence</string>
                 </property>
                 <property name="icon">
-                 <iconset>
+                 <iconset resource="Resources/VgenesResources.qrc">
                   <normaloff>:/PNG-Icons/pages.png</normaloff>:/PNG-Icons/pages.png</iconset>
                 </property>
                 <property name="flat">
@@ -6097,7 +6102,7 @@ Edit</string>
                  <string>Copy selected AA sequence</string>
                 </property>
                 <property name="icon">
-                 <iconset>
+                 <iconset resource="Resources/VgenesResources.qrc">
                   <normaloff>:/PNG-Icons/pages.png</normaloff>:/PNG-Icons/pages.png</iconset>
                 </property>
                 <property name="flat">
@@ -6248,7 +6253,7 @@ Edit</string>
                   <string/>
                  </property>
                  <property name="pixmap">
-                  <pixmap>:/PNG-Icons/ScalePic.png</pixmap>
+                  <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/ScalePic.png</pixmap>
                  </property>
                  <property name="scaledContents">
                   <bool>true</bool>
@@ -6699,7 +6704,7 @@ Edit</string>
 report</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/page.png</normaloff>:/PNG-Icons/page.png</iconset>
              </property>
              <property name="iconSize">
@@ -6748,8 +6753,8 @@ window</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1299</width>
-             <height>911</height>
+             <width>1278</width>
+             <height>908</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_58">
@@ -7358,15 +7363,6 @@ p, li { white-space: pre-wrap; }
                       </color>
                      </brush>
                     </colorrole>
-                    <colorrole role="PlaceholderText">
-                     <brush brushstyle="NoBrush">
-                      <color alpha="128">
-                       <red>252</red>
-                       <green>1</green>
-                       <blue>7</blue>
-                      </color>
-                     </brush>
-                    </colorrole>
                    </active>
                    <inactive>
                     <colorrole role="WindowText">
@@ -7390,15 +7386,6 @@ p, li { white-space: pre-wrap; }
                     <colorrole role="ButtonText">
                      <brush brushstyle="SolidPattern">
                       <color alpha="255">
-                       <red>252</red>
-                       <green>1</green>
-                       <blue>7</blue>
-                      </color>
-                     </brush>
-                    </colorrole>
-                    <colorrole role="PlaceholderText">
-                     <brush brushstyle="NoBrush">
-                      <color alpha="128">
                        <red>252</red>
                        <green>1</green>
                        <blue>7</blue>
@@ -7431,15 +7418,6 @@ p, li { white-space: pre-wrap; }
                        <red>148</red>
                        <green>148</green>
                        <blue>148</blue>
-                      </color>
-                     </brush>
-                    </colorrole>
-                    <colorrole role="PlaceholderText">
-                     <brush brushstyle="NoBrush">
-                      <color alpha="128">
-                       <red>252</red>
-                       <green>1</green>
-                       <blue>7</blue>
                       </color>
                      </brush>
                     </colorrole>
@@ -7503,15 +7481,6 @@ IF V-begin is off, the sequence may be truncated on the 5' end</string>
                       </color>
                      </brush>
                     </colorrole>
-                    <colorrole role="PlaceholderText">
-                     <brush brushstyle="NoBrush">
-                      <color alpha="128">
-                       <red>252</red>
-                       <green>1</green>
-                       <blue>7</blue>
-                      </color>
-                     </brush>
-                    </colorrole>
                    </active>
                    <inactive>
                     <colorrole role="WindowText">
@@ -7535,15 +7504,6 @@ IF V-begin is off, the sequence may be truncated on the 5' end</string>
                     <colorrole role="ButtonText">
                      <brush brushstyle="SolidPattern">
                       <color alpha="255">
-                       <red>252</red>
-                       <green>1</green>
-                       <blue>7</blue>
-                      </color>
-                     </brush>
-                    </colorrole>
-                    <colorrole role="PlaceholderText">
-                     <brush brushstyle="NoBrush">
-                      <color alpha="128">
                        <red>252</red>
                        <green>1</green>
                        <blue>7</blue>
@@ -7576,15 +7536,6 @@ IF V-begin is off, the sequence may be truncated on the 5' end</string>
                        <red>148</red>
                        <green>148</green>
                        <blue>148</blue>
-                      </color>
-                     </brush>
-                    </colorrole>
-                    <colorrole role="PlaceholderText">
-                     <brush brushstyle="NoBrush">
-                      <color alpha="128">
-                       <red>252</red>
-                       <green>1</green>
-                       <blue>7</blue>
                       </color>
                      </brush>
                     </colorrole>
@@ -7985,7 +7936,7 @@ If the J-end is off the J gene end may need adjusted</string>
 Figure</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/cloud_download.png</normaloff>:/PNG-Icons/cloud_download.png</iconset>
             </property>
             <property name="iconSize">
@@ -8021,7 +7972,7 @@ Figure</string>
 Figure</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
             </property>
             <property name="iconSize">
@@ -8824,7 +8775,7 @@ Figure</string>
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap>:/PNG-Icons/right_arrow.png</pixmap>
+                 <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/right_arrow.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -8849,7 +8800,7 @@ Figure</string>
                  <string/>
                 </property>
                 <property name="pixmap">
-                 <pixmap>:/PNG-Icons/right_arrow.png</pixmap>
+                 <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/right_arrow.png</pixmap>
                 </property>
                 <property name="scaledContents">
                  <bool>true</bool>
@@ -9208,7 +9159,7 @@ Logo</string>
 Logo</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/MKPR.png</normaloff>:/PNG-Icons/MKPR.png</iconset>
           </property>
           <property name="iconSize">
@@ -9277,7 +9228,7 @@ Logo</string>
 Logo</string>
           </property>
           <property name="icon">
-           <iconset>
+           <iconset resource="Resources/VgenesResources.qrc">
             <normaloff>:/PNG-Icons/ATCG.png</normaloff>:/PNG-Icons/ATCG.png</iconset>
           </property>
           <property name="iconSize">
@@ -9340,7 +9291,7 @@ Scheme:</string>
       </widget>
       <widget class="QWidget" name="tab_4">
        <attribute name="icon">
-        <iconset>
+        <iconset resource="Resources/VgenesResources.qrc">
          <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
        </attribute>
        <attribute name="title">
@@ -9379,7 +9330,7 @@ Scheme:</string>
                <string>Load IgPhyML results</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/page.png</normaloff>:/PNG-Icons/page.png</iconset>
               </property>
               <property name="iconSize">
@@ -9432,7 +9383,7 @@ Scheme:</string>
                <string>Load Newick tree file</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/page.png</normaloff>:/PNG-Icons/page.png</iconset>
               </property>
               <property name="iconSize">
@@ -9479,7 +9430,7 @@ Scheme:</string>
                <string>Build clone phylogeny with RAxML</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
               </property>
               <property name="iconSize">
@@ -9548,7 +9499,7 @@ Scheme:</string>
                <string>Build phylogeny with RAxML</string>
               </property>
               <property name="icon">
-               <iconset>
+               <iconset resource="Resources/VgenesResources.qrc">
                 <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
               </property>
               <property name="iconSize">
@@ -9602,7 +9553,7 @@ Scheme:</string>
       </widget>
       <widget class="QWidget" name="tab_7">
        <attribute name="icon">
-        <iconset>
+        <iconset resource="Resources/VgenesResources.qrc">
          <normaloff>:/PNG-Icons/Clonal.png</normaloff>:/PNG-Icons/Clonal.png</iconset>
        </attribute>
        <attribute name="title">
@@ -9644,7 +9595,7 @@ Scheme:</string>
 Public</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
              </property>
              <property name="iconSize">
@@ -9714,7 +9665,7 @@ only</string>
 for current clone</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/pairClone.png</normaloff>:/PNG-Icons/pairClone.png</iconset>
              </property>
              <property name="iconSize">
@@ -9753,7 +9704,7 @@ for current clone</string>
               <string>Refresh</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/refresh.png</normaloff>:/PNG-Icons/refresh.png</iconset>
              </property>
              <property name="iconSize">
@@ -9975,7 +9926,7 @@ for current clone</string>
               <string>Check this clone</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/check.png</normaloff>:/PNG-Icons/check.png</iconset>
              </property>
              <property name="iconSize">
@@ -10027,7 +9978,7 @@ for current clone</string>
                    <string>Draw        </string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="Resources/VgenesResources.qrc">
                     <normaloff>:/PNG-Icons/chart.png</normaloff>:/PNG-Icons/chart.png</iconset>
                   </property>
                   <property name="iconSize">
@@ -10060,7 +10011,7 @@ for current clone</string>
 Figure</string>
                   </property>
                   <property name="icon">
-                   <iconset>
+                   <iconset resource="Resources/VgenesResources.qrc">
                     <normaloff>:/PNG-Icons/cloud_download.png</normaloff>:/PNG-Icons/cloud_download.png</iconset>
                   </property>
                   <property name="iconSize">
@@ -10294,7 +10245,7 @@ Figure</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="Resources/VgenesResources.qrc">
                       <normaloff>:/PNG-Icons/MKPR.png</normaloff>:/PNG-Icons/MKPR.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -10361,7 +10312,7 @@ Figure</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="Resources/VgenesResources.qrc">
                       <normaloff>:/PNG-Icons/ATCG.png</normaloff>:/PNG-Icons/ATCG.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -10507,7 +10458,7 @@ popup window</string>
 Identity</string>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="Resources/VgenesResources.qrc">
                       <normaloff>:/PNG-Icons/SeqID.png</normaloff>:/PNG-Icons/SeqID.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -10542,7 +10493,7 @@ Identity</string>
                      <string>MSA</string>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="Resources/VgenesResources.qrc">
                       <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -10585,7 +10536,7 @@ Identity</string>
 Report</string>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="Resources/VgenesResources.qrc">
                       <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -10620,7 +10571,7 @@ Report</string>
                      <string/>
                     </property>
                     <property name="icon">
-                     <iconset>
+                     <iconset resource="Resources/VgenesResources.qrc">
                       <normaloff>:/PNG-Icons/Muli.png</normaloff>:/PNG-Icons/Muli.png</iconset>
                     </property>
                     <property name="iconSize">
@@ -10690,7 +10641,7 @@ Report</string>
       </widget>
       <widget class="QWidget" name="tab_14">
        <attribute name="icon">
-        <iconset>
+        <iconset resource="Resources/VgenesResources.qrc">
          <normaloff>:/PNG-Icons/mAB.png</normaloff>:/PNG-Icons/mAB.png</iconset>
        </attribute>
        <attribute name="title">
@@ -10783,7 +10734,7 @@ Report</string>
 Plot</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/Heatmap.png</normaloff>:/PNG-Icons/Heatmap.png</iconset>
              </property>
              <property name="iconSize">
@@ -10810,7 +10761,7 @@ Plot</string>
 details</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/database.png</normaloff>:/PNG-Icons/database.png</iconset>
              </property>
              <property name="iconSize">
@@ -10847,7 +10798,7 @@ details</string>
 Plot</string>
              </property>
              <property name="icon">
-              <iconset>
+              <iconset resource="Resources/VgenesResources.qrc">
                <normaloff>:/PNG-Icons/Circo.png</normaloff>:/PNG-Icons/Circo.png</iconset>
              </property>
              <property name="iconSize">
@@ -10912,7 +10863,7 @@ Plot</string>
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>:/PNG-Icons/mAB.png</pixmap>
+             <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/mAB.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -10966,7 +10917,7 @@ Plot</string>
 all</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/check.png</normaloff>:/PNG-Icons/check.png</iconset>
             </property>
             <property name="iconSize">
@@ -10996,7 +10947,7 @@ all</string>
 Report</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
             </property>
             <property name="iconSize">
@@ -11026,7 +10977,7 @@ Report</string>
 Alignment</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
             </property>
             <property name="iconSize">
@@ -11056,7 +11007,7 @@ Alignment</string>
 Tree</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
             </property>
             <property name="iconSize">
@@ -11092,7 +11043,7 @@ Tree</string>
              <string/>
             </property>
             <property name="pixmap">
-             <pixmap>:/PNG-Icons/mAB.png</pixmap>
+             <pixmap resource="Resources/VgenesResources.qrc">:/PNG-Icons/mAB.png</pixmap>
             </property>
             <property name="scaledContents">
              <bool>true</bool>
@@ -11140,7 +11091,7 @@ Tree</string>
 all</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/check.png</normaloff>:/PNG-Icons/check.png</iconset>
             </property>
             <property name="iconSize">
@@ -11170,7 +11121,7 @@ all</string>
 Report</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/NA.png</normaloff>:/PNG-Icons/NA.png</iconset>
             </property>
             <property name="iconSize">
@@ -11200,7 +11151,7 @@ Report</string>
 Alignment</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
             </property>
             <property name="iconSize">
@@ -11230,7 +11181,7 @@ Alignment</string>
 Tree</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
             </property>
             <property name="iconSize">
@@ -11423,7 +11374,7 @@ Tree</string>
              <string>Clear list</string>
             </property>
             <property name="icon">
-             <iconset>
+             <iconset resource="Resources/VgenesResources.qrc">
               <normaloff>:/PNG-Icons/block.png</normaloff>:/PNG-Icons/block.png</iconset>
             </property>
            </widget>
@@ -11434,7 +11385,7 @@ Tree</string>
       </widget>
       <widget class="QWidget" name="tab_15">
        <attribute name="icon">
-        <iconset>
+        <iconset resource="Resources/VgenesResources.qrc">
          <normaloff>:/PNG-Icons/SHM.png</normaloff>:/PNG-Icons/SHM.png</iconset>
        </attribute>
        <attribute name="title">
@@ -11731,7 +11682,7 @@ Tree</string>
      <x>0</x>
      <y>0</y>
      <width>1683</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="defaultUp">
@@ -11946,7 +11897,7 @@ Tree</string>
   </widget>
   <action name="action_Open">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/folder.png</normaloff>:/PNG-Icons/folder.png</iconset>
    </property>
    <property name="text">
@@ -11958,7 +11909,7 @@ Tree</string>
   </action>
   <action name="action_New">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/page.png</normaloff>
      <normalon>../../../../../Applications/Python 3.4/PyQt-gpl-5.3.1/examples/mainwindows/mdi/images/new.png</normalon>:/PNG-Icons/page.png</iconset>
    </property>
@@ -11974,7 +11925,7 @@ Tree</string>
   </action>
   <action name="action_Import">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Import1.png</normaloff>:/PNG-Icons/Import1.png</iconset>
    </property>
    <property name="text">
@@ -11989,7 +11940,7 @@ Tree</string>
   </action>
   <action name="actionExport">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Export1.png</normaloff>:/PNG-Icons/Export1.png</iconset>
    </property>
    <property name="text">
@@ -11998,7 +11949,7 @@ Tree</string>
   </action>
   <action name="actionIMGT">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/IMGT.png</normaloff>:/PNG-Icons/IMGT.png</iconset>
    </property>
    <property name="text">
@@ -12007,7 +11958,7 @@ Tree</string>
   </action>
   <action name="actionIgBlast">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/NCBI.png</normaloff>:/PNG-Icons/NCBI.png</iconset>
    </property>
    <property name="text">
@@ -12016,7 +11967,7 @@ Tree</string>
   </action>
   <action name="actionAnalyze_Mutations">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SHM.png</normaloff>:/PNG-Icons/SHM.png</iconset>
    </property>
    <property name="text">
@@ -12025,7 +11976,7 @@ Tree</string>
   </action>
   <action name="actionMultiple_Alignement">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Muli.png</normaloff>:/PNG-Icons/Muli.png</iconset>
    </property>
    <property name="text">
@@ -12034,7 +11985,7 @@ Tree</string>
   </action>
   <action name="actionAlignment">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Align.png</normaloff>:/PNG-Icons/Align.png</iconset>
    </property>
    <property name="text">
@@ -12046,7 +11997,7 @@ Tree</string>
   </action>
   <action name="actionPreferences">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/process.png</normaloff>:/PNG-Icons/process.png</iconset>
    </property>
    <property name="text">
@@ -12055,7 +12006,7 @@ Tree</string>
   </action>
   <action name="actionPrint">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/print.png</normaloff>:/PNG-Icons/print.png</iconset>
    </property>
    <property name="text">
@@ -12067,7 +12018,7 @@ Tree</string>
   </action>
   <action name="actionPaste_from_Clipboard">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Paste.png</normaloff>:/PNG-Icons/Paste.png</iconset>
    </property>
    <property name="text">
@@ -12076,7 +12027,7 @@ Tree</string>
   </action>
   <action name="actionCopy">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/pages.png</normaloff>:/PNG-Icons/pages.png</iconset>
    </property>
    <property name="text">
@@ -12088,7 +12039,7 @@ Tree</string>
   </action>
   <action name="actionCut">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/scissor.png</normaloff>:/PNG-Icons/scissor.png</iconset>
    </property>
    <property name="text">
@@ -12100,7 +12051,7 @@ Tree</string>
   </action>
   <action name="actionPaste">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Paste.png</normaloff>:/PNG-Icons/Paste.png</iconset>
    </property>
    <property name="text">
@@ -12112,7 +12063,7 @@ Tree</string>
   </action>
   <action name="action_Save">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SaveIcon.png</normaloff>:/PNG-Icons/SaveIcon.png</iconset>
    </property>
    <property name="text">
@@ -12124,7 +12075,7 @@ Tree</string>
   </action>
   <action name="actionAbout_2">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/warning.png</normaloff>:/PNG-Icons/warning.png</iconset>
    </property>
    <property name="text">
@@ -12133,7 +12084,7 @@ Tree</string>
   </action>
   <action name="action_Help">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/help.png</normaloff>:/PNG-Icons/help.png</iconset>
    </property>
    <property name="text">
@@ -12142,7 +12093,7 @@ Tree</string>
   </action>
   <action name="actionTop">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/top.png</normaloff>:/PNG-Icons/top.png</iconset>
    </property>
    <property name="text">
@@ -12157,7 +12108,7 @@ Tree</string>
   </action>
   <action name="actionBottom">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/buttom.png</normaloff>:/PNG-Icons/buttom.png</iconset>
    </property>
    <property name="text">
@@ -12172,7 +12123,7 @@ Tree</string>
   </action>
   <action name="actionMove_Up">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/up.png</normaloff>:/PNG-Icons/up.png</iconset>
    </property>
    <property name="text">
@@ -12187,7 +12138,7 @@ Tree</string>
   </action>
   <action name="actionMove_Down">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/down.png</normaloff>:/PNG-Icons/down.png</iconset>
    </property>
    <property name="text">
@@ -12202,7 +12153,7 @@ Tree</string>
   </action>
   <action name="actionFind_Clonal">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Clonal.png</normaloff>:/PNG-Icons/Clonal.png</iconset>
    </property>
    <property name="text">
@@ -12211,7 +12162,7 @@ Tree</string>
   </action>
   <action name="actionSave_As">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SaveAsIcon.png</normaloff>:/PNG-Icons/SaveAsIcon.png</iconset>
    </property>
    <property name="text">
@@ -12220,7 +12171,7 @@ Tree</string>
   </action>
   <action name="actionDelete_record">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/delete.png</normaloff>:/PNG-Icons/delete.png</iconset>
    </property>
    <property name="text">
@@ -12260,7 +12211,7 @@ Tree</string>
   </action>
   <action name="actionIncrease_font_size">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/plus.png</normaloff>:/PNG-Icons/plus.png</iconset>
    </property>
    <property name="text">
@@ -12272,7 +12223,7 @@ Tree</string>
   </action>
   <action name="actionDecrease_font_size">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/minus.png</normaloff>:/PNG-Icons/minus.png</iconset>
    </property>
    <property name="text">
@@ -12289,7 +12240,7 @@ Tree</string>
   </action>
   <action name="actionCreateVDJdb">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/address_book.png</normaloff>:/PNG-Icons/address_book.png</iconset>
    </property>
    <property name="text">
@@ -12369,7 +12320,7 @@ Tree</string>
   </action>
   <action name="actionSuggestCanonical">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/checkmark.png</normaloff>:/PNG-Icons/checkmark.png</iconset>
    </property>
    <property name="text">
@@ -12381,7 +12332,7 @@ Tree</string>
   </action>
   <action name="actionRevert_to_previous">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/rewind.png</normaloff>:/PNG-Icons/rewind.png</iconset>
    </property>
    <property name="text">
@@ -12393,7 +12344,7 @@ Tree</string>
   </action>
   <action name="actionAnalyze_Isotypes">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/yen_currency_sign.png</normaloff>:/PNG-Icons/yen_currency_sign.png</iconset>
    </property>
    <property name="text">
@@ -12433,7 +12384,7 @@ Tree</string>
   </action>
   <action name="actionAlignmentHTML">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/MSA.png</normaloff>:/PNG-Icons/MSA.png</iconset>
    </property>
    <property name="text">
@@ -12445,7 +12396,7 @@ Tree</string>
   </action>
   <action name="actionEditLock">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/locked.png</normaloff>:/PNG-Icons/locked.png</iconset>
    </property>
    <property name="text">
@@ -12454,7 +12405,7 @@ Tree</string>
   </action>
   <action name="actionclearTrash">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/bin.png</normaloff>:/PNG-Icons/bin.png</iconset>
    </property>
    <property name="text">
@@ -12463,7 +12414,7 @@ Tree</string>
   </action>
   <action name="actionImport_Annotate">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/edit.png</normaloff>:/PNG-Icons/edit.png</iconset>
    </property>
    <property name="text">
@@ -12480,7 +12431,7 @@ Tree</string>
   </action>
   <action name="actiontranslate">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/nt2aa.png</normaloff>:/PNG-Icons/nt2aa.png</iconset>
    </property>
    <property name="text">
@@ -12492,7 +12443,7 @@ Tree</string>
   </action>
   <action name="actionaddABlist">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/mAB.png</normaloff>:/PNG-Icons/mAB.png</iconset>
    </property>
    <property name="text">
@@ -12504,7 +12455,7 @@ Tree</string>
   </action>
   <action name="actionpreviousChecked">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/up_checked.png</normaloff>:/PNG-Icons/up_checked.png</iconset>
    </property>
    <property name="text">
@@ -12516,7 +12467,7 @@ Tree</string>
   </action>
   <action name="actionnextChecked">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/down_checked.png</normaloff>:/PNG-Icons/down_checked.png</iconset>
    </property>
    <property name="text">
@@ -12528,7 +12479,7 @@ Tree</string>
   </action>
   <action name="actionmatchHCLC">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/mAB_match.png</normaloff>:/PNG-Icons/mAB_match.png</iconset>
    </property>
    <property name="text">
@@ -12540,7 +12491,7 @@ Tree</string>
   </action>
   <action name="actionIdentifyPublicClone">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/tree.png</normaloff>:/PNG-Icons/tree.png</iconset>
    </property>
    <property name="text">
@@ -12549,7 +12500,7 @@ Tree</string>
   </action>
   <action name="actionSampling">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/Cookie.png</normaloff>:/PNG-Icons/Cookie.png</iconset>
    </property>
    <property name="text">
@@ -12561,7 +12512,7 @@ Tree</string>
   </action>
   <action name="actionBatchChangeName">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/network.png</normaloff>:/PNG-Icons/network.png</iconset>
    </property>
    <property name="text">
@@ -12570,7 +12521,7 @@ Tree</string>
   </action>
   <action name="actionSeqSimlarPct">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/SeqID.png</normaloff>:/PNG-Icons/SeqID.png</iconset>
    </property>
    <property name="text">
@@ -12582,7 +12533,7 @@ Tree</string>
   </action>
   <action name="actionStructure">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/structure.png</normaloff>:/PNG-Icons/structure.png</iconset>
    </property>
    <property name="text">
@@ -12591,7 +12542,7 @@ Tree</string>
   </action>
   <action name="actionTestMutMap">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/AID.png</normaloff>:/PNG-Icons/AID.png</iconset>
    </property>
    <property name="text">
@@ -12600,7 +12551,7 @@ Tree</string>
   </action>
   <action name="actionPairToNewDB">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/CopyDB.png</normaloff>:/PNG-Icons/CopyDB.png</iconset>
    </property>
    <property name="text">
@@ -12609,7 +12560,7 @@ Tree</string>
   </action>
   <action name="actionPairAndJump">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/pairClone.png</normaloff>:/PNG-Icons/pairClone.png</iconset>
    </property>
    <property name="text">
@@ -12623,7 +12574,7 @@ Tree</string>
   </action>
   <action name="actionSimilarProtein">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/ProteinSimilar.png</normaloff>:/PNG-Icons/ProteinSimilar.png</iconset>
    </property>
    <property name="text">
@@ -12632,7 +12583,7 @@ Tree</string>
   </action>
   <action name="actionQchart">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/search.png</normaloff>:/PNG-Icons/search.png</iconset>
    </property>
    <property name="text">
@@ -12641,7 +12592,7 @@ Tree</string>
   </action>
   <action name="actionpyqtGraph">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/scatter.png</normaloff>:/PNG-Icons/scatter.png</iconset>
    </property>
    <property name="text">
@@ -12650,7 +12601,7 @@ Tree</string>
   </action>
   <action name="actionPatternSearch">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/coffee.png</normaloff>:/PNG-Icons/coffee.png</iconset>
    </property>
    <property name="text">
@@ -12664,7 +12615,7 @@ Tree</string>
   </action>
   <action name="actionHistViewer">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/hist.png</normaloff>:/PNG-Icons/hist.png</iconset>
    </property>
    <property name="text">
@@ -12673,7 +12624,7 @@ Tree</string>
   </action>
   <action name="actionBoxPlotViewer">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/bar.png</normaloff>:/PNG-Icons/bar.png</iconset>
    </property>
    <property name="text">
@@ -12682,7 +12633,7 @@ Tree</string>
   </action>
   <action name="actionHeatmapViewer">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/heat.png</normaloff>:/PNG-Icons/heat.png</iconset>
    </property>
    <property name="text">
@@ -12691,7 +12642,7 @@ Tree</string>
   </action>
   <action name="actionReverse_Current_Selection">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/repeat.png</normaloff>:/PNG-Icons/repeat.png</iconset>
    </property>
    <property name="text">
@@ -12700,7 +12651,7 @@ Tree</string>
   </action>
   <action name="actionReAnalyze">
    <property name="icon">
-    <iconset>
+    <iconset resource="Resources/VgenesResources.qrc">
      <normaloff>:/PNG-Icons/reRun.png</normaloff>:/PNG-Icons/reRun.png</iconset>
    </property>
    <property name="text">
@@ -12780,8 +12731,8 @@ Tree</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup_3"/>
+  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
  </buttongroups>
 </ui>
