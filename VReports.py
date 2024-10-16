@@ -424,7 +424,7 @@ def StandardReports(self, option, SequenceName, DBFilename):
             else:
                 return
 
-        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatement
+        SQLStatement = 'SELECT SeqName,Sequence,Blank7 FROM vgenesdb' + WHEREStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         FASTAFile = ''
@@ -432,7 +432,11 @@ def StandardReports(self, option, SequenceName, DBFilename):
             Seqname = item[0]
             Sequence = item[1]
             Sequence = Sequence.replace('-', '')
-            AASeq, ErMessage = VGenesSeq.Translator(Sequence, 0)
+            try:
+                ORF = int(item[2])
+            except:
+                ORF = 0
+            AASeq, ErMessage = VGenesSeq.Translator(Sequence, ORF)
             FASTAFile = FASTAFile + '>' + Seqname + '\n' + AASeq + '\n'
 
         Pathname = saveFile(self, 'FASTA')
