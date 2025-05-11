@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <title>Awesome-pyecharts</title>
+
+<script type="text/javascript" src="/Users/leili/Documents/GitHub/VGenes/JS/echarts.js"></script><script src="/Users/leili/Documents/GitHub/VGenes/JS/jquery.js"></script><script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+<script type="text/javascript">$(document).ready(function() {new QWebChannel(qt.webChannelTransport, function(channel) {var my_object = channel.objects.connection;$("#download").click(function(){my_object.download(text);});$("#update").click(function(){my_object.updateSelection(text);});});});</script>
+
+
+</head>
+
+<body>
+
+<input id="download" type="button" value="" style="display:none;"/><input id="update" type="button" value="" style="display:none;"/>
+    <div id="525e5cb2a1f84d72ac199047855fb5d1" class="chart-container" style="position: fixed; top: 0px; left: 5%;width:90%; height:637px;"></div>
+    <script>
+
+        var chart_525e5cb2a1f84d72ac199047855fb5d1 = echarts.init(
+
+            document.getElementById('525e5cb2a1f84d72ac199047855fb5d1'), 'white', {renderer: 'svg'});
+
+        var option_525e5cb2a1f84d72ac199047855fb5d1 = {
+
+    "animation": true,
+
+    "animationThreshold": 2000,
+
+    "animationDuration": 1000,
+
+    "animationEasing": "cubicOut",
+
+    "animationDelay": 0,
+
+    "animationDurationUpdate": 300,
+
+    "animationEasingUpdate": "cubicOut",
+
+    "animationDelayUpdate": 0,
+
+    "color": [
+
+        "#c23531",
+
+        "#2f4554",
+
+        "#61a0a8",
+
+        "#d48265",
+
+        "#749f83",
+
+        "#ca8622",
+
+        "#bda29a",
+
+        "#6e7074",
+
+        "#546570",
+
+        "#c4ccd3",
+
+        "#f05b72",
+
+        "#ef5b9c",
+
+        "#f47920",
+
+        "#905a3d",
+
+        "#fab27b",
+
+        "#2a5caa",
+
+        "#444693",
+
+        "#726930",
+
+        "#b2d235",
+
+        "#6d8346",
+
+        "#ac6767",
+
+        "#1d953f",
+
+        "#6950a1",
+
+        "#918597"
+
+    ],
+
+    "series": [
+
+        {
+
+            "type": "pie",
+
+            "clockwise": true,
+
+            "data": [
+
+                {
+
+                    "name": "0",
+
+                    "value": 217
+
+                },
+
+                {
+
+                    "name": "H2_K17",
+
+                    "value": 5
+
+                },
+
+                {
+
+                    "name": "H3_K16,H3_K14",
+
+                    "value": 3
+
+                },
+
+                {
+
+                    "name": "H1_K20",
+
+                    "value": 3
+
+                },
+
+                {
+
+                    "name": "H1_K16",
+
+                    "value": 2
+
+                },
+
+                {
+
+                    "name": "H3_K14",
+
+                    "value": 2
+
+                }
+
+            ],
+
+            "radius": [
+
+                "40%",
+
+                "75%"
+
+            ],
+
+            "center": [
+
+                "50%",
+
+                "50%"
+
+            ],
+
+            "label": {
+
+                "show": true,
+
+                "position": "top",
+
+                "margin": 8,
+
+                "formatter": " {b}: {c} ({d}%)"
+
+            },
+
+            "rippleEffect": {
+
+                "show": true,
+
+                "brushType": "stroke",
+
+                "scale": 2.5,
+
+                "period": 4
+
+            }
+
+        }
+
+    ],
+
+    "legend": [
+
+        {
+
+            "data": [
+
+                "0",
+
+                "H2_K17",
+
+                "H3_K16,H3_K14",
+
+                "H1_K20",
+
+                "H1_K16",
+
+                "H3_K14"
+
+            ],
+
+            "selected": {},
+
+            "show": true,
+
+            "padding": 5,
+
+            "itemGap": 10,
+
+            "itemWidth": 25,
+
+            "itemHeight": 14
+
+        }
+
+    ],
+
+    "tooltip": {
+
+        "show": true,
+
+        "trigger": "item",
+
+        "triggerOn": "mousemove|click",
+
+        "axisPointer": {
+
+            "type": "line"
+
+        },
+
+        "showContent": true,
+
+        "alwaysShowContent": false,
+
+        "showDelay": 0,
+
+        "hideDelay": 100,
+
+        "textStyle": {
+
+            "fontSize": 14
+
+        },
+
+        "borderWidth": 0,
+
+        "padding": 5
+
+    },
+
+    "title": [
+
+        {
+
+            "padding": 5,
+
+            "itemGap": 10
+
+        }
+
+    ]
+
+};
+
+        chart_525e5cb2a1f84d72ac199047855fb5d1.setOption(option_525e5cb2a1f84d72ac199047855fb5d1);
+
+chart_525e5cb2a1f84d72ac199047855fb5d1.on('click', function (params) {if(params.data['0'] == null){text = params.name + ',' + params.seriesName + ',0,0';}else{text = params.name + ',' + params.seriesName + ','+params.data['0']+','+params.data['1'];}$('#update').click();});
+    </script>
+
+</body>
+
+</html>

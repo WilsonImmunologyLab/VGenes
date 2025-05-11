@@ -5020,8 +5020,7 @@ class Clone_thread(QThread):
                             VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
                             existing_clone_list.append(str(i))
                         except:
-                            print(
-                                item + ' caused error in finding clones at line 1798 and so was not annotated as a clone')
+                            print(item + ' caused error in finding clones at line 1798 and so was not annotated as a clone')
 
                     else:
                         if j == 1:
@@ -5065,6 +5064,59 @@ class Clone_thread(QThread):
 
                 while str(i) in existing_clone_list:
                     i += 1
+
+
+        # I don't want to modify the original Clone code because it has been so many years and was written by Patrick originally. Here i will check if cell barcode available, if so, integrate HC clones with LC clone to make HC+LC clone.
+        # to be consistent with previous version, will use 0 indicate none-clones. Results will be put under: ClonalRank
+        SQLStatement = 'SELECT GeneType,ClonalPool,Blank10 FROM vgenesdb WHERE ClonalPool != 0'
+        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        CloneDF = pd.DataFrame(DataIn, columns=['GeneType', 'ClonalPool', 'CellBarcode'])
+        # Check if Blank10 column has actual values (not default "Blank10" or empty string "")
+        has_barcode = ~CloneDF['CellBarcode'].isin(['Blank10', ''])
+        data_with_barcode = CloneDF[has_barcode].copy()
+
+        # Group by cell barcode
+        grouped = data_with_barcode.groupby('CellBarcode')
+
+        result = []
+
+        for barcode, group in grouped:
+            # Initialize lists for heavy chains (hc) and light chains (lc)
+            hc_pools = []
+            kappa_pools = []
+            lambda_pools = []
+
+            # Process each record in the group
+            for _, row in group.iterrows():
+                gene_type = row['GeneType']
+                pool = row['ClonalPool']
+
+                # Add prefix based on GeneType
+                if gene_type == 'Heavy':
+                    prefixed_pool = f'H{pool}'
+                    hc_pools.append(prefixed_pool)
+                elif gene_type == 'Kappa':
+                    prefixed_pool = f'K{pool}'
+                    kappa_pools.append(prefixed_pool)
+                elif gene_type == 'Lambda':
+                    prefixed_pool = f'L{pool}'
+                    lambda_pools.append(prefixed_pool)
+
+            # Combine Kappa and Lambda into light chains (lc)
+            lc_pools = kappa_pools + lambda_pools
+
+            # Generate all possible hc-lc pairs
+            pairs = ",".join([f"{hc}_{lc}" for hc in hc_pools for lc in lc_pools]) if hc_pools and lc_pools else "0"
+
+            # Append to results: [barcode, records, pairs]
+            result.append([barcode, group.to_dict('records'), pairs])
+
+        # update VDB according to our results
+        for item in result:
+            SQLStatement = 'UPDATE vgenesDB SET `ClonalRank` = "' + str(item[2]) + '" WHERE Blank10 = "' + item[0] + '"'
+            VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+
+        Msg = 'Integtated cell barcode info\n'
 
         # model = self.ui.tableView.model()
         # model.refresh()
@@ -5139,7 +5191,7 @@ class Clone_thread(QThread):
         Vgenes.initial_Clone()
 
         sign = 0
-        Msg = 'Successfully identified clones!'
+        Msg += 'Successfully identified clones!'
         self.Clone_finish.emit([sign, Msg])
 
 class CloneChangeOIgBlast_thread(QThread):
