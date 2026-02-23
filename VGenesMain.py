@@ -214,7 +214,7 @@ JustMoved = False
 
 
 global RefreshSQL
-RefreshSQL = 'select * from vgenesdb ORDER BY Project, Grouping, SubGroup, SeqName'
+RefreshSQL = 'select * from vgenesDB ORDER BY Project, Grouping, SubGroup, SeqName'
 # global data
 global FieldList
 FieldList = ['SeqName', 'SeqLen', 'GeneType', 'V1', 'V2', 'V3', 'D1', 'D2', 'D3', 'J1', 'J2', 'J3', 'StopCodon',
@@ -943,11 +943,11 @@ class HCLC_thread(QThread):
         # Step 2: search on new DB
         Good_list = []
         if len(self.checkRecords) == 0:
-            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE GeneType = "Heavy"'
+            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesDB WHERE GeneType = "Heavy"'
             DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
         else:
             list_str = '("' + '","'.join(self.checkRecords) + '")'
-            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesdb WHERE SeqName IN ' + list_str
+            SQLStatement = 'SELECT DISTINCT(Blank10) FROM vgenesDB WHERE SeqName IN ' + list_str
             DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
         if len(DataIn) < 2:
@@ -961,9 +961,9 @@ class HCLC_thread(QThread):
                 if barcode == 'Blank10' or barcode == '':
                     pass
                 else:
-                    SQLStatement1 = 'SELECT SeqName FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Heavy","Beta","Delta")'
+                    SQLStatement1 = 'SELECT SeqName FROM vgenesDB WHERE Blank10 = "' + barcode + '" AND GeneType IN ("Heavy","Beta","Delta")'
                     DataIn1 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement1)
-                    SQLStatement2 = 'SELECT SeqName FROM vgenesdb WHERE Blank10 = "' + barcode + '" AND GeneType NOT IN ("Heavy","Beta","Delta")'
+                    SQLStatement2 = 'SELECT SeqName FROM vgenesDB WHERE Blank10 = "' + barcode + '" AND GeneType NOT IN ("Heavy","Beta","Delta")'
                     DataIn2 = VGenesSQL.RunSQL(self.DBFilename, SQLStatement2)
                     if len(DataIn1) == 1 and len(DataIn2) == 1:
                         Good_list.append(barcode)
@@ -976,7 +976,7 @@ class HCLC_thread(QThread):
         if seq_num > 0:
             # edit on new DB
             list_str = '("' + '","'.join(Good_list) + '")'
-            SQLStatement = 'DELETE FROM vgenesdb WHERE Blank10 NOT IN ' + list_str
+            SQLStatement = 'DELETE FROM vgenesDB WHERE Blank10 NOT IN ' + list_str
             VGenesSQL.RunUpdateSQL(self.Pathname, SQLStatement)
 
             Msg = 'Total ' + str(seq_num) + ' HC/LC pairs were found!'
@@ -1070,7 +1070,7 @@ class CopyRecord_thread(QThread):
 
         # Step 2: delete unchecked records from new DB
         list_str = '("' + '","'.join(self.checkRecords) + '")'
-        SQLStatement = 'DELETE FROM vgenesdb WHERE SeqName NOT IN ' + list_str
+        SQLStatement = 'DELETE FROM vgenesDB WHERE SeqName NOT IN ' + list_str
         VGenesSQL.RunUpdateSQL(self.Pathname, SQLStatement)
 
         Msg = 'New DB with selected records have been created!'
@@ -1240,7 +1240,7 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
         # numeric value
         if figure_type == True:
             field = re.sub(r'\(.+', '', filed_name)
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             self.updateInfo(DataIn)
 
@@ -1302,7 +1302,7 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
             #        num_list.sort()
 
             # update figure
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             F = MyFigure(width=3, height=3, dpi=300)
@@ -1325,7 +1325,7 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
                 return
             elif self.initial == 2:
                 field = re.sub(r'\(.+', '', filed_name)
-                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = [row[0] for row in DataIn]
 
@@ -1342,7 +1342,7 @@ class AdvanceSelectioDialog(QtWidgets.QDialog):
                     value_list[i] = 'NULL'
 
             # update figure
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             self.updateInfo(DataIn)
 
@@ -2861,16 +2861,16 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     return
 
                 WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") AND `GeneType` == "Heavy"'
-                SQLStatement = 'SELECT Blank10 FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT Blank10 FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                 barcodes = [ele[0] for ele in DataIn]
                 Res_barcode = random.sample(barcodes, size)
                 # make res
                 WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(Res_barcode) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
-                SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT Blank10,SeqName FROM vgenesDB' + WHEREStatement
                 DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                 WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(Res_barcode) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
-                SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT Blank10,SeqName FROM vgenesDB' + WHEREStatement
                 DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                 Res = []
                 for index in range(len(DataInHC)):
@@ -2995,11 +2995,11 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     # make res
                     WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
                         Res_barcode) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
-                    SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
                     DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                     WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
                         Res_barcode) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
-                    SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT Blank10,SeqName FROM vgenesDB' + WHEREStatement
                     DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                     Res = []
                     for index in range(len(DataInHC)):
@@ -3088,11 +3088,11 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     # make res
                     WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
                         Res_barcode) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
-                    SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
                     DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                     WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
                         Res_barcode) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
-                    SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT Blank10,SeqName FROM vgenesDB' + WHEREStatement
                     DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                     Res = []
                     for index in range(len(DataInHC)):
@@ -3460,7 +3460,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
             WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(res) + '")'
             if pf != '':
                 WHEREStatement += ' ORDER BY ' + pf
-            SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
+            SQLStatement = 'SELECT SeqName,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
             Res = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
 
             # show result on table
@@ -3484,12 +3484,12 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
             WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY Blank10'
             #if pf != '':
             #	WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` == "Heavy" ORDER BY ' + pf +',Blank10'
-            SQLStatement = 'SELECT Blank10,SeqName,' + field_names_str + ' FROM vgenesdb' + WHEREStatement
+            SQLStatement = 'SELECT Blank10,SeqName,' + field_names_str + ' FROM vgenesDB' + WHEREStatement
             DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
             WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` <> "Heavy" ORDER BY Blank10'
             #if pf != '':
             #	WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(res) + '") AND `GeneType` <> "Heavy" ORDER BY ' + pf +',Blank10'
-            SQLStatement = 'SELECT Blank10,SeqName FROM vgenesdb' + WHEREStatement
+            SQLStatement = 'SELECT Blank10,SeqName FROM vgenesDB' + WHEREStatement
             DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
             Res = []
             for index in range(len(DataInHC)):
@@ -3604,9 +3604,9 @@ class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
         hc_list = [record[1] for record in Data]
         lc_list = [record[2] for record in Data]
         WHEREStatementHC = ' WHERE SeqName IN ("' + '","'.join(hc_list) + '")'
-        SQLStatementHC = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatementHC
+        SQLStatementHC = 'SELECT SeqName,Sequence FROM vgenesDB' + WHEREStatementHC
         WHEREStatementLC = ' WHERE SeqName IN ("' + '","'.join(lc_list) + '")'
-        SQLStatementLC = 'SELECT SeqName,Sequence FROM vgenesdb' + WHEREStatementLC
+        SQLStatementLC = 'SELECT SeqName,Sequence FROM vgenesDB' + WHEREStatementLC
         DataInHC = VGenesSQL.RunSQL(self.DBFilename, SQLStatementHC)
         DataInLC = VGenesSQL.RunSQL(self.DBFilename, SQLStatementLC)
         time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
@@ -4408,7 +4408,7 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 
                 self.ui.LineEditCutoff.setHidden(False)
                 field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = []
                 char_list = []
@@ -4457,7 +4457,7 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
                         num_list.sort()
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 F = MyFigure(width=3, height=3, dpi=160)
@@ -4482,12 +4482,12 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
                     return
                 elif self.initial == 1:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     value_list = [row[0] for row in DataIn]
                 elif self.initial == 2:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     value_list = [row[0] for row in DataIn]
 
@@ -4510,7 +4510,7 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
                 self.load_data(value_list)
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 data = []
@@ -4622,7 +4622,7 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
 
                 # start update records
                 field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 for ele in DataIn:
@@ -4650,7 +4650,7 @@ class StatCheckDialog(QtWidgets.QDialog, Ui_StatCheckDialog):
                 if len(Dict) > 0:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
                     for key in Dict:
-                        SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement + ' AND ' + field + ' = "' + key +  '"'
+                        SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB' + WHEREStatement + ' AND ' + field + ' = "' + key +  '"'
                         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                         for record in DataIn:
                             To_check_list.append(record[1])
@@ -4781,7 +4781,7 @@ class LoadTable_thread(QThread):
         fields = ','.join(current_field_list)
         if fields == '':
             fields = '*'
-        SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+        SQLStatement = 'select '+ fields +' from vgenesDB ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         pct = 0
@@ -4894,7 +4894,7 @@ class Batch_thread(QThread):
                     WHEREStatement = ' WHERE 1'
 
             field = re.sub(r'\(.+', '', self.dialog.ui.comboBox.currentText())
-            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesdb' + WHEREStatement
+            SQLStatement = 'SELECT ' + field + ',SeqName FROM vgenesDB' + WHEREStatement
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             
             process = 1
@@ -4906,9 +4906,9 @@ class Batch_thread(QThread):
                         if cur_value >= num_list[i] and cur_value < num_list[i+1]:
                             new_value = new_values[i]
                             if new_value == 'NULL':
-                                SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
+                                SQLStatement = 'UPDATE vgenesDB SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
                             else:
-                                SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
+                                SQLStatement = 'UPDATE vgenesDB SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
                             VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
                             pct = int(process / len(DataIn) * 100)
@@ -4943,9 +4943,9 @@ class Batch_thread(QThread):
                 step = 1
                 for key in Dict:
                     if key == 'NULL':
-                        SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = ' + key
+                        SQLStatement = 'UPDATE vgenesDB SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = ' + key
                     else:
-                        SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
+                        SQLStatement = 'UPDATE vgenesDB SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
                     #print(SQLStatement)
                     process += VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
 
@@ -4990,7 +4990,7 @@ class Clone_thread(QThread):
         CPseqs = 0
         CPs = 0
         # identify all existing Clone IDs
-        SQLStatement = 'SELECT DISTINCT(ClonalPool) FROM vgenesdb'
+        SQLStatement = 'SELECT DISTINCT(ClonalPool) FROM vgenesDB'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         existing_clone_list = [row[0] for row in DataIn]
 
@@ -5068,7 +5068,7 @@ class Clone_thread(QThread):
 
         # I don't want to modify the original Clone code because it has been so many years and was written by Patrick originally. Here i will check if cell barcode available, if so, integrate HC clones with LC clone to make HC+LC clone.
         # to be consistent with previous version, will use 0 indicate none-clones. Results will be put under: ClonalRank
-        SQLStatement = 'SELECT GeneType,ClonalPool,Blank10 FROM vgenesdb WHERE ClonalPool != 0'
+        SQLStatement = 'SELECT GeneType,ClonalPool,Blank10 FROM vgenesDB WHERE ClonalPool != 0'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         CloneDF = pd.DataFrame(DataIn, columns=['GeneType', 'ClonalPool', 'CellBarcode'])
         # Check if Blank10 column has actual values (not default "Blank10" or empty string "")
@@ -5477,7 +5477,7 @@ class annotate_thread(QThread):
             if row == 0:
                 continue
             else:
-                SQLSTATEMENT = "UPDATE vgenesdb SET "
+                SQLSTATEMENT = "UPDATE vgenesDB SET "
                 for i in range(len(col_index)):
                     col = col_index[i]
                     field = col_fields[i]
@@ -5509,7 +5509,7 @@ class annotate_thread(QThread):
             if SkipHeader:
                 SkipHeader = False
             else:
-                SQLSTATEMENT = "UPDATE vgenesdb SET "
+                SQLSTATEMENT = "UPDATE vgenesDB SET "
                 for i in range(len(col_index)):
                     col = col_index[i]
                     field = col_fields[i]
@@ -8408,7 +8408,7 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
                 if field == '':
                     return
 
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = []
                 char_list = []
@@ -8428,7 +8428,7 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
                     return
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 F = MyFigure(width=3, height=3, dpi=160)
@@ -8446,7 +8446,7 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
                 if field == '':
                     return
 
-                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = [row[0] for row in DataIn]
 
@@ -8463,7 +8463,7 @@ class NewFieldDialog(QtWidgets.QDialog, Ui_NewFieldDialog):
                         return
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 data = []
@@ -8552,7 +8552,7 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
             if field == '':
                 return
             
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             value_list = []
             char_list = []
@@ -8572,7 +8572,7 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
                 return
 
             # update figure
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             F = MyFigure(width=3, height=3, dpi=160)
@@ -8595,7 +8595,7 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
             if field == '':
                 return
         
-            SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+            SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             value_list = [row[0] for row in DataIn]
 
@@ -8612,7 +8612,7 @@ class CopyDialog(QtWidgets.QDialog, Ui_CopyDialog):
                     return
 
             # update figure
-            SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             data = []
@@ -8751,7 +8751,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
                 self.ui.LineEditCutoff.setHidden(False)
                 field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = []
                 char_list = []
@@ -8800,7 +8800,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                         num_list.sort()
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 F = MyFigure(width=3, height=3, dpi=160)
@@ -8825,12 +8825,12 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                     return
                 elif self.initial == 1:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     value_list = [row[0] for row in DataIn]
                 elif self.initial == 2:
                     field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb' + WHEREStatement
+                    SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                     value_list = [row[0] for row in DataIn]
 
@@ -8853,7 +8853,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                 self.load_data(value_list)
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb' + WHEREStatement
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB' + WHEREStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 data = []
@@ -8963,7 +8963,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
 
             # start update records
             field = re.sub(r'\(.+', '', self.ui.comboBox.currentText())
-            SQLStatement = 'SELECT ' + field + ',ID FROM vgenesdb'
+            SQLStatement = 'SELECT ' + field + ',ID FROM vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
             for ele in DataIn:
@@ -8973,7 +8973,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                     for i in range(len(num_list)-1):
                         if cur_value >= num_list[i] and cur_value < num_list[i+1]:
                             new_value = new_values[i]
-                            SQLStatement = 'UPDATE vgenesdb SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
+                            SQLStatement = 'UPDATE vgenesDB SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
                             VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
                 except:
                     pass
@@ -9219,7 +9219,7 @@ class EditableSqlModel(QSqlQueryModel):
 
     def setValue(self, Id, Newvalue, field):
         query = QSqlQuery()
-        queryText = 'update vgenesdb set ' + field + ' = ? where ID = ?'
+        queryText = 'update vgenesDB set ' + field + ' = ? where ID = ?'
         query.prepare(queryText)
         query.addBindValue(Newvalue)
         query.addBindValue(Id)
@@ -9516,7 +9516,7 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
             if row == 0:
                 continue
             else:
-                SQLSTATEMENT = "UPDATE vgenesdb SET "
+                SQLSTATEMENT = "UPDATE vgenesDB SET "
                 for i in range(len(col_index)):
                     col = col_index[i]
                     field = col_fields[i]
@@ -9717,7 +9717,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
                 if field == '':
                     return
 
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = []
                 char_list = []
@@ -9737,7 +9737,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
                     return
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 F = MyFigure(width=3, height=3, dpi=160)
@@ -9755,7 +9755,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
                 if field == '':
                     return
 
-                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesdb'
+                SQLStatement = 'SELECT DISTINCT(' + field + ') FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 value_list = [row[0] for row in DataIn]
 
@@ -9772,7 +9772,7 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
                         return
 
                 # update figure
-                SQLStatement = 'SELECT ' + field + ' FROM vgenesdb'
+                SQLStatement = 'SELECT ' + field + ' FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
                 data = []
@@ -13842,7 +13842,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 return
 
         # updated selected list
-        SQLStatement = 'SELECT SeqName FROM vgenesdb'
+        SQLStatement = 'SELECT SeqName FROM vgenesDB'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         if len(DataIn) == 0:
             return
@@ -14048,7 +14048,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 self.HCLCDialog.ui.tableWidget.setColumnCount(0)
 
             # fetch data for current record
-            SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + SeqName + '"'
+            SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + SeqName + '"'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             if len(DataIn) == 0:
                 return
@@ -14106,7 +14106,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                             self.HCLCDialog.ui.tableWidget.setColumnCount(0)
 
                         # fetch data for current record
-                        SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + SeqName + '"'
+                        SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + SeqName + '"'
                         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                         if len(DataIn) == 0:
                             return
@@ -14374,11 +14374,11 @@ class VGenesForm(QtWidgets.QMainWindow):
         data_field = self.ui.comboBoxHCLC.currentText()
         ## HC
         WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` IN ("Heavy","Beta","Delta") ORDER BY Blank10'
-        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
+        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesDB' + WHEREStatement
         DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         ## LC
         WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` NOT IN ("Heavy","Beta","Delta") ORDER BY Blank10'
-        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
+        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesDB' + WHEREStatement
         DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         Res = []
         for index in range(len(DataInHC)):
@@ -14552,11 +14552,11 @@ class VGenesForm(QtWidgets.QMainWindow):
         data_field = self.ui.comboBoxHCLC.currentText()
         ## HC
         WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` IN ("Heavy","Beta","Delta") ORDER BY Blank10'
-        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
+        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesDB' + WHEREStatement
         DataInHC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         ## LC
         WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(barcodes) + '") AND `GeneType` NOT IN ("Heavy","Beta","Delta") ORDER BY Blank10'
-        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesdb' + WHEREStatement
+        SQLStatement = 'SELECT Blank10,' + data_field + ' FROM vgenesDB' + WHEREStatement
         DataInLC = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         Res = []
         for index in range(len(DataInHC)):
@@ -17065,7 +17065,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         # get current record
         currentName = self.ui.txtName.toPlainText()
         # fetch data for current record
-        SQLStatement = 'SELECT * FROM vgenesdb WHERE SeqName = "' + currentName + '"'
+        SQLStatement = 'SELECT * FROM vgenesDB WHERE SeqName = "' + currentName + '"'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         if len(DataIn) == 0:
             return
@@ -17197,7 +17197,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 CurPage = int(self.ui.labelCurPage.text()) - 1
                 #RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str((CurPage + 1) * pageSize)
                 RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str(pageSize)
-                SQLStatement = 'SELECT COUNT(*) FROM vgenesdb'
+                SQLStatement = 'SELECT COUNT(*) FROM vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 TotalRecords = DataIn[0][0]
                 TotalRecordsStr = str(math.ceil(TotalRecords/pageSize))
@@ -17210,7 +17210,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 fields = ','.join(current_field_list)
                 if fields == '':
                     fields = '*'
-                SQLStatement = 'select '+ fields +' from vgenesdb ORDER BY ' + field1 + ',' + field2 + ',' + field3 + ',SeqName'
+                SQLStatement = 'select '+ fields +' from vgenesDB ORDER BY ' + field1 + ',' + field2 + ',' + field3 + ',SeqName'
                 SQLStatement += RecordLimitStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
@@ -17366,7 +17366,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                     self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
                 self.TreeChecksAll()
                 # update check list
-                SQLStatement = 'SELECT SeqName from vgenesdb'
+                SQLStatement = 'SELECT SeqName from vgenesDB'
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 self.CheckedRecords = [u[0] for u in DataIn]
             else:
@@ -17401,7 +17401,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 root = self.ui.treeWidget.invisibleRootItem()
                 self.TreeChecksAll()
             # update check list
-            SQLStatement = 'SELECT SeqName from vgenesdb'
+            SQLStatement = 'SELECT SeqName from vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             self.CheckedRecords = [u[0] for u in DataIn]
         else:
@@ -20519,21 +20519,21 @@ class VGenesForm(QtWidgets.QMainWindow):
         field1, field2, field3 = SQLFields
         NameIndex.clear()
         if field1 != 'None' and field2 != 'None' and field3 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
         elif field1 != 'None' and field2 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
         elif field1 != 'None' and field3 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', ' + field3 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field1 + ', ' + field3 + ', SeqName'
         elif field2 != 'None' and field3 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field2 + ', ' + field3 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field2 + ', ' + field3 + ', SeqName'
         elif field1 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field1 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field1 + ', SeqName'
         elif field2 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field2 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field2 + ', SeqName'
         elif field3 != 'None':
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY ' + field3 + ', SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY ' + field3 + ', SeqName'
         else:
-            SQLStatement = 'select SeqName from vgenesdb ORDER BY SeqName'
+            SQLStatement = 'select SeqName from vgenesDB ORDER BY SeqName'
 
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         Maxi = len(DataIs)
@@ -21587,7 +21587,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         CPseqs = 0
         CPs = 0
         # identify all existing Clone IDs
-        SQLStatement = 'SELECT DISTINCT(ClonalPool) FROM vgenesdb'
+        SQLStatement = 'SELECT DISTINCT(ClonalPool) FROM vgenesDB'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         existing_clone_list = [row[0] for row in DataIn]
 
@@ -24407,7 +24407,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             SQLFields = ('Project', 'Grouping', 'SubGroup')
             time_start = time.time()
             # if the database is too big
-            SQLStatement = 'select count(*) from vgenesdb'
+            SQLStatement = 'select count(*) from vgenesDB'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             NumRows = DataIn[0][0]
             if NumRows > 2000000:
@@ -24454,7 +24454,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     def initializeModel(self, model):
 
-        model.setQuery('select * from vgenesdb ORDER BY Project, Grouping, SubGroup, SeqName')
+        model.setQuery('select * from vgenesDB ORDER BY Project, Grouping, SubGroup, SeqName')
         while model.canFetchMore():
             model.fetchMore()
         NumRows = model.rowCount()
@@ -25178,7 +25178,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             else:
                 WHEREStatement = ''
 
-            SQLStatement = 'SELECT DISTINCT(' + cur_field + '),COUNT(*) FROM vgenesdb' + WHEREStatement + ' GROUP BY ' + cur_field
+            SQLStatement = 'SELECT DISTINCT(' + cur_field + '),COUNT(*) FROM vgenesDB' + WHEREStatement + ' GROUP BY ' + cur_field
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             value_list = [str(row[0]) + "\t(Count=" + str(row[1]) + ")" for row in DataIn]
             if MoveNotChange == False:
@@ -25595,7 +25595,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         fieldsearch = re.sub(r'\(.+', '', field)
 
         #     if search != '':
-        #         SQLstatement = 'select * from vgenesdb WHERE ' + fieldsearch + ' LIKE ' + search + ' ORDER BY ' + fieldsearch + ', Project, Grouping, SubGroup, SeqName'
+        #         SQLstatement = 'select * from vgenesDB WHERE ' + fieldsearch + ' LIKE ' + search + ' ORDER BY ' + fieldsearch + ', Project, Grouping, SubGroup, SeqName'
         # #         todo select one if exact or if no then all similar items in tree and table...best if tree checkable
 
         if self.ui.rdoLocal.isChecked():
@@ -25782,7 +25782,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             answer = informationMessage(self, 'The field name you determined is not exist!', 'OK')
             return
         '''
-        SQLStatement = 'SELECT DISTINCT(' + cur_field + ') FROM vgenesdb'
+        SQLStatement = 'SELECT DISTINCT(' + cur_field + ') FROM vgenesDB'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         value_list = [row[0] for row in DataIn]
 
@@ -25867,7 +25867,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
         else:
             for key in dict:
-                SQLStatement = 'UPDATE vgenesdb SET ' + field + ' = "' + dict[key] + '" WHERE ' + field + ' = "' + key + '"'
+                SQLStatement = 'UPDATE vgenesDB SET ' + field + ' = "' + dict[key] + '" WHERE ' + field + ' = "' + key + '"'
                 print(SQLStatement)
                 VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
             Msg = 'Update finished!'
@@ -25888,7 +25888,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        SQLStatement = 'SELECT ID FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
+        SQLStatement = 'SELECT ID FROM vgenesDB WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
         cur_field = re.sub(r'\(.+', '', self.ui.cboFindField1.currentText())
@@ -25922,9 +25922,9 @@ class VGenesForm(QtWidgets.QMainWindow):
             id = record[0]
             SQLStatement = ""
             if str_target == "":
-                SQLStatement = "UPDATE vgenesdb SET " + cur_field + " = '" + str_replace + "' WHERE ID = " + str(id)
+                SQLStatement = "UPDATE vgenesDB SET " + cur_field + " = '" + str_replace + "' WHERE ID = " + str(id)
             else:
-                SQLStatement = 'SELECT ' + cur_field + ' FROM vgenesdb WHERE ID = ' + str(id)
+                SQLStatement = 'SELECT ' + cur_field + ' FROM vgenesDB WHERE ID = ' + str(id)
                 thisData = VGenesSQL.RunSQL(DBFilename, SQLStatement)
                 thisData = thisData[0][0]
 
@@ -25935,7 +25935,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                     new_str = re.sub(str_target, str_replace, thisData)
 
                 if new_str != thisData:
-                    SQLStatement = "UPDATE vgenesdb SET " + cur_field + " = '" + new_str + "' WHERE ID = " + str(id)
+                    SQLStatement = "UPDATE vgenesDB SET " + cur_field + " = '" + new_str + "' WHERE ID = " + str(id)
 
             try:
                 VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
@@ -26348,7 +26348,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                                     QMessageBox.Ok)
             return
 
-        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesdb WHERE SeqName IN ("' + '","'.join(selected) + '")'
+        SQLStatement = 'SELECT SeqName,Sequence FROM vgenesDB WHERE SeqName IN ("' + '","'.join(selected) + '")'
         
         filename = saveFile(self, 'Nucleotide')
         if filename == '' or filename == None:
@@ -29244,13 +29244,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
             # global RefreshSQL
             if field1 == 'None' or field1 is None:
-                RefreshSQL = 'select * from vgenesdb ORDER BY SeqName'
+                RefreshSQL = 'select * from vgenesDB ORDER BY SeqName'
             elif field2 == 'None' or field2 is None:
-                RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', SeqName'
+                RefreshSQL = 'select * from vgenesDB ORDER BY ' + field1 + ', SeqName'
             elif field3 == 'None' or field3 is None:
-                RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
+                RefreshSQL = 'select * from vgenesDB ORDER BY ' + field1 + ', ' + field2 + ', SeqName'
             else:
-                RefreshSQL = 'select * from vgenesdb ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
+                RefreshSQL = 'select * from vgenesDB ORDER BY ' + field1 + ', ' + field2 + ', ' + field3 + ', SeqName'
 
             #model.refresh()
 
