@@ -56,6 +56,23 @@ Notes:
   base environment. During dependency validation, the mixed environment loaded
   duplicate Qt libraries and emitted warnings even though imports completed.
 
+## Repository Layout
+
+The repository is still a source-first desktop app, but the top level is now
+split more intentionally:
+
+- Active application code and generated Qt modules remain at the repository
+  root to avoid breaking import and packaging paths.
+- Sample/demo VDB databases now live under `samples/vdb/`.
+- Archival reference material now lives under `reference/`.
+- One-off experiments and legacy utility scripts now live under
+  `dev-scripts/`.
+
+Runtime-coupled files such as `BackUP.vdb`, `UpdateRecord.nt`, packaging icon
+assets, and the main application entry points remain at the root for now.
+Those should only be moved together with corresponding path cleanup in the app
+code and spec files.
+
 ## Build Metadata
 
 Basic build metadata now lives in `pyproject.toml`. For packaging work, treat

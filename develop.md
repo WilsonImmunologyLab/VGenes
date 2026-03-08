@@ -288,6 +288,13 @@ Current guidance:
   its `Temp/` directory before writing logs and uses that directory as
   `MPLCONFIGDIR`, avoiding Matplotlib cache warnings when the user home cache
   path is unavailable or unwritable.
+- Performed a conservative repository reorganization pass:
+  - moved sample/demo `.vdb` databases out of the root into `samples/vdb/`
+  - moved archival docs/spreadsheets/build notes into `reference/`
+  - moved one-off examples and legacy utility scripts into `dev-scripts/`
+  - intentionally left runtime-coupled files such as `BackUP.vdb`,
+    `UpdateRecord.nt`, root icon assets, and active application modules in
+    place to avoid breaking import/spec/runtime paths during this pass
 - Updated the main table load/check/edit wiring to use the lighter checkable
   item approach instead of embedded checkbox widgets.
 - Added persistent main-table sort state and moved page loading order to SQL,
