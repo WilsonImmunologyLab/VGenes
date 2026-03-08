@@ -284,6 +284,10 @@ Current guidance:
   warnings because it mixes Conda Qt libraries with pip-installed PyQt wheel
   runtimes; a clean project virtual environment is still the recommended
   runtime target.
+- Added small runtime-hygiene fixes in `VGenesMain.py` so the app now creates
+  its `Temp/` directory before writing logs and uses that directory as
+  `MPLCONFIGDIR`, avoiding Matplotlib cache warnings when the user home cache
+  path is unavailable or unwritable.
 - Updated the main table load/check/edit wiring to use the lighter checkable
   item approach instead of embedded checkbox widgets.
 - Added persistent main-table sort state and moved page loading order to SQL,

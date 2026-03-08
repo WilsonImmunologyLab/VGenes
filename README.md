@@ -52,6 +52,9 @@ Notes:
   `Resources/`, `Js/`, and `Temp/` to exist relative to the project root.
 - Packaging metadata is now defined in `pyproject.toml`, but the runtime is
   still organized as a source-first desktop app rather than a polished library.
+- Prefer a clean project virtual environment over a mixed Anaconda + `pip`
+  base environment. During dependency validation, the mixed environment loaded
+  duplicate Qt libraries and emitted warnings even though imports completed.
 
 ## Build Metadata
 

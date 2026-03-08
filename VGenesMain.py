@@ -68,7 +68,10 @@ from PyQt5.QtWidgets import QMainWindow
 
 import tarfile
 import zipfile
-from tempfile import TemporaryDirectory
+from tempfile import TemporaryDirectory, gettempdir
+
+os.environ.setdefault('MPLCONFIGDIR', os.path.join(gettempdir(), 'vgenes-mpl'))
+os.makedirs(os.environ['MPLCONFIGDIR'], exist_ok=True)
 
 import VGenesCloneCaller
 import MakeDb
@@ -172,14 +175,15 @@ else:
     raxml_path = os.path.join(working_prefix, 'Tools', 'raxml')
     igblast_path = os.path.join(working_prefix, 'IgBlast', 'igblastn')
 
+os.makedirs(temp_folder, exist_ok=True)
+os.environ.setdefault('MPLCONFIGDIR', temp_folder)
+
 ErlogFile = os.path.join(temp_folder, 'ErLog.txt')
 ErlogFile2 = os.path.join(temp_folder, 'ErLog2.txt')
-r = open(ErlogFile,'w')
-r.write('')
-r.close()
-r = open(ErlogFile2, 'w')
-r.write('')
-r.close()
+with open(ErlogFile, 'w') as current_file:
+    current_file.write('')
+with open(ErlogFile2, 'w') as current_file:
+    current_file.write('')
 
 global IgBLASTAnalysis
 IgBLASTAnalysis = []
