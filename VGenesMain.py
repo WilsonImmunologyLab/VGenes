@@ -59,6 +59,10 @@ from VgenesTextEdit import VGenesTextMain
 import VGenesSQL
 import VGenesSeq
 import VGenesDialogues
+from alignment_utils import global_alignment_strings
+from seq_table_adapter import SequenceTableAdapter
+from sequence_table_view import SequenceTableView
+from vg_theme import db_tab_stylesheet
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
@@ -70,9 +74,6 @@ import VGenesCloneCaller
 import MakeDb
 from ui_Import_Dialogue import Ui_DialogImport
 
-# Import pairwise2 module
-from Bio import pairwise2
-from Bio.SubsMat import MatrixInfo as matlist
 #from Bio.Align import substitution_matrices
 
 global OldName
@@ -2477,9 +2478,7 @@ class ChangeODialog(QtWidgets.QDialog):
                         resDict[record[1]] = [record[0]]
                 
                 for key,value in resDict.items():
-                    SQLStatement = 'UPDATE vgenesDB SET ClonalPool= "' + str(key) + '" WHERE SeqName IN ("' + '","'.join(value) + '")'
-                    print(SQLStatement)
-                    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                    VGenesSQL.UpdateFieldWhereIn(DBFilename, 'ClonalPool', str(key), 'SeqName', value)
                 
                 Msg = 'ChangeO result has been imported!'
                 QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -4789,34 +4788,15 @@ class LoadTable_thread(QThread):
         self.loadProgress.emit(pct, label)
 
         num_row = len(DataIn)
-        num_col = len(current_field_list)
-        vgene.ui.SeqTable.setRowCount(num_row)
-        vgene.ui.SeqTable.setColumnCount(num_col + 1)
-
         horizontalHeader = [''] + current_nickname_list
-        vgene.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
-        vgene.ui.SeqTable.fields = horizontalHeader
-        # re-size column size
-        vgene.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
-        vgene.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        if vgene.ui.checkBoxRowSelection.isChecked():
-            vgene.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-        else:
-            vgene.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
+        vgene.seqTableAdapter.begin_reload()
+        vgene.seqTableAdapter.configure([''] + current_field_list, horizontalHeader, [str(row[0]) for row in DataIn])
+        vgene.seqTableAdapter.resize_primary_columns(check_width=10)
+        vgene.seqTableAdapter.apply_selection_behavior(vgene.ui.checkBoxRowSelection.isChecked())
 
+        vgene.seqTableAdapter.populate_rows(DataIn, [])
         process = 1
         for row_index in range(num_row):
-            cell_checkBox = QCheckBox()
-            # cell_checkBox.setText(DataIn[row_index][0])
-            cell_checkBox.setChecked(False)
-            cell_checkBox.stateChanged.connect(vgene.multipleSelection)
-            vgene.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
-
-            for col_index in range(num_col):
-                unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
-                unit.last_name = DataIn[row_index][col_index]
-                vgene.ui.SeqTable.setItem(row_index, col_index + 1, unit)
-
             pct = int(process / num_row * 100)
             label = "Loading records: " + str(process) + '/' + str(num_row)
             self.loadProgress.emit(pct, label)
@@ -4827,12 +4807,12 @@ class LoadTable_thread(QThread):
         self.loadProgress.emit(pct, label)
 
         # disable edit
-        vgene.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-        # show sort indicator
-        vgene.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
+        vgene.seqTableAdapter.apply_edit_mode()
+        vgene.seqTableAdapter.set_sort_indicator(1, Qt.AscendingOrder)
         # connect sort indicator to slot function
         vgene.ui.SeqTable.horizontalHeader().sectionClicked.connect(vgene.sortTable)
-        vgene.ui.SeqTable.itemChanged.connect(vgene.EditTableItem)
+        vgene.seqTableAdapter.end_reload()
+        vgene.ui.SeqTable.itemChanged.connect(vgene.handleSeqTableItemChanged)
 
         msg = 'Table fully loaded!'
         self.trigger.emit([0, msg])
@@ -4905,11 +4885,7 @@ class Batch_thread(QThread):
                     for i in range(len(num_list)-1):
                         if cur_value >= num_list[i] and cur_value < num_list[i+1]:
                             new_value = new_values[i]
-                            if new_value == 'NULL':
-                                SQLStatement = 'UPDATE vgenesDB SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
-                            else:
-                                SQLStatement = 'UPDATE vgenesDB SET ' + field + '= "' + new_value + '" WHERE SeqName="' + cur_id + '"'
-                            VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                            VGenesSQL.UpdateFieldbySeqName(cur_id, new_value, field, DBFilename)
 
                             pct = int(process / len(DataIn) * 100)
                             label = "Updating records: " + str(process) + '/' + str(len(DataIn))
@@ -4942,12 +4918,7 @@ class Batch_thread(QThread):
                 process = 0
                 step = 1
                 for key in Dict:
-                    if key == 'NULL':
-                        SQLStatement = 'UPDATE vgenesDB SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = ' + key
-                    else:
-                        SQLStatement = 'UPDATE vgenesDB SET ' + field + ' = "' + Dict[key] + '" WHERE ' + field + ' = "' + key + '"'
-                    #print(SQLStatement)
-                    process += VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                    process += VGenesSQL.UpdateFieldWhereValue(DBFilename, field, key, Dict[key])
 
                     pct = int(step / len(Dict) * 100)
                     label = "Updating records: " + str(process)
@@ -5015,9 +4986,7 @@ class Clone_thread(QThread):
                     #Vgenes.findTreeItem(item)
                     if Duplicates == False:
                         try:
-                            SQLStatement = 'UPDATE vgenesDB SET `ClonalPool` = "' + \
-                                           str(i) + '" WHERE SeqName = "' + item + '"'
-                            VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                            VGenesSQL.UpdateFieldbySeqName(item, str(i), 'ClonalPool', DBFilename)
                             existing_clone_list.append(str(i))
                         except:
                             print(item + ' caused error in finding clones at line 1798 and so was not annotated as a clone')
@@ -5029,17 +4998,11 @@ class Clone_thread(QThread):
                         else:
                             try:
                                 if remove == False:
-                                    SQLStatement = 'UPDATE vgenesDB SET `Quality` = "' + \
-                                                   SeqName + '" WHERE SeqName = "' + item + '"'
-                                    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                                    VGenesSQL.UpdateFieldbySeqName(item, SeqName, 'Quality', DBFilename)
                                     #VGenesSQL.UpdateField(data[119], SeqName, 'Quality', DBFilename)
                                 else:
-                                    SQLStatement = 'UPDATE vgenesDB SET `Quality` = "' + \
-                                                   'Duplicate' + '" WHERE SeqName = "' + item + '"'
-                                    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
-                                    SQLStatement = 'UPDATE vgenesDB SET `Project` = "' + \
-                                                   'Delete' + '" WHERE SeqName = "' + item + '"'
-                                    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                                    VGenesSQL.UpdateFieldbySeqName(item, 'Duplicate', 'Quality', DBFilename)
+                                    VGenesSQL.UpdateFieldbySeqName(item, 'Delete', 'Project', DBFilename)
                                     #VGenesSQL.UpdateField(data[119], 'Duplicate', 'Quality', DBFilename)
                                     #VGenesSQL.UpdateField(data[119], 'Delete', 'Project', DBFilename)
                                 DupList += (item + ', ')
@@ -5113,8 +5076,7 @@ class Clone_thread(QThread):
 
         # update VDB according to our results
         for item in result:
-            SQLStatement = 'UPDATE vgenesDB SET `ClonalRank` = "' + str(item[2]) + '" WHERE Blank10 = "' + item[0] + '"'
-            VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+            VGenesSQL.UpdateFieldWhere(DBFilename, 'ClonalRank', str(item[2]), 'Blank10', item[0])
 
         Msg = 'Integtated cell barcode info\n'
 
@@ -5330,9 +5292,7 @@ class barcode_thread(QThread):
                     barcode = record[1]
                     barcode = re.sub(del_str, rep_str, barcode)
                     if barcode != record[0]:
-                        SQLStatement = 'UPDATE vgenesDB SET `' + barcode_field_name + '`="' + barcode + '" WHERE `ID` = ' + str(
-                            id)
-                        VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                        VGenesSQL.UpdateField(id, barcode, barcode_field_name, DBFilename)
 
                         pct = int(process / len(DataIn) * 100)
                         label = "Updating records: " + str(process) + '/' + str(len(DataIn))
@@ -5367,10 +5327,7 @@ class barcode_thread(QThread):
                     barcode = barcode + '_' + add_str
 
                 if barcode != record[0]:
-                    SQLStatement = 'UPDATE vgenesDB SET `' + barcode_field_name + '`="' + barcode + '" WHERE `ID` = ' + str(
-                        id)
-                    VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
-                    #print(SQLStatement)
+                    VGenesSQL.UpdateField(id, barcode, barcode_field_name, DBFilename)
 
                     pct = int(process / len(DataIn) * 100)
                     label = "Updating records: " + str(process) + '/' + str(len(DataIn))
@@ -5450,17 +5407,18 @@ class annotate_thread(QThread):
                             self.trigger.emit([sign, Msg])
                             return
 
-                        # update field name table
-                        SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-                        max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
-
-                        SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment,display, display_priority) ' \
-                                        'VALUES(' + str(max_id[0][0] + 1) + ',"' + tmp_field_name + '", "' + \
-                                        header[col] + '", "Customized", "", "yes", 9)'
                         try:
-                            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+                            VGenesSQL.InsertFieldTableRecord(
+                                DBFilename,
+                                tmp_field_name,
+                                header[col],
+                                field_type='Customized',
+                                comment='',
+                                display='yes',
+                                display_priority=9,
+                            )
                         except:
-                            Msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+                            Msg = "DB operation Error when creating field metadata for:\n" + tmp_field_name
                             sign = 1
                             self.trigger.emit([sign, Msg])
                             return
@@ -5509,32 +5467,26 @@ class annotate_thread(QThread):
             if SkipHeader:
                 SkipHeader = False
             else:
-                SQLSTATEMENT = "UPDATE vgenesDB SET "
+                update_values = {}
                 for i in range(len(col_index)):
                     col = col_index[i]
                     field = col_fields[i]
                     field = re.sub(r'\s.+', '', field)
                     value = row_content[col]
-                    SQLSTATEMENT = SQLSTATEMENT + field + ' = "' + value + '",'
+                    update_values[field] = value
 
                 current_anchor = row_content[anchor_col_index]
-                SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
-
-                if self.chains == 'All':
-                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '"'
-                elif self.chains == 'HC':
-                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '" AND GeneType IN ("Heavy","Beta","Delta")'
-                elif self.chains == 'LC':
-                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '" AND GeneType NOT IN ("Heavy","Beta","Delta")'
-                else:
-                    WHEREStatement = " WHERE " + target_field + ' = "' + current_anchor + '"'
-
-                SQLSTATEMENT = SQLSTATEMENT + WHEREStatement
 
                 try:
-                    count += VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
+                    count += VGenesSQL.UpdateRecordByAnchor(
+                        DBFilename,
+                        update_values,
+                        target_field,
+                        current_anchor,
+                        chains=self.chains
+                    )
                 except:
-                    Msg = 'SQL error! Current SQL statement is:\n' + SQLSTATEMENT
+                    Msg = 'SQL error! Failed to update records anchored by:\n' + str(current_anchor)
                     sign = 1
                     self.trigger.emit([sign, Msg])
                     return
@@ -5686,24 +5638,15 @@ class protein_slimlar_thread(QThread):
                     ThisLoop_TargetColorMap6 = copy.deepcopy(TargetColorMap6)
 
                 ## for each sequence, align with target sequence
-                if self.alignment_setting[0] == "blosum62":
-                    matrix = matlist.blosum62
-                    #matrix = substitution_matrices.load('BLOSUM62')
-                elif self.alignment_setting[0] == "pam60":
-                    matrix = matlist.pam60
-                    #matrix = substitution_matrices.load('PAM70')
-                elif self.alignment_setting[0] == "benner22":
-                    matrix = matlist.benner22
-                    #matrix = substitution_matrices.load('BENNER22')
-                else:
-                    matrix = matlist.blosum62
-                    #matrix = substitution_matrices.load('BLOSUM62')
                 gap_open = self.alignment_setting[1]
                 gap_extend = self.alignment_setting[2]
-
-                alignments = pairwise2.align.globalds(targetAASeq, currentAASeq, matrix, gap_open, gap_extend)
-                tergetAlign = alignments[0][0]
-                currentAlign = alignments[0][1]
+                tergetAlign, currentAlign = global_alignment_strings(
+                    targetAASeq,
+                    currentAASeq,
+                    self.alignment_setting[0],
+                    gap_open,
+                    gap_extend,
+                )
 
                 ## align score array for target sequence
                 gap_index_target = []
@@ -8079,7 +8022,6 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
         if DBFilename != '' and DBFilename != None and DBFilename != 'none':
             SQLStatement = 'SELECT display,display_priority,Field,FieldNickName,FieldType,FieldComment,ID FROM fieldsname ORDER BY ID'
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-            DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
             header_list = ['Display', 'Display Priority','Field','Field nickname','Field type','Field comment', 'ID']
             num_row = len(DataIn)
             num_col = len(header_list)
@@ -8147,22 +8089,32 @@ class TableDialog(QtWidgets.QDialog, Ui_TableDialog):
     def saveChange(self):
         if DBFilename != '' and DBFilename != None and DBFilename != 'none':
             rows = self.ui.tableWidget.rowCount()
+            field_settings = []
             for row in range(1, rows):
-                name = self.ui.tableWidget.item(row, 2).text()
+                name_item = self.ui.tableWidget.item(row, 2)
+                if name_item is None:
+                    continue
+                name = name_item.text().strip()
+                if name == '':
+                    continue
                 if self.ui.tableWidget.cellWidget(row, 0).isChecked():
                     value = 'yes'
                 else:
                     value = 'no'
-                order = self.ui.tableWidget.cellWidget(row, 1).currentText()
+                order = self.ui.tableWidget.cellWidget(row, 1).currentText().strip()
+                if order == '':
+                    order = '9'
+                field_settings.append({
+                    'field': name,
+                    'display': value,
+                    'display_priority': int(order),
+                })
 
-                SQLStatement = 'UPDATE fieldsname SET display = "' + value + '" WHERE Field = "' + name + '"'
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
-                SQLStatement = 'UPDATE fieldsname SET display_priority = ' + order + ' WHERE Field = "' + name + '"'
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+            VGenesSQL.UpdateFieldDisplaySettings(DBFilename, field_settings)
 
             self.refreshDBSignal.emit()
             self.changeNotSave = False
-            msg = 'Changes saved!'
+            msg = 'Field display settings saved.'
             QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def reject(self):
@@ -8973,8 +8925,7 @@ class BatchDialog(QtWidgets.QDialog, Ui_BatchDialog):
                     for i in range(len(num_list)-1):
                         if cur_value >= num_list[i] and cur_value < num_list[i+1]:
                             new_value = new_values[i]
-                            SQLStatement = 'UPDATE vgenesDB SET ' + field + '= "' + new_value + '" WHERE ID=' + cur_id
-                            VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                            VGenesSQL.UpdateField(cur_id, new_value, field, DBFilename)
                 except:
                     pass
             # process char part
@@ -9516,21 +9467,23 @@ class AnnoDielog(QtWidgets.QDialog, Ui_AnnoDialog):
             if row == 0:
                 continue
             else:
-                SQLSTATEMENT = "UPDATE vgenesDB SET "
+                update_values = {}
                 for i in range(len(col_index)):
                     col = col_index[i]
                     field = col_fields[i]
                     field = re.sub(r'\s.+','',field)
                     value = self.ui.tableWidget.item(row, col).text()
-                    SQLSTATEMENT = SQLSTATEMENT + field + ' = "' + value + '",'
+                    update_values[field] = value
                 current_anchor = self.ui.tableWidget.item(row, anchor_col_index).text()
-                SQLSTATEMENT = SQLSTATEMENT.rstrip(',')
-                SQLSTATEMENT = SQLSTATEMENT + " WHERE " + target_field + ' = "' + current_anchor + '"'
                 try:
-                    count += VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT)
-                    #print(SQLSTATEMENT)
+                    count += VGenesSQL.UpdateRecordByAnchor(
+                        DBFilename,
+                        update_values,
+                        target_field,
+                        current_anchor
+                    )
                 except:
-                    Msg = 'SQL error! Current SQL statement is:\n' + SQLSTATEMENT
+                    Msg = 'SQL error! Failed to update records anchored by:\n' + str(current_anchor)
                     QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok,
                                             QMessageBox.Ok)
                     return
@@ -9806,8 +9759,11 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
         global FieldCommentList
         global FieldTypeList
 
-        target_field = self.ui.listWidget.currentItem().text()
-        if self.ui.lineEditType == "Fixed":
+        current_item = self.ui.listWidget.currentItem()
+        if current_item is None:
+            return
+        target_field = current_item.text()
+        if self.ui.lineEditType.text() == "Fixed":
             Msg = 'You can not delete Fixed filed!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
@@ -9827,11 +9783,10 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
         #	                    QMessageBox.Ok)
         #	return
 
-        SQLSTATEMENT2 = 'DELETE FROM fieldsname WHERE Field = "' + target_field + '"'
         try:
-            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+            VGenesSQL.DeleteFieldTableRecord(DBFilename, target_field)
         except:
-            msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+            msg = "DB operation Error when deleting field metadata for:\n" + target_field
             QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
                                 QMessageBox.Ok)
             return
@@ -9883,15 +9838,18 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
             return
 
         # update field name table
-        SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-        max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
-
-        SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
-                        'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_field + '", "' + new_field + '", "Customized", "", "yes", 9)'
         try:
-            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+            VGenesSQL.InsertFieldTableRecord(
+                DBFilename,
+                new_field,
+                new_field,
+                field_type='Customized',
+                comment='',
+                display='yes',
+                display_priority=9,
+            )
         except:
-            msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+            msg = "DB operation Error when creating field metadata for:\n" + new_field
             QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
                                 QMessageBox.Ok)
             return
@@ -9899,11 +9857,10 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
         # copy record
         if field_from != '':
             field_from = re.sub(r'\(.+', '', field_from)
-            SQLStatement = 'UPDATE vgenesDB SET ' + new_field + ' = ' + field_from
             try:
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                VGenesSQL.CopyFieldValues(DBFilename, new_field, field_from)
             except:
-                Msg = 'Error occurs when updating the DB!\nCurrent SQL statement is:\n' + SQLStatement
+                Msg = 'Error occurs when updating the DB!'
                 QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                 return
 
@@ -9959,15 +9916,18 @@ class AlterDielog(QtWidgets.QDialog, Ui_AlterDialog):
                 return
 
         # update field name table
-        SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-        max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
-
-        SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
-                        'VALUES(' + str(max_id[0][0] + 1) + ',"' + tmp_field_name + '", "' + tmp_field_name + '", "Customized", "", "yes", 9)'
         try:
-            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+            VGenesSQL.InsertFieldTableRecord(
+                DBFilename,
+                tmp_field_name,
+                tmp_field_name,
+                field_type='Customized',
+                comment='',
+                display='yes',
+                display_priority=9,
+            )
         except:
-            msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+            msg = "DB operation Error when creating field metadata for:\n" + tmp_field_name
             QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
                                 QMessageBox.Ok)
             return
@@ -11360,14 +11320,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                         new_col_name = cur_field_name[new_col_index]
                         new_col_comment = ''
 
-                        # update table
-                        SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-                        max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
-
                         SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
-                        SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
-                                        'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_col + '", "' + new_col_name + \
-                                        '", "Customized", "' + new_col_comment + '", "yes", 9)'
                         try:
                             VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
                         except:
@@ -11377,9 +11330,17 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                             return
 
                         try:
-                            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+                            VGenesSQL.InsertFieldTableRecord(
+                                DBFilename,
+                                new_col,
+                                new_col_name,
+                                field_type='Customized',
+                                comment=new_col_comment,
+                                display='yes',
+                                display_priority=9,
+                            )
                         except:
-                            msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+                            msg = "DB operation Error when creating field metadata for:\n" + new_col
                             QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
                                                 QMessageBox.Ok)
                             return
@@ -11495,13 +11456,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                         new_col_name = cur_field_name[new_col_index]
                         new_col_comment = cur_field_comment[new_col_index]
 
-                        # update table
-                        SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-                        max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
                         SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_col + " text"
-                        SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
-                                        'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_col + '", "' + new_col_name + \
-                                        '", "Customized", "' + new_col_comment + '", "yes", 9)'
                         try:
                             VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
                         except:
@@ -11511,9 +11466,17 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                             return
 
                         try:
-                            VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+                            VGenesSQL.InsertFieldTableRecord(
+                                DBFilename,
+                                new_col,
+                                new_col_name,
+                                field_type='Customized',
+                                comment=new_col_comment,
+                                display='yes',
+                                display_priority=9,
+                            )
                         except:
-                            msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2 + '\nCurrent VDB file: ' + vdb_file
+                            msg = "DB operation Error when creating field metadata for:\n" + new_col + '\nCurrent VDB file: ' + vdb_file
                             QMessageBox.warning(self, 'Warning', msg, QMessageBox.Ok,
                                                 QMessageBox.Ok)
                             return
@@ -13286,12 +13249,7 @@ class VDB_thread(QThread):
         for new_field in DF.columns:
             if new_field not in RealNameList:
                 # update table
-                SQLSTATEMENT = 'SELECT MAX(ID) FROM fieldsname'
-                max_id = VGenesSQL.RunSQL(DBFilename, SQLSTATEMENT)
                 SQLSTATEMENT1 = "ALTER TABLE vgenesDB ADD " + new_field + " text"
-                SQLSTATEMENT2 = 'INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) ' \
-                                'VALUES(' + str(max_id[0][0] + 1) + ',"' + new_field + '", "' + new_field + \
-                                '", "Customized", "' + new_field + '", "yes", 9)'
                 try:
                     VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT1)
                 except:
@@ -13300,9 +13258,17 @@ class VDB_thread(QThread):
                     return
 
                 try:
-                    VGenesSQL.RunUpdateSQL(DBFilename, SQLSTATEMENT2)
+                    VGenesSQL.InsertFieldTableRecord(
+                        DBFilename,
+                        new_field,
+                        new_field,
+                        field_type='Customized',
+                        comment=new_field,
+                        display='yes',
+                        display_priority=9,
+                    )
                 except:
-                    msg = "DB operation Error! Current SQL statement is: \n" + SQLSTATEMENT2
+                    msg = "DB operation Error when creating field metadata for:\n" + new_field
                     self.trigger.emit(1, msg)
                     return
 
@@ -13660,6 +13626,9 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
 
         self.ui.setupUi(self)
+        self.replaceSeqTable()
+        self.setupDbTableStatus()
+        self.applyDbTabTheme()
 
         self.ui.comboBoxSpecies.currentTextChanged.connect(self.on_comboBoxSpecies_editTextChanged)
         self.ui.cboTreeOp1.currentTextChanged.connect(self.TreeviewOptions)
@@ -13802,8 +13771,10 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         # save all checked records name, this is the only way I know to improve our DB page without changing the SQL table design
         self.CheckedRecords = []
-        self.ui.SeqTable.pageSize = 20
-        self.ui.SeqTable.EditTag = False
+        self.seqTableAdapter = SequenceTableAdapter(self.ui.SeqTable)
+        self.seqTableAdapter.initialize_state(page_size=20)
+        self.seqTableSortField = None
+        self.seqTableSortOrder = Qt.AscendingOrder
 
         self.HCLCDialog = HCLCDialog()
 
@@ -13831,6 +13802,125 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             pass
 
+    def replaceSeqTable(self):
+        old_table = self.ui.SeqTable
+        new_table = SequenceTableView(self.ui.tabDB)
+        new_table.setObjectName(old_table.objectName())
+        new_table.setFont(old_table.font())
+        new_table.setSizePolicy(old_table.sizePolicy())
+        new_table.setAlternatingRowColors(True)
+        new_table.setSelectionMode(old_table.selectionMode())
+        new_table.setSelectionBehavior(old_table.selectionBehavior())
+        new_table.setEditTriggers(old_table.editTriggers())
+        new_table.setShowGrid(False)
+        new_table.setWordWrap(False)
+        new_table.verticalHeader().setVisible(old_table.verticalHeader().isVisible())
+        new_table.horizontalHeader().setStretchLastSection(old_table.horizontalHeader().stretchLastSection())
+
+        self.ui.gridLayout_42.replaceWidget(old_table, new_table)
+        old_table.hide()
+        old_table.deleteLater()
+        self.ui.SeqTable = new_table
+
+    def setupDbTableStatus(self):
+        self.dbTableStatusLabel = QLabel(self.ui.tabDB)
+        self.dbTableStatusLabel.setObjectName('dbTableStatusLabel')
+        self.dbTableStatusLabel.setText('Table hidden.')
+        self.ui.gridLayout_42.addWidget(self.dbTableStatusLabel, 3, 0, 1, 20)
+        self.ui.SeqTable.setPlaceholderText('Load the table to inspect sequence records.')
+
+    def applyDbTabTheme(self):
+        self.ui.tabDB.setStyleSheet(db_tab_stylesheet())
+        self.ui.SeqTable.setAlternatingRowColors(True)
+
+    def updateDbTableStatus(self, message, placeholder_text=None):
+        self.dbTableStatusLabel.setText(message)
+        self.statusBar().showMessage(message, 4000)
+        if placeholder_text is not None:
+            self.ui.SeqTable.setPlaceholderText(placeholder_text)
+
+    def seqTableName(self, row):
+        return self.seqTableAdapter.row_name(row)
+
+    def seqTableCheckItem(self, row):
+        return self.seqTableAdapter.check_item(row)
+
+    def isSeqTableChecked(self, row):
+        return self.seqTableAdapter.is_checked(row)
+
+    def setSeqTableChecked(self, row, checked):
+        self.seqTableAdapter.set_checked(row, checked)
+
+    def selectedSeqTableRows(self):
+        return self.seqTableAdapter.selected_rows()
+
+    def seqTableDefaultSortFields(self):
+        return [
+            re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()),
+            re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()),
+            re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText()),
+            'SeqName'
+        ]
+
+    def seqTableOrderClause(self):
+        order_fields = []
+        if self.seqTableSortField:
+            direction = 'ASC' if self.seqTableSortOrder == Qt.AscendingOrder else 'DESC'
+            order_fields.append(f'{self.seqTableSortField} {direction}')
+
+        for field in self.seqTableDefaultSortFields():
+            if field == 'None':
+                continue
+            if any(entry.split()[0] == field for entry in order_fields):
+                continue
+            order_fields.append(field)
+
+        if not order_fields:
+            order_fields.append('SeqName')
+        return ' ORDER BY ' + ', '.join(order_fields)
+
+    def handleSeqTableCheckChanged(self, item):
+        global MoveNotChange
+        if MoveNotChange:
+            return
+
+        row = item.row()
+        sender_name = self.seqTableName(row)
+
+        MoveNotChange = True
+        rows = self.selectedSeqTableRows()
+
+        checked_names = []
+        if row in rows:
+            for cur_row in rows:
+                if cur_row != row:
+                    self.setSeqTableChecked(cur_row, item.checkState() == Qt.Checked)
+            for cur_row in rows:
+                checked_names.append(self.seqTableName(cur_row))
+        else:
+            checked_names.append(sender_name)
+
+        if item.checkState() == Qt.Checked:
+            events = True
+            for name in checked_names:
+                if name not in self.CheckedRecords:
+                    self.CheckedRecords.append(name)
+        else:
+            events = False
+            for name in checked_names:
+                try:
+                    self.CheckedRecords.remove(name)
+                except:
+                    print(name + ':Not in the list')
+        self.match_table_to_tree(checked_names, events)
+        MoveNotChange = False
+
+    def handleSeqTableItemChanged(self, item):
+        if item.column() == 0:
+            self.handleSeqTableCheckChanged(item)
+        else:
+            self.EditTableItem(item)
+
     @pyqtSlot()
     def on_actionReverse_Current_Selection_triggered(self):
         # notice when DB is huge
@@ -13852,7 +13942,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         self.CheckedRecords = list(allRecords - checkedRecords)
         # refersh DB table
-        if self.ui.SeqTable.rowCount() > 0:
+        if self.seqTableAdapter.row_count() > 0:
             self.ui.pushButtonRefresh.click()
 
         # update tree (if active)
@@ -13889,9 +13979,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.myMarkRecordsDialog.show()
 
     def updateValueForSelection(self, filed_name, given_value):
-        WHEREStatement = 'WHERE SeqName IN ("' + '","'.join(self.CheckedRecords) + '")'
-        SQLStatement = 'UPDATE vgenesDB SET ' + filed_name + ' = "' + given_value + '" ' + WHEREStatement
-        VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+        VGenesSQL.UpdateFieldWhereIn(DBFilename, filed_name, given_value, 'SeqName', self.CheckedRecords)
 
         Msg = 'Records updated successfully!'
         QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
@@ -15536,11 +15624,11 @@ class VGenesForm(QtWidgets.QMainWindow):
         MoveNotChange = True
         rows = self.ui.SeqTable.rowCount()
         for row in range(rows):
-            cur_name = self.ui.SeqTable.item(row, 1).text()
+            cur_name = self.seqTableName(row)
             if cur_name in member_names:
-                self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+                self.setSeqTableChecked(row, True)
             else:
-                self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+                self.setSeqTableChecked(row, False)
         MoveNotChange = False
 
         self.match_table_to_tree()
@@ -15842,7 +15930,8 @@ class VGenesForm(QtWidgets.QMainWindow):
     def refreshDB(self):
         global MoveNotChange
         MoveNotChange = True
-        if self.ui.SeqTable.rowCount() == 0:
+        if self.seqTableAdapter.row_count() == 0:
+            self.updateDbTableStatus('Table hidden.', 'Load the table to inspect sequence records.')
             return
 
         self.load_table()
@@ -15973,9 +16062,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         global DontFindTwice
         field_from = re.sub(r'\(.+', '', field_from)
         field_to = re.sub(r'\(.+', '', field_to)
-        SQLStatement = 'UPDATE vgenesDB SET ' + field_to + ' = ' + field_from
         try:
-            VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+            VGenesSQL.CopyFieldValues(DBFilename, field_to, field_from)
             Msg = 'Update finished!'
             DontFindTwice = True
             self.refreshDB()
@@ -15986,7 +16074,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
         except:
-            Msg = 'Error occurs when updating the DB!\nCurrent SQL statement is:\n' + SQLStatement
+            Msg = 'Error occurs when updating the DB!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
@@ -16920,7 +17008,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             # DB page
             elif self.ui.tabWidget.currentIndex() == 0:
                 # if old table exists, skip
-                if self.ui.SeqTable.columnCount() > 0:
+                if self.seqTableAdapter.column_count() > 0:
                     pass
                     #if updateMarker == True:
                     #	self.load_table()
@@ -17136,7 +17224,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             except:
                 MoveNotChange = True
                 col = item.column()
-                self.ui.SeqTable.item(row, col).setText(SeqName)
+                self.seqTableAdapter.set_cell_text(row, col, SeqName)
                 MoveNotChange = False
                 QMessageBox.warning(self, 'Warning',
                                     'The name:\n' + CurVal + '\nhas been taken! Please choose another name!',
@@ -17166,10 +17254,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
     def load_table(self):
-        if self.ui.SeqTable.columnCount() > 0:
-            self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
-        self.ui.SeqTable.setColumnCount(0)
-        self.ui.SeqTable.setRowCount(0)
+        if self.seqTableAdapter.column_count() > 0:
+            try:
+                self.ui.SeqTable.itemChanged.disconnect(self.handleSeqTableItemChanged)
+            except:
+                pass
+        self.seqTableAdapter.clear()
+        self.updateDbTableStatus('Loading table ...', 'Loading records ...')
 
         try:
             # load data for new table
@@ -17182,16 +17273,12 @@ class VGenesForm(QtWidgets.QMainWindow):
                 #label = "Fetching data ..."
                 #self.progressLabel(pct, label)
 
-                field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-                field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-                field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-
                 # paging system
                 pageSize = int(self.ui.spinBoxPageSize.text())
-                if self.ui.SeqTable.pageSize == pageSize:
+                if self.seqTableAdapter.page_size() == pageSize:
                     pass
                 else:
-                    self.ui.SeqTable.pageSize = pageSize
+                    self.seqTableAdapter.set_page_size(pageSize)
                     self.ui.labelCurPage.setText('1')
 
                 CurPage = int(self.ui.labelCurPage.text()) - 1
@@ -17202,6 +17289,13 @@ class VGenesForm(QtWidgets.QMainWindow):
                 TotalRecords = DataIn[0][0]
                 TotalRecordsStr = str(math.ceil(TotalRecords/pageSize))
                 self.ui.labelTotalPage.setText(TotalRecordsStr)
+                if TotalRecords == 0:
+                    self.ui.labelCurPage.setText('1')
+                    self.updateDbTableStatus(
+                        'No records found in the current database.',
+                        'No records found in the current database.'
+                    )
+                    return
 
                 SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID LIMIT 0,200'
                 HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -17210,7 +17304,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 fields = ','.join(current_field_list)
                 if fields == '':
                     fields = '*'
-                SQLStatement = 'select '+ fields +' from vgenesDB ORDER BY ' + field1 + ',' + field2 + ',' + field3 + ',SeqName'
+                SQLStatement = 'select ' + fields + ' from vgenesDB' + self.seqTableOrderClause()
                 SQLStatement += RecordLimitStatement
                 DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
 
@@ -17219,55 +17313,35 @@ class VGenesForm(QtWidgets.QMainWindow):
                 #self.progressLabel(pct, label)
 
                 num_row = len(DataIn)
-                num_col = len(current_field_list)
-                self.ui.SeqTable.setRowCount(num_row)
-                self.ui.SeqTable.setColumnCount(num_col + 1)
-
                 horizontalHeader = [''] + current_nickname_list
-                self.ui.SeqTable.setHorizontalHeaderLabels(horizontalHeader)
-                self.ui.SeqTable.fields = horizontalHeader
-                # re-size column size
-                self.ui.SeqTable.horizontalHeader().resizeSection(0, 10)
-                self.ui.SeqTable.setSelectionMode(QAbstractItemView.ExtendedSelection)
-                if self.ui.checkBoxRowSelection.isChecked():
-                    self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectRows)
-                else:
-                    self.ui.SeqTable.setSelectionBehavior(QAbstractItemView.SelectItems)
-
-                #process = 1
-                for row_index in range(num_row):
-                    cell_checkBox = QCheckBox()
-                    cell_checkBox.id = str(DataIn[row_index][0])
-                    # cell_checkBox.setText(DataIn[row_index][0])
-                    if str(DataIn[row_index][0]) in self.CheckedRecords:
-                        cell_checkBox.setChecked(True)
-                    else:
-                        cell_checkBox.setChecked(False)
-                    cell_checkBox.stateChanged.connect(self.multipleSelection)
-                    self.ui.SeqTable.setCellWidget(row_index, 0, cell_checkBox)
-
-                    for col_index in range(num_col):
-                        unit = QTableWidgetItem(str(DataIn[row_index][col_index]))
-                        unit.last_name = DataIn[row_index][col_index]
-                        self.ui.SeqTable.setItem(row_index, col_index + 1, unit)
-
-                    #pct = int(process / num_row * 100)
-                    #label = "Loading records: " + str(process) + '/' + str(num_row)
-                    #self.progressLabel(pct, label)
-                    #process += 1
-
-
-                # disable edit
-                if self.ui.SeqTable.EditTag == True:
-                    self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
-                else:
-                    self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+                row_names = [str(row[0]) for row in DataIn]
+                self.seqTableAdapter.begin_reload()
+                self.seqTableAdapter.configure([''] + current_field_list, horizontalHeader, row_names)
+                self.seqTableAdapter.resize_primary_columns(check_width=10)
+                self.seqTableAdapter.apply_selection_behavior(self.ui.checkBoxRowSelection.isChecked())
+                self.seqTableAdapter.populate_rows(DataIn, self.CheckedRecords)
+                self.seqTableAdapter.apply_edit_mode()
                 # show sort indicator
-                self.ui.SeqTable.horizontalHeader().setSortIndicatorShown(True)
+                if self.seqTableSortField and self.seqTableSortField in current_field_list:
+                    sort_index = current_field_list.index(self.seqTableSortField) + 1
+                    self.seqTableAdapter.set_sort_indicator(sort_index, self.seqTableSortOrder)
+                else:
+                    self.seqTableAdapter.set_sort_indicator(1, Qt.AscendingOrder)
                 # connect sort indicator to slot function
+                try:
+                    self.ui.SeqTable.horizontalHeader().sectionClicked.disconnect(self.sortTable)
+                except:
+                    pass
                 self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
-                self.ui.SeqTable.itemChanged.connect(self.EditTableItem)
+                self.seqTableAdapter.end_reload()
+                self.ui.SeqTable.itemChanged.connect(self.handleSeqTableItemChanged)
+                message = 'Showing ' + str(num_row) + ' records on page ' + self.ui.labelCurPage.text() + ' of ' + TotalRecordsStr + '.'
+                self.updateDbTableStatus(message, 'No records available for this page.')
+            else:
+                self.updateDbTableStatus('No database loaded.', 'Open a VDB file to browse sequence records.')
         except:
+            self.seqTableAdapter.end_reload()
+            self.updateDbTableStatus('Failed to load table.', 'Unable to load records for the current table view.')
             return
         # try multi-thread
         '''
@@ -17358,12 +17432,12 @@ class VGenesForm(QtWidgets.QMainWindow):
             return
 
         MoveNotChange = True
-        rows = self.ui.SeqTable.rowCount()
+        rows = self.seqTableAdapter.row_count()
         if rows > 0:
             if self.ui.checkBoxAll.isChecked():
                 self.ui.checkBoxAll1.setChecked(True)
                 for row in range(rows):
-                    self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+                    self.setSeqTableChecked(row, True)
                 self.TreeChecksAll()
                 # update check list
                 SQLStatement = 'SELECT SeqName from vgenesDB'
@@ -17372,7 +17446,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             else:
                 self.ui.checkBoxAll1.setChecked(False)
                 for row in range(rows):
-                    self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+                    self.setSeqTableChecked(row, False)
                 # update check list
                 self.CheckedRecords = []
             MoveNotChange = False
@@ -17389,13 +17463,13 @@ class VGenesForm(QtWidgets.QMainWindow):
             return
 
         MoveNotChange = True
-        rows = self.ui.SeqTable.rowCount()
+        rows = self.seqTableAdapter.row_count()
         if self.ui.checkBoxAll1.isChecked():
             self.ui.checkBoxAll.setChecked(True)
             # check table
             if rows > 0:
                 for row in range(rows):
-                    self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+                    self.setSeqTableChecked(row, True)
             # check trre
             if self.ui.treeWidget.isEnabled():
                 root = self.ui.treeWidget.invisibleRootItem()
@@ -17409,7 +17483,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             # check table
             if rows > 0:
                 for row in range(rows):
-                    self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+                    self.setSeqTableChecked(row, False)
             # check trre
             if self.ui.treeWidget.isEnabled():
                 root = self.ui.treeWidget.invisibleRootItem()
@@ -17417,58 +17491,6 @@ class VGenesForm(QtWidgets.QMainWindow):
             # update check list
             self.CheckedRecords = []
         MoveNotChange = False
-
-    def multipleSelection(self, int_signal):
-        global MoveNotChange
-        if MoveNotChange:
-            return
-
-        sender = self.sender()
-        sender_name = sender.id
-
-        MoveNotChange = True
-        buttonClicked = self.sender()
-        postitionOfWidget = buttonClicked.pos()
-        index = self.ui.SeqTable.indexAt(postitionOfWidget)
-        row = index.row()
-
-        # get all selected rows
-        rows = []
-        item = self.ui.SeqTable.selectedItems()
-        for i in item:
-            if self.ui.SeqTable.indexFromItem(i).row() not in rows:
-                rows.append(self.ui.SeqTable.indexFromItem(i).row())
-
-        # prepare names
-        checked_names = []
-        # if current row in selected rows, check all rows
-        if row in rows:
-            for cur_row in rows:
-                if cur_row != row:
-                    if int_signal == 2:		# signal = 2 means check event
-                        self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(True)
-                    else:
-                        self.ui.SeqTable.cellWidget(cur_row, 0).setChecked(False)
-
-            for cur_row in rows:
-                checked_names.append(self.ui.SeqTable.item(cur_row, 1).text())
-        else:
-            checked_names.append(sender_name)
-
-        if int_signal == 2:
-            events = True
-            for name in checked_names:
-                self.CheckedRecords.append(name)
-        else:
-            events = False
-            for name in checked_names:
-                try:
-                    self.CheckedRecords.remove(name)
-                except:
-                    print(name + ':Not in the list')
-        self.match_table_to_tree(checked_names, events)
-        MoveNotChange = False
-
 
     def match_tree_to_table(self):
         global MoveNotChange
@@ -17481,13 +17503,13 @@ class VGenesForm(QtWidgets.QMainWindow):
             selected_list = self.CheckedRecords
 
         MoveNotChange = True
-        rows = self.ui.SeqTable.rowCount()
+        rows = self.seqTableAdapter.row_count()
         for row in range(rows):
-            cur_name = self.ui.SeqTable.item(row, 1).text()
+            cur_name = self.seqTableName(row)
             if cur_name in selected_list:
-                self.ui.SeqTable.cellWidget(row, 0).setChecked(True)
+                self.setSeqTableChecked(row, True)
             else:
-                self.ui.SeqTable.cellWidget(row, 0).setChecked(False)
+                self.setSeqTableChecked(row, False)
         MoveNotChange = False
 
     def match_table_to_tree(self, names, events):
@@ -17512,10 +17534,10 @@ class VGenesForm(QtWidgets.QMainWindow):
         if self.ui.treeWidget.isEnabled():
             DataIn = []
             # get all checked table rows
-            total_rows = self.ui.SeqTable.rowCount()
+            total_rows = self.seqTableAdapter.row_count()
             for row in range(total_rows):
-                if self.ui.SeqTable.cellWidget(row, 0).isChecked():
-                    DataIn.append(self.ui.SeqTable.item(row, 1).text())
+                if self.isSeqTableChecked(row):
+                    DataIn.append(self.seqTableName(row))
     
             # update the selection
             self.clearTreeChecks()
@@ -17540,20 +17562,21 @@ class VGenesForm(QtWidgets.QMainWindow):
         col = item.column()
         CurVal = item.text()
 
-        horizontalHeader = self.ui.SeqTable.fields
+        horizontalHeader = [self.seqTableAdapter.header_label(i) for i in range(self.seqTableAdapter.column_count())]
         col_name = horizontalHeader[col]
         index = RealNameList.index(col_name)
         col_name = FieldList[index]
 
         if col == 1:  # update sequence name
-            SeqName = item.last_name
+            SeqName = item.original_value()
         else:
-            SeqName = self.ui.SeqTable.item(row, 1).text()
+            SeqName = self.seqTableAdapter.cell_text(row, 1)
 
         try:
             self.UpdateSeq(SeqName, CurVal, col_name)
             if col == 1:  # update sequence name
-                item.last_name = CurVal
+                item.set_original_value(CurVal)
+                self.seqTableAdapter.update_row_name(row, CurVal)
 
                 # update name index
                 #NameIndex[CurVal] = NameIndex[SeqName]
@@ -17582,7 +17605,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         except:
             MoveNotChange = True
             col = item.column()
-            self.ui.SeqTable.item(row, col).setText(SeqName)
+            self.seqTableAdapter.set_cell_text(row, col, SeqName)
             MoveNotChange = False
             QMessageBox.warning(self, 'Warning',
                                 'The name:\n' + CurVal + '\nhas been taken! Please choose another name!',
@@ -17595,26 +17618,42 @@ class VGenesForm(QtWidgets.QMainWindow):
         VGenesSQL.UpdateFieldbySeqName(ID, ItemValue, FieldName, DBFilename)
 
     def sortTable(self, index):
-        if self.ui.tabWidget.currentIndex() == 9:
-            self.ui.SeqTable.sortByColumn(index, self.ui.SeqTable.horizontalHeader().sortIndicatorOrder())
+        if index == 0:
+            return
+        try:
+            field_name = self.seqTableAdapter.db_field(index)
+        except:
+            return
+        if field_name in ['', 'None']:
+            return
+
+        if self.seqTableSortField == field_name:
+            if self.seqTableSortOrder == Qt.AscendingOrder:
+                self.seqTableSortOrder = Qt.DescendingOrder
+            else:
+                self.seqTableSortOrder = Qt.AscendingOrder
         else:
-            self.ui.SeqTable.sortByColumn(index, self.ui.SeqTable.horizontalHeader().sortIndicatorOrder())
+            self.seqTableSortField = field_name
+            self.seqTableSortOrder = Qt.AscendingOrder
+
+        self.ui.SeqTable.horizontalHeader().setSortIndicator(index, self.seqTableSortOrder)
+        self.load_table()
 
     def ChangeEditMode(self):
-        if self.ui.SeqTable.editTriggers() == QtWidgets.QAbstractItemView.NoEditTriggers:
+        if self.seqTableAdapter.edit_triggers() == QtWidgets.QAbstractItemView.NoEditTriggers:
             unlock_icon = QIcon()
             unlock_icon.addPixmap(QPixmap(":/PNG-Icons/unlocked.png"), QIcon.Normal, QIcon.Off)
             self.ui.EditLock.setIcon(unlock_icon)
             self.ui.EditLock.setText('Edit \nunlock')
-            self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.DoubleClicked)
-            self.ui.SeqTable.EditTag = True
+            self.seqTableAdapter.set_edit_triggers(QtWidgets.QAbstractItemView.DoubleClicked)
+            self.seqTableAdapter.set_edit_tag(True)
         else:
             lock_icon = QIcon()
             lock_icon.addPixmap(QPixmap(":/PNG-Icons/locked.png"), QIcon.Normal, QIcon.Off)
             self.ui.EditLock.setIcon(lock_icon)
             self.ui.EditLock.setText('Edit \nlocked')
-            self.ui.SeqTable.setEditTriggers(QtWidgets.QAbstractItemView.NoEditTriggers)
-            self.ui.SeqTable.EditTag = False
+            self.seqTableAdapter.set_edit_triggers(QtWidgets.QAbstractItemView.NoEditTriggers)
+            self.seqTableAdapter.set_edit_tag(False)
 
     @pyqtSlot()
     def on_actionBatchChangeName_triggered(self):
@@ -20720,20 +20759,12 @@ class VGenesForm(QtWidgets.QMainWindow):
             print(name)
 
             # try to match before re-generate table
-            rows = self.ui.SeqTable.rowCount()
-            for row in range(rows):
-                cur_name = self.ui.SeqTable.item(row, 1).text()
-                if cur_name == name:
-                    self.ui.SeqTable.setCurrentCell(row,1)
-                    return
+            if self.seqTableAdapter.set_current_name(name):
+                return
 
             # loacte records in table and update table
             print('re-generate table!\n')
-            field1 = re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText())
-            field2 = re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText())
-            field3 = re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText())
-
-            orderStatement = "ORDER BY " + field1 + "," + field2 + "," + field3 + ",SeqName"
+            orderStatement = self.seqTableOrderClause()
             #SQLStatement = 'SELECT * FROM (SELECT ROW_NUMBER () OVER ( ' + orderStatement + ') RowNum,SeqName FROM vgenesDB) WHERE `SeqName` = "' + name + '"'
             SQLStatement = 'SELECT SeqName FROM vgenesDB ' + orderStatement
             DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
@@ -20750,12 +20781,8 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.load_table()
 
             # setup focus on seqTable
-            rows = self.ui.SeqTable.rowCount()
-            for row in range(rows):
-                cur_name = self.ui.SeqTable.item(row, 1).text()
-                if cur_name == name:
-                    self.ui.SeqTable.setCurrentCell(row,1)
-                    return
+            if self.seqTableAdapter.set_current_name(name):
+                return
 
     def tree_to_table_selection_old(self):
         Selected = self.ui.treeWidget.selectedItems()
@@ -20767,19 +20794,14 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         print(name)
 
-        rows = self.ui.SeqTable.rowCount()
-        for row in range(rows):
-            cur_name = self.ui.SeqTable.item(row, 1).text()
-            if cur_name == name:
-                self.ui.SeqTable.setCurrentCell(row,1)
-                return
+        if self.seqTableAdapter.set_current_name(name):
+            return
 
     def table_to_tree_selection(self):
         global from_table
         try:
-            items = self.ui.SeqTable.selectedItems()
-            item = items[-1]
-            name = self.ui.SeqTable.item(self.ui.SeqTable.indexFromItem(item).row(), 1).text()
+            names = self.seqTableAdapter.selected_names()
+            name = names[-1]
 
             print(name)
 
@@ -21447,8 +21469,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         for item in DataIs:
             SharedName = ''
             ClPl = item[0]
-            SQLStatement = 'SELECT DISTINCT Project FROM vgenesDB WHERE ClonalPool = ' + ClPl + ' ORDER BY Project'
-            DataIs2 = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+            DataIs2 = VGenesSQL.GetDistinctFieldWhere(DBFilename, 'Project', 'ClonalPool', ClPl, order_by='Project')
 
             for proj in DataIs2:
                 if proj[0] in ProjDict:
@@ -21460,14 +21481,9 @@ class VGenesForm(QtWidgets.QMainWindow):
             elif SharedName == 'D0_D1_D3_D7_Pre':
                 SharedName = 'All'
 
+            VGenesSQL.UpdateFieldWhere(DBFilename, 'Blank7', SharedName, 'ClonalPool', ClPl)
 
-            SQLStatement = 'UPDATE vgenesDB SET Blank7 = "' + SharedName + '" WHERE ClonalPool = "' + ClPl + '"'
-
-            foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
-
-        SQLStatement = 'UPDATE vgenesDB SET Blank7 = "Distinct" WHERE ClonalPool = 0'
-
-        foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+        VGenesSQL.UpdateFieldWhere(DBFilename, 'Blank7', 'Distinct', 'ClonalPool', 0)
         print("Finished Shared analysis")
 
     @pyqtSlot()
@@ -21554,9 +21570,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 ErLog += item[0] + '\n'
                 Errs += 1
         seq_name_list = [i[0] for i in DataIs]
-        WhereStatement = '","'.join(seq_name_list)
-        SQLStatement = 'UPDATE vgenesDB SET `ClonalPool` = "0" WHERE SeqName in ("' + WhereStatement + '")'
-        VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+        VGenesSQL.UpdateFieldWhereIn(DBFilename, 'ClonalPool', '0', 'SeqName', seq_name_list)
 
         TotSeqs = len(DataIs2)
         # if fieldsearch == 'None':
@@ -21832,9 +21846,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 ErLog += item[0] + '\n'
                 Errs += 1
         seq_name_list = [i[0] for i in DataIs]
-        WhereStatement = '","'.join(seq_name_list)
-        SQLStatement = 'UPDATE vgenesDB SET `ClonalPool` = "0" WHERE SeqName in ("' + WhereStatement + '")'
-        VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+        VGenesSQL.UpdateFieldWhereIn(DBFilename, 'ClonalPool', '0', 'SeqName', seq_name_list)
 
         TotSeqs = len(DataIs2)
         # if fieldsearch == 'None':
@@ -22034,13 +22046,10 @@ class VGenesForm(QtWidgets.QMainWindow):
         # annotate the SQL DB using
         field_id_list = list(range(1,75)) + list(range(78,86)) + list(range(90,94)) + list(range(96,106))
         for record in IgBLASTAnalysis:
-            SQLStatement = 'UPDATE vgenesDB SET '
-            updateList = []
+            field_values = {}
             for index in field_id_list:
-                updateList.append(FieldList[index] + ' = "' + str(record[index]) + '"')
-            SQLStatement += ','.join(updateList)
-            SQLStatement += ' WHERE SeqName = "' + record[0] + '"'
-            VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+                field_values[FieldList[index]] = str(record[index])
+            VGenesSQL.UpdateRecordBySeqName(DBFilename, record[0], field_values)
 
         try:
             self.progress.FeatProgressBar.setValue(100)
@@ -22711,9 +22720,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                     return
                 print(Isot)
 
-            SQLStatement = 'UPDATE vgenesDB SET Isotype = "' + Isot + '" WHERE SeqName = "' + SeqName + '"'
-            # 'UPDATE vgenesDB SET SubGroup = "all" WHERE Project = "Heavy"'
-            foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+            VGenesSQL.UpdateFieldbySeqName(SeqName, Isot, 'Isotype', DBFilename)
 
     @pyqtSlot()
     def on_actionIsotypes_triggered(self):
@@ -25506,13 +25513,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                     NewSub = Subgroup + EditSubgroup
 
                     # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-                    SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, data[0])
-
-                    WhereStart = SQLStatement.find('WHERE')
-                    WhereState = SQLStatement[WhereStart - 1:]  # + ' AND '
-                    SQLStatement = 'UPDATE vgenesDB SET Subgroup = "' + NewSub + '" WHERE SeqName = "' + SeqName + '"'
-
-                    foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+                    VGenesSQL.UpdateFieldbySeqName(SeqName, NewSub, 'SubGroup', DBFilename)
 
                 #model = self.ui.tableView.model()
                 #model.refresh()
@@ -25808,10 +25809,13 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     @pyqtSlot()
     def on_ShowTable_clicked(self):
-        if self.ui.SeqTable.columnCount() > 0:
-            self.ui.SeqTable.itemChanged.disconnect(self.EditTableItem)
-            self.ui.SeqTable.setColumnCount(0)
-            self.ui.SeqTable.setRowCount(0)
+        if self.seqTableAdapter.column_count() > 0:
+            try:
+                self.ui.SeqTable.itemChanged.disconnect(self.handleSeqTableItemChanged)
+            except:
+                pass
+            self.seqTableAdapter.clear()
+            self.updateDbTableStatus('Table hidden.', 'Load the table to inspect sequence records.')
         else:
             max_number = self.ui.lcdNumber_max.value()
             if max_number > 5000000:
@@ -25867,9 +25871,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
         else:
             for key in dict:
-                SQLStatement = 'UPDATE vgenesDB SET ' + field + ' = "' + dict[key] + '" WHERE ' + field + ' = "' + key + '"'
-                print(SQLStatement)
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
+                VGenesSQL.UpdateFieldWhereValue(DBFilename, field, key, dict[key])
             Msg = 'Update finished!'
             QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
@@ -25888,8 +25890,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        SQLStatement = 'SELECT ID FROM vgenesDB WHERE SeqName IN ("' + '","'.join(selected_name) + '")'
-        DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        DataIn = VGenesSQL.GetIDsBySeqNames(DBFilename, selected_name)
 
         cur_field = re.sub(r'\(.+', '', self.ui.cboFindField1.currentText())
         '''
@@ -25920,13 +25921,18 @@ class VGenesForm(QtWidgets.QMainWindow):
         # update each records
         for record in DataIn:
             id = record[0]
-            SQLStatement = ""
             if str_target == "":
-                SQLStatement = "UPDATE vgenesDB SET " + cur_field + " = '" + str_replace + "' WHERE ID = " + str(id)
+                try:
+                    VGenesSQL.UpdateField(id, str_replace, cur_field, DBFilename)
+                except:
+                    Msg = 'SQL ERROR! Failed to update record ID ' + str(id)
+                    QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                    return
             else:
-                SQLStatement = 'SELECT ' + cur_field + ' FROM vgenesDB WHERE ID = ' + str(id)
-                thisData = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                thisData = thisData[0][0]
+                thisData = VGenesSQL.GetFieldByID(DBFilename, cur_field, id)
+                if thisData is None:
+                    continue
+                thisData = str(thisData)
 
                 if self.ui.radioButtonReg.isChecked():
                     regx = re.compile(str_target)
@@ -25935,14 +25941,12 @@ class VGenesForm(QtWidgets.QMainWindow):
                     new_str = re.sub(str_target, str_replace, thisData)
 
                 if new_str != thisData:
-                    SQLStatement = "UPDATE vgenesDB SET " + cur_field + " = '" + new_str + "' WHERE ID = " + str(id)
-
-            try:
-                VGenesSQL.RunUpdateSQL(DBFilename, SQLStatement)
-            except:
-                Msg = 'SQL ERROR! Current CMD:\n' + SQLStatement
-                QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
-                return
+                    try:
+                        VGenesSQL.UpdateField(id, new_str, cur_field, DBFilename)
+                    except:
+                        Msg = 'SQL ERROR! Failed to update record ID ' + str(id)
+                        QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
+                        return
 
         #SQLFields = (
         #	self.ui.cboTreeOp1.currentText(), self.ui.cboTreeOp2.currentText(), self.ui.cboTreeOp3.currentText())
@@ -26106,55 +26110,51 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         global updateMarker
         if self.enableEdit == True:
-            SETStatement = 'SET '
-            SETStatement += 'Project = "' + self.ui.txtProject.toPlainText() + '",'
-            SETStatement += 'Grouping = "' + self.ui.txtGroup.toPlainText() + '",'
-            SETStatement += 'SubGroup = "' + self.ui.txtSubGroup.toPlainText() + '",'
-            # SETStatement += 'SeqName = "' + self.ui.txtName.toPlainText() + '",'
-            SETStatement += 'Species = "' + self.ui.comboBoxSpecies.currentText() + '",'
-            SETStatement += 'DateEntered = "' + self.ui.txtDateTime.toPlainText() + '",'
-            SETStatement += 'Quality = "' + self.ui.txtQuality.toPlainText() + '",'
-            SETStatement += 'Blank12 = "' + self.ui.txtLabel.toPlainText() + '",'
-            SETStatement += 'Blank12 = "' + self.ui.txtLabel.toPlainText() + '",'
-            SETStatement += 'Blank13 = "' + self.ui.txtStatus.toPlainText() + '",'
-            SETStatement += 'V1 = "' + self.ui.txtVgene.toPlainText() + '",'
-            SETStatement += 'VLocus = "' + self.ui.txtVLocus.toPlainText() + '",'
-            SETStatement += 'D1 = "' + self.ui.txtDgene.toPlainText() + '",'
-            SETStatement += 'DLocus = "' + self.ui.txtDLocus.toPlainText() + '",'
-            SETStatement += 'J1 = "' + self.ui.txtJgene.toPlainText() + '",'
-            SETStatement += 'JLocus = "' + self.ui.txtJLocus.toPlainText() + '",'
-            SETStatement += 'Isotype = "' + self.ui.txtIsotype.toPlainText() + '",'
-            SETStatement += 'IDEvent = "' + self.ui.txtID.toPlainText() + '",'
-            SETStatement += 'StopCodon = "' + self.ui.txtStop.toPlainText() + '",'
-            SETStatement += 'Blank8 = "' + self.ui.textCluster.toPlainText() + '",'
-            SETStatement += 'Blank9 = "' + self.ui.textEdit.toPlainText() + '",'
-            SETStatement += 'TotMut = "' + self.ui.textMutations.toPlainText() + '",'
-            SETStatement += 'Blank10 = "' + self.ui.textBarcode.toPlainText() + '",'
-            SETStatement += 'Blank11 = "' + self.ui.txtPopulation.toPlainText() + '",'
-            SETStatement += 'VSeqend = "' + self.ui.txtVend.toPlainText() + '",'
-            SETStatement += 'VDJunction = "' + self.ui.txtVD.toPlainText() + '",'
-            SETStatement += 'Dregion = "' + self.ui.txtD.toPlainText() + '",'
-            SETStatement += 'DJJunction = "' + self.ui.txtDJ.toPlainText() + '",'
-            SETStatement += 'begJ = "' + self.ui.txtJend.toPlainText() + '",'
-            SETStatement += 'CDR3DNA = "' + self.ui.txtCDR3DNA.toPlainText() + '",'
-            SETStatement += 'CDR3AA = "' + self.ui.txtCDR3AA.toPlainText() + '",'
-            SETStatement += 'CDR3Length = "' + self.ui.txtCDR3Length.toPlainText() + '",'
-            SETStatement += 'CDR3pI = "' + self.ui.txtCDR3pI.toPlainText() + '",'
-            SETStatement += 'CDR3MW = "' + self.ui.txtCDR3MW.toPlainText() + '",'
-            SETStatement += 'productive = "' + self.ui.txtProductive.toPlainText() + '",'
-            SETStatement += 'ReadingFrame = "' + self.ui.txtReadingFrame.toPlainText() + '",'
-            SETStatement += 'ClonalPool = "' + self.ui.txtClonalPool.toPlainText() + '",'
-            SETStatement += 'ClonalRank = "' + self.ui.txtClonalRank.toPlainText() + '",'
-            SETStatement += 'Specificity = "' + self.ui.listViewSpecificity.currentText() + '",'
-            SETStatement += 'Subspecificity = "' + self.ui.listViewSpecificity_2.currentText() + '",'
-            SETStatement += 'Blank6 = "' + self.ui.Autoreactivity.currentText() + '",'
-            SETStatement += 'Comments = "' + self.ui.txtComments.toPlainText() + '" '
-
             name = data[0]
-            WHEREStatement = 'WHERE SeqName = "' + name + '"'
+            field_values = {
+                'Project': self.ui.txtProject.toPlainText(),
+                'Grouping': self.ui.txtGroup.toPlainText(),
+                'SubGroup': self.ui.txtSubGroup.toPlainText(),
+                'Species': self.ui.comboBoxSpecies.currentText(),
+                'DateEntered': self.ui.txtDateTime.toPlainText(),
+                'Quality': self.ui.txtQuality.toPlainText(),
+                'Blank12': self.ui.txtLabel.toPlainText(),
+                'Blank13': self.ui.txtStatus.toPlainText(),
+                'V1': self.ui.txtVgene.toPlainText(),
+                'VLocus': self.ui.txtVLocus.toPlainText(),
+                'D1': self.ui.txtDgene.toPlainText(),
+                'DLocus': self.ui.txtDLocus.toPlainText(),
+                'J1': self.ui.txtJgene.toPlainText(),
+                'JLocus': self.ui.txtJLocus.toPlainText(),
+                'Isotype': self.ui.txtIsotype.toPlainText(),
+                'IDEvent': self.ui.txtID.toPlainText(),
+                'StopCodon': self.ui.txtStop.toPlainText(),
+                'Blank8': self.ui.textCluster.toPlainText(),
+                'Blank9': self.ui.textEdit.toPlainText(),
+                'TotMut': self.ui.textMutations.toPlainText(),
+                'Blank10': self.ui.textBarcode.toPlainText(),
+                'Blank11': self.ui.txtPopulation.toPlainText(),
+                'VSeqend': self.ui.txtVend.toPlainText(),
+                'VDJunction': self.ui.txtVD.toPlainText(),
+                'Dregion': self.ui.txtD.toPlainText(),
+                'DJJunction': self.ui.txtDJ.toPlainText(),
+                'begJ': self.ui.txtJend.toPlainText(),
+                'CDR3DNA': self.ui.txtCDR3DNA.toPlainText(),
+                'CDR3AA': self.ui.txtCDR3AA.toPlainText(),
+                'CDR3Length': self.ui.txtCDR3Length.toPlainText(),
+                'CDR3pI': self.ui.txtCDR3pI.toPlainText(),
+                'CDR3MW': self.ui.txtCDR3MW.toPlainText(),
+                'productive': self.ui.txtProductive.toPlainText(),
+                'ReadingFrame': self.ui.txtReadingFrame.toPlainText(),
+                'ClonalPool': self.ui.txtClonalPool.toPlainText(),
+                'ClonalRank': self.ui.txtClonalRank.toPlainText(),
+                'Specificity': self.ui.listViewSpecificity.currentText(),
+                'Subspecificity': self.ui.listViewSpecificity_2.currentText(),
+                'Blank6': self.ui.Autoreactivity.currentText(),
+                'Comments': self.ui.txtComments.toPlainText(),
+            }
 
-            SQLStatement = 'UPDATE vgenesDB ' + SETStatement + WHEREStatement
-            foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+            foundRecs = VGenesSQL.UpdateRecordBySeqName(DBFilename, name, field_values)
 
             if name == self.ui.txtName.toPlainText():
                 pass
@@ -31029,8 +31029,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 for i in range(0, valueToL):
                     NewBarCode = '%' + NewBarCode
 
-                SQLStatement = 'SELECT SeqName FROM vgenesDB WHERE SeqName LIKE "'+ NewBarCode + '"'
-                HeavyLights = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+                HeavyLights = VGenesSQL.GetSeqNamesLike(DBFilename, NewBarCode)
 
                 fieldsearch = "Blank10"
 
@@ -31046,16 +31045,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
 
 
-                    # fields = ['ID']
-                    # checkedProjects, checkedGroups, checkedSubGroups, checkedkids = getTreeChecked()
-                    # SQLStatement = VGenesSQL.MakeSQLStatement(self, fields, SeqIsNamed)
-                    SQLStatement = 'SELECT ID FROM vgenesDB WHERE SeqName = "'+ SeqIsNamed +'"'
-
-                    WhereStart = SQLStatement.find('WHERE')
-                    WhereState = SQLStatement[WhereStart - 1:]  # + ' AND '
-                    SQLStatement = 'UPDATE vgenesDB SET ' + fieldsearch + ' = "' + search + '"' + WhereState  # -7.000000' WHERE locId = 173567"
-                    # ' WHERE SeqName = "A116_1B04H-2" OR SeqName = "A116_1B04H-3"'
-                    foundRecs = VGenesSQL.UpdateMulti(SQLStatement, DBFilename)
+                    VGenesSQL.UpdateFieldbySeqName(SeqIsNamed, search, fieldsearch, DBFilename)
 
                     #model = self.ui.tableView.model()
                     #model.refresh()

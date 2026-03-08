@@ -1,6 +1,8 @@
 #!/usr/local/bin/python
 # filename: clonify.py
 
+from __future__ import print_function
+
 
 ###########################################################################
 #
@@ -27,7 +29,6 @@ import numpy as np
 import fastcluster as fc
 from scipy.cluster.hierarchy import fcluster
 
-from Bio import pairwise2
 from Levenshtein import distance
 
 
@@ -102,7 +103,8 @@ class Seq(object):
 
 
 
-def clonify((ichunk, jchunk)):
+def clonify(chunks):
+	ichunk, jchunk = chunks
 	results = []
 	for i in ichunk:
 		results.append(get_scores(i, jchunk))
@@ -131,11 +133,10 @@ def get_LD(i, j):
 	'''
 	Calculate sequence distance between a pair of Seq objects
 	'''
-	# pairwise2 is used to force 'gapless' distance when sequence pair is of the same length
+	# For equal-length sequences, gapless identity is just the count of
+	# character-wise matches.
 	if i.junc_len == j.junc_len:
-		identity = pairwise2.align.globalms(i.junc, j.junc, 1, 0, -50, -50,
-											score_only=True,
-											one_alignment_only=True)
+		identity = sum(1 for a, b in zip(i.junc, j.junc) if a == b)
 		return i.junc_len - identity
 	# Levenshtein distance is used for sequence pairs of different lengths
 	else:
@@ -291,32 +292,33 @@ def chunk_maker(n, iterable, fillvalue=None):
 	where x = fillvalue
 	'''
 	args = [iter(iterable)] * n
-	return [[e for e in t if e is not None] for t in itertools.izip_longest(*args)]
+	return [[e for e in t if e is not None] for t in itertools.zip_longest(*args)]
 
 
 def grouper_nofill(n, iterable):
- 	'''
- 	list(grouper_nofill(3, 'ABCDEFG')) --> [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
- 	'''
- 	it = iter(iterable)
- 	def take():
+	'''
+	list(grouper_nofill(3, 'ABCDEFG')) --> [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+	'''
+	it = iter(iterable)
+	def take():
 		while 1:
 			yield list(itertools.islice(it, n))
- 	return iter(take().next, [])
+	take_iter = take()
+	return iter(lambda: next(take_iter), [])
 
 
 def build_cluster_dict(count, vh):
 	clusters = {}
-	for c in xrange(1, count):
+	for c in range(1, count):
 		clusters["lineage_{0}_{1}".format(vh, str(c))] = []
 	return clusters
 
 
 def build_matrix(ichunks, chunksize, size, chunk_count):
 	matrix = np.zeros((size, size))
-	print 'number of processes:', chunk_count
-	print 'matrix:', matrix.shape
-	print 'total calculations:', matrix.size
+	print('number of processes:', chunk_count)
+	print('matrix:', matrix.shape)
+	print('total calculations:', matrix.size)
 	p = Pool(processes=chunk_count)
 	for x, seq in enumerate(grouper_nofill(chunk_count, ichunks)):
 		result = p.imap(clonify, seq)
@@ -340,18 +342,18 @@ def squareform(matrix):
 
 def make_clusters(input_seqs, vh):
 	chunksize = get_chunksize(input_seqs)
-	print 'Chunksize is:', chunksize
+	print('Chunksize is:', chunksize)
 	chunks = chunk_maker(chunksize, input_seqs)
 	iter_chunks = itertools.product(chunks, repeat=2)
 	distMatrix = build_matrix(iter_chunks, chunksize, len(input_seqs), len(chunks))
-	print 'condensing the distance matrix...'
+	print('condensing the distance matrix...')
 	con_distMatrix = squareform(distMatrix)
-	print 'clustering...'
+	print('clustering...')
 	linkageMatrix = fc.linkage(con_distMatrix, method='average', preserve_input=False)
 	flatCluster = fcluster(linkageMatrix, args.distance_cutoff, criterion='distance')
-	print 'building cluster dict...'
+	print('building cluster dict...')
 	clusters = build_cluster_dict(max(flatCluster) + 1, vh)
-	print 'assigning sequences to clusters...'
+	print('assigning sequences to clusters...')
 	clusters = assign_seqs(flatCluster, clusters, input_seqs, vh)
 	return clusters
 
@@ -360,7 +362,7 @@ def assign_seqs(flatCluster, clusters, input_seqs, vh):
 	'''
 	Partition sequences into lineage clusters
 	'''
-	for s in xrange(len(flatCluster)):
+	for s in range(len(flatCluster)):
 		s_id = 'lineage_{0}_{1}'.format(vh, str(flatCluster[s]))
 		clusters[s_id].append(input_seqs[s])
 	return clusters
@@ -439,70 +441,70 @@ def write_output(out_dir, collection, data):
 
 
 def print_query_start(collection):
-	print ''
-	print ''
-	print '========================================'
-	print 'processing collection: {0}'.format(collection)
-	print '========================================'
-	print ''
-	print 'Querying MongoDB (db: {0}, collection: {1}) for the input sequences...'.format(args.db, collection)
+	print('')
+	print('')
+	print('========================================')
+	print('processing collection: {0}'.format(collection))
+	print('========================================')
+	print('')
+	print('Querying MongoDB (db: {0}, collection: {1}) for the input sequences...'.format(args.db, collection))
 
 
 def print_vh_info(vh):
-	print ''
-	print '--------'
-	print vh
-	print '--------'
+	print('')
+	print('--------')
+	print(vh)
+	print('--------')
 
 
 def print_query_end(seq_count):
-	print '...done. Retrieved {} sequences.\n'.format(seq_count)
+	print('...done. Retrieved {} sequences.\n'.format(seq_count))
 
 
 def print_clonify_start():
-	print 'Sorting sequences into clonal families...'
+	print('Sorting sequences into clonal families...')
 
 
 def print_clonify_end():
-	print '...done.\n'
+	print('...done.\n')
 
 
 def print_update_start():
-	print 'Updating MongoDB...'
+	print('Updating MongoDB...')
 
 
 def print_no_update():
-	print 'Calculating cluster statistics...'
+	print('Calculating cluster statistics...')
 
 
 def print_update_end():
-	print '...done.\n'
+	print('...done.\n')
 
 
 def print_write_start():
-	print 'Writing clonal families to file...'
+	print('Writing clonal families to file...')
 
 
 def print_write_end():
-	print '...done.\n'
+	print('...done.\n')
 
 
 def print_write_null():
-	print 'No output directory was provided. Lineage assignments are not being written to file.\n'
+	print('No output directory was provided. Lineage assignments are not being written to file.\n')
 
 
 def print_run_summary(stats, startTime, queryEnd, clonifyEnd, updateEnd, total_count):
-	print ''
-	print 'Querying MongoDB took {} seconds.'.format(queryEnd - startTime)
-	print '{0} sequences were segregated into {1} clonal families in {2} seconds.'.format(total_count, stats[0], clonifyEnd - queryEnd)
+	print('')
+	print('Querying MongoDB took {} seconds.'.format(queryEnd - startTime))
+	print('{0} sequences were segregated into {1} clonal families in {2} seconds.'.format(total_count, stats[0], clonifyEnd - queryEnd))
 	if args.update:
-		print 'Updating MongoDB took {} seconds.'.format(updateEnd - clonifyEnd)
-	print ''
-	print 'The average cluster size was %0.2f.' % (stats[2])
-	print 'The largest cluster contains {} seqeunces.'.format(stats[3])
-	print '%s sequences were assigned to clonal families (%0.2f%% of all sequences).' % (stats[1], 100.0 * stats[1] / total_count)
-	print ''
-	print ''
+		print('Updating MongoDB took {} seconds.'.format(updateEnd - clonifyEnd))
+	print('')
+	print('The average cluster size was %0.2f.' % (stats[2]))
+	print('The largest cluster contains {} seqeunces.'.format(stats[3]))
+	print('%s sequences were assigned to clonal families (%0.2f%% of all sequences).' % (stats[1], 100.0 * stats[1] / total_count))
+	print('')
+	print('')
 
 
 

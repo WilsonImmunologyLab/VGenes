@@ -1,3 +1,16 @@
 
 Test.vdb
 .DS_Store
+/__pycache__
+/Temp
+*.pyc
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+build/
+dist/
+*.egg-info/
+venv/
+/Temp

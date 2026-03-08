@@ -20,13 +20,15 @@ import array
 import sys
 import warnings
 
-from Bio._py3k import range
-from Bio._py3k import basestring
+try:
+    basestring
+except NameError:
+    basestring = str
 
-from Bio import Alphabet
+import Alphabet
 import IUPAC
 from IUPACData import ambiguous_dna_complement, ambiguous_rna_complement
-from Bio.Data import CodonTable
+import CodonTable
 
 
 def _maketrans(complement_mapping):
@@ -2132,4 +2134,3 @@ def _test():
 
 if __name__ == "__main__":
     _test()
-

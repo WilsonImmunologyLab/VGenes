@@ -11,9 +11,9 @@ Last updated for Version 3.9
 
 from __future__ import print_function
 
-from Bio import Alphabet
-from Bio.Alphabet import IUPAC
-from Bio.Data import IUPACData
+import Alphabet
+import IUPAC
+import IUPACData
 
 unambiguous_dna_by_name = {}
 unambiguous_dna_by_id = {}

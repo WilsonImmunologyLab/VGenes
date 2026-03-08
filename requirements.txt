@@ -1,0 +1,24 @@
+# Core runtime baseline for VGenes
+#
+# Notes:
+# - The project now avoids the main direct Bio.Alphabet/Bio._py3k and
+#   pairwise2 blockers in active code paths. Keep Biopython pinned to a modern
+#   tested release rather than floating.
+# - Qt chart and web engine modules are distributed as separate wheels.
+# - This file targets a conservative, reproducible baseline rather than the
+#   newest possible versions.
+
+PyQt5>=5.15,<5.16
+PyQtChart>=5.15,<5.16
+PyQtWebEngine>=5.15,<5.16
+AnyQt>=0.2,<0.3
+numpy>=1.23,<2.0
+pandas>=1.5,<2.3
+scipy>=1.9,<1.12
+matplotlib>=3.6,<3.9
+seaborn>=0.12,<0.14
+pyqtgraph>=0.13,<0.14
+pyecharts>=2.0,<3.0
+Pillow>=9.0,<12.0
+weblogo>=3.7,<4.0
+biopython==1.86

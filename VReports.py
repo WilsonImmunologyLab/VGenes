@@ -3,8 +3,6 @@ import VGenesSQL
 import VGenesSeq
 from VGenesDialogues import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, \
     setText
-from VGenesMain import ProgressBar
-from VGenesMain import GibsonDialog, PatentDialog, ExportOptionDialog
 from PyQt5.QtWidgets import QMessageBox, QAbstractItemView, QTableWidgetItem, QTableWidget, QHeaderView, QTextEdit, QLineEdit, QCheckBox, QComboBox
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 from PyQt5 import QtGui
@@ -51,6 +49,11 @@ RealNameList = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene
                 "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
                 "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster", "10xBarCode", "Population",
                 "Blank12", "Blank13", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
+
+
+def _main_ui_classes():
+    from VGenesMain import ExportOptionDialog, GibsonDialog, PatentDialog, ProgressBar
+    return ProgressBar, GibsonDialog, PatentDialog, ExportOptionDialog
 
 
 class CSVRep_thread(QThread):
@@ -314,6 +317,7 @@ class HCLC_thread(QThread):
 
 def StandardReports(self, option, SequenceName, DBFilename):
     import os
+    ProgressBar, GibsonDialog, PatentDialog, ExportOptionDialog = _main_ui_classes()
     # first get list of seqs and info as tuple from DB:
     if option == 'FASTA Nucleotide file':
         '''

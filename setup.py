@@ -1,12 +1,5 @@
-from distutils.core import setup
+from setuptools import setup
 
-setup(
-    name='VGenes',
-    version='',
-    packages=[''],
-    url='',
-    license='',
-    author='wilsonp',
-    author_email='wilsonp@uchicago.edu',
-    description=''
-)
+
+if __name__ == "__main__":
+    setup()

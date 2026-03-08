@@ -1,0 +1,10 @@
+# Optional dependencies used by selected import, clustering, and data processing
+# scripts. These should be installed only if those workflows are required.
+#
+# Keep these compatible with the conservative core baseline in requirements.txt.
+
+changeo
+presto
+pymongo>=4,<5
+fastcluster<1.3
+python-Levenshtein

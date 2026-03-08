@@ -4,21 +4,16 @@ import os
 import re
 # first need connect to a database
 from VGenesDialogues import openFile, openFiles, newFile, questionMessage, setText
+from db_utils import connect as db_connect, validate_identifier
 
 def creatnewDB(DBpathname):
-
-    (dirname, filename) = os.path.split(DBpathname)
-
-    os.chdir(dirname)
-    # print(dirname)
-
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-    cursor.execute('drop table if exists vgenesdb')
-    cursor.execute("create table vgenesDB(SeqName text UNIQUE, SeqLen, GeneType text, V1 text, V2 text, V3 text, D1 text, D2 text, D3 text, J1 text, J2 text, J3 text, StopCodon text, ReadingFrame text, productive text, Strand text, VSeqend text, VDJunction text, Dregion text, DJJunction text, begJ text, VJunction text, FR1From text, FR1To text, FR1length text, FR1matches text, FR1mis text, FR1gaps text, FR1PercentIdentity text, CDR1From text, CDR1to text, CDR1length text, CDR1matches text, CDR1mis text, CDR1gaps text, CDR1PercentIdentity text, FR2From text, FR2To text, FR2length text, FR2matches text, FR2mis text, FR2gaps text, FR2PercentIdentity text, CDR2From text, CDR2to text, CDR2length text, CDR2matches text, CDR2mis text, CDR2gaps text, CDR2PercentIdentity text, FR3From text, FR3To text, FR3length text, FR3matches text, FR3mis text, FR3gaps text, FR3PercentIdentity text, TotMut text, SeqAlignment text, GVbeg text, GVend text, GD1beg text, GD1end text, GD2beg text, GD2end text, GJbeg text, GJend text, Vbeg text, Vend text, D1beg text, D1end text, D2beg text, D2end text, Jbeg text, Jend text, Project text, Grouping text, SubGroup text, Species text, Sequence text, GermlineSequence text, CDR3DNA text, CDR3AA text, CDR3Length text, CDR3beg text, CDR3end text, Specificity text, Subspecificity text, ClonalPool text, ClonalRank text, VLocus text, JLocus text, DLocus text, DateEntered text, Comments text, Quality text, TotalMuts text, Mutations text, IDEvent text, CDR3MW, CDR3pI, Isotype, GCDR3beg, GCDR3end, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, ID PRIMARY KEY NOT NULL)")
-    # ID PRIMARY KEY,
-    cursor.execute('drop table if exists fieldsname')
-    cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text, display_priority text)")
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute('drop table if exists vgenesdb')
+        cursor.execute("create table vgenesDB(SeqName text UNIQUE, SeqLen, GeneType text, V1 text, V2 text, V3 text, D1 text, D2 text, D3 text, J1 text, J2 text, J3 text, StopCodon text, ReadingFrame text, productive text, Strand text, VSeqend text, VDJunction text, Dregion text, DJJunction text, begJ text, VJunction text, FR1From text, FR1To text, FR1length text, FR1matches text, FR1mis text, FR1gaps text, FR1PercentIdentity text, CDR1From text, CDR1to text, CDR1length text, CDR1matches text, CDR1mis text, CDR1gaps text, CDR1PercentIdentity text, FR2From text, FR2To text, FR2length text, FR2matches text, FR2mis text, FR2gaps text, FR2PercentIdentity text, CDR2From text, CDR2to text, CDR2length text, CDR2matches text, CDR2mis text, CDR2gaps text, CDR2PercentIdentity text, FR3From text, FR3To text, FR3length text, FR3matches text, FR3mis text, FR3gaps text, FR3PercentIdentity text, TotMut text, SeqAlignment text, GVbeg text, GVend text, GD1beg text, GD1end text, GD2beg text, GD2end text, GJbeg text, GJend text, Vbeg text, Vend text, D1beg text, D1end text, D2beg text, D2end text, Jbeg text, Jend text, Project text, Grouping text, SubGroup text, Species text, Sequence text, GermlineSequence text, CDR3DNA text, CDR3AA text, CDR3Length text, CDR3beg text, CDR3end text, Specificity text, Subspecificity text, ClonalPool text, ClonalRank text, VLocus text, JLocus text, DLocus text, DateEntered text, Comments text, Quality text, TotalMuts text, Mutations text, IDEvent text, CDR3MW, CDR3pI, Isotype, GCDR3beg, GCDR3end, Blank6, Blank7, Blank8, Blank9, Blank10, Blank11, Blank12, Blank13, Blank14, Blank15, Blank16, Blank17, Blank18, Blank19, Blank20, ID PRIMARY KEY NOT NULL)")
+        # ID PRIMARY KEY,
+        cursor.execute('drop table if exists fieldsname')
+        cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text, display_priority text)")
 
     FieldList = [
         [1, "SeqName", "Name", "Fixed", ""],
@@ -158,252 +153,353 @@ def creatnewDB(DBpathname):
         else:
             ele.append(9)
 
-    cursor.executemany(
-        '''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) VALUES(?,?,?,?,?,?,?)''',
-        FieldList)
-
-    conn.commit()
-    conn.close()
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.executemany(
+            '''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) VALUES(?,?,?,?,?,?,?)''',
+            FieldList)
 
 def checkFieldTable(DBpathname):
-    (dirname, filename) = os.path.split(DBpathname)
-
-    os.chdir(dirname)
-
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-
     yes_list = [1, 2, 3, 4, 7, 10, 13, 14, 15, 16, 76, 77, 78, 79, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94,
                 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115,
                 116, 117, 118, 119, 120]
     yes_str = [str(i) for i in yes_list]
     yes_str = ','.join(yes_str)
 
-    try:
-        cursor.execute("SELECT * FROM fieldsname WHERE ID = 1")
-        HEADERStatement = 'PRAGMA table_info(fieldsname);'
-        HeaderIn = RunSQL(DBpathname, HEADERStatement)
-        header_list = [i[1] for i in HeaderIn]
-        if 'display' in header_list:
-            pass
-        else:
-            SQLStatement = "ALTER TABLE fieldsname ADD display text"
-            cursor.execute(SQLStatement)
-            conn.commit()
-            SQLStatement = 'UPDATE fieldsname SET display = "no" WHERE 1'
-            cursor.execute(SQLStatement)
-            SQLStatement = 'UPDATE fieldsname SET display = "yes" WHERE ID in (' + yes_str + ')'
-            cursor.execute(SQLStatement)
-            SQLStatement = 'UPDATE fieldsname SET display = "yes" WHERE ID > 110'
-            cursor.execute(SQLStatement)
-            conn.commit()
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute("SELECT * FROM fieldsname WHERE ID = 1")
+            HEADERStatement = 'PRAGMA table_info(fieldsname);'
+            HeaderIn = RunSQL(DBpathname, HEADERStatement)
+            header_list = [i[1] for i in HeaderIn]
+            if 'display' not in header_list:
+                cursor.execute("ALTER TABLE fieldsname ADD display text")
+                cursor.execute('UPDATE fieldsname SET display = "no" WHERE 1')
+                cursor.execute('UPDATE fieldsname SET display = "yes" WHERE ID in (' + yes_str + ')')
+                cursor.execute('UPDATE fieldsname SET display = "yes" WHERE ID > 110')
 
-        if 'display_priority' in header_list:
-            pass
-        else:
-            SQLStatement = "ALTER TABLE fieldsname ADD display_priority text"
-            cursor.execute(SQLStatement)
-            conn.commit()
-            SQLStatement = 'UPDATE fieldsname SET display_priority = 9 WHERE 1'
-            cursor.execute(SQLStatement)
-            SQLStatement = 'UPDATE fieldsname SET display_priority = 0 WHERE ID = 1'
-            cursor.execute(SQLStatement)
-            conn.commit()
-    except:
-        #cursor.execute('drop table if exists fieldsname')
-        cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text, display_priority text)")
+            if 'display_priority' not in header_list:
+                cursor.execute("ALTER TABLE fieldsname ADD display_priority text")
+                cursor.execute('UPDATE fieldsname SET display_priority = 9 WHERE 1')
+                cursor.execute('UPDATE fieldsname SET display_priority = 0 WHERE ID = 1')
+        except Exception:
+            #cursor.execute('drop table if exists fieldsname')
+            cursor.execute("CREATE TABLE IF NOT EXISTS fieldsname(ID int PRIMARY KEY NOT NULL, Field text, FieldNickName text, FieldType text, FieldComment text, display text, display_priority text)")
 
-        HEADERStatement = 'PRAGMA table_info(vgenesDB);'
-        HeaderIn = RunSQL(DBpathname, HEADERStatement)
-        Fields = [i[1] for i in HeaderIn]
+            HEADERStatement = 'PRAGMA table_info(vgenesDB);'
+            HeaderIn = RunSQL(DBpathname, HEADERStatement)
+            Fields = [i[1] for i in HeaderIn]
 
-        keys = ['SeqName', 'SeqLen', 'GeneType', 'V1', 'V2', 'V3', 'D1', 'D2', 'D3', 'J1', 'J2', 'J3', 'StopCodon',
-            'ReadingFrame', 'productive', 'Strand', 'VSeqend', 'VDJunction', 'Dregion', 'DJJunction', 'begJ',
-            'VJunction', 'FR1From', 'FR1To', 'FR1length', 'FR1matches', 'FR1mis', 'FR1gaps', 'FR1PercentIdentity',
-            'CDR1From', 'CDR1to', 'CDR1length', 'CDR1matches', 'CDR1mis', 'CDR1gaps', 'CDR1PercentIdentity', 'FR2From',
-            'FR2To', 'FR2length', 'FR2matches', 'FR2mis', 'FR2gaps', 'FR2PercentIdentity', 'CDR2From', 'CDR2to',
-            'CDR2length', 'CDR2matches', 'CDR2mis', 'CDR2gaps', 'CDR2PercentIdentity', 'FR3From', 'FR3To', 'FR3length',
-            'FR3matches', 'FR3mis', 'FR3gaps', 'FR3PercentIdentity', 'TotMut', 'SeqAlignment', 'GVbeg', 'GVend',
-            'GD1beg', 'GD1end', 'GD2beg', 'GD2end', 'GJbeg', 'GJend', 'Vbeg', 'Vend', 'D1beg', 'D1end', 'D2beg',
-            'D2end', 'Jbeg', 'Jend', 'Project', 'Grouping', 'SubGroup', 'Species', 'Sequence', 'GermlineSequence',
-            'CDR3DNA', 'CDR3AA', 'CDR3Length', 'CDR3beg', 'CDR3end', 'Specificity', 'Subspecificity', 'ClonalPool',
-            'ClonalRank', 'VLocus', 'JLocus', 'DLocus', 'DateEntered', 'Comments', 'Quality', 'TotalMuts', 'Mutations',
-            'IDEvent', 'CDR3MW', 'CDR3pI', 'Isotype', 'GCDR3beg', 'GCDR3end', 'Blank6', 'Blank7', 'Blank8', 'Blank9',
-            'Blank10', 'Blank11', 'Blank12', 'Blank13', 'Blank14', 'Blank15', 'Blank16', 'Blank17', 'Blank18',
-            'Blank19', 'Blank20', 'ID']
-        values = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene 3rd choice", "D gene",
-             " D gene 2nd choice", "D gene 3rd choice", "J gene", " J gene 2nd choice", "J gene 3rd choice",
-             "Stop codons?", "Reading frame", "Productive?", "Strand", "End of V gene", "V to D Junction",
-             "D region", "D to J junction", "Beginning of J", "V to J junction", "FWR1 first base", "FWR1 last base",
-             "FWR1 length", "FWR1 matches", "FWR1 mismatches", "FWR1 gaps", "FWR1 percent identity",
-             "CDR1 first base", "CDR1 last base", "CDR1 length", "CDR1 matches", "CDR1 mismatches", "CDR1 gaps",
-             "CDR1 percent identity", "FWR2 first base", "FWR2 last base", "FWR2 length", "FWR2 matches",
-             "FWR2 mismatches", "FWR2 gaps", "FWR2 percent identity", "CDR2 first base", "CDR2 last base",
-             "CDR2 length", "CDR2 matches", "CDR2 mismatches", "CDR2 gaps", "CDR2 percent identity",
-             "FWR3 first base", "FWR3 last base", "FWR3 length", "FWR3 matches", "FWR3 mismatches", "FWR3 gaps",
-             "FWR3 percent identity", "IgBLAST mutation count", "IgBLAST Sequence Alignment", "Germline V begin",
-             "Germline V end", "Germline D1 begin", "Germline D1 end", "Germline D2 begin", "Germline D2 end",
-             "Germline J begin", "Germline J end", " V begin", " V end", " D1 begin", " D1 end", " D2 begin",
-             " D2 end", " J begin", " J end", "Project", "Grouping", "Subgroup", "Species", "Sequence",
-             " Germline sequence", "CDR3 DNA", "CDR3 peptide", "CDR3 length", "CDR3 first base", "CDR3 last base",
-             "Specificity", "Subspecificity", "Clonal Pool", "Clonal Rank", "V locus", "J locus", "D locus",
-             "Date and time entered", "Comments", "Quality", "Total Mutations", "Mutation list",
-             "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
-             "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster",
-             "10xBarCode", "Population",
-             "Label", "Status", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
+            keys = ['SeqName', 'SeqLen', 'GeneType', 'V1', 'V2', 'V3', 'D1', 'D2', 'D3', 'J1', 'J2', 'J3', 'StopCodon',
+                'ReadingFrame', 'productive', 'Strand', 'VSeqend', 'VDJunction', 'Dregion', 'DJJunction', 'begJ',
+                'VJunction', 'FR1From', 'FR1To', 'FR1length', 'FR1matches', 'FR1mis', 'FR1gaps', 'FR1PercentIdentity',
+                'CDR1From', 'CDR1to', 'CDR1length', 'CDR1matches', 'CDR1mis', 'CDR1gaps', 'CDR1PercentIdentity', 'FR2From',
+                'FR2To', 'FR2length', 'FR2matches', 'FR2mis', 'FR2gaps', 'FR2PercentIdentity', 'CDR2From', 'CDR2to',
+                'CDR2length', 'CDR2matches', 'CDR2mis', 'CDR2gaps', 'CDR2PercentIdentity', 'FR3From', 'FR3To', 'FR3length',
+                'FR3matches', 'FR3mis', 'FR3gaps', 'FR3PercentIdentity', 'TotMut', 'SeqAlignment', 'GVbeg', 'GVend',
+                'GD1beg', 'GD1end', 'GD2beg', 'GD2end', 'GJbeg', 'GJend', 'Vbeg', 'Vend', 'D1beg', 'D1end', 'D2beg',
+                'D2end', 'Jbeg', 'Jend', 'Project', 'Grouping', 'SubGroup', 'Species', 'Sequence', 'GermlineSequence',
+                'CDR3DNA', 'CDR3AA', 'CDR3Length', 'CDR3beg', 'CDR3end', 'Specificity', 'Subspecificity', 'ClonalPool',
+                'ClonalRank', 'VLocus', 'JLocus', 'DLocus', 'DateEntered', 'Comments', 'Quality', 'TotalMuts', 'Mutations',
+                'IDEvent', 'CDR3MW', 'CDR3pI', 'Isotype', 'GCDR3beg', 'GCDR3end', 'Blank6', 'Blank7', 'Blank8', 'Blank9',
+                'Blank10', 'Blank11', 'Blank12', 'Blank13', 'Blank14', 'Blank15', 'Blank16', 'Blank17', 'Blank18',
+                'Blank19', 'Blank20', 'ID']
+            values = ["Name", "Length", "Type", "V gene", "V gene 2nd choice", "V gene 3rd choice", "D gene",
+                 " D gene 2nd choice", "D gene 3rd choice", "J gene", " J gene 2nd choice", "J gene 3rd choice",
+                 "Stop codons?", "Reading frame", "Productive?", "Strand", "End of V gene", "V to D Junction",
+                 "D region", "D to J junction", "Beginning of J", "V to J junction", "FWR1 first base", "FWR1 last base",
+                 "FWR1 length", "FWR1 matches", "FWR1 mismatches", "FWR1 gaps", "FWR1 percent identity",
+                 "CDR1 first base", "CDR1 last base", "CDR1 length", "CDR1 matches", "CDR1 mismatches", "CDR1 gaps",
+                 "CDR1 percent identity", "FWR2 first base", "FWR2 last base", "FWR2 length", "FWR2 matches",
+                 "FWR2 mismatches", "FWR2 gaps", "FWR2 percent identity", "CDR2 first base", "CDR2 last base",
+                 "CDR2 length", "CDR2 matches", "CDR2 mismatches", "CDR2 gaps", "CDR2 percent identity",
+                 "FWR3 first base", "FWR3 last base", "FWR3 length", "FWR3 matches", "FWR3 mismatches", "FWR3 gaps",
+                 "FWR3 percent identity", "IgBLAST mutation count", "IgBLAST Sequence Alignment", "Germline V begin",
+                 "Germline V end", "Germline D1 begin", "Germline D1 end", "Germline D2 begin", "Germline D2 end",
+                 "Germline J begin", "Germline J end", " V begin", " V end", " D1 begin", " D1 end", " D2 begin",
+                 " D2 end", " J begin", " J end", "Project", "Grouping", "Subgroup", "Species", "Sequence",
+                 " Germline sequence", "CDR3 DNA", "CDR3 peptide", "CDR3 length", "CDR3 first base", "CDR3 last base",
+                 "Specificity", "Subspecificity", "Clonal Pool", "Clonal Rank", "V locus", "J locus", "D locus",
+                 "Date and time entered", "Comments", "Quality", "Total Mutations", "Mutation list",
+                 "Insertions & deletions", "CDR3 molecular weight", "CDR3 isoelectric point", "Isotype",
+                 "Germlne CDR3 begin", "Germline CDR3 end", "Autoreactivity", "Blank7", "10xCluster", "Seuret_Cluster",
+                 "10xBarCode", "Population",
+                 "Label", "Status", "Blank14", "Blank15", "Blank16", "Blank17", "Blank18", "Blank19", "Blank20", "ID"]
 
-        Dict = dict(zip(keys, values))
+            Dict = dict(zip(keys, values))
 
-        i = 1
-        FieldList = []
-        for field in Fields:
-            if i < 106:
-                if field in keys:
-                    ele = [i, field, Dict[field], "Fixed", ""]
+            i = 1
+            FieldList = []
+            for field in Fields:
+                if i < 106:
+                    if field in keys:
+                        ele = [i, field, Dict[field], "Fixed", ""]
+                    else:
+                        ele = [i, field, field, "Fixed", ""]
                 else:
-                    ele = [i, field, field, "Fixed", ""]
-            else:
-                if field in keys:
-                    ele = [i, field, Dict[field], "Customized", ""]
+                    if field in keys:
+                        ele = [i, field, Dict[field], "Customized", ""]
+                    else:
+                        ele = [i, field, field, "Customized", ""]
+
+                if i in yes_list:
+                    ele.append('yes')
                 else:
-                    ele = [i, field, field, "Customized", ""]
+                    ele.append('no')
 
-            if i in yes_list:
-                ele.append('yes')
-            else:
-                ele.append('no')
+                if i == 1:
+                    ele.append(0)
+                else:
+                    ele.append(9)
+                FieldList.append(ele)
+                i += 1
 
-            if i == 1:
-                ele.append(0)
-            else:
-                ele.append(9)
-            FieldList.append(ele)
-            i += 1
-
-        cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) VALUES(?,?,?,?,?,?,?)''',FieldList)
-        conn.commit()
-
-    conn.close()
+            cursor.executemany('''INSERT INTO fieldsname(ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority) VALUES(?,?,?,?,?,?,?)''',FieldList)
 
 def CopyDatatoDB2(SQLSELECT, DBpathname, DB2path):
     # (dirname, filename) = os.path.split(DBpathname)
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-
-
-    # ATTACH DATABASE "\mydir\data\beta.sqlite\" AS beta;
-    # CREATE TABLE NewTable AS
-    # SELECT * FROM beta.table3;
-    # DETACH DATABASE beta;
-
-    # INSERT INTO blog_posts
-    # SELECT * FROM BlogProduction.dbo.blog_posts
-    SQLStatement = 'ATTACH DATABASE "'+ DB2path + '" AS "DB2"'
-    SQLStatement2 = 'INSERT INTO DB2.vgenesDB '+ SQLSELECT #SELECT * FROM vgenesDB WHERE ...' #'INSERT INTO + ' "' + vgenesDB.DB2 ' + '" '+ SQLSELECT #SELECT * FROM vgenesDB WHERE ...'
-    SQLStatement3 = 'DETACH DATABASE DB2'
-    try:
-        cursor.execute(SQLStatement)
-        cursor.execute(SQLStatement2)
-        cursor.execute(SQLStatement3)
-    except:
-
-        print(SQLStatement + ', '+ SQLStatement2 + ', '+ SQLStatement3)
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        SQLStatement2 = 'INSERT INTO DB2.vgenesDB ' + SQLSELECT
+        try:
+            cursor.execute('ATTACH DATABASE ? AS DB2', (DB2path,))
+            cursor.execute(SQLStatement2)
+            cursor.execute('DETACH DATABASE DB2')
+        except Exception:
+            print('ATTACH DATABASE "' + DB2path + '" AS "DB2"' + ', ' + SQLStatement2 + ', DETACH DATABASE DB2')
 
 def UpdateMulti(SQLCommand, DBpathname):
-    (dirname, filename) = os.path.split(DBpathname)
-
-    os.chdir(dirname)
-    # print(dirname)
-
-
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-    # cursor.execute('drop table if exists vgenesdb')
-
-    # SQLCommand = 'UPDATE vgenesDB SET ' + Field + ' = "' + Value + '" WHERE ID = ' + ID
-    # if Field == 'SeqAlignment':
-    #     SQLCommand = 'UPDATE vgenesdb SET Isotype = "' + Value + '" WHERE ID = ' + ID
-    try:
-        cursor.execute(SQLCommand)
-    except:
-        print(SQLCommand)
-    # SQLCommand = 'UPDATE vgenesdb SET SeqName = "DeletionSeq2", V1 = "333" WHERE ID = 7'
-
-    # ID PRIMARY KEY,
-
-    conn.commit()
-    conn.close
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(SQLCommand)
+        except Exception:
+            print(SQLCommand)
 
 def UpdateField(ID, Value, Field, DBpathname):
-    (dirname, filename) = os.path.split(DBpathname)
-
-    os.chdir(dirname)
-    # print(dirname)
-
-
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-    # cursor.execute('drop table if exists vgenesdb')
-    nID = str(ID)
-    SQLCommand = 'UPDATE vgenesDB SET ' + Field + ' = "' + Value + '" WHERE ID = ' + nID
-    # if Field == 'SeqAlignment':
-    #     SQLCommand = 'UPDATE vgenesdb SET Isotype = "' + Value + '" WHERE ID = ' + ID
-    try:
-        cursor.execute(SQLCommand)
-    except:
-        print(SQLCommand)
-    # SQLCommand = 'UPDATE vgenesdb SET SeqName = "DeletionSeq2", V1 = "333" WHERE ID = 7'
-
-    # ID PRIMARY KEY,
-
-    conn.commit()
-    conn.close
+    field_name = validate_identifier(Field)
+    sql = f'UPDATE vgenesDB SET {field_name} = ? WHERE ID = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, (Value, str(ID)))
+        except Exception:
+            print(sql, Value, ID)
 
 def UpdateFieldTable(ID, Value, Field, DBpathname):
-    (dirname, filename) = os.path.split(DBpathname)
+    field_name = validate_identifier(Field)
+    sql = f'UPDATE fieldsname SET {field_name} = ? WHERE Field = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, (Value, str(ID)))
+        except Exception:
+            print(sql, Value, ID)
 
-    os.chdir(dirname)
-    # print(dirname)
 
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-    # cursor.execute('drop table if exists vgenesdb')
-    nID = str(ID)
-    SQLCommand = 'UPDATE fieldsname SET ' + Field + ' = "' + Value + '" WHERE Field = "' + nID + '"'
+def UpdateFieldDisplaySettings(DBpathname, field_settings):
+    """Persist display/display_priority changes for fieldsname rows."""
+    if not field_settings:
+        return 0
 
-    try:
-        cursor.execute(SQLCommand)
-    except:
-        print(SQLCommand)
+    updates = []
+    for entry in field_settings:
+        field_name = str(entry['field'])
+        display = 'yes' if str(entry['display']).lower() == 'yes' else 'no'
+        priority = int(entry['display_priority'])
+        updates.append((display, priority, field_name))
 
-    conn.commit()
-    conn.close
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.executemany(
+            'UPDATE fieldsname SET display = ?, display_priority = ? WHERE Field = ?',
+            updates,
+        )
+        return cursor.rowcount
+
+
+def GetNextFieldTableID(DBpathname):
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT COALESCE(MAX(ID), 0) + 1 FROM fieldsname')
+        row = cursor.fetchone()
+        return row[0]
+
+
+def InsertFieldTableRecord(
+    DBpathname,
+    field,
+    nickname,
+    field_type='Customized',
+    comment='',
+    display='yes',
+    display_priority=9,
+):
+    next_id = GetNextFieldTableID(DBpathname)
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            '''
+            INSERT INTO fieldsname(
+                ID, Field, FieldNickName, FieldType, FieldComment, display, display_priority
+            ) VALUES(?,?,?,?,?,?,?)
+            ''',
+            (
+                next_id,
+                str(field),
+                str(nickname),
+                str(field_type),
+                str(comment),
+                str(display),
+                int(display_priority),
+            ),
+        )
+        return next_id
+
+
+def DeleteFieldTableRecord(DBpathname, field):
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute('DELETE FROM fieldsname WHERE Field = ?', (str(field),))
+        return cursor.rowcount
 
 def UpdateFieldbySeqName(ID, Value, Field, DBpathname):
-    (dirname, filename) = os.path.split(DBpathname)
+    field_name = validate_identifier(Field)
+    sql = f'UPDATE vgenesDB SET {field_name} = ? WHERE SeqName = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, (Value, str(ID)))
+            return cursor.rowcount
+        except Exception:
+            print(sql, Value, ID)
+            raise
 
-    os.chdir(dirname)
-    # print(dirname)
+def UpdateFieldWhereValue(DBpathname, Field, OldValue, NewValue):
+    field_name = validate_identifier(Field)
+    sql = f'UPDATE vgenesDB SET {field_name} = ? WHERE {field_name} = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        try:
+            cursor.execute(sql, (NewValue, OldValue))
+            return cursor.rowcount
+        except Exception:
+            print(sql, NewValue, OldValue)
+            return 0
 
+def GetIDsBySeqNames(DBpathname, seq_names):
+    if not seq_names:
+        return []
+    placeholders = ','.join(['?'] * len(seq_names))
+    sql = f'SELECT ID FROM vgenesDB WHERE SeqName IN ({placeholders})'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, tuple(seq_names))
+        return cursor.fetchall()
 
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-    # cursor.execute('drop table if exists vgenesdb')
-    nID = str(ID)
-    SQLCommand = 'UPDATE vgenesDB SET ' + Field + ' = "' + Value + '" WHERE SeqName = ' + '"' + nID + '"'
-    # if Field == 'SeqAlignment':
-    #     SQLCommand = 'UPDATE vgenesdb SET Isotype = "' + Value + '" WHERE ID = ' + ID
-    try:
-        cursor.execute(SQLCommand)
-    except:
-        print(SQLCommand)
-    # SQLCommand = 'UPDATE vgenesdb SET SeqName = "DeletionSeq2", V1 = "333" WHERE ID = 7'
+def GetFieldByID(DBpathname, Field, record_id):
+    field_name = validate_identifier(Field)
+    sql = f'SELECT {field_name} FROM vgenesDB WHERE ID = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (str(record_id),))
+        row = cursor.fetchone()
+        if row is None:
+            return None
+        return row[0]
 
-    # ID PRIMARY KEY,
+def UpdateRecordBySeqName(DBpathname, SeqName, field_values):
+    if not field_values:
+        return 0
 
-    conn.commit()
-    conn.close
+    assignments = []
+    params = []
+    for field_name, value in field_values.items():
+        safe_field = validate_identifier(field_name)
+        assignments.append(f"{safe_field} = ?")
+        params.append(value)
+
+    params.append(SeqName)
+    sql = f'UPDATE vgenesDB SET {", ".join(assignments)} WHERE SeqName = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, tuple(params))
+        return cursor.rowcount
+
+def UpdateFieldWhere(DBpathname, TargetField, NewValue, FilterField, FilterValue):
+    target_field = validate_identifier(TargetField)
+    filter_field = validate_identifier(FilterField)
+    sql = f'UPDATE vgenesDB SET {target_field} = ? WHERE {filter_field} = ?'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (NewValue, FilterValue))
+        return cursor.rowcount
+
+def UpdateFieldWhereIn(DBpathname, TargetField, NewValue, FilterField, FilterValues):
+    if not FilterValues:
+        return 0
+    target_field = validate_identifier(TargetField)
+    filter_field = validate_identifier(FilterField)
+    placeholders = ','.join(['?'] * len(FilterValues))
+    sql = f'UPDATE vgenesDB SET {target_field} = ? WHERE {filter_field} IN ({placeholders})'
+    params = [NewValue]
+    params.extend(FilterValues)
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, tuple(params))
+        return cursor.rowcount
+
+def GetSeqNamesLike(DBpathname, Pattern):
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute('SELECT SeqName FROM vgenesDB WHERE SeqName LIKE ?', (Pattern,))
+        return cursor.fetchall()
+
+def GetDistinctFieldWhere(DBpathname, Field, FilterField, FilterValue, order_by=None):
+    field_name = validate_identifier(Field)
+    filter_field = validate_identifier(FilterField)
+    sql = f'SELECT DISTINCT {field_name} FROM vgenesDB WHERE {filter_field} = ?'
+    if order_by:
+        sql += f' ORDER BY {validate_identifier(order_by)}'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, (FilterValue,))
+        return cursor.fetchall()
+
+def CopyFieldValues(DBpathname, TargetField, SourceField):
+    target_field = validate_identifier(TargetField)
+    source_field = validate_identifier(SourceField)
+    sql = f'UPDATE vgenesDB SET {target_field} = {source_field}'
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql)
+        return cursor.rowcount
+
+def UpdateRecordByAnchor(DBpathname, field_values, anchor_field, anchor_value, chains='All'):
+    if not field_values:
+        return 0
+
+    safe_anchor = validate_identifier(anchor_field)
+    assignments = []
+    params = []
+    for field_name, value in field_values.items():
+        safe_field = validate_identifier(field_name)
+        assignments.append(f"{safe_field} = ?")
+        params.append(value)
+
+    sql = f'UPDATE vgenesDB SET {", ".join(assignments)} WHERE {safe_anchor} = ?'
+    params.append(anchor_value)
+
+    if chains == 'HC':
+        sql += ' AND GeneType IN ("Heavy","Beta","Delta")'
+    elif chains == 'LC':
+        sql += ' AND GeneType NOT IN ("Heavy","Beta","Delta")'
+
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        cursor.execute(sql, tuple(params))
+        return cursor.rowcount
 
 def CreateAnalysisDB(FileName, DBpathname):
     # DBpathname = FileName   #os.path.join(os.path.expanduser('~'), 'Dropbox', 'VGenes', 'VDJGenes.db')
@@ -557,37 +653,35 @@ def DumpDB(DBpathname, tmp_path, recordNames):
     import time
     import re
 
-    conn = db.connect(DBpathname)
     time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
     file_path = os.path.join(tmp_path, time_stamp + '_dump.sql')
 
-    if len(recordNames) == 0:
-        with open(file_path, 'w') as f:
-            for line in conn.iterdump():
-                f.write('%s\n' % line)
-    else:
-        with open(file_path, 'w') as f:
-            for line in conn.iterdump():
-                if line.startswith('INSERT INTO "vgenesDB"'):
-                    match = re.findall(r"VALUES\(\'([^\']+)", line)
-                    if match[0] in recordNames:
-                        f.write('%s\n' % line)
-                else:
+    with db_connect(DBpathname) as conn:
+        if len(recordNames) == 0:
+            with open(file_path, 'w') as f:
+                for line in conn.iterdump():
                     f.write('%s\n' % line)
+        else:
+            with open(file_path, 'w') as f:
+                for line in conn.iterdump():
+                    if line.startswith('INSERT INTO "vgenesDB"'):
+                        match = re.findall(r"VALUES\(\'([^\']+)", line)
+                        if match and match[0] in recordNames:
+                            f.write('%s\n' % line)
+                    else:
+                        f.write('%s\n' % line)
 
-    conn.close()
     return file_path
 
 def ImportDB(DBpathname, SQLfile):
     try:
-        conn = db.connect(DBpathname)
-        cur = conn.cursor()
-        SQL_f = open(SQLfile, 'r')
-        SQL_str = SQL_f.read()
-        cur.executescript(SQL_str)
-        conn.close()
+        with db_connect(DBpathname) as conn:
+            cur = conn.cursor()
+            with open(SQLfile, 'r') as SQL_f:
+                SQL_str = SQL_f.read()
+            cur.executescript(SQL_str)
         return True
-    except:
+    except Exception:
         return False
 
 def RunAnalysisSQL(DBpathname):
@@ -1118,50 +1212,31 @@ def ColName(DBpathname):
     return col_name_list
 
 def RunUpdateSQL(DBpathname, SQLStatement):
-    import os
-
-    (dirname, filename) = os.path.split(DBpathname)
-    os.chdir(dirname)
-    conn = db.connect(DBpathname)
-    cursor = conn.cursor()
-    res = cursor.execute(SQLStatement)
-    conn.commit()
-    conn.close()
-    return res.rowcount
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
+        res = cursor.execute(SQLStatement)
+        return res.rowcount
 
 def RunSQL(DBpathname, SQLStatement):
     # returns a dictionary with seqname as key and all other fileds  as a list as data
     # Note: always needs SeqName to be first field SQLed
-    import os
+    with db_connect(DBpathname) as conn:
+        cursor = conn.cursor()
 
-    (dirname, filename) = os.path.split(DBpathname)
+        if SQLStatement == 'None':
+            cursor.execute('''SELECT * FROM vgenesDB''')
+        else:
+            cursor.execute(SQLStatement)
 
-    os.chdir(dirname)
+        DataIs = []
+        Fields = []
+        for row in cursor:
+            Fields.clear()
+            for column in row:
+                Fields.append(column)
+            DataIs.append(tuple(Fields))
 
-
-    conn = db.connect(DBpathname)
-    #  then need to create a cursor that lets you traverse the database
-    cursor = conn.cursor()
-
-    if SQLStatement == 'None':
-        cursor.execute('''SELECT * FROM vgenesDB''')
-    else:
-        cursor.execute(SQLStatement)
-
-    DataIs = []
-    KeyName  = ''
-    Fields = []
-    # rows = cursor.rowcount
-    for row in cursor:
-        Fields.clear()
-        for column in row:
-            Fields.append(column)
-        DataIs.append(tuple(Fields))
-
-    # conn.commit()  #  saves data into file
-    conn.close()
-
-    return DataIs
+        return DataIs
 
 
 def ImportVDB(pathname, DBFilename):
@@ -1434,4 +1509,3 @@ def MakeSQLStatementNew(self, fields, SeqName):
         SQLStatement = SQLStatement_all
 
     return SQLStatement
-

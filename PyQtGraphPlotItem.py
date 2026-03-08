@@ -28,8 +28,18 @@ from pyqtgraph.widgets.FileDialog import FileDialog
 
 translate = QtCore.QCoreApplication.translate
 
-ui_template = importlib.import_module(
-    f'pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_{QT_LIB.lower()}', package=__package__)
+try:
+    ui_template = importlib.import_module(
+        f'pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_{QT_LIB.lower()}',
+        package=__package__,
+    )
+except ModuleNotFoundError:
+    # Newer pyqtgraph releases expose a generic template instead of toolkit-
+    # specific modules such as plotConfigTemplate_pyqt5.
+    ui_template = importlib.import_module(
+        'pyqtgraph.graphicsItems.PlotItem.plotConfigTemplate_generic',
+        package=__package__,
+    )
 
 __all__ = ['PlotItem']
 
