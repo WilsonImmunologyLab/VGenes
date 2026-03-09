@@ -6973,7 +6973,7 @@ p, li { white-space: pre-wrap; }
                   <widget class="QLabel" name="label_56">
                    <property name="font">
                     <font>
-                     <family>Abadi MT Condensed Extra Bold</family>
+                     <family>Avenir Next Condensed</family>
                      <pointsize>18</pointsize>
                     </font>
                    </property>
@@ -6996,7 +6996,7 @@ p, li { white-space: pre-wrap; }
                   <widget class="QLabel" name="label_55">
                    <property name="font">
                     <font>
-                     <family>Abadi MT Condensed Extra Bold</family>
+                     <family>Avenir Next Condensed</family>
                      <pointsize>18</pointsize>
                     </font>
                    </property>

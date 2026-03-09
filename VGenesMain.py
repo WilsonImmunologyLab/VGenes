@@ -15,10 +15,10 @@ import csv
 #import asyncio
 #from aiohttp import TCPConnector, ClientSession
 
-from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable, QEvent, QCoreApplication
+from PyQt5.QtCore import pyqtSlot, QTimer, Qt, QSortFilterProxyModel, pyqtSignal, QUrl, QObject, QThread, QEventLoop, QThreadPool, QRunnable, QEvent, QCoreApplication, QSize
 from PyQt5 import QtWidgets
 from PyQt5.QtPrintSupport import QPrintDialog, QPrinter
-from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette
+from PyQt5.QtGui import QTextCursor, QFont, QPixmap, QTextCharFormat, QBrush, QColor, QTextCursor, QCursor, QIcon, QPalette, QPainter
 from PyQt5.QtWidgets import QApplication, QTableView, QGridLayout, QTableWidgetItem, QCheckBox, QAbstractItemView, QLabel, QLineEdit, QComboBox, QCompleter, QListWidget, QHeaderView
 from PyQt5.QtSql import QSqlQuery, QSqlQueryModel
 from PyQt5.QtChart import QChart, QChartView, QScatterSeries, QLogValueAxis, QValueAxis
@@ -62,7 +62,7 @@ import VGenesDialogues
 from alignment_utils import global_alignment_strings
 from seq_table_adapter import SequenceTableAdapter
 from sequence_table_view import SequenceTableView
-from vg_theme import db_tab_stylesheet
+from vg_theme import build_palette, db_tab_stylesheet, main_window_stylesheet, theme_choices, THEMES
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
@@ -13628,11 +13628,17 @@ class VGenesForm(QtWidgets.QMainWindow):
         global DBFilename
 
         self.ui = Ui_MainWindow()
+        self.theme_name = self.loadSavedTheme()
 
         self.ui.setupUi(self)
         self.replaceSeqTable()
         self.setupDbTableStatus()
-        self.applyDbTabTheme()
+        self.applyResponsiveMainLayout()
+        self.setupThemeMenu()
+        self.setupResponsiveToolbar()
+        self.applyTheme(self.theme_name)
+        self.applyTabUiRefinements()
+        self.setupResponsiveButtons()
 
         self.ui.comboBoxSpecies.currentTextChanged.connect(self.on_comboBoxSpecies_editTextChanged)
         self.ui.cboTreeOp1.currentTextChanged.connect(self.TreeviewOptions)
@@ -13806,6 +13812,13 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             pass
 
+    def resizeEvent(self, event):
+        super(VGenesForm, self).resizeEvent(event)
+        if hasattr(self, 'ui') and hasattr(self.ui, 'toolBar'):
+            self.updateToolbarPresentation()
+        if hasattr(self, 'responsiveButtons'):
+            self.updateResponsiveButtonPresentation()
+
     def replaceSeqTable(self):
         old_table = self.ui.SeqTable
         new_table = SequenceTableView(self.ui.tabDB)
@@ -13833,8 +13846,333 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.gridLayout_42.addWidget(self.dbTableStatusLabel, 3, 0, 1, 20)
         self.ui.SeqTable.setPlaceholderText('Load the table to inspect sequence records.')
 
+    def themeConfigPath(self):
+        return os.path.join(working_prefix, 'Conf', 'theme_setting.txt')
+
+    def loadSavedTheme(self):
+        try:
+            filename = self.themeConfigPath()
+            with open(filename, 'r') as handle:
+                theme_name = handle.read().strip()
+            if theme_name in THEMES:
+                return theme_name
+        except:
+            pass
+        return 'light'
+
+    def saveTheme(self, theme_name):
+        try:
+            os.makedirs(os.path.dirname(self.themeConfigPath()), exist_ok=True)
+            with open(self.themeConfigPath(), 'w') as handle:
+                handle.write(theme_name)
+        except:
+            pass
+
+    def setupThemeMenu(self):
+        self.themeMenu = self.ui.menuView.addMenu('Themes')
+        self.themeActionGroup = QtWidgets.QActionGroup(self)
+        self.themeActionGroup.setExclusive(True)
+        self.themeActions = {}
+        for theme_name, label in theme_choices():
+            action = QtWidgets.QAction(label, self)
+            action.setCheckable(True)
+            action.triggered.connect(
+                lambda checked, name=theme_name: checked and self.applyTheme(name)
+            )
+            self.themeActionGroup.addAction(action)
+            self.themeMenu.addAction(action)
+            self.themeActions[theme_name] = action
+
+    def setupResponsiveToolbar(self):
+        self.toolbarCompactThreshold = 1850
+        self.toolbarActionState = {}
+        for action in self.ui.toolBar.actions():
+            if action.isSeparator():
+                continue
+            self.toolbarActionState[action] = {
+                'text': action.text(),
+                'icon': QIcon(action.icon()),
+                'tooltip': action.toolTip() or action.text().replace('&', ''),
+            }
+            action.setToolTip(self.toolbarActionState[action]['tooltip'])
+        self.updateToolbarPresentation()
+
+    def setupResponsiveButtons(self):
+        self.buttonCompactThreshold = 1420
+        self.responsiveButtons = {}
+        for button in self.findChildren(QtWidgets.QPushButton):
+            if button.parent() is None:
+                continue
+            self.responsiveButtons[button] = {
+                'text': button.text(),
+                'icon': QIcon(button.icon()),
+                'tooltip': button.toolTip() or button.text().replace('\n', ' ').strip(),
+                'icon_size': QSize(button.iconSize()),
+                'min_width': button.minimumWidth(),
+                'max_width': button.maximumWidth(),
+            }
+            if self.responsiveButtons[button]['tooltip']:
+                button.setToolTip(self.responsiveButtons[button]['tooltip'])
+        self.updateResponsiveButtonPresentation()
+
+    def makeTextIcon(self, text):
+        pixmap = QPixmap(34, 24)
+        pixmap.fill(Qt.transparent)
+        painter = QPainter(pixmap)
+        painter.setRenderHint(QPainter.Antialiasing)
+        painter.setPen(QColor('#2d261b') if self.theme_name != 'dark' else QColor('#edf2f7'))
+        painter.setFont(QFont('Avenir Next', 10, QFont.DemiBold))
+        painter.drawText(pixmap.rect(), Qt.AlignCenter, text)
+        painter.end()
+        return QIcon(pixmap)
+
+    def buttonShortLabel(self, text):
+        clean = text.replace('&', '').replace('\n', ' ').strip()
+        words = [word for word in clean.split() if word]
+        if not words:
+            return ''
+        if len(words) == 1:
+            return words[0][:3].upper()
+        return ''.join(word[0].upper() for word in words[:3])
+
+    def updateToolbarPresentation(self):
+        toolbar_width = self.ui.toolBar.width() if hasattr(self.ui, 'toolBar') else self.width()
+        compact = toolbar_width < self.toolbarCompactThreshold
+        if compact:
+            self.ui.toolBar.setToolButtonStyle(Qt.ToolButtonIconOnly)
+        else:
+            self.ui.toolBar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        for action, state in getattr(self, 'toolbarActionState', {}).items():
+            has_icon = not state['icon'].isNull()
+            full_text = state['text']
+            tooltip = state['tooltip']
+            action.setToolTip(tooltip)
+            if compact:
+                if has_icon:
+                    action.setIcon(state['icon'])
+                else:
+                    short = full_text.replace('&', '').strip()
+                    short = short if len(short) <= 3 else short[:3]
+                    action.setIcon(self.makeTextIcon(short))
+                action.setText('')
+            else:
+                action.setIcon(state['icon'])
+                action.setText(full_text)
+        for button in self.ui.toolBar.findChildren(QtWidgets.QToolButton):
+            action = button.defaultAction()
+            if action is not None:
+                button.setToolTip(action.toolTip())
+            button.setAutoRaise(True)
+        self.ui.toolBar.update()
+
+    def updateResponsiveButtonPresentation(self):
+        compact = self.width() < self.buttonCompactThreshold
+        for button, state in getattr(self, 'responsiveButtons', {}).items():
+            tooltip = state['tooltip']
+            if tooltip:
+                button.setToolTip(tooltip)
+            if compact:
+                if not state['icon'].isNull():
+                    button.setIcon(state['icon'])
+                else:
+                    short = self.buttonShortLabel(state['text'])
+                    if short:
+                        button.setIcon(self.makeTextIcon(short))
+                button.setText('')
+                button.setIconSize(QSize(18, 18))
+                button.setMinimumWidth(30)
+                button.setMaximumWidth(42)
+            else:
+                button.setIcon(state['icon'])
+                button.setText(state['text'])
+                button.setIconSize(state['icon_size'])
+                button.setMinimumWidth(state['min_width'])
+                button.setMaximumWidth(state['max_width'])
+        self.update()
+
+    def normalizeButtons(self, parent, min_height=40, min_width=110):
+        for button in parent.findChildren(QtWidgets.QAbstractButton):
+            if button.parent() is None:
+                continue
+            button.setMinimumHeight(max(button.minimumHeight(), min_height))
+            text_lines = max(1, button.text().count('\n') + 1)
+            target_height = min_height + (text_lines - 1) * 10
+            button.setMinimumHeight(max(button.minimumHeight(), target_height))
+            text_width = button.fontMetrics().horizontalAdvance(
+                max(button.text().splitlines() or [''], key=len)
+            )
+            button.setMinimumWidth(max(button.minimumWidth(), min_width, text_width + 42))
+
+    def normalizeSingleLineInputs(self, parent, min_height=36):
+        for line_edit in parent.findChildren(QLineEdit):
+            line_edit.setMinimumHeight(max(line_edit.minimumHeight(), min_height))
+        for combo in parent.findChildren(QComboBox):
+            combo.setMinimumHeight(max(combo.minimumHeight(), min_height + 2))
+            combo.view().setSpacing(2)
+        for spin_box in parent.findChildren(QtWidgets.QAbstractSpinBox):
+            spin_box.setMinimumHeight(max(spin_box.minimumHeight(), min_height))
+        for text_edit in parent.findChildren(QtWidgets.QTextEdit):
+            if text_edit.maximumHeight() <= 40 or text_edit.minimumHeight() <= 25:
+                text_edit.setMinimumHeight(max(text_edit.minimumHeight(), min_height))
+                if text_edit.maximumHeight() <= 40:
+                    text_edit.setMaximumHeight(max(text_edit.maximumHeight(), min_height + 6))
+        for plain_text in parent.findChildren(QtWidgets.QPlainTextEdit):
+            if plain_text.maximumHeight() <= 40 or plain_text.minimumHeight() <= 25:
+                plain_text.setMinimumHeight(max(plain_text.minimumHeight(), min_height))
+                if plain_text.maximumHeight() <= 40:
+                    plain_text.setMaximumHeight(max(plain_text.maximumHeight(), min_height + 6))
+
+    def setupTableTabInfo(self):
+        self.tableTabInfoLabel = QLabel(self.ui.tab_16)
+        self.tableTabInfoLabel.setObjectName('tableTabInfoLabel')
+        self.tableTabInfoLabel.setWordWrap(True)
+        self.tableTabInfoLabel.setText(
+            'Structured table view for side-by-side field comparison. '
+            'Use row selection for review, keep auto-save on only when you want edits written immediately.'
+        )
+        self.ui.gridLayout_63.addWidget(self.tableTabInfoLabel, 1, 0, 1, 1)
+        self.ui.tableWidgetTableView.setAlternatingRowColors(True)
+        self.ui.tableWidgetTableView.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.ui.tableWidgetTableView.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.ui.tableWidgetTableView.setWordWrap(False)
+        self.ui.tableWidgetTableView.setShowGrid(False)
+        self.ui.tableWidgetTableView.setSortingEnabled(True)
+        self.ui.tableWidgetTableView.verticalHeader().setVisible(False)
+        self.ui.tableWidgetTableView.horizontalHeader().setStretchLastSection(True)
+        self.ui.tableWidgetTableView.horizontalHeader().setMinimumSectionSize(110)
+        self.ui.tableWidgetTableView.horizontalHeader().setDefaultSectionSize(150)
+
+    def normalizeDatabaseTabControls(self):
+        toolbar_height = 30
+        toolbar_buttons = [
+            self.ui.pushButtonClear1,
+            self.ui.pushButtonMark1,
+            self.ui.ShowTable,
+            self.ui.StatUpdate,
+            self.ui.CopyValue,
+            self.ui.EditLock,
+            self.ui.pushButtonRefresh,
+            self.ui.pushButtonAlter,
+            self.ui.pushButtonTable,
+        ]
+        toolbar_labels = {
+            self.ui.pushButtonClear1: 'Clear Check',
+            self.ui.pushButtonMark1: 'Quick Mark',
+            self.ui.ShowTable: 'Table',
+            self.ui.StatUpdate: 'Stat Edit',
+            self.ui.CopyValue: 'Copy Values',
+            self.ui.EditLock: 'Edit Locked',
+            self.ui.pushButtonRefresh: 'Refresh',
+            self.ui.pushButtonAlter: 'Alter DB',
+            self.ui.pushButtonTable: 'Display Fields',
+        }
+        pager_buttons = [
+            self.ui.pushButtonFirstPage,
+            self.ui.pushButtonPreviousPage,
+            self.ui.pushButtonNextPage,
+            self.ui.pushButtonLastPage,
+            self.ui.pushButtonJumpTo,
+            self.ui.pushButtonRefresh1,
+        ]
+
+        for button in toolbar_buttons:
+            button.setText(toolbar_labels.get(button, button.text().replace('\n', ' ')))
+            button.setMinimumHeight(toolbar_height)
+            button.setMaximumHeight(toolbar_height)
+            button.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
+            button.setIconSize(QSize(18, 18))
+            button.setStyleSheet('text-align: center;')
+
+        for button in pager_buttons:
+            button.setMinimumHeight(30)
+            button.setMaximumHeight(30)
+
+        for checkbox in (self.ui.checkBoxAll, self.ui.checkBoxRowSelection, self.ui.checkBoxAll1):
+            checkbox.setMinimumHeight(26)
+
+        self.ui.verticalLayout_13.setSpacing(4)
+        self.ui.verticalLayout_13.setContentsMargins(0, 6, 0, 6)
+        self.ui.horizontalLayout_16.setSpacing(8)
+
+    def applyTabUiRefinements(self):
+        self.ui.tabWidget.tabBar().setFont(QFont('Avenir Next', 15, QFont.DemiBold))
+        self.normalizeButtons(self.ui.tabDB, min_height=40, min_width=112)
+        self.normalizeDatabaseTabControls()
+
+        self.normalizeSingleLineInputs(self.ui.tabRecord, min_height=36)
+        self.normalizeButtons(self.ui.tabRecord, min_height=40, min_width=130)
+
+        self.normalizeSingleLineInputs(self.ui.tabSequence, min_height=38)
+        self.normalizeButtons(self.ui.tabSequence, min_height=42, min_width=148)
+
+        self.setupTableTabInfo()
+
+        self.normalizeButtons(self.ui.tab_7, min_height=48, min_width=138)
+        self.normalizeSingleLineInputs(self.ui.tab_7, min_height=36)
+
+        self.normalizeButtons(self.ui.tab_14, min_height=48, min_width=138)
+        self.normalizeSingleLineInputs(self.ui.tab_14, min_height=38)
+
+    def applyResponsiveMainLayout(self):
+        self.setMinimumSize(1100, 680)
+        self.setDockNestingEnabled(True)
+        self.statusBar().setSizeGripEnabled(True)
+
+        self.ui.gridLayout_8.setContentsMargins(12, 10, 12, 12)
+        self.ui.gridLayout_8.setHorizontalSpacing(10)
+        self.ui.gridLayout_8.setVerticalSpacing(10)
+        self.ui.gridLayout_8.setColumnStretch(0, 2)
+        self.ui.gridLayout_8.setColumnStretch(1, 5)
+        self.ui.gridLayout_8.setRowStretch(2, 4)
+
+        self.ui.frame_11.setMinimumHeight(140)
+        self.ui.frame_11.setMaximumHeight(230)
+        self.ui.frame_3.setMinimumWidth(260)
+        self.ui.frame_4.setMinimumWidth(260)
+
+        self.ui.groupBox_2.setMinimumWidth(220)
+        self.ui.groupBox_2.setMaximumWidth(380)
+        self.ui.label_Name.setMinimumWidth(160)
+        self.ui.label_Name.setMaximumWidth(16777215)
+        self.ui.label_Name.setWordWrap(True)
+
+        self.ui.treeWidget.setMinimumWidth(220)
+        self.ui.treeWidget.setMaximumWidth(380)
+        tree_header = self.ui.treeWidget.header()
+        tree_header.setMinimumSectionSize(140)
+        tree_header.setStretchLastSection(True)
+        tree_header.setSectionResizeMode(QHeaderView.Interactive)
+
+        self.ui.tabWidget.setUsesScrollButtons(True)
+        self.ui.tabWidget.tabBar().setExpanding(False)
+        self.ui.tabWidget.tabBar().setElideMode(Qt.ElideRight)
+        self.ui.tabWidget.setDocumentMode(False)
+        self.ui.tabWidget.tabBar().setDrawBase(False)
+
+        self.ui.SeqTable.horizontalHeader().setMinimumSectionSize(96)
+        self.ui.SeqTable.horizontalHeader().setDefaultSectionSize(140)
+
+    def applyTheme(self, theme_name='light'):
+        if theme_name not in THEMES:
+            theme_name = 'light'
+        self.theme_name = theme_name
+        self.applyMainWindowTheme()
+        self.applyDbTabTheme()
+        self.updateToolbarPresentation()
+        if hasattr(self, 'responsiveButtons'):
+            self.updateResponsiveButtonPresentation()
+        if hasattr(self, 'themeActions') and theme_name in self.themeActions:
+            self.themeActions[theme_name].setChecked(True)
+        self.saveTheme(theme_name)
+
+    def applyMainWindowTheme(self):
+        app = QtWidgets.QApplication.instance()
+        if app is not None:
+            app.setPalette(build_palette(self.theme_name))
+        self.setStyleSheet(main_window_stylesheet(self.theme_name))
+
     def applyDbTabTheme(self):
-        self.ui.tabDB.setStyleSheet(db_tab_stylesheet())
+        self.ui.tabDB.setStyleSheet(db_tab_stylesheet(self.theme_name))
         self.ui.SeqTable.setAlternatingRowColors(True)
 
     def updateDbTableStatus(self, message, placeholder_text=None):
@@ -23236,14 +23574,12 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.show()
 
         # adjust the window size according to current resolution
-        self.desktop = QApplication.desktop()
-        self.screenRect = self.desktop.screenGeometry()
-        self.height = self.screenRect.height()
-        self.width = self.screenRect.width()
-        if self.width > 1800:
-            self.resize(1680, 1200)
-        else:
-            self.resize(1440, 800)
+        screen = QApplication.primaryScreen()
+        if screen is not None:
+            available = screen.availableGeometry()
+            target_width = max(1100, min(available.width() - 40, int(available.width() * 0.92)))
+            target_height = max(680, min(available.height() - 40, int(available.height() * 0.9)))
+            self.resize(target_width, target_height)
 
 
         global DBFilename

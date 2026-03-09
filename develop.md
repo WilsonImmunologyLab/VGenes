@@ -295,6 +295,34 @@ Current guidance:
   - intentionally left runtime-coupled files such as `BackUP.vdb`,
     `UpdateRecord.nt`, root icon assets, and active application modules in
     place to avoid breaking import/spec/runtime paths during this pass
+- Added the first responsive main-window UI pass:
+  - reduced the effective minimum shell size in runtime
+  - replaced fixed startup resize breakpoints with screen-aware sizing
+  - relaxed left-pane and top-control minimum widths/heights so the shell can
+    compress more effectively on smaller displays
+  - enabled more adaptive tab behavior and smaller tree/table constraints
+  - added a lightweight shell stylesheet for a more modern visual hierarchy
+- Refactored the new UI styling into a named theme system in `vg_theme.py`:
+  - added parallel light and dark theme definitions with explicit palettes and
+    matching widget/table styles
+  - switched runtime theme application in `VGenesMain.py` to a reusable
+    `applyTheme()` path
+  - kept the app on the light theme by default, but prepared the code for a
+    future user-facing theme selector without another styling rewrite
+- Added a broader cross-tab UI sizing/refinement pass:
+  - increased main tab label size
+  - normalized button heights on the Database, Clones, and HC/LC tabs
+  - increased one-line input heights on the Record and Sequence tabs
+  - widened action buttons where text was clipping
+  - refined combo-box styling and dropdown presentation
+  - improved the Table tab with a clearer info banner and more readable table
+    behavior defaults
+- Added user-switchable themes:
+  - expanded the theme system from light/dark to multiple presets
+  - added a `View -> Themes` menu in the main window
+  - persisted the selected theme in `Conf/theme_setting.txt`
+  - kept the shared palette/stylesheet architecture so more themes can be
+    added later without another UI refactor
 - Updated the main table load/check/edit wiring to use the lighter checkable
   item approach instead of embedded checkbox widgets.
 - Added persistent main-table sort state and moved page loading order to SQL,
