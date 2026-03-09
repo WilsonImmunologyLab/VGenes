@@ -64,10 +64,10 @@
        </size>
       </property>
       <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+       <enum>QFrame::Shape::NoFrame</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
+       <enum>QFrame::Shadow::Raised</enum>
       </property>
       <layout class="QGridLayout" name="gridLayout_61">
        <item row="0" column="0">
@@ -79,10 +79,10 @@
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_22">
           <property name="leftMargin">
@@ -273,7 +273,7 @@ Search</string>
        <item row="0" column="6" rowspan="2">
         <widget class="Line" name="line_18">
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
         </widget>
        </item>
@@ -312,10 +312,10 @@ Search</string>
           </size>
          </property>
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_9">
           <item row="0" column="2">
@@ -415,10 +415,10 @@ Record</string>
        <item row="0" column="8">
         <widget class="QFrame" name="frame_5">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_16">
           <item row="0" column="3">
@@ -458,7 +458,7 @@ Record</string>
              <number>8</number>
             </property>
             <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
+             <enum>QLCDNumber::SegmentStyle::Flat</enum>
             </property>
             <property name="value" stdset="0">
              <double>1.000000000000000</double>
@@ -483,7 +483,7 @@ Record</string>
              <number>8</number>
             </property>
             <property name="segmentStyle">
-             <enum>QLCDNumber::Flat</enum>
+             <enum>QLCDNumber::SegmentStyle::Flat</enum>
             </property>
             <property name="value" stdset="0">
              <double>1.000000000000000</double>
@@ -505,7 +505,7 @@ Record</string>
              </size>
             </property>
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
            </widget>
           </item>
@@ -574,7 +574,7 @@ Record</string>
           </size>
          </property>
          <property name="orientation">
-          <enum>Qt::Vertical</enum>
+          <enum>Qt::Orientation::Vertical</enum>
          </property>
         </widget>
        </item>
@@ -608,10 +608,10 @@ Record</string>
        <item row="0" column="4" rowspan="2">
         <widget class="QFrame" name="frame_10">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_43">
           <item row="3" column="2">
@@ -620,7 +620,7 @@ Record</string>
              <string>To</string>
             </property>
             <property name="alignment">
-             <set>Qt::AlignCenter</set>
+             <set>Qt::AlignmentFlag::AlignCenter</set>
             </property>
            </widget>
           </item>
@@ -744,10 +744,10 @@ Edit</string>
        <item row="1" column="8">
         <widget class="QFrame" name="frame_23">
          <property name="frameShape">
-          <enum>QFrame::StyledPanel</enum>
+          <enum>QFrame::Shape::StyledPanel</enum>
          </property>
          <property name="frameShadow">
-          <enum>QFrame::Raised</enum>
+          <enum>QFrame::Shadow::Raised</enum>
          </property>
          <layout class="QGridLayout" name="gridLayout_44">
           <property name="leftMargin">
@@ -1166,7 +1166,7 @@ DataViewer</string>
           </size>
          </property>
          <property name="layoutDirection">
-          <enum>Qt::LeftToRight</enum>
+          <enum>Qt::LayoutDirection::LeftToRight</enum>
          </property>
          <property name="text">
           <string>Check All</string>
@@ -1197,10 +1197,10 @@ DataViewer</string>
        </font>
       </property>
       <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
+       <enum>QFrame::Shape::StyledPanel</enum>
       </property>
       <property name="frameShadow">
-       <enum>QFrame::Sunken</enum>
+       <enum>QFrame::Shadow::Sunken</enum>
       </property>
       <property name="lineWidth">
        <number>1</number>
@@ -1212,7 +1212,7 @@ DataViewer</string>
        <string>Sequence Name</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignmentFlag::AlignCenter</set>
       </property>
      </widget>
     </item>
@@ -1231,16 +1231,16 @@ DataViewer</string>
        </size>
       </property>
       <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
+       <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
       </property>
       <property name="alternatingRowColors">
        <bool>true</bool>
       </property>
       <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
+       <enum>QAbstractItemView::SelectionMode::ExtendedSelection</enum>
       </property>
       <property name="textElideMode">
-       <enum>Qt::ElideNone</enum>
+       <enum>Qt::TextElideMode::ElideNone</enum>
       </property>
       <property name="headerHidden">
        <bool>false</bool>
@@ -1248,10 +1248,10 @@ DataViewer</string>
       <attribute name="headerCascadingSectionResizes">
        <bool>false</bool>
       </attribute>
-      <attribute name="headerDefaultSectionSize">
+      <attribute name="headerMinimumSectionSize">
        <number>500</number>
       </attribute>
-      <attribute name="headerMinimumSectionSize">
+      <attribute name="headerDefaultSectionSize">
        <number>500</number>
       </attribute>
       <column>
@@ -1309,7 +1309,7 @@ DataViewer</string>
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -1512,7 +1512,7 @@ DataViewer</string>
           <item>
            <spacer name="horizontalSpacer_14">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -1527,7 +1527,7 @@ DataViewer</string>
         <item row="0" column="4">
          <spacer name="horizontalSpacer_21">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -1799,7 +1799,7 @@ Check</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1278</width>
+             <width>1291</width>
              <height>821</height>
             </rect>
            </property>
@@ -1819,10 +1819,10 @@ Check</string>
                </size>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_18">
                <item row="1" column="1" colspan="2">
@@ -1852,7 +1852,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -1868,10 +1868,10 @@ Check</string>
                   </size>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_7">
                   <property name="leftMargin">
@@ -1908,7 +1908,7 @@ Check</string>
                   <item row="0" column="2">
                    <spacer name="horizontalSpacer_3">
                     <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                     <enum>Qt::Orientation::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -2002,7 +2002,7 @@ Check</string>
                   <item row="0" column="5">
                    <spacer name="horizontalSpacer_4">
                     <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                     <enum>Qt::Orientation::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -2083,7 +2083,7 @@ Check</string>
                   <string>CDR3 Length:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -2111,7 +2111,7 @@ Check</string>
                   <string>CDR3 pI:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -2145,7 +2145,7 @@ Check</string>
                   <string>CDR3 DNA:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -2176,7 +2176,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2207,7 +2207,7 @@ Check</string>
                   <string>CDR3 Mol. Wgt.</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -2235,17 +2235,17 @@ Check</string>
                   <string>CDR3 peptide:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
                <item row="0" column="0" colspan="6">
                 <widget class="QFrame" name="frame_8">
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QGridLayout" name="gridLayout_6">
                   <property name="leftMargin">
@@ -2442,7 +2442,7 @@ Check</string>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
-                     <enum>Qt::ScrollBarAlwaysOff</enum>
+                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -2476,7 +2476,7 @@ Check</string>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
-                     <enum>Qt::ScrollBarAlwaysOff</enum>
+                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -2510,7 +2510,7 @@ Check</string>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
-                     <enum>Qt::ScrollBarAlwaysOff</enum>
+                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -2544,7 +2544,7 @@ Check</string>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
-                     <enum>Qt::ScrollBarAlwaysOff</enum>
+                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -2554,7 +2554,7 @@ Check</string>
                   <item row="2" column="2">
                    <spacer name="verticalSpacer_4">
                     <property name="orientation">
-                     <enum>Qt::Vertical</enum>
+                     <enum>Qt::Orientation::Vertical</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -2591,7 +2591,7 @@ Check</string>
                      </font>
                     </property>
                     <property name="verticalScrollBarPolicy">
-                     <enum>Qt::ScrollBarAlwaysOff</enum>
+                     <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                     </property>
                     <property name="readOnly">
                      <bool>true</bool>
@@ -2647,7 +2647,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2681,7 +2681,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2715,7 +2715,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2744,10 +2744,10 @@ Check</string>
                </sizepolicy>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_5">
                <item row="1" column="6">
@@ -2774,7 +2774,7 @@ Check</string>
                   <string>Quality:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -2818,7 +2818,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2852,7 +2852,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2886,7 +2886,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2917,7 +2917,6 @@ Check</string>
                   <font>
                    <family>Lucida Grande</family>
                    <pointsize>15</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -2925,7 +2924,7 @@ Check</string>
                   <bool>true</bool>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -2959,7 +2958,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3036,7 +3035,7 @@ Check</string>
                   <string>Project:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3067,7 +3066,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3098,7 +3097,7 @@ Check</string>
                   <string>Label:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3117,7 +3116,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3148,7 +3147,7 @@ Check</string>
                   <string>Subgroup:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3176,7 +3175,7 @@ Check</string>
                   <string>Species:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3235,7 +3234,7 @@ Check</string>
                   <string>Group:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3266,7 +3265,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3297,7 +3296,7 @@ Check</string>
                   <string>Status</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3325,7 +3324,7 @@ Check</string>
                   <string>Name:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3341,10 +3340,10 @@ Check</string>
                </sizepolicy>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_10">
                <item row="1" column="1">
@@ -3374,7 +3373,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3408,7 +3407,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3442,7 +3441,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3479,7 +3478,7 @@ Check</string>
                   <string>Isotype:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3513,7 +3512,7 @@ Check</string>
                   <string>D gene:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3585,7 +3584,7 @@ Check</string>
                   <string>V gene:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3619,7 +3618,7 @@ Check</string>
                   <string>Insertion or deletion:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3653,7 +3652,7 @@ Check</string>
                   <string>Stop codon?</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3687,7 +3686,7 @@ Check</string>
                   <string>J gene:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -3718,7 +3717,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3752,7 +3751,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3786,7 +3785,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3820,7 +3819,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -3883,10 +3882,10 @@ Check</string>
                </size>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout">
                <item row="0" column="5">
@@ -3992,10 +3991,10 @@ Check</string>
                <item row="1" column="0" colspan="3">
                 <widget class="QFrame" name="frame_2">
                  <property name="frameShape">
-                  <enum>QFrame::NoFrame</enum>
+                  <enum>QFrame::Shape::NoFrame</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Raised</enum>
+                  <enum>QFrame::Shadow::Raised</enum>
                  </property>
                  <layout class="QHBoxLayout" name="horizontalLayout_2">
                   <property name="leftMargin">
@@ -4209,10 +4208,10 @@ Check</string>
                </size>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_12">
                <item row="1" column="0">
@@ -4221,7 +4220,7 @@ Check</string>
                   <string>CellRanger Cluster:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -4234,7 +4233,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -4247,7 +4246,7 @@ Check</string>
                   <string>Population:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -4263,7 +4262,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -4279,7 +4278,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -4292,7 +4291,7 @@ Check</string>
                   <string>Barcode:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -4324,7 +4323,7 @@ Check</string>
                   </font>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -4369,7 +4368,7 @@ Check</string>
                   <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;B cell subset or population&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
                  <property name="verticalScrollBarPolicy">
-                  <enum>Qt::ScrollBarAlwaysOff</enum>
+                  <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
                  </property>
                  <property name="readOnly">
                   <bool>true</bool>
@@ -4394,10 +4393,10 @@ Check</string>
                </size>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_13">
                <item row="0" column="0">
@@ -4478,10 +4477,10 @@ Check</string>
            </size>
           </property>
           <property name="frameShape">
-           <enum>QFrame::WinPanel</enum>
+           <enum>QFrame::Shape::WinPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
           <layout class="QHBoxLayout" name="horizontalLayout_12">
            <property name="topMargin">
@@ -4581,7 +4580,7 @@ Check</string>
            <item>
             <widget class="Line" name="line_6">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -4670,7 +4669,7 @@ Check</string>
            <item>
             <widget class="Line" name="line_8">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -4722,7 +4721,7 @@ as</string>
            <item>
             <widget class="Line" name="line_9">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -4750,7 +4749,7 @@ Edit</string>
            <item>
             <spacer name="horizontalSpacer_26">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -4773,10 +4772,10 @@ Edit</string>
         <item row="0" column="0">
          <widget class="QFrame" name="frame_24">
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_63">
            <item row="0" column="0">
@@ -4816,8 +4815,8 @@ Edit</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1278</width>
-             <height>750</height>
+             <width>1084</width>
+             <height>747</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_56">
@@ -4830,10 +4829,10 @@ Edit</string>
                </sizepolicy>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_15">
                <item row="1" column="1">
@@ -4916,7 +4915,7 @@ Edit</string>
                   <string>Subgroup:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -5124,10 +5123,10 @@ Edit</string>
                   <string> J gene:</string>
                  </property>
                  <property name="textFormat">
-                  <enum>Qt::AutoText</enum>
+                  <enum>Qt::TextFormat::AutoText</enum>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -5267,7 +5266,7 @@ Edit</string>
                   <string>Isotype:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -5277,10 +5276,10 @@ Edit</string>
             <item row="1" column="0" colspan="2">
              <widget class="QFrame" name="frame_17">
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <layout class="QGridLayout" name="gridLayout_3">
                <item row="0" column="0">
@@ -5353,7 +5352,7 @@ Edit</string>
                <item row="1" column="3">
                 <spacer name="horizontalSpacer_2">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -5421,7 +5420,7 @@ Edit</string>
                <item row="1" column="5">
                 <spacer name="horizontalSpacer">
                  <property name="orientation">
-                  <enum>Qt::Horizontal</enum>
+                  <enum>Qt::Orientation::Horizontal</enum>
                  </property>
                  <property name="sizeHint" stdset="0">
                   <size>
@@ -5446,7 +5445,6 @@ Edit</string>
                <font>
                 <family>Lucida Grande</family>
                 <pointsize>13</pointsize>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -5541,7 +5539,7 @@ Edit</string>
                   <number>2</number>
                  </property>
                  <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                  <enum>Qt::Orientation::Vertical</enum>
                  </property>
                 </widget>
                </item>
@@ -5723,7 +5721,7 @@ Edit</string>
                <item row="0" column="11">
                 <widget class="Line" name="line_4">
                  <property name="frameShadow">
-                  <enum>QFrame::Sunken</enum>
+                  <enum>QFrame::Shadow::Sunken</enum>
                  </property>
                  <property name="lineWidth">
                   <number>2</number>
@@ -5732,7 +5730,7 @@ Edit</string>
                   <number>0</number>
                  </property>
                  <property name="orientation">
-                  <enum>Qt::Vertical</enum>
+                  <enum>Qt::Orientation::Vertical</enum>
                  </property>
                 </widget>
                </item>
@@ -5801,7 +5799,6 @@ Edit</string>
                <font>
                 <family>Lucida Grande</family>
                 <pointsize>13</pointsize>
-                <weight>75</weight>
                 <bold>true</bold>
                </font>
               </property>
@@ -5842,7 +5839,7 @@ Edit</string>
                   <string>V-begin:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -5864,7 +5861,6 @@ Edit</string>
                   <font>
                    <family>Courier New</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -5888,7 +5884,7 @@ Edit</string>
                   <string>Expected-V</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -5910,7 +5906,6 @@ Edit</string>
                   <font>
                    <family>Courier New</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -5934,7 +5929,7 @@ Edit</string>
                   <string>J-end:</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -5956,7 +5951,6 @@ Edit</string>
                   <font>
                    <family>Courier New</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -5980,7 +5974,7 @@ Edit</string>
                   <string>Expected-J</string>
                  </property>
                  <property name="alignment">
-                  <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                  <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                  </property>
                 </widget>
                </item>
@@ -6002,7 +5996,6 @@ Edit</string>
                   <font>
                    <family>Courier New</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -6031,7 +6024,7 @@ Edit</string>
                  <string>DNA sequence:</string>
                 </property>
                 <property name="alignment">
-                 <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                 <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                 </property>
                </widget>
               </item>
@@ -6069,7 +6062,7 @@ Edit</string>
                </font>
               </property>
               <property name="textInteractionFlags">
-               <set>Qt::TextEditorInteraction</set>
+               <set>Qt::TextInteractionFlag::TextEditorInteraction</set>
               </property>
              </widget>
             </item>
@@ -6124,7 +6117,7 @@ Edit</string>
                <bool>false</bool>
               </property>
               <property name="textInteractionFlags">
-               <set>Qt::TextSelectableByKeyboard|Qt::TextSelectableByMouse</set>
+               <set>Qt::TextInteractionFlag::TextSelectableByKeyboard|Qt::TextInteractionFlag::TextSelectableByMouse</set>
               </property>
              </widget>
             </item>
@@ -6143,10 +6136,10 @@ Edit</string>
                </size>
               </property>
               <property name="frameShape">
-               <enum>QFrame::NoFrame</enum>
+               <enum>QFrame::Shape::NoFrame</enum>
               </property>
               <property name="frameShadow">
-               <enum>QFrame::Raised</enum>
+               <enum>QFrame::Shadow::Raised</enum>
               </property>
               <widget class="QLabel" name="label">
                <property name="geometry">
@@ -6244,10 +6237,10 @@ Edit</string>
                   </size>
                  </property>
                  <property name="frameShape">
-                  <enum>QFrame::Panel</enum>
+                  <enum>QFrame::Shape::Panel</enum>
                  </property>
                  <property name="frameShadow">
-                  <enum>QFrame::Sunken</enum>
+                  <enum>QFrame::Shadow::Sunken</enum>
                  </property>
                  <property name="text">
                   <string/>
@@ -6355,13 +6348,13 @@ Edit</string>
            </font>
           </property>
           <property name="verticalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
           </property>
           <property name="horizontalScrollBarPolicy">
-           <enum>Qt::ScrollBarAlwaysOn</enum>
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOn</enum>
           </property>
           <property name="lineWrapMode">
-           <enum>QTextEdit::NoWrap</enum>
+           <enum>QTextEdit::LineWrapMode::NoWrap</enum>
           </property>
          </widget>
         </item>
@@ -6375,7 +6368,7 @@ Edit</string>
           </property>
           <property name="maximumSize">
            <size>
-            <width>200</width>
+            <width>400</width>
             <height>16777215</height>
            </size>
           </property>
@@ -6403,7 +6396,7 @@ Edit</string>
         <item row="0" column="1">
          <spacer name="horizontalSpacer_5">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -6450,7 +6443,7 @@ Edit</string>
            <string>Report contents:</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
           <layout class="QGridLayout" name="gridLayout_20">
            <item row="1" column="6">
@@ -6685,7 +6678,7 @@ Edit</string>
            <string>Report type:</string>
           </property>
           <property name="alignment">
-           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+           <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
           </property>
           <layout class="QGridLayout" name="gridLayout_19">
            <item row="0" column="0">
@@ -6753,8 +6746,8 @@ window</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1278</width>
-             <height>908</height>
+             <width>810</width>
+             <height>911</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_58">
@@ -6768,8 +6761,11 @@ window</string>
                 <widget class="QTextBrowser" name="textBrowser">
                  <property name="html">
                   <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;meta charset=&quot;utf-8&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
 p, li { white-space: pre-wrap; }
+hr { height: 1px; border-width: 0; }
+li.unchecked::marker { content: &quot;\2610&quot;; }
+li.checked::marker { content: &quot;\2612&quot;; }
 &lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;&quot;&gt;
 &lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-family:'.SF NS Text';&quot;&gt;Select (check) the VH sequences to be cloned from 10xGenomics data that had barcodes imported for all heavy and light chains. This report generator will provide the appropriate ends and linker sequences for all sequences with a single heavy and light chain. For sequences with more then one light chain, only the predicted functional light chain should be annotaed with a barcode matching that of the VH gene (i.e., the other light chain bar-code can be edited with the addition of a &amp;quot;-2&amp;quot;). If no bar-codes exist, these can be generated and heavy/light chains paired by pressing that button. If the alignment of any sequences appears to result in out-of frame CH, Ckappa, or Clambda genes, the edit fields below can be used to add or remove J gene nucleotides to establish the proper alignment. Cycle through all sequences requiring editing with the arrow bottons. Preview first to ensure all sequences are in frame then generate the final report.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                  </property>
@@ -6787,7 +6783,6 @@ p, li { white-space: pre-wrap; }
                   <font>
                    <family>Lucida Grande</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -6822,7 +6817,6 @@ p, li { white-space: pre-wrap; }
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -6840,7 +6834,6 @@ p, li { white-space: pre-wrap; }
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -6849,7 +6842,7 @@ p, li { white-space: pre-wrap; }
                   <item>
                    <widget class="Line" name="line_7">
                     <property name="orientation">
-                     <enum>Qt::Vertical</enum>
+                     <enum>Qt::Orientation::Vertical</enum>
                     </property>
                    </widget>
                   </item>
@@ -6865,7 +6858,6 @@ p, li { white-space: pre-wrap; }
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -6883,7 +6875,6 @@ p, li { white-space: pre-wrap; }
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -6949,7 +6940,7 @@ p, li { white-space: pre-wrap; }
                     <bool>true</bool>
                    </property>
                    <property name="alignment">
-                    <set>Qt::AlignCenter</set>
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
                    </property>
                    <property name="maximum">
                     <number>999</number>
@@ -6962,7 +6953,7 @@ p, li { white-space: pre-wrap; }
                     <bool>true</bool>
                    </property>
                    <property name="alignment">
-                    <set>Qt::AlignCenter</set>
+                    <set>Qt::AlignmentFlag::AlignCenter</set>
                    </property>
                    <property name="maximum">
                     <number>999</number>
@@ -6981,7 +6972,7 @@ p, li { white-space: pre-wrap; }
                     <string>-</string>
                    </property>
                    <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -7004,7 +6995,7 @@ p, li { white-space: pre-wrap; }
                     <string>-</string>
                    </property>
                    <property name="alignment">
-                    <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                    <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -7069,12 +7060,11 @@ p, li { white-space: pre-wrap; }
                    </property>
                    <property name="font">
                     <font>
-                     <weight>75</weight>
                      <bold>true</bold>
                     </font>
                    </property>
                    <property name="layoutDirection">
-                    <enum>Qt::LeftToRight</enum>
+                    <enum>Qt::LayoutDirection::LeftToRight</enum>
                    </property>
                    <property name="text">
                     <string>Sequence end verification:</string>
@@ -7095,7 +7085,6 @@ p, li { white-space: pre-wrap; }
                   <font>
                    <family>Lucida Grande</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -7130,14 +7119,14 @@ p, li { white-space: pre-wrap; }
                      <string>V-begin:</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QSpinBox" name="sbVbeg">
                     <property name="alignment">
-                     <set>Qt::AlignCenter</set>
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                     <property name="maximum">
                      <number>999</number>
@@ -7156,7 +7145,7 @@ p, li { white-space: pre-wrap; }
                      <string>V-end:</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
@@ -7166,7 +7155,7 @@ p, li { white-space: pre-wrap; }
                      <bool>false</bool>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignCenter</set>
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                     <property name="maximum">
                      <number>999</number>
@@ -7185,7 +7174,7 @@ p, li { white-space: pre-wrap; }
                      <string>D-begin:</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
@@ -7195,7 +7184,7 @@ p, li { white-space: pre-wrap; }
                      <bool>false</bool>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignCenter</set>
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                     <property name="maximum">
                      <number>999</number>
@@ -7214,7 +7203,7 @@ p, li { white-space: pre-wrap; }
                      <string>D-end:</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
@@ -7224,7 +7213,7 @@ p, li { white-space: pre-wrap; }
                      <bool>false</bool>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignCenter</set>
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                     <property name="maximum">
                      <number>999</number>
@@ -7243,7 +7232,7 @@ p, li { white-space: pre-wrap; }
                      <string>J-begin:</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
@@ -7253,7 +7242,7 @@ p, li { white-space: pre-wrap; }
                      <bool>false</bool>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignCenter</set>
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                     <property name="maximum">
                      <number>999</number>
@@ -7272,14 +7261,14 @@ p, li { white-space: pre-wrap; }
                      <string>J-end:</string>
                     </property>
                     <property name="alignment">
-                     <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+                     <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
                     </property>
                    </widget>
                   </item>
                   <item>
                    <widget class="QSpinBox" name="sbJend">
                     <property name="alignment">
-                     <set>Qt::AlignCenter</set>
+                     <set>Qt::AlignmentFlag::AlignCenter</set>
                     </property>
                     <property name="maximum">
                      <number>999</number>
@@ -7297,7 +7286,7 @@ p, li { white-space: pre-wrap; }
                     <string>Choose cloning method:</string>
                    </property>
                    <property name="alignment">
-                    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                    <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
                    </property>
                   </widget>
                  </item>
@@ -7426,7 +7415,6 @@ p, li { white-space: pre-wrap; }
                  </property>
                  <property name="font">
                   <font>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -7544,7 +7532,6 @@ IF V-begin is off, the sequence may be truncated on the 5' end</string>
                  </property>
                  <property name="font">
                   <font>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -7570,7 +7557,6 @@ If the J-end is off the J gene end may need adjusted</string>
                   <font>
                    <family>Lucida Grande</family>
                    <pointsize>13</pointsize>
-                   <weight>75</weight>
                    <bold>true</bold>
                   </font>
                  </property>
@@ -7642,7 +7628,6 @@ If the J-end is off the J gene end may need adjusted</string>
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -7697,7 +7682,6 @@ If the J-end is off the J gene end may need adjusted</string>
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -7706,7 +7690,7 @@ If the J-end is off the J gene end may need adjusted</string>
                   <item>
                    <spacer name="horizontalSpacer_9">
                     <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                     <enum>Qt::Orientation::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -7765,7 +7749,6 @@ If the J-end is off the J gene end may need adjusted</string>
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -7820,7 +7803,6 @@ If the J-end is off the J gene end may need adjusted</string>
                      <font>
                       <family>Courier New</family>
                       <pointsize>13</pointsize>
-                      <weight>75</weight>
                       <bold>true</bold>
                      </font>
                     </property>
@@ -8055,7 +8037,7 @@ Figure</string>
             <item row="0" column="4">
              <spacer name="horizontalSpacer_10">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8178,7 +8160,7 @@ Figure</string>
             <item row="0" column="7">
              <spacer name="horizontalSpacer_11">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8259,7 +8241,7 @@ Figure</string>
             <item row="0" column="2">
              <spacer name="horizontalSpacer_12">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8296,7 +8278,7 @@ Figure</string>
             <item row="0" column="2">
              <spacer name="horizontalSpacer_15">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8432,7 +8414,7 @@ Figure</string>
             <item row="0" column="7">
              <spacer name="horizontalSpacer_13">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8553,7 +8535,7 @@ Figure</string>
             <item row="0" column="11">
              <spacer name="horizontalSpacer_7">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8839,7 +8821,7 @@ Figure</string>
             <item row="0" column="4">
              <spacer name="horizontalSpacer_28">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -8972,7 +8954,7 @@ Figure</string>
             <item row="0" column="2">
              <spacer name="horizontalSpacer_29">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -9046,7 +9028,7 @@ Figure</string>
         <item row="0" column="9">
          <widget class="Line" name="line_14">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
          </widget>
         </item>
@@ -9176,14 +9158,14 @@ Logo</string>
         <item row="0" column="3">
          <widget class="Line" name="line_13">
           <property name="orientation">
-           <enum>Qt::Vertical</enum>
+           <enum>Qt::Orientation::Vertical</enum>
           </property>
          </widget>
         </item>
         <item row="0" column="11">
          <spacer name="horizontalSpacer_17">
           <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+           <enum>Qt::Orientation::Horizontal</enum>
           </property>
           <property name="sizeHint" stdset="0">
            <size>
@@ -9347,7 +9329,7 @@ Scheme:</string>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_18">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -9367,7 +9349,7 @@ Scheme:</string>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_20">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -9447,7 +9429,7 @@ Scheme:</string>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_19">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -9516,7 +9498,7 @@ Scheme:</string>
             <item row="0" column="0">
              <spacer name="horizontalSpacer_22">
               <property name="orientation">
-               <enum>Qt::Horizontal</enum>
+               <enum>Qt::Orientation::Horizontal</enum>
               </property>
               <property name="sizeHint" stdset="0">
                <size>
@@ -9563,16 +9545,16 @@ Scheme:</string>
         <item row="0" column="0" colspan="3">
          <widget class="QFrame" name="frame_19">
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_45">
            <item row="0" column="3">
             <spacer name="horizontalSpacer_23">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -9620,7 +9602,7 @@ Public</string>
               <string>Total 0 Clones identified (Use Tools-&gt;Find Clone to identify clones)</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignCenter</set>
+              <set>Qt::AlignmentFlag::AlignCenter</set>
              </property>
             </widget>
            </item>
@@ -9682,7 +9664,7 @@ for current clone</string>
            <item row="0" column="1">
             <spacer name="horizontalSpacer_24">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -9721,7 +9703,7 @@ for current clone</string>
            <item row="0" column="8">
             <widget class="Line" name="line_17">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -9731,10 +9713,10 @@ for current clone</string>
         <item row="1" column="2">
          <widget class="QFrame" name="frame_21">
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_53">
            <item row="4" column="0">
@@ -10091,7 +10073,7 @@ Figure</string>
                   <item row="1" column="1">
                    <spacer name="horizontalSpacer_6">
                     <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                     <enum>Qt::Orientation::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -10262,7 +10244,7 @@ Figure</string>
                   <item row="0" column="2" rowspan="2">
                    <widget class="Line" name="line_15">
                     <property name="orientation">
-                     <enum>Qt::Vertical</enum>
+                     <enum>Qt::Orientation::Vertical</enum>
                     </property>
                    </widget>
                   </item>
@@ -10510,7 +10492,7 @@ Identity</string>
                   <item row="0" column="5">
                    <widget class="Line" name="line_16">
                     <property name="orientation">
-                     <enum>Qt::Vertical</enum>
+                     <enum>Qt::Orientation::Vertical</enum>
                     </property>
                    </widget>
                   </item>
@@ -10588,7 +10570,7 @@ Report</string>
                   <item row="0" column="1">
                    <spacer name="horizontalSpacer_30">
                     <property name="orientation">
-                     <enum>Qt::Horizontal</enum>
+                     <enum>Qt::Orientation::Horizontal</enum>
                     </property>
                     <property name="sizeHint" stdset="0">
                      <size>
@@ -10651,10 +10633,10 @@ Report</string>
         <item row="0" column="0" colspan="2">
          <widget class="QFrame" name="frame_22">
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_59">
            <property name="topMargin">
@@ -10714,7 +10696,7 @@ Report</string>
               <string>Antibody candidates</string>
              </property>
              <property name="alignment">
-              <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+              <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
              </property>
             </widget>
            </item>
@@ -10778,7 +10760,7 @@ details</string>
            <item row="0" column="4">
             <widget class="Line" name="line_11">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -10822,7 +10804,7 @@ Plot</string>
            <item row="0" column="2">
             <widget class="Line" name="line_12">
              <property name="orientation">
-              <enum>Qt::Vertical</enum>
+              <enum>Qt::Orientation::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -10836,7 +10818,7 @@ Plot</string>
            <item row="0" column="1">
             <spacer name="horizontalSpacer_27">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
@@ -10891,7 +10873,7 @@ Plot</string>
           <item>
            <spacer name="horizontalSpacer_8">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -11065,7 +11047,7 @@ Tree</string>
           <item>
            <spacer name="horizontalSpacer_16">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -11229,7 +11211,7 @@ Tree</string>
           <item>
            <spacer name="horizontalSpacer_25">
             <property name="orientation">
-             <enum>Qt::Horizontal</enum>
+             <enum>Qt::Orientation::Horizontal</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -11410,10 +11392,10 @@ Tree</string>
            </size>
           </property>
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::Shape::StyledPanel</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Shadow::Raised</enum>
           </property>
           <layout class="QGridLayout" name="gridLayout_62">
            <item row="3" column="0" colspan="2">
@@ -11573,7 +11555,7 @@ Tree</string>
            <item row="1" column="1">
             <widget class="Line" name="line_5">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
@@ -11641,7 +11623,7 @@ Tree</string>
            <item row="6" column="0" colspan="2">
             <widget class="Line" name="line_10">
              <property name="orientation">
-              <enum>Qt::Horizontal</enum>
+              <enum>Qt::Orientation::Horizontal</enum>
              </property>
             </widget>
            </item>
@@ -12731,8 +12713,8 @@ Tree</string>
   </connection>
  </connections>
  <buttongroups>
-  <buttongroup name="buttonGroup_3"/>
-  <buttongroup name="buttonGroup_2"/>
   <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+  <buttongroup name="buttonGroup_3"/>
  </buttongroups>
 </ui>
