@@ -323,6 +323,25 @@ Current guidance:
   - persisted the selected theme in `Conf/theme_setting.txt`
   - kept the shared palette/stylesheet architecture so more themes can be
     added later without another UI refactor
+- Added a Cerulean-inspired theme preset based on the Bootswatch Cerulean
+  visual direction:
+  - brighter primary blue actions
+  - lighter blue-gray toolbar and status surfaces
+  - cleaner white panes and tables
+  - included directly in the existing `View -> Themes` switcher
+- Added four more Bootswatch-inspired theme presets with stronger text
+  contrast than the original web themes where needed:
+  - `Brite Pop`
+  - `Cosmo Blue`
+  - `Sandstone Calm`
+  - `United Ember`
+- Reverted runtime theme application back toward the default Qt/Designer look:
+  - removed the live custom palette/stylesheet application path from
+    `VGenesMain.py`
+  - stopped adding the user theme menu at runtime
+  - kept the non-theme functional UI adjustments in place
+- Normalized `VGenesMain.ui` enum values back to PyQt5-compatible forms and
+  regenerated `ui_VGenesMain.py` successfully with `pyuic5`
 - Updated the main table load/check/edit wiring to use the lighter checkable
   item approach instead of embedded checkbox widgets.
 - Added persistent main-table sort state and moved page loading order to SQL,

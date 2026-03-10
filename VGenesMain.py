@@ -62,7 +62,6 @@ import VGenesDialogues
 from alignment_utils import global_alignment_strings
 from seq_table_adapter import SequenceTableAdapter
 from sequence_table_view import SequenceTableView
-from vg_theme import build_palette, db_tab_stylesheet, main_window_stylesheet, theme_choices, THEMES
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
@@ -13628,15 +13627,15 @@ class VGenesForm(QtWidgets.QMainWindow):
         global DBFilename
 
         self.ui = Ui_MainWindow()
-        self.theme_name = self.loadSavedTheme()
+        self.theme_name = 'default'
 
         self.ui.setupUi(self)
         self.replaceSeqTable()
         self.setupDbTableStatus()
         self.applyResponsiveMainLayout()
-        self.setupThemeMenu()
         self.setupResponsiveToolbar()
-        self.applyTheme(self.theme_name)
+        self.setStyleSheet("")
+        self.ui.tabDB.setStyleSheet("")
         self.applyTabUiRefinements()
         self.setupResponsiveButtons()
 
@@ -13712,6 +13711,16 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.pushButtonDeleteAll.clicked.connect(self.deleteAll)
         self.ui.tableWidgetHC.cellClicked.connect(self.matchSelection)
         self.ui.tableWidgetLC.cellClicked.connect(self.matchSelection)
+        self.ui.tableWidgetHC.setCornerButtonEnabled(False)
+        self.ui.tableWidgetLC.setCornerButtonEnabled(False)
+        self.ui.tableWidgetHC.setStyleSheet(
+            self.ui.tableWidgetHC.styleSheet() +
+            " QTableCornerButton::section { background: transparent; border: none; }"
+        )
+        self.ui.tableWidgetLC.setStyleSheet(
+            self.ui.tableWidgetLC.styleSheet() +
+            " QTableCornerButton::section { background: transparent; border: none; }"
+        )
         self.ui.txtFieldSearch.textChanged.connect(self.trimInfo)
         self.ui.checkBoxSHM_Vregion.clicked.connect(self.SHMcheck)
         self.ui.checkBoxSHM_FR1.clicked.connect(self.SHMcheck1)
@@ -13846,45 +13855,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.gridLayout_42.addWidget(self.dbTableStatusLabel, 3, 0, 1, 20)
         self.ui.SeqTable.setPlaceholderText('Load the table to inspect sequence records.')
 
-    def themeConfigPath(self):
-        return os.path.join(working_prefix, 'Conf', 'theme_setting.txt')
-
-    def loadSavedTheme(self):
-        try:
-            filename = self.themeConfigPath()
-            with open(filename, 'r') as handle:
-                theme_name = handle.read().strip()
-            if theme_name in THEMES:
-                return theme_name
-        except:
-            pass
-        return 'light'
-
-    def saveTheme(self, theme_name):
-        try:
-            os.makedirs(os.path.dirname(self.themeConfigPath()), exist_ok=True)
-            with open(self.themeConfigPath(), 'w') as handle:
-                handle.write(theme_name)
-        except:
-            pass
-
-    def setupThemeMenu(self):
-        self.themeMenu = self.ui.menuView.addMenu('Themes')
-        self.themeActionGroup = QtWidgets.QActionGroup(self)
-        self.themeActionGroup.setExclusive(True)
-        self.themeActions = {}
-        for theme_name, label in theme_choices():
-            action = QtWidgets.QAction(label, self)
-            action.setCheckable(True)
-            action.triggered.connect(
-                lambda checked, name=theme_name: checked and self.applyTheme(name)
-            )
-            self.themeActionGroup.addAction(action)
-            self.themeMenu.addAction(action)
-            self.themeActions[theme_name] = action
-
     def setupResponsiveToolbar(self):
-        self.toolbarCompactThreshold = 1850
         self.toolbarActionState = {}
         for action in self.ui.toolBar.actions():
             if action.isSeparator():
@@ -13920,7 +13891,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         pixmap.fill(Qt.transparent)
         painter = QPainter(pixmap)
         painter.setRenderHint(QPainter.Antialiasing)
-        painter.setPen(QColor('#2d261b') if self.theme_name != 'dark' else QColor('#edf2f7'))
+        painter.setPen(self.palette().color(QPalette.ButtonText))
         painter.setFont(QFont('Avenir Next', 10, QFont.DemiBold))
         painter.drawText(pixmap.rect(), Qt.AlignCenter, text)
         painter.end()
@@ -13936,12 +13907,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         return ''.join(word[0].upper() for word in words[:3])
 
     def updateToolbarPresentation(self):
-        toolbar_width = self.ui.toolBar.width() if hasattr(self.ui, 'toolBar') else self.width()
-        compact = toolbar_width < self.toolbarCompactThreshold
-        if compact:
-            self.ui.toolBar.setToolButtonStyle(Qt.ToolButtonIconOnly)
-        else:
-            self.ui.toolBar.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        compact = True
+        self.ui.toolBar.setToolButtonStyle(Qt.ToolButtonIconOnly)
         for action, state in getattr(self, 'toolbarActionState', {}).items():
             has_icon = not state['icon'].isNull()
             full_text = state['text']
@@ -14094,8 +14061,34 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.verticalLayout_13.setContentsMargins(0, 6, 0, 6)
         self.ui.horizontalLayout_16.setSpacing(8)
 
+    def normalizeOverviewButtons(self):
+        tree_buttons = [
+            self.ui.pushButtonMark,
+            self.ui.pushButtonClear,
+            self.ui.btnUpdateTree,
+        ]
+        for button in tree_buttons:
+            button.setMinimumHeight(34)
+            button.setMinimumWidth(150)
+            button.setMaximumWidth(180)
+
+        viewer_buttons = [
+            (self.ui.pushButtonScatter, 'Scatter Viewer'),
+            (self.ui.pushButtonHistViewer, 'Hist Viewer'),
+            (self.ui.pushButtonBoxplotViewer, 'BoxPlot Viewer'),
+            (self.ui.pushButtonHeatmapViewer, 'Heatmap Viewer'),
+        ]
+        for button, label in viewer_buttons:
+            button.setText(label)
+            button.setMinimumHeight(42)
+            button.setMinimumWidth(165)
+            button.setMaximumWidth(190)
+            button.setIconSize(QSize(24, 24))
+            button.setStyleSheet('text-align: left; padding-left: 6px;')
+
     def applyTabUiRefinements(self):
         self.ui.tabWidget.tabBar().setFont(QFont('Avenir Next', 15, QFont.DemiBold))
+        self.normalizeOverviewButtons()
         self.normalizeButtons(self.ui.tabDB, min_height=40, min_width=112)
         self.normalizeDatabaseTabControls()
 
@@ -14151,29 +14144,6 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         self.ui.SeqTable.horizontalHeader().setMinimumSectionSize(96)
         self.ui.SeqTable.horizontalHeader().setDefaultSectionSize(140)
-
-    def applyTheme(self, theme_name='light'):
-        if theme_name not in THEMES:
-            theme_name = 'light'
-        self.theme_name = theme_name
-        self.applyMainWindowTheme()
-        self.applyDbTabTheme()
-        self.updateToolbarPresentation()
-        if hasattr(self, 'responsiveButtons'):
-            self.updateResponsiveButtonPresentation()
-        if hasattr(self, 'themeActions') and theme_name in self.themeActions:
-            self.themeActions[theme_name].setChecked(True)
-        self.saveTheme(theme_name)
-
-    def applyMainWindowTheme(self):
-        app = QtWidgets.QApplication.instance()
-        if app is not None:
-            app.setPalette(build_palette(self.theme_name))
-        self.setStyleSheet(main_window_stylesheet(self.theme_name))
-
-    def applyDbTabTheme(self):
-        self.ui.tabDB.setStyleSheet(db_tab_stylesheet(self.theme_name))
-        self.ui.SeqTable.setAlternatingRowColors(True)
 
     def updateDbTableStatus(self, message, placeholder_text=None):
         self.dbTableStatusLabel.setText(message)
