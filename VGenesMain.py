@@ -13638,6 +13638,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.tabDB.setStyleSheet("")
         self.applyTabUiRefinements()
         self.setupResponsiveButtons()
+        self.updateResponsiveLayoutMode()
 
         self.ui.comboBoxSpecies.currentTextChanged.connect(self.on_comboBoxSpecies_editTextChanged)
         self.ui.cboTreeOp1.currentTextChanged.connect(self.TreeviewOptions)
@@ -13827,6 +13828,8 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.updateToolbarPresentation()
         if hasattr(self, 'responsiveButtons'):
             self.updateResponsiveButtonPresentation()
+        if hasattr(self, 'ui'):
+            self.updateResponsiveLayoutMode()
 
     def replaceSeqTable(self):
         old_table = self.ui.SeqTable
@@ -13869,18 +13872,30 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.updateToolbarPresentation()
 
     def setupResponsiveButtons(self):
-        self.buttonCompactThreshold = 1420
+        self.buttonCompactThreshold = 1500
         self.responsiveButtons = {}
-        for button in self.findChildren(QtWidgets.QPushButton):
+        for button in self.findChildren(QtWidgets.QAbstractButton):
             if button.parent() is None:
                 continue
+            if isinstance(button, QtWidgets.QCheckBox) or isinstance(button, QtWidgets.QRadioButton):
+                continue
+            if isinstance(button, QtWidgets.QToolButton) and button.parent() == self.ui.toolBar:
+                continue
+            original_text = button.text()
+            if not original_text.strip():
+                continue
             self.responsiveButtons[button] = {
-                'text': button.text(),
+                'text': original_text,
                 'icon': QIcon(button.icon()),
-                'tooltip': button.toolTip() or button.text().replace('\n', ' ').strip(),
+                'tooltip': button.toolTip() or original_text.replace('\n', ' ').strip(),
                 'icon_size': QSize(button.iconSize()),
                 'min_width': button.minimumWidth(),
                 'max_width': button.maximumWidth(),
+                'min_height': button.minimumHeight(),
+                'max_height': button.maximumHeight(),
+                'tool_button_style': button.toolButtonStyle() if isinstance(button, QtWidgets.QToolButton) else None,
+                'size_policy_h': button.sizePolicy().horizontalPolicy(),
+                'size_policy_v': button.sizePolicy().verticalPolicy(),
             }
             if self.responsiveButtons[button]['tooltip']:
                 button.setToolTip(self.responsiveButtons[button]['tooltip'])
@@ -13933,7 +13948,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.toolBar.update()
 
     def updateResponsiveButtonPresentation(self):
-        compact = self.width() < self.buttonCompactThreshold
+        compact = self.width() < self.buttonCompactThreshold or self.height() < 760
         for button, state in getattr(self, 'responsiveButtons', {}).items():
             tooltip = state['tooltip']
             if tooltip:
@@ -13947,15 +13962,64 @@ class VGenesForm(QtWidgets.QMainWindow):
                         button.setIcon(self.makeTextIcon(short))
                 button.setText('')
                 button.setIconSize(QSize(18, 18))
-                button.setMinimumWidth(30)
-                button.setMaximumWidth(42)
+                compact_width = max(28, min(40, max(state['min_height'], 28)))
+                button.setMinimumWidth(compact_width)
+                button.setMaximumWidth(compact_width + 8)
+                button.setMinimumHeight(max(28, min(state['min_height'] or 28, 36)))
+                if state['max_height'] > 0:
+                    button.setMaximumHeight(max(28, min(state['max_height'], 40)))
+                button.setSizePolicy(QtWidgets.QSizePolicy.Fixed, state['size_policy_v'])
+                if isinstance(button, QtWidgets.QToolButton):
+                    button.setToolButtonStyle(Qt.ToolButtonIconOnly)
             else:
                 button.setIcon(state['icon'])
                 button.setText(state['text'])
                 button.setIconSize(state['icon_size'])
                 button.setMinimumWidth(state['min_width'])
                 button.setMaximumWidth(state['max_width'])
+                button.setMinimumHeight(state['min_height'])
+                if state['max_height'] > 0:
+                    button.setMaximumHeight(state['max_height'])
+                button.setSizePolicy(state['size_policy_h'], state['size_policy_v'])
+                if isinstance(button, QtWidgets.QToolButton) and state['tool_button_style'] is not None:
+                    button.setToolButtonStyle(state['tool_button_style'])
         self.update()
+
+    def updateResponsiveLayoutMode(self):
+        narrow = self.width() < 1500 or self.height() < 760
+        very_narrow = self.width() < 1220 or self.height() < 700
+
+        if narrow:
+            self.ui.gridLayout_8.setContentsMargins(6, 6, 6, 6)
+            self.ui.gridLayout_8.setHorizontalSpacing(6)
+            self.ui.gridLayout_8.setVerticalSpacing(6)
+            self.ui.frame_11.setMinimumHeight(120)
+            self.ui.frame_11.setMaximumHeight(190)
+            self.ui.frame_3.setMinimumWidth(210)
+            self.ui.frame_4.setMinimumWidth(210)
+            self.ui.groupBox_2.setMinimumWidth(180)
+            self.ui.groupBox_2.setMaximumWidth(300)
+            self.ui.treeWidget.setMinimumWidth(180)
+            self.ui.treeWidget.setMaximumWidth(300)
+            self.ui.SeqTable.horizontalHeader().setMinimumSectionSize(72)
+            self.ui.SeqTable.horizontalHeader().setDefaultSectionSize(110)
+        else:
+            self.ui.gridLayout_8.setContentsMargins(12, 10, 12, 12)
+            self.ui.gridLayout_8.setHorizontalSpacing(10)
+            self.ui.gridLayout_8.setVerticalSpacing(10)
+            self.ui.frame_11.setMinimumHeight(140)
+            self.ui.frame_11.setMaximumHeight(230)
+            self.ui.frame_3.setMinimumWidth(260)
+            self.ui.frame_4.setMinimumWidth(260)
+            self.ui.groupBox_2.setMinimumWidth(220)
+            self.ui.groupBox_2.setMaximumWidth(380)
+            self.ui.treeWidget.setMinimumWidth(220)
+            self.ui.treeWidget.setMaximumWidth(380)
+            self.ui.SeqTable.horizontalHeader().setMinimumSectionSize(96)
+            self.ui.SeqTable.horizontalHeader().setDefaultSectionSize(140)
+
+        tab_font = QFont('Avenir Next', 13 if very_narrow else 15, QFont.DemiBold)
+        self.ui.tabWidget.tabBar().setFont(tab_font)
 
     def normalizeButtons(self, parent, min_height=40, min_width=110):
         for button in parent.findChildren(QtWidgets.QAbstractButton):

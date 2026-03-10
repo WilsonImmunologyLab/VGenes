@@ -8,7 +8,7 @@
     <x>0</x>
     <y>0</y>
     <width>1683</width>
-    <height>1096</height>
+    <height>970</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -827,6 +827,11 @@ Edit</string>
               <string>Sequence for GibsonClone</string>
              </property>
             </item>
+            <item>
+             <property name="text">
+              <string>V(D)J with Leader Sequences</string>
+             </property>
+            </item>
            </widget>
           </item>
           <item row="0" column="2">
@@ -1304,7 +1309,7 @@ DataViewer</string>
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Sequence&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <property name="usesScrollButtons">
        <bool>false</bool>
@@ -1573,6 +1578,9 @@ Mark</string>
             <property name="text">
              <string>Select entire row</string>
             </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
            </widget>
           </item>
          </layout>
@@ -1794,7 +1802,7 @@ Check</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1299</width>
+             <width>1278</width>
              <height>821</height>
             </rect>
            </property>
@@ -4811,8 +4819,8 @@ Edit</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1299</width>
-             <height>750</height>
+             <width>1278</width>
+             <height>747</height>
             </rect>
            </property>
            <layout class="QGridLayout" name="gridLayout_56">
@@ -6370,7 +6378,7 @@ Edit</string>
           </property>
           <property name="maximumSize">
            <size>
-            <width>200</width>
+            <width>800</width>
             <height>16777215</height>
            </size>
           </property>
@@ -6748,7 +6756,7 @@ window</string>
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1299</width>
+             <width>1278</width>
              <height>911</height>
             </rect>
            </property>
@@ -11731,7 +11739,7 @@ Tree</string>
      <x>0</x>
      <y>0</y>
      <width>1683</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <property name="defaultUp">
