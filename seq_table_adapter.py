@@ -1,6 +1,6 @@
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QAbstractItemView
+from PyQt5.QtWidgets import QAbstractItemView, QHeaderView
 
 from sequence_table_view import SequenceTableItem
 
@@ -191,6 +191,13 @@ class SequenceTableAdapter:
         self.table.horizontalHeader().setSortIndicator(column_index, sort_order)
 
     def resize_primary_columns(self, check_width=10, name_width=None):
-        self.table.horizontalHeader().resizeSection(0, check_width)
-        if name_width is not None and self.table.columnCount() > 1:
-            self.table.horizontalHeader().resizeSection(1, name_width)
+        header = self.table.horizontalHeader()
+        if self.table.columnCount() > 0:
+            header.setSectionResizeMode(0, QHeaderView.Fixed)
+            header.resizeSection(0, check_width)
+        if self.table.columnCount() > 1:
+            if name_width is not None:
+                header.setSectionResizeMode(1, QHeaderView.Fixed)
+                header.resizeSection(1, name_width)
+            else:
+                header.setSectionResizeMode(1, QHeaderView.ResizeToContents)

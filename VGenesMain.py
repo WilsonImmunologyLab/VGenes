@@ -4797,7 +4797,7 @@ class LoadTable_thread(QThread):
         horizontalHeader = [''] + current_nickname_list
         vgene.seqTableAdapter.begin_reload()
         vgene.seqTableAdapter.configure([''] + current_field_list, horizontalHeader, [str(row[0]) for row in DataIn])
-        vgene.seqTableAdapter.resize_primary_columns(check_width=10)
+        vgene.seqTableAdapter.resize_primary_columns(check_width=34)
         vgene.seqTableAdapter.apply_selection_behavior(vgene.ui.checkBoxRowSelection.isChecked())
 
         vgene.seqTableAdapter.populate_rows(DataIn, [])
@@ -14156,8 +14156,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.HCLCDialog.ui.tableWidget.setColumnCount(num_col)
             self.HCLCDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
             self.HCLCDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
-            self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
-            self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+            self.seqTableAdapter.resize_primary_columns(check_width=34)
 
             for row_index in range(num_row):
                 print(str(row_index))
@@ -14214,8 +14213,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                         self.HCLCDialog.ui.tableWidget.setColumnCount(num_col)
                         self.HCLCDialog.ui.tableWidget.setHorizontalHeaderLabels(horizontalHeader)
                         self.HCLCDialog.ui.tableWidget.horizontalHeader().setStretchLastSection(True)
-                        self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
-                        self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+                        self.seqTableAdapter.resize_primary_columns(check_width=34)
 
                         for row_index in range(num_row):
                             print(str(row_index))
@@ -17173,8 +17171,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.tableWidgetTableView.setColumnCount(num_col)
         self.ui.tableWidgetTableView.setHorizontalHeaderLabels(horizontalHeader)
         self.ui.tableWidgetTableView.horizontalHeader().setStretchLastSection(True)
-        self.ui.SeqTable.horizontalHeader().resizeSection(0, 12)
-        self.ui.SeqTable.horizontalHeader().resizeSection(1, 18)
+        self.seqTableAdapter.resize_primary_columns(check_width=34)
 
         #a = FieldList
         #b = RealNameList
@@ -17324,7 +17321,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 row_names = [str(row[0]) for row in DataIn]
                 self.seqTableAdapter.begin_reload()
                 self.seqTableAdapter.configure([''] + current_field_list, horizontalHeader, row_names)
-                self.seqTableAdapter.resize_primary_columns(check_width=10)
+                self.seqTableAdapter.resize_primary_columns(check_width=34)
                 self.seqTableAdapter.apply_selection_behavior(self.ui.checkBoxRowSelection.isChecked())
                 self.seqTableAdapter.populate_rows(DataIn, self.CheckedRecords)
                 self.seqTableAdapter.apply_edit_mode()
