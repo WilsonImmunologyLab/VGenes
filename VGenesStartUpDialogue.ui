@@ -6,13 +6,13 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>824</width>
+    <width>1000</width>
     <height>738</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
-    <width>824</width>
+    <width>1200</width>
     <height>738</height>
    </size>
   </property>
@@ -248,7 +248,7 @@
     <widget class="QLabel" name="label_3">
      <property name="maximumSize">
       <size>
-       <width>800</width>
+       <width>1000</width>
        <height>500</height>
       </size>
      </property>
