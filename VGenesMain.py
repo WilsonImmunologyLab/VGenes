@@ -4,6 +4,7 @@ import sys
 import sqlite3 as db
 import time
 import re
+from datetime import datetime
 #import sip
 import shutil
 import math
@@ -63,6 +64,7 @@ from alignment_utils import global_alignment_strings
 from seq_table_adapter import SequenceTableAdapter
 from sequence_table_view import SequenceTableView
 from vg_theme import db_tab_stylesheet
+from vgenes_version import APP_NAME, SCHEMA_VERSION, __version__, format_app_title
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
@@ -13630,6 +13632,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
 
         self.ui.setupUi(self)
+        self.setWindowTitle(format_app_title())
         self.replaceSeqTable()
         self.setupDbTableStatus()
         self.applyDbTabTheme()
@@ -24358,8 +24361,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.OnOpen()
         time_end = time.time()
         print('Load DB, step2 time cost: ', time_end - time_start, 's')
-        titletext = 'VGenes - ' + inputDBFilename
-        self.setWindowTitle(titletext)
+        self.setWindowTitle(format_app_title(inputDBFilename))
 
         #self.load_table()
         #self.initial_Clone()
@@ -24840,6 +24842,17 @@ class VGenesForm(QtWidgets.QMainWindow):
         valueTo = self.ui.txtStatus.toPlainText()
         FieldIS = 'Blank13'
         self.FieldChanger(valueTo, FieldIS)
+
+    @pyqtSlot()
+    def on_actionAbout_2_triggered(self):
+        current_year = datetime.now().year
+        about_text = (
+            f"{APP_NAME} v{__version__}\n"
+            f"Schema version: {SCHEMA_VERSION}\n\n"
+            "Integrated desktop application for repertoire sequence analysis.\n"
+            f"Wilson Lab @ {current_year}"
+        )
+        QMessageBox.information(self, f"About {APP_NAME}", about_text, QMessageBox.Ok, QMessageBox.Ok)
 
     # @pyqtSlot()
     def on_sbJend_valueChanged(self):

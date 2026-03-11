@@ -4,7 +4,6 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "vgenes"
-version = "0.1.0"
 description = "Desktop application for B cell receptor repertoire analysis"
 readme = "README.md"
 requires-python = ">=3.10,<3.13"
@@ -26,7 +25,7 @@ classifiers = [
   "Programming Language :: Python :: 3.11",
   "Topic :: Scientific/Engineering :: Bio-Informatics",
 ]
-dynamic = ["dependencies"]
+dynamic = ["version", "dependencies"]
 
 [project.urls]
 Homepage = "https://wilsonimmunologylab.github.io/VGenes/"
@@ -34,8 +33,9 @@ Repository = "https://github.com/WilsonImmunologyLab/VGenes"
 Documentation = "https://wilsonimmunologylab.github.io/VGenes/"
 
 [tool.setuptools]
-py-modules = []
+py-modules = ["vgenes_version"]
 include-package-data = true
 
 [tool.setuptools.dynamic]
+version = { attr = "vgenes_version.__version__" }
 dependencies = { file = ["requirements.txt"] }
