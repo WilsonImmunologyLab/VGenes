@@ -63,6 +63,7 @@ import VGenesDialogues
 from alignment_utils import global_alignment_strings
 from seq_table_adapter import SequenceTableAdapter
 from sequence_table_view import SequenceTableView
+from task_utils import FunctionTask, fetch_seq_table_page
 from vg_theme import db_tab_stylesheet
 from vgenes_version import APP_NAME, SCHEMA_VERSION, __version__, format_app_title
 from htmldialog import Ui_htmlDialog
@@ -13727,6 +13728,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         # self.ui.listViewSpecificity.mouseDoubleClickEvent.connect(self.SpecSet)
 
         self.threadpool = QThreadPool()
+        self._task_progress = {}
+        self._table_load_token = 0
 
         self.lastTab = 1
         self.ui.cboTreeOp1.id = 'TreeOp1'
@@ -13870,21 +13873,129 @@ class VGenesForm(QtWidgets.QMainWindow):
         ]
 
     def seqTableOrderClause(self):
-        order_fields = []
-        if self.seqTableSortField:
-            direction = 'ASC' if self.seqTableSortOrder == Qt.AscendingOrder else 'DESC'
-            order_fields.append(f'{self.seqTableSortField} {direction}')
+        from task_utils import build_seq_table_order_clause
 
-        for field in self.seqTableDefaultSortFields():
-            if field == 'None':
-                continue
-            if any(entry.split()[0] == field for entry in order_fields):
-                continue
-            order_fields.append(field)
+        return build_seq_table_order_clause(
+            self.seqTableSortField,
+            self.seqTableSortOrder,
+            self.seqTableDefaultSortFields(),
+        )
 
-        if not order_fields:
-            order_fields.append('SeqName')
-        return ' ORDER BY ' + ', '.join(order_fields)
+    def openTaskProgress(self, task_name, token, label):
+        self.closeTaskProgress(task_name)
+        timer = QTimer(self)
+        timer.setSingleShot(True)
+        self._task_progress[task_name] = {
+            'token': token,
+            'dialog': None,
+            'timer': timer,
+            'label': label,
+            'pct': 0,
+        }
+        timer.timeout.connect(lambda current_task=task_name, current_token=token: self.showTaskProgress(current_task, current_token))
+        timer.start(180)
+
+    def showTaskProgress(self, task_name, token):
+        task_info = self._task_progress.get(task_name)
+        if task_info is None or task_info['token'] != token or task_info['dialog'] is not None:
+            return
+        progress = ProgressBar(self)
+        progress.setValue(task_info['pct'])
+        progress.setLabel(task_info['label'])
+        task_info['dialog'] = progress
+
+    def updateTaskProgress(self, task_name, token, pct, label):
+        task_info = self._task_progress.get(task_name)
+        if task_info is None or task_info['token'] != token:
+            return
+        task_info['pct'] = pct
+        task_info['label'] = label
+        if task_info['dialog'] is not None:
+            task_info['dialog'].setValue(pct)
+            task_info['dialog'].setLabel(label)
+
+    def closeTaskProgress(self, task_name, token=None):
+        task_info = self._task_progress.get(task_name)
+        if task_info is None:
+            return
+        if token is not None and task_info['token'] != token:
+            return
+        timer = task_info.get('timer')
+        if timer is not None:
+            timer.stop()
+            timer.deleteLater()
+        dialog = task_info.get('dialog')
+        try:
+            if dialog is not None:
+                dialog.FeatProgressBar.setValue(100)
+                dialog.close()
+        except:
+            pass
+        self._task_progress.pop(task_name, None)
+
+    def applyLoadedSeqTablePayload(self, payload):
+        current_field_list = payload['field_list']
+        current_nickname_list = payload['nickname_list']
+        data_rows = payload['rows']
+        row_names = payload['row_names']
+        total_pages = str(payload['total_pages'])
+        num_row = len(data_rows)
+
+        self.seqTableAdapter.begin_reload()
+        try:
+            horizontalHeader = [''] + current_nickname_list
+            self.seqTableAdapter.configure([''] + current_field_list, horizontalHeader, row_names)
+            self.seqTableAdapter.resize_primary_columns(check_width=34)
+            self.seqTableAdapter.apply_selection_behavior(self.ui.checkBoxRowSelection.isChecked())
+            self.seqTableAdapter.populate_rows(data_rows, self.CheckedRecords)
+            self.seqTableAdapter.apply_edit_mode()
+            if self.seqTableSortField and self.seqTableSortField in current_field_list:
+                sort_index = current_field_list.index(self.seqTableSortField) + 1
+                self.seqTableAdapter.set_sort_indicator(sort_index, self.seqTableSortOrder)
+            else:
+                self.seqTableAdapter.set_sort_indicator(1, Qt.AscendingOrder)
+            try:
+                self.ui.SeqTable.horizontalHeader().sectionClicked.disconnect(self.sortTable)
+            except:
+                pass
+            self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
+        finally:
+            self.seqTableAdapter.end_reload()
+
+        try:
+            self.ui.SeqTable.itemChanged.disconnect(self.handleSeqTableItemChanged)
+        except:
+            pass
+        self.ui.SeqTable.itemChanged.connect(self.handleSeqTableItemChanged)
+        self.ui.labelTotalPage.setText(total_pages)
+        message = 'Showing ' + str(num_row) + ' records on page ' + self.ui.labelCurPage.text() + ' of ' + total_pages + '.'
+        self.updateDbTableStatus(message, 'No records available for this page.')
+
+    def handleLoadTableResult(self, token, payload):
+        if token != self._table_load_token:
+            return
+
+        status = payload.get('status')
+        if status == 'no_db':
+            self.updateDbTableStatus('No database loaded.', 'Open a VDB file to browse sequence records.')
+            return
+        if status == 'empty':
+            self.ui.labelTotalPage.setText(str(payload['total_pages']))
+            self.ui.labelCurPage.setText('1')
+            self.updateDbTableStatus(
+                'No records found in the current database.',
+                'No records found in the current database.'
+            )
+            return
+
+        self.ui.labelTotalPage.setText(str(payload['total_pages']))
+        self.applyLoadedSeqTablePayload(payload)
+
+    def handleLoadTableError(self, token, title, detail):
+        if token != self._table_load_token:
+            return
+        self.updateDbTableStatus('Failed to load table.', 'Unable to load records for the current table view.')
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
     def handleSeqTableCheckChanged(self, item):
         global MoveNotChange
@@ -17265,88 +17376,43 @@ class VGenesForm(QtWidgets.QMainWindow):
                 pass
         self.seqTableAdapter.clear()
         self.updateDbTableStatus('Loading table ...', 'Loading records ...')
-
-        try:
-            # load data for new table
-            if DBFilename != '' and DBFilename != 'none' and DBFilename != None:
-                #self.progress = ProgressBar(self)
-                #self.progress.setLabel('Modifying barcodes ...')
-                #self.progress.show()
-
-                #pct = 0
-                #label = "Fetching data ..."
-                #self.progressLabel(pct, label)
-
-                # paging system
-                pageSize = int(self.ui.spinBoxPageSize.text())
-                if self.seqTableAdapter.page_size() == pageSize:
-                    pass
-                else:
-                    self.seqTableAdapter.set_page_size(pageSize)
-                    self.ui.labelCurPage.setText('1')
-
-                CurPage = int(self.ui.labelCurPage.text()) - 1
-                #RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str((CurPage + 1) * pageSize)
-                RecordLimitStatement = " LIMIT " + str(CurPage * pageSize) + "," + str(pageSize)
-                SQLStatement = 'SELECT COUNT(*) FROM vgenesDB'
-                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                TotalRecords = DataIn[0][0]
-                TotalRecordsStr = str(math.ceil(TotalRecords/pageSize))
-                self.ui.labelTotalPage.setText(TotalRecordsStr)
-                if TotalRecords == 0:
-                    self.ui.labelCurPage.setText('1')
-                    self.updateDbTableStatus(
-                        'No records found in the current database.',
-                        'No records found in the current database.'
-                    )
-                    return
-
-                SQLStatement = 'SELECT Field,FieldNickName FROM fieldsname WHERE display = "yes" ORDER BY display_priority,ID LIMIT 0,200'
-                HeaderIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-                current_field_list = [i[0] for i in HeaderIn]
-                current_nickname_list = [i[1] for i in HeaderIn]
-                fields = ','.join(current_field_list)
-                if fields == '':
-                    fields = '*'
-                SQLStatement = 'select ' + fields + ' from vgenesDB' + self.seqTableOrderClause()
-                SQLStatement += RecordLimitStatement
-                DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
-
-                #pct = 0
-                #label = "Initial Table ..."
-                #self.progressLabel(pct, label)
-
-                num_row = len(DataIn)
-                horizontalHeader = [''] + current_nickname_list
-                row_names = [str(row[0]) for row in DataIn]
-                self.seqTableAdapter.begin_reload()
-                self.seqTableAdapter.configure([''] + current_field_list, horizontalHeader, row_names)
-                self.seqTableAdapter.resize_primary_columns(check_width=34)
-                self.seqTableAdapter.apply_selection_behavior(self.ui.checkBoxRowSelection.isChecked())
-                self.seqTableAdapter.populate_rows(DataIn, self.CheckedRecords)
-                self.seqTableAdapter.apply_edit_mode()
-                # show sort indicator
-                if self.seqTableSortField and self.seqTableSortField in current_field_list:
-                    sort_index = current_field_list.index(self.seqTableSortField) + 1
-                    self.seqTableAdapter.set_sort_indicator(sort_index, self.seqTableSortOrder)
-                else:
-                    self.seqTableAdapter.set_sort_indicator(1, Qt.AscendingOrder)
-                # connect sort indicator to slot function
-                try:
-                    self.ui.SeqTable.horizontalHeader().sectionClicked.disconnect(self.sortTable)
-                except:
-                    pass
-                self.ui.SeqTable.horizontalHeader().sectionClicked.connect(self.sortTable)
-                self.seqTableAdapter.end_reload()
-                self.ui.SeqTable.itemChanged.connect(self.handleSeqTableItemChanged)
-                message = 'Showing ' + str(num_row) + ' records on page ' + self.ui.labelCurPage.text() + ' of ' + TotalRecordsStr + '.'
-                self.updateDbTableStatus(message, 'No records available for this page.')
-            else:
-                self.updateDbTableStatus('No database loaded.', 'Open a VDB file to browse sequence records.')
-        except:
-            self.seqTableAdapter.end_reload()
-            self.updateDbTableStatus('Failed to load table.', 'Unable to load records for the current table view.')
+        if DBFilename == '' or DBFilename == 'none' or DBFilename == None:
+            self.updateDbTableStatus('No database loaded.', 'Open a VDB file to browse sequence records.')
             return
+
+        pageSize = int(self.ui.spinBoxPageSize.text())
+        if self.seqTableAdapter.page_size() != pageSize:
+            self.seqTableAdapter.set_page_size(pageSize)
+            self.ui.labelCurPage.setText('1')
+
+        CurPage = int(self.ui.labelCurPage.text()) - 1
+        self._table_load_token += 1
+        token = self._table_load_token
+        self.openTaskProgress('load_table', token, 'Loading table ...')
+
+        task = FunctionTask(
+            fetch_seq_table_page,
+            DBFilename,
+            pageSize,
+            CurPage,
+            self.seqTableSortField,
+            self.seqTableSortOrder,
+            self.seqTableDefaultSortFields(),
+            task_name='Load sequence table',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('load_table', current_token, pct, label)
+        )
+        task.signals.result.connect(
+            lambda payload, current_token=token: self.handleLoadTableResult(current_token, payload)
+        )
+        task.signals.error.connect(
+            lambda title, detail, current_token=token: self.handleLoadTableError(current_token, title, detail)
+        )
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('load_table', current_token)
+        )
+        self.threadpool.start(task)
         # try multi-thread
         '''
         if DBFilename != '' and DBFilename != 'none' and DBFilename != None:

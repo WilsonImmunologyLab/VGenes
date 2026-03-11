@@ -163,6 +163,20 @@ Current guidance:
 
 ## Progress Log
 
+### 2026-03-10
+
+- Added a small reusable async task layer in `task_utils.py` with:
+  - `TaskSignals`
+  - `FunctionTask`
+  - a background fetch helper for paged DB-table loading
+- Migrated the Database-tab table load path in `VGenesMain.py` off the old
+  `QThread` UI-mutation pattern and onto:
+  - background data fetch on `QThreadPool`
+  - main-thread table application
+  - token-guarded progress dialog lifecycle
+- Kept the old `LoadTable_thread` class in place for now as a legacy reference,
+  but the active DB-table loading path no longer depends on it.
+
 ### 2026-03-08
 
 - Reviewed repository structure and core application files.
