@@ -136,7 +136,26 @@ class SequenceTableAdapter:
         row = self._row_index_by_name.get(name)
         if row is None:
             return False
+        try:
+            self.table.clearSelection()
+        except:
+            pass
         self.table.setCurrentCell(row, column)
+        try:
+            if self.table.selectionBehavior() == QAbstractItemView.SelectRows:
+                self.table.selectRow(row)
+            else:
+                item = self.table.item(row, column)
+                if item is not None:
+                    item.setSelected(True)
+        except:
+            pass
+        try:
+            current_item = self.table.item(row, column)
+            if current_item is not None:
+                self.table.scrollToItem(current_item, QAbstractItemView.PositionAtCenter)
+        except:
+            pass
         return True
 
     def begin_reload(self):

@@ -13730,6 +13730,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.threadpool = QThreadPool()
         self._task_progress = {}
         self._table_load_token = 0
+        self._pending_seqtable_selection = None
 
         self.lastTab = 1
         self.ui.cboTreeOp1.id = 'TreeOp1'
@@ -13990,10 +13991,15 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         self.ui.labelTotalPage.setText(str(payload['total_pages']))
         self.applyLoadedSeqTablePayload(payload)
+        pending_name = self._pending_seqtable_selection
+        if pending_name:
+            if self.seqTableAdapter.set_current_name(pending_name):
+                self._pending_seqtable_selection = None
 
     def handleLoadTableError(self, token, title, detail):
         if token != self._table_load_token:
             return
+        self._pending_seqtable_selection = None
         self.updateDbTableStatus('Failed to load table.', 'Unable to load records for the current table view.')
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
@@ -20847,12 +20853,9 @@ class VGenesForm(QtWidgets.QMainWindow):
             pageSize = int(self.ui.spinBoxPageSize.text())
             PageNumber = math.ceil(row_number/pageSize)
 
+            self._pending_seqtable_selection = name
             self.ui.labelCurPage.setText(str(PageNumber))
             self.load_table()
-
-            # setup focus on seqTable
-            if self.seqTableAdapter.set_current_name(name):
-                return
 
     def tree_to_table_selection_old(self):
         Selected = self.ui.treeWidget.selectedItems()
@@ -20880,7 +20883,10 @@ class VGenesForm(QtWidgets.QMainWindow):
                 if len(found) > 0:
                     found = found[0]
                     from_table = True
+                    self.ui.treeWidget.clearSelection()
                     self.ui.treeWidget.setCurrentItem(found)
+                    found.setSelected(True)
+                    self.ui.treeWidget.scrollToItem(found, QtWidgets.QAbstractItemView.PositionAtCenter)
                     from_table = False
             else:
                 MatchingIndex = NameIndex[name]
