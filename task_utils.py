@@ -1,8 +1,11 @@
 import math
+import os
 import traceback
 
+import pandas as pd
 from PyQt5.QtCore import QObject, QRunnable, Qt, pyqtSignal, pyqtSlot
 
+import VGenesCloneCaller
 import VGenesSQL
 
 
@@ -112,4 +115,159 @@ def fetch_seq_table_page(
         "nickname_list": current_nickname_list,
         "rows": data_rows,
         "row_names": [str(row[0]) for row in data_rows],
+    }
+
+
+class _ProgressEmitter:
+    def __init__(self, emit_progress, start_pct, end_pct):
+        self.emit_progress = emit_progress
+        self.start_pct = start_pct
+        self.end_pct = end_pct
+
+    def emit(self, pct, label):
+        span = max(1, self.end_pct - self.start_pct)
+        mapped_pct = self.start_pct + int((pct / 100.0) * span)
+        self.emit_progress(mapped_pct, label)
+
+
+def _read_seq_fields(db_filename, seq_name, fields):
+    sql = "SELECT " + ",".join(fields) + " FROM vgenesDB WHERE SeqName = ?"
+    rows = VGenesSQL.run_sql_query(db_filename, sql, [seq_name])
+    if len(rows) == 0:
+        return tuple("" for _ in fields)
+    return rows[0]
+
+
+def run_conventional_clone_calling(
+    db_filename,
+    clonal_pools,
+    duplicates,
+    remove,
+    total_sequences,
+    error_log_text,
+    error_count,
+    pool_names,
+    current_record,
+    emit_progress=None,
+):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    emit_progress(2, "Preparing clonal calling ...")
+    if len(pool_names) == 0:
+        pool_names = ["Current Clone pool"]
+
+    cp_seqs = 0
+    cp_count = 0
+
+    existing_clone_rows = VGenesSQL.RunSQL(db_filename, 'SELECT DISTINCT(ClonalPool) FROM vgenesDB')
+    existing_clone_list = [row[0] for row in existing_clone_rows]
+    clone_id = 1
+    while str(clone_id) in existing_clone_list:
+        clone_id += 1
+
+    total_pools = max(1, len(clonal_pools))
+    for pool_index, pool in enumerate(clonal_pools):
+        pool_start = 5 + int((pool_index / total_pools) * 55)
+        pool_end = 5 + int(((pool_index + 1) / total_pools) * 55)
+        progress_adapter = _ProgressEmitter(emit_progress, pool_start, pool_end)
+
+        cp_list = VGenesCloneCaller.CloneCaller(list(pool), duplicates, progress_adapter, pool_names[pool_index])
+
+        for record in cp_list:
+            cp_count += 1
+            duplicate_count = 1
+            duplicate_label = "Sequences identical: "
+            first_seq_name = None
+
+            for seq_name in record:
+                if not duplicates:
+                    VGenesSQL.UpdateFieldbySeqName(seq_name, str(clone_id), 'ClonalPool', db_filename)
+                    existing_clone_list.append(str(clone_id))
+                else:
+                    if duplicate_count == 1:
+                        first_seq_name = seq_name
+                        duplicate_seq_label = 'Duplicate of:  ' + seq_name
+                    else:
+                        if remove:
+                            VGenesSQL.UpdateFieldbySeqName(seq_name, 'Duplicate', 'Quality', db_filename)
+                            VGenesSQL.UpdateFieldbySeqName(seq_name, 'Delete', 'Project', db_filename)
+                        else:
+                            VGenesSQL.UpdateFieldbySeqName(seq_name, duplicate_seq_label, 'Quality', db_filename)
+                        duplicate_label += seq_name + ', '
+                    duplicate_count += 1
+                cp_seqs += 1
+
+            depth = 'Depth = ' + str(duplicate_count - 1)
+            if duplicates and first_seq_name:
+                existing_comments, existing_quality = _read_seq_fields(db_filename, first_seq_name, ['Comments', 'Quality'])
+                if duplicate_label.endswith(', '):
+                    duplicate_label = duplicate_label[:-2]
+                if existing_comments not in ('', ' ', 'Comments', None):
+                    duplicate_label = duplicate_label + ', ' + str(existing_comments)
+                if existing_quality not in ('', ' ', 'Quality', None):
+                    depth = depth + '  ' + str(existing_quality)
+                VGenesSQL.UpdateFieldbySeqName(first_seq_name, duplicate_label, 'Comments', db_filename)
+                VGenesSQL.UpdateFieldbySeqName(first_seq_name, depth, 'Quality', db_filename)
+
+            while str(clone_id) in existing_clone_list:
+                clone_id += 1
+
+    emit_progress(70, 'Integrating cell barcode info ...')
+    sql = 'SELECT GeneType,ClonalPool,Blank10 FROM vgenesDB WHERE ClonalPool != 0'
+    clone_df = pd.DataFrame(VGenesSQL.RunSQL(db_filename, sql), columns=['GeneType', 'ClonalPool', 'CellBarcode'])
+    if not clone_df.empty:
+        has_barcode = ~clone_df['CellBarcode'].isin(['Blank10', ''])
+        data_with_barcode = clone_df[has_barcode].copy()
+        grouped = data_with_barcode.groupby('CellBarcode')
+        for barcode, group in grouped:
+            hc_pools = []
+            kappa_pools = []
+            lambda_pools = []
+
+            for _, row in group.iterrows():
+                gene_type = row['GeneType']
+                pool = row['ClonalPool']
+                if gene_type == 'Heavy':
+                    hc_pools.append(f'H{pool}')
+                elif gene_type == 'Kappa':
+                    kappa_pools.append(f'K{pool}')
+                elif gene_type == 'Lambda':
+                    lambda_pools.append(f'L{pool}')
+
+            lc_pools = kappa_pools + lambda_pools
+            pairs = ",".join([f"{hc}_{lc}" for hc in hc_pools for lc in lc_pools]) if hc_pools and lc_pools else "0"
+            VGenesSQL.UpdateFieldWhere(db_filename, 'ClonalRank', str(pairs), 'Blank10', barcode)
+
+    emit_progress(85, 'Collecting clone summary ...')
+    data_in = VGenesSQL.RunSQL(db_filename, 'SELECT GeneType,ClonalPool FROM vgenesDB WHERE ClonalPool <> "0"')
+    clone_dict = {}
+    for gene_type, pool_id in data_in:
+        clone_name = str(gene_type) + '|' + 'Clone' + str(pool_id)
+        clone_dict[clone_name] = clone_dict.get(clone_name, 0) + 1
+
+    clone_items = []
+    for key, value in sorted(clone_dict.items(), key=lambda x: x[1], reverse=True):
+        clone_items.append(key + '|Num of seq: ' + str(value))
+    clone_items.sort(key=lambda x: x[0] if x else '')
+
+    error_file = ""
+    summary = str(cp_count) + ' clonal pools containing ' + str(cp_seqs) + ' sequences were identified from ' + str(total_sequences) + ' total sequences analyzed.\n'
+    if len(summary) > 0:
+        combined_log = summary + 'The following ' + str(error_count) + ' sequences could not be anaylzed for\nclonality because no CDR3s are indicated:\n' + error_log_text
+        error_file = os.path.join(os.path.dirname(db_filename), 'Temp', 'ErLog.txt')
+        try:
+            os.makedirs(os.path.dirname(error_file), exist_ok=True)
+            with open(error_file, 'w') as current_file:
+                current_file.write(combined_log)
+        except Exception:
+            error_file = ""
+
+    emit_progress(100, 'Clonal calling finished.')
+    return {
+        'clone_items': clone_items,
+        'summary_message': 'Integtated cell barcode info\nSuccessfully identified clones!',
+        'error_file': error_file,
+        'current_record': current_record,
+        'remove_duplicates': remove,
     }

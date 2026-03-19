@@ -63,7 +63,7 @@ import VGenesDialogues
 from alignment_utils import global_alignment_strings
 from seq_table_adapter import SequenceTableAdapter
 from sequence_table_view import SequenceTableView
-from task_utils import FunctionTask, fetch_seq_table_page
+from task_utils import FunctionTask, fetch_seq_table_page, run_conventional_clone_calling
 from vg_theme import db_tab_stylesheet
 from vgenes_version import APP_NAME, SCHEMA_VERSION, __version__, format_app_title
 from htmldialog import Ui_htmlDialog
@@ -13730,7 +13730,9 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.threadpool = QThreadPool()
         self._task_progress = {}
         self._table_load_token = 0
+        self._task_token_counter = 0
         self._pending_seqtable_selection = None
+        self._clone_task_active = False
 
         self.lastTab = 1
         self.ui.cboTreeOp1.id = 'TreeOp1'
@@ -13896,6 +13898,10 @@ class VGenesForm(QtWidgets.QMainWindow):
         timer.timeout.connect(lambda current_task=task_name, current_token=token: self.showTaskProgress(current_task, current_token))
         timer.start(180)
 
+    def nextTaskToken(self):
+        self._task_token_counter += 1
+        return self._task_token_counter
+
     def showTaskProgress(self, task_name, token):
         task_info = self._task_progress.get(task_name)
         if task_info is None or task_info['token'] != token or task_info['dialog'] is not None:
@@ -14001,6 +14007,47 @@ class VGenesForm(QtWidgets.QMainWindow):
             return
         self._pending_seqtable_selection = None
         self.updateDbTableStatus('Failed to load table.', 'Unable to load records for the current table view.')
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
+    def handleCloneTaskResult(self, payload):
+        self._clone_task_active = False
+        self.ui.comboBoxTree.clear()
+        self.ui.comboBoxTree.addItems(payload.get('clone_items', []))
+
+        if re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()) == 'Clonal Pool' \
+                or re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()) == 'Clonal Pool' \
+                or re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText()) == 'Clonal Pool':
+            self.on_btnUpdateTree_clicked()
+
+        current_record = payload.get('current_record')
+        if current_record:
+            self.findTreeItem(current_record)
+
+        if payload.get('remove_duplicates'):
+            self.LoadDB(DBFilename)
+            self.ui.txtFieldSearch.setText('Duplicate')
+            self.ui.cboFindField.setCurrentText('Quality')
+            self.on_btnFieldSearch_clicked()
+            self.on_actionDelete_record_triggered()
+            self.on_btnUpdateTree_clicked()
+
+        error_file = payload.get('error_file', '')
+        if error_file and os.path.isfile(error_file):
+            self.ShowVGenesText(error_file)
+
+        if self.ui.tabWidget.currentIndex() == 0:
+            self.load_table()
+            self.match_tree_to_table()
+            self.tree_to_table_selection()
+        else:
+            global updateMarker
+            updateMarker = True
+
+        self.initial_Clone()
+        QMessageBox.information(self, 'Information', payload.get('summary_message', 'Successfully identified clones!'), QMessageBox.Ok, QMessageBox.Ok)
+
+    def handleCloneTaskError(self, title, detail):
+        self._clone_task_active = False
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
     def handleSeqTableCheckChanged(self, item):
@@ -17392,8 +17439,8 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.ui.labelCurPage.setText('1')
 
         CurPage = int(self.ui.labelCurPage.text()) - 1
-        self._table_load_token += 1
-        token = self._table_load_token
+        token = self.nextTaskToken()
+        self._table_load_token = token
         self.openTaskProgress('load_table', token, 'Loading table ...')
 
         task = FunctionTask(
@@ -21859,6 +21906,9 @@ class VGenesForm(QtWidgets.QMainWindow):
         global updateMarker
         from operator import itemgetter
         import itertools
+        if self._clone_task_active:
+            QMessageBox.information(self, 'Information', 'A clonal calling task is already running.', QMessageBox.Ok, QMessageBox.Ok)
+            return
         remove = False
         items = ('Clonal Pools', 'Annotate Duplicates', 'Remove Duplicates', 'Shared Clones')
         title = 'Choose analysis:'
@@ -21948,20 +21998,33 @@ class VGenesForm(QtWidgets.QMainWindow):
         else:
             ClonalPools.append(DataIs2)
 
-        self.clone_Thread = Clone_thread(self)
-        self.clone_Thread.ClonalPools = ClonalPools
-        self.clone_Thread.Duplicates = Duplicates
-        self.clone_Thread.remove = remove
-        self.clone_Thread.TotSeqs = TotSeqs
-        self.clone_Thread.Errs = Errs
-        self.clone_Thread.ErLog = ErLog
-        self.clone_Thread.PoolNames = PoolNames
-        self.clone_Thread.Clone_progress.connect(self.progressLabel)
-        self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
-        self.clone_Thread.start()
+        self._clone_task_active = True
+        token = self.nextTaskToken()
+        self.openTaskProgress('clone_calling', token, 'Preparing clonal calling ...')
 
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        current_record = self.ui.txtName.toPlainText()
+        task = FunctionTask(
+            run_conventional_clone_calling,
+            DBFilename,
+            ClonalPools,
+            Duplicates,
+            remove,
+            TotSeqs,
+            ErLog,
+            Errs,
+            PoolNames,
+            current_record,
+            task_name='Conventional clonal calling',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('clone_calling', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handleCloneTaskResult)
+        task.signals.error.connect(self.handleCloneTaskError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('clone_calling', current_token)
+        )
+        self.threadpool.start(task)
 
 
     @pyqtSlot()
