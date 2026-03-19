@@ -63,7 +63,13 @@ import VGenesDialogues
 from alignment_utils import global_alignment_strings
 from seq_table_adapter import SequenceTableAdapter
 from sequence_table_view import SequenceTableView
-from task_utils import FunctionTask, fetch_seq_table_page, run_conventional_clone_calling
+from task_utils import (
+    FunctionTask,
+    fetch_seq_table_page,
+    run_changeo_clone_pipeline,
+    run_changeo_igblast_export,
+    run_conventional_clone_calling,
+)
 from vg_theme import db_tab_stylesheet
 from vgenes_version import APP_NAME, SCHEMA_VERSION, __version__, format_app_title
 from htmldialog import Ui_htmlDialog
@@ -2493,6 +2499,173 @@ class ChangeODialog(QtWidgets.QDialog):
 
     def changeOrun(self):
         self.changeOSignal.emit(2)
+
+
+class ChangeORunDialog(QtWidgets.QDialog):
+    changeOSignal = pyqtSignal(object)
+
+    def __init__(self):
+        super(ChangeORunDialog, self).__init__()
+        self.setWindowTitle('Integrated Change-O')
+        self.resize(760, 560)
+
+        root_layout = QtWidgets.QVBoxLayout(self)
+        root_layout.setContentsMargins(18, 18, 18, 18)
+        root_layout.setSpacing(14)
+
+        title = QtWidgets.QLabel('Run Change-O Inside VGenes')
+        title_font = QFont()
+        title_font.setPointSize(18)
+        title_font.setBold(True)
+        title.setFont(title_font)
+        root_layout.addWidget(title)
+
+        subtitle = QtWidgets.QLabel(
+            'Export IgBlast fmt7 files, run the full Change-O clone pipeline, or import an external DefineClones result.'
+        )
+        subtitle.setWordWrap(True)
+        root_layout.addWidget(subtitle)
+
+        top_layout = QtWidgets.QHBoxLayout()
+        top_layout.setSpacing(14)
+        root_layout.addLayout(top_layout)
+
+        actions_box = QtWidgets.QGroupBox('Actions')
+        actions_layout = QtWidgets.QVBoxLayout(actions_box)
+        actions_layout.setSpacing(10)
+
+        self.buttonRun = QtWidgets.QPushButton('Run Change-O in VGenes')
+        self.buttonRun.setMinimumHeight(42)
+        self.buttonRun.setDefault(True)
+        self.buttonRun.setAutoDefault(True)
+        self.buttonExport = QtWidgets.QPushButton('Export IgBlast fmt7 only')
+        self.buttonExport.setMinimumHeight(42)
+        self.buttonImport = QtWidgets.QPushButton('Load external Change-O results')
+        self.buttonImport.setMinimumHeight(42)
+        self.buttonLegacy = QtWidgets.QPushButton('Open legacy Change-O window')
+        self.buttonLegacy.setMinimumHeight(36)
+
+        actions_layout.addWidget(self.buttonRun)
+        actions_layout.addWidget(self.buttonExport)
+        actions_layout.addWidget(self.buttonImport)
+        actions_layout.addStretch(1)
+        actions_layout.addWidget(self.buttonLegacy)
+
+        settings_box = QtWidgets.QGroupBox('Integrated pipeline settings')
+        settings_layout = QtWidgets.QFormLayout(settings_box)
+        settings_layout.setSpacing(10)
+
+        self.doubleSpinDistance = QtWidgets.QDoubleSpinBox()
+        self.doubleSpinDistance.setDecimals(3)
+        self.doubleSpinDistance.setRange(0.001, 1.0)
+        self.doubleSpinDistance.setSingleStep(0.005)
+        self.doubleSpinDistance.setValue(0.15)
+        settings_layout.addRow('Distance threshold', self.doubleSpinDistance)
+
+        self.comboMode = QtWidgets.QComboBox()
+        self.comboMode.addItems(['gene', 'allele'])
+        settings_layout.addRow('Group mode', self.comboMode)
+
+        self.comboLink = QtWidgets.QComboBox()
+        self.comboLink.addItems(['single', 'average', 'complete'])
+        settings_layout.addRow('Linkage', self.comboLink)
+
+        self.comboModel = QtWidgets.QComboBox()
+        self.comboModel.addItems(['ham', 'aa', 'hh_s1f', 'hh_s5f', 'mk_rs1nf', 'mk_rs5nf'])
+        settings_layout.addRow('Distance model', self.comboModel)
+
+        top_layout.addWidget(actions_box, 1)
+        top_layout.addWidget(settings_box, 1)
+
+        notes_box = QtWidgets.QGroupBox('Workflow notes')
+        notes_layout = QtWidgets.QVBoxLayout(notes_box)
+        notes = QtWidgets.QLabel(
+            'Integrated run:\n'
+            '1. Export selected records to FASTA\n'
+            '2. Run IgBlast\n'
+            '3. Build AIRR tables with MakeDb\n'
+            '4. Call clones with DefineClones\n'
+            '5. Import clone IDs back into the current VDB\n\n'
+            'Use the external import only if you need to run Change-O outside VGenes.'
+        )
+        notes.setWordWrap(True)
+        notes_layout.addWidget(notes)
+        root_layout.addWidget(notes_box)
+
+        button_row = QtWidgets.QHBoxLayout()
+        button_row.addStretch(1)
+        self.buttonClose = QtWidgets.QPushButton('Close')
+        button_row.addWidget(self.buttonClose)
+        root_layout.addLayout(button_row)
+
+        self.buttonRun.clicked.connect(self.changeOrun)
+        self.buttonExport.clicked.connect(self.changeOsetp1)
+        self.buttonImport.clicked.connect(self.changeOsetp3)
+        self.buttonLegacy.clicked.connect(self.openLegacyDialog)
+        self.buttonClose.clicked.connect(self.reject)
+
+        if system() == 'Windows':
+            self.setStyleSheet("QLabel{font-size:18px;}"
+                               "QTextEdit{font-size:18px;}"
+                               "QComboBox{font-size:18px;}"
+                               "QPushButton{font-size:18px;}"
+                               "QTabWidget{font-size:18px;}"
+                               "QCommandLinkButton{font-size:18px;}"
+                               "QRadioButton{font-size:18px;}"
+                               "QPlainTextEdit{font-size:18px;}"
+                               "QCheckBox{font-size:18px;}"
+                               "QTableWidget{font-size:18px;}"
+                               "QToolBar{font-size:18px;}"
+                               "QMenuBar{font-size:18px;}"
+                               "QMenu{font-size:18px;}"
+                               "QAction{font-size:18px;}"
+                               "QMainWindow{font-size:18px;}"
+                               "QLineEdit{font-size:18px;}"
+                               "QTreeWidget{font-size:18px;}"
+                               "QSpinBox{font-size:18px;}"
+                               "QGroupBox{font-size:18px;}")
+
+    def changeOsetp1(self):
+        self.changeOSignal.emit({'action': 'export'})
+
+    def changeOsetp3(self):
+        res_file = openFile(self, 'Tsv')
+        if res_file == '' or res_file == None:
+            return
+
+        if os.path.isfile(res_file):
+            Err, parseRes = parseChangeOoutput(res_file)
+            if Err == 1:
+                QMessageBox.warning(self, 'Warning', parseRes, QMessageBox.Ok, QMessageBox.Ok)
+                return
+
+            resDict = {}
+            for record in parseRes:
+                if record[1] in resDict:
+                    resDict[record[1]].append(record[0])
+                else:
+                    resDict[record[1]] = [record[0]]
+
+            for key, value in resDict.items():
+                VGenesSQL.UpdateFieldWhereIn(DBFilename, 'ClonalPool', str(key), 'SeqName', value)
+
+            Msg = 'ChangeO result has been imported!'
+            QMessageBox.information(self, 'Information', Msg, QMessageBox.Ok, QMessageBox.Ok)
+            self.close()
+
+    def changeOrun(self):
+        self.changeOSignal.emit({
+            'action': 'run',
+            'distance': self.doubleSpinDistance.value(),
+            'mode': self.comboMode.currentText(),
+            'link': self.comboLink.currentText(),
+            'model': self.comboModel.currentText(),
+        })
+
+    def openLegacyDialog(self):
+        self.legacyDialog = ChangeODialog()
+        self.legacyDialog.changeOSignal.connect(lambda signal: self.changeOSignal.emit({'action': 'export'} if signal == 1 else {'action': 'run'}))
+        self.legacyDialog.show()
 
 class CloneOptionDialog(QtWidgets.QDialog):
     optionSignal = pyqtSignal(int)
@@ -14000,6 +14173,11 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui.labelTotalPage.setText(str(payload['total_pages']))
         self.applyLoadedSeqTablePayload(payload)
         pending_name = self._pending_seqtable_selection
+        if self._pending_seqtable_hscroll is not None:
+            try:
+                self.ui.SeqTable.horizontalScrollBar().setValue(self._pending_seqtable_hscroll)
+            except:
+                pass
         if pending_name:
             if self.seqTableAdapter.set_current_name(pending_name, self._pending_seqtable_column):
                 if self._pending_seqtable_hscroll is not None:
@@ -14009,6 +14187,9 @@ class VGenesForm(QtWidgets.QMainWindow):
                         pass
                 self._pending_seqtable_selection = None
                 self._pending_seqtable_hscroll = None
+                self._pending_seqtable_column = 1
+        elif self._pending_seqtable_hscroll is not None:
+            self._pending_seqtable_hscroll = None
 
     def handleLoadTableError(self, token, title, detail):
         if token != self._table_load_token:
@@ -14071,6 +14252,42 @@ class VGenesForm(QtWidgets.QMainWindow):
         QMessageBox.information(self, 'Information', payload.get('summary_message', 'Successfully identified clones!'), QMessageBox.Ok, QMessageBox.Ok)
 
     def handleCloneTaskError(self, title, detail):
+        self._clone_task_active = False
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
+    def handleChangeOCloneTaskResult(self, payload):
+        self._clone_task_active = False
+        clone_items = payload.get('clone_items')
+        if clone_items is not None:
+            self.ui.comboBoxTree.clear()
+            self.ui.comboBoxTree.addItems(clone_items)
+            if re.sub(r'\(.+', '', self.ui.cboTreeOp1.currentText()) == 'Clonal Pool' \
+                    or re.sub(r'\(.+', '', self.ui.cboTreeOp2.currentText()) == 'Clonal Pool' \
+                    or re.sub(r'\(.+', '', self.ui.cboTreeOp3.currentText()) == 'Clonal Pool':
+                self.on_btnUpdateTree_clicked()
+
+            current_record = payload.get('current_record')
+            if current_record:
+                self.findTreeItem(current_record)
+
+            if self.ui.tabWidget.currentIndex() == 0:
+                self.load_table()
+                self.match_tree_to_table()
+                self.tree_to_table_selection()
+            else:
+                global updateMarker
+                updateMarker = True
+
+            self.initial_Clone()
+        QMessageBox.information(
+            self,
+            'Information',
+            payload.get('summary_message', 'Change-O processing finished successfully.'),
+            QMessageBox.Ok,
+            QMessageBox.Ok
+        )
+
+    def handleChangeOCloneTaskError(self, title, detail):
         self._clone_task_active = False
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
@@ -21901,12 +22118,29 @@ class VGenesForm(QtWidgets.QMainWindow):
         if signal == 1:
             self.ConventionalCloneIdentification()
         else:
-            self.myDialog = ChangeODialog()
-            self.myDialog.changeOSignal.connect(self.ClusteringCloneIdentification)
-            self.myDialog.show()
+            self.myChangeODialog = ChangeORunDialog()
+            self.myChangeODialog.changeOSignal.connect(self.ClusteringCloneIdentification)
+            self.myChangeODialog.show()
 
-    def ClusteringCloneIdentification(self, signal_int):
+    def ClusteringCloneIdentification(self, signal_data):
         # if sequence selected
+        if self._clone_task_active:
+            QMessageBox.information(self, 'Information', 'A clonal calling task is already running.', QMessageBox.Ok, QMessageBox.Ok)
+            return
+
+        if isinstance(signal_data, dict):
+            action = signal_data.get('action', 'run')
+            changeo_distance = signal_data.get('distance', 0.15)
+            changeo_mode = signal_data.get('mode', 'gene')
+            changeo_link = signal_data.get('link', 'single')
+            changeo_model = signal_data.get('model', 'ham')
+        else:
+            action = 'export' if signal_data == 1 else 'run'
+            changeo_distance = 0.15
+            changeo_mode = 'gene'
+            changeo_link = 'single'
+            changeo_model = 'ham'
+
         WhereStatement = '1'
         if len(self.CheckedRecords) == 0:
             msg = 'You did not selected any records, will identify clones from the entir dataset!'
@@ -21918,26 +22152,53 @@ class VGenesForm(QtWidgets.QMainWindow):
         # fetch sequence
         SQLStatement = 'SELECT SeqName, Sequence, Blank20, Species FROM vgenesDB' + WhereStatement
         DataIs = VGenesSQL.RunSQL(DBFilename, SQLStatement)
+        if len(DataIs) == 0:
+            QMessageBox.warning(self, 'Warning', 'No records are available for Change-O analysis.', QMessageBox.Ok, QMessageBox.Ok)
+            return
 
-        if signal_int == 1:
+        self._clone_task_active = True
+        token = self.nextTaskToken()
+        if action == 'export':
             output_path = saveFile(self, 'fmt7')
             if output_path == '' or output_path == None:
+                self._clone_task_active = False
                 return
-            self.clone_Thread = CloneChangeOIgBlast_thread(self)
-            self.clone_Thread.data = DataIs
-            self.clone_Thread.file = output_path
-            self.clone_Thread.Clone_progress.connect(self.progressLabel)
-            self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
-            self.clone_Thread.start()
+            self.openTaskProgress('clone_changeo', token, 'Fetching data ...')
+            task = FunctionTask(
+                run_changeo_igblast_export,
+                DataIs,
+                output_path,
+                working_prefix,
+                temp_folder,
+                igblast_path,
+                task_name='Change-O IgBlast export',
+            )
         else:
-            self.clone_Thread = CloneChangeO_thread(self)
-            self.clone_Thread.data = DataIs
-            self.clone_Thread.Clone_progress.connect(self.progressLabel)
-            self.clone_Thread.Clone_finish.connect(self.ShowMessageBox)
-            self.clone_Thread.start()
+            self.openTaskProgress('clone_changeo', token, 'Fetching data ...')
+            task = FunctionTask(
+                run_changeo_clone_pipeline,
+                DBFilename,
+                DataIs,
+                working_prefix,
+                temp_folder,
+                igblast_path,
+                self.ui.txtName.toPlainText(),
+                changeo_distance,
+                changeo_mode,
+                changeo_link,
+                changeo_model,
+                task_name='Change-O clonal calling',
+            )
 
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('clone_changeo', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handleChangeOCloneTaskResult)
+        task.signals.error.connect(self.handleChangeOCloneTaskError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('clone_changeo', current_token)
+        )
+        self.threadpool.start(task)
 
     def ConventionalCloneIdentification(self):
         global updateMarker

@@ -7,6 +7,7 @@ from PyQt5.QtCore import QObject, QRunnable, Qt, pyqtSignal, pyqtSlot
 
 import VGenesCloneCaller
 import VGenesSQL
+from changeo_runner import run_igblast_fmt7, run_integrated_changeo, write_fasta
 
 
 class TaskSignals(QObject):
@@ -271,3 +272,58 @@ def run_conventional_clone_calling(
         'current_record': current_record,
         'remove_duplicates': remove,
     }
+
+
+def run_changeo_igblast_export(
+    data_rows,
+    output_path,
+    working_prefix,
+    temp_folder,
+    igblast_path,
+    emit_progress=None,
+):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+    if not data_rows:
+        raise ValueError('No records selected for Change-O IgBlast export.')
+
+    species = data_rows[0][3]
+    emit_progress(15, 'Fetching data ...')
+    _, seq_pathname = write_fasta(data_rows, temp_folder)
+
+    emit_progress(45, 'Running IgBlast ...')
+    run_igblast_fmt7(seq_pathname, output_path, species, working_prefix, igblast_path)
+
+    emit_progress(100, 'IgBlast export finished.')
+    return {
+        'summary_message': 'Successfully finished IgBlast, the results have been saved!',
+        'output_path': output_path,
+    }
+
+
+def run_changeo_clone_pipeline(
+    db_filename,
+    data_rows,
+    working_prefix,
+    temp_folder,
+    igblast_path,
+    current_record='',
+    define_clones_distance='0.15',
+    define_clones_mode='gene',
+    define_clones_link='single',
+    define_clones_model='ham',
+    emit_progress=None,
+):
+    return run_integrated_changeo(
+        db_filename,
+        data_rows,
+        working_prefix,
+        temp_folder,
+        igblast_path,
+        current_record=current_record,
+        define_clones_distance=define_clones_distance,
+        define_clones_mode=define_clones_mode,
+        define_clones_link=define_clones_link,
+        define_clones_model=define_clones_model,
+        emit_progress=emit_progress,
+    )

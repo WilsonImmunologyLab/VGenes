@@ -319,6 +319,19 @@ Current guidance:
 - Reached the first manual-test checkpoint for database hardening. Remaining
   raw SQL updates are now concentrated in narrower specialized workflows rather
   than the most common editing paths.
+- Integrated the active Change-O path into the application:
+  - added `changeo_runner.py` to run IgBlast, `MakeDb.py`, and
+    `DefineClones.py` end-to-end inside VGenes
+  - wired the Change-O task onto the shared `FunctionTask` / progress-dialog
+    async path
+  - updated the Change-O dialog so users can run the internal pipeline
+    directly while still keeping an external result-import fallback
+  - used a default `DefineClones.py --dist 0.15` threshold as the initial
+    built-in Change-O clone distance setting
+- Split Change-O UI into two layers:
+  - preserved the legacy `ChangeODialog` for the original manual/export flow
+  - added a new `ChangeORunDialog` as the default entry point for integrated
+    Change-O execution and parameter tuning
 
 ## Notes
 
