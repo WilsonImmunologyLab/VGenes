@@ -66,6 +66,7 @@ from sequence_table_view import SequenceTableView
 from task_utils import (
     FunctionTask,
     fetch_seq_table_page,
+    run_copy_records_db,
     run_hclc_pairing,
     run_hclc_export_db,
     run_changeo_clone_pipeline,
@@ -14361,6 +14362,37 @@ class VGenesForm(QtWidgets.QMainWindow):
     def handleHCLCExportError(self, title, detail):
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
+    def launchCopyRecordsTask(self, output_path, checked_records):
+        token = self.nextTaskToken()
+        self.openTaskProgress('copy_records', token, 'Creating database copy ...')
+
+        task = FunctionTask(
+            run_copy_records_db,
+            DBFilename,
+            output_path,
+            list(checked_records),
+            task_name='Export selected records',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('copy_records', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handleCopyRecordsResult)
+        task.signals.error.connect(self.handleCopyRecordsError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('copy_records', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleCopyRecordsResult(self, payload):
+        self.HCLC_finish_process([
+            payload.get('sign', 1),
+            payload.get('message', 'Record export finished.'),
+            payload.get('pathname', ''),
+        ])
+
+    def handleCopyRecordsError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
     def handleSeqTableCheckChanged(self, item):
         global MoveNotChange
         if MoveNotChange:
@@ -15047,16 +15079,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        self.CopyRecord_Thread = CopyRecord_thread(self)
-        self.CopyRecord_Thread.DBFilename = DBFilename
-        self.CopyRecord_Thread.Pathname = Pathname
-        self.CopyRecord_Thread.checkRecords = self.CheckedRecords
-        self.CopyRecord_Thread.HCLC_progress.connect(self.result_display)
-        self.CopyRecord_Thread.HCLC_finish.connect(self.HCLC_finish_process)
-        self.CopyRecord_Thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchCopyRecordsTask(Pathname, self.CheckedRecords)
 
 
     @pyqtSlot()
@@ -16667,38 +16690,28 @@ class VGenesForm(QtWidgets.QMainWindow):
         '''
 
     def update_check_from_list(self, old_list, new_list, error_file):
-        # close ProgressBar
-        try:
-            self.progress.FeatProgressBar.setValue(100)
-            self.progress.close()
-        except:
-            pass
         # update the checked list
-        self.CheckedRecords = self.CheckedRecords + new_list
+        self.CheckedRecords = list(dict.fromkeys(self.CheckedRecords + list(old_list) + list(new_list)))
         # update tree checks if the tree is enabled
         if self.ui.treeWidget.isEnabled():
-            for Seqname in new_list:
+            for Seqname in self.CheckedRecords:
                 found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
                 for record in found:
                     record.setCheckState(0, Qt.Checked)
+        self.match_tree_to_table()
         # open log file
         self.ShowVGenesText(error_file)
 
     def jump_to_HCLC(self, old_list, new_list, error_file):
-        # close ProgressBar
-        try:
-            self.progress.FeatProgressBar.setValue(100)
-            self.progress.close()
-        except:
-            pass
         # update the checked list
-        self.CheckedRecords = self.CheckedRecords + new_list
+        self.CheckedRecords = list(dict.fromkeys(self.CheckedRecords + list(old_list) + list(new_list)))
         # update tree checks if the tree is enabled
         if self.ui.treeWidget.isEnabled():
-            for Seqname in new_list:
+            for Seqname in self.CheckedRecords:
                 found = self.ui.treeWidget.findItems(Seqname, Qt.MatchRecursive, 0)
                 for record in found:
                     record.setCheckState(0, Qt.Checked)
+        self.match_tree_to_table()
         # open log file
         self.ShowVGenesText(error_file)
 

@@ -471,3 +471,35 @@ def run_hclc_export_db(
         'message': 'Did not find any HC/LC pair in your current DB!',
         'pathname': output_path,
     }
+
+
+def run_copy_records_db(
+    db_filename,
+    output_path,
+    checked_records,
+    emit_progress=None,
+):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    emit_progress(5, 'Creating database copy ...')
+    try:
+        shutil.copy(db_filename, output_path)
+    except Exception:
+        return {
+            'sign': 1,
+            'message': 'Can not save file in this path! You do not have write permission!',
+            'pathname': output_path,
+        }
+
+    list_str = '("' + '","'.join(checked_records) + '")'
+    sql_statement = 'DELETE FROM vgenesDB WHERE SeqName NOT IN ' + list_str
+    emit_progress(60, 'Removing unchecked records ...')
+    VGenesSQL.RunUpdateSQL(output_path, sql_statement)
+
+    emit_progress(100, 'Selected-record database finished.')
+    return {
+        'sign': 0,
+        'message': 'New DB with selected records have been created!',
+        'pathname': output_path,
+    }

@@ -344,6 +344,12 @@ Current guidance:
 - Migrated the active "pair to new DB" HC/LC export flow onto the shared
   async task model with `run_hclc_export_db(...)` and a main-thread result
   adapter that preserves the existing `HCLC_finish_process(...)` behavior
+- Migrated the active "record to new DB" export flow onto the shared async
+  task model with `run_copy_records_db(...)`, reusing the same
+  `HCLC_finish_process(...)` post-run UI path
+- Fixed HC/LC async check-state synchronization so post-task updates now
+  deduplicate `CheckedRecords` and run the normal tree/table sync path again,
+  restoring correct "next checked" navigation after `match HC/LC`
 
 ## Notes
 
