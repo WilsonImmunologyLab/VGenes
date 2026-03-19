@@ -457,6 +457,35 @@ class Alignment_thread(QThread):
         # Step 4: send signal to VGenes
         self.HCLC_finish.emit([ErrMsg, html_file])
 
+
+def run_alignment_html_task(db_filename, check_records, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    emit_progress(25, 'Loading sequences ...')
+    where_state = 'SeqName IN ("' + '","'.join(check_records) + '")'
+    field = 'SeqName,Sequence,FR1From,FR1To,CDR1From,CDR1To,FR2From,FR2To,CDR2From,CDR2To,FR3From,FR3To,CDR3beg,CDR3end,Jend,GermlineSequence,Blank7'
+    sql_statement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + where_state
+    data_in = VGenesSQL.RunSQL(db_filename, sql_statement)
+    data_set = []
+    for item in data_in:
+        seq_name = item[0]
+        sequence = item[1]
+        seq_from = int(item[2])
+        seq_to = int(item[14])
+        sequence = sequence[seq_from - 1:seq_to]
+        sequence = sequence.upper()
+        each_in = (
+            seq_name, sequence, item[2], item[3], item[4], item[5], item[6], item[7], item[8], item[9], item[10],
+            item[11], item[12], item[13], item[14], item[15], item[16]
+        )
+        data_set.append(each_in)
+
+    emit_progress(70, 'Building alignment HTML ...')
+    err_msg, html_file = AlignSequencesHTMLBCR(data_set, '')
+    emit_progress(100, 'Alignment HTML finished.')
+    return [err_msg, html_file]
+
 class Tree_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -14393,6 +14422,32 @@ class VGenesForm(QtWidgets.QMainWindow):
     def handleCopyRecordsError(self, title, detail):
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
+    def launchAlignmentHtmlTask(self, seq_names, clone_view=False):
+        token = self.nextTaskToken()
+        self.openTaskProgress('alignment_html', token, 'Loading sequences ...')
+
+        task = FunctionTask(
+            run_alignment_html_task,
+            DBFilename,
+            list(seq_names),
+            task_name='Build alignment HTML',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('alignment_html', current_token, pct, label)
+        )
+        if clone_view:
+            task.signals.result.connect(self.handle_alignment_html_clone)
+        else:
+            task.signals.result.connect(self.handle_alignment_html)
+        task.signals.error.connect(self.handleAlignmentHtmlTaskError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('alignment_html', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleAlignmentHtmlTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
     def handleSeqTableCheckChanged(self, item):
         global MoveNotChange
         if MoveNotChange:
@@ -16861,15 +16916,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        self.Alignment_thread = Alignment_thread(self)
-        self.Alignment_thread.DBFilename = DBFilename
-        self.Alignment_thread.checkRecords = listItems
-        self.Alignment_thread.HCLC_progress.connect(self.result_display)
-        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html)
-        self.Alignment_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchAlignmentHtmlTask(listItems, clone_view=False)
 
     def handle_alignment_html(self, res):
         global VGenesTextWindows
@@ -16977,15 +17024,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         for row in range(self.ui.tableWidgetHC.rowCount()):
             seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
 
-        self.Alignment_thread = Alignment_thread(self)
-        self.Alignment_thread.DBFilename = DBFilename
-        self.Alignment_thread.checkRecords = seq_list
-        self.Alignment_thread.HCLC_progress.connect(self.result_display)
-        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html)
-        self.Alignment_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchAlignmentHtmlTask(seq_list, clone_view=False)
 
     @pyqtSlot()
     def on_pushButtonAlignLC_clicked(self):
@@ -17001,15 +17040,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         for row in range(self.ui.tableWidgetLC.rowCount()):
             seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
 
-        self.Alignment_thread = Alignment_thread(self)
-        self.Alignment_thread.DBFilename = DBFilename
-        self.Alignment_thread.checkRecords = seq_list
-        self.Alignment_thread.HCLC_progress.connect(self.result_display)
-        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html)
-        self.Alignment_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchAlignmentHtmlTask(seq_list, clone_view=False)
 
     @pyqtSlot()
     def on_pushButtonTreeHC_clicked(self):
@@ -27008,15 +27039,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             item = self.ui.listWidgetCloneMember.item(i)
             member_names.append(item.text())
 
-        self.Alignment_thread = Alignment_thread(self)
-        self.Alignment_thread.DBFilename = DBFilename
-        self.Alignment_thread.checkRecords = member_names
-        self.Alignment_thread.HCLC_progress.connect(self.result_display)
-        self.Alignment_thread.HCLC_finish.connect(self.handle_alignment_html_clone)
-        self.Alignment_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchAlignmentHtmlTask(member_names, clone_view=True)
     
     def handle_alignment_html_clone(self, res):
         global VGenesTextWindows
@@ -36078,13 +36101,20 @@ def AlignSequencesHTMLBCR(DataSet, template):
     ruler_name = ruler_records[0]
     ruler_original_AA, ErrMsg1 = Translator(all[ruler_name][0], 0)
     ruler_aligned_AA = all[ruler_name][1]
+
+    def safe_region_end(value, fallback):
+        try:
+            return int(value) / 3
+        except:
+            return fallback
+
     # range
-    FWR1_end = int(ruler_records[3]) / 3
-    CDR1_end = int(ruler_records[5]) / 3
-    FWR2_end = int(ruler_records[7]) / 3
-    CDR2_end = int(ruler_records[9]) / 3
-    FWR3_end = int(ruler_records[11]) / 3
-    CDR3_end = int(ruler_records[13]) / 3
+    FWR1_end = safe_region_end(ruler_records[3], 0)
+    CDR1_end = safe_region_end(ruler_records[5], FWR1_end)
+    FWR2_end = safe_region_end(ruler_records[7], CDR1_end)
+    CDR2_end = safe_region_end(ruler_records[9], FWR2_end)
+    FWR3_end = safe_region_end(ruler_records[11], CDR2_end)
+    CDR3_end = safe_region_end(ruler_records[13], FWR3_end)
 
     cur_pos_map2original_pos = 0
     last = 'fwr1'

@@ -350,6 +350,15 @@ Current guidance:
 - Fixed HC/LC async check-state synchronization so post-task updates now
   deduplicate `CheckedRecords` and run the normal tree/table sync path again,
   restoring correct "next checked" navigation after `match HC/LC`
+- Migrated the active alignment-HTML workflow onto the shared async task
+  model:
+  - added `run_alignment_html_task(...)` in `VGenesMain.py`
+  - replaced the active alignment HTML launch paths for the main checked-list,
+    HC table, LC table, and clone alignment HTML actions with
+    `FunctionTask` + shared progress handling
+- Hardened `AlignSequencesHTMLBCR(...)` against non-numeric ruler coordinates
+  such as `NA`, preventing clone-page alignment HTML generation from crashing
+  on incomplete region metadata
 
 ## Notes
 
