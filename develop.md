@@ -341,6 +341,9 @@ Current guidance:
   - corrected the worker to use the current checkout's `VGenesSQL.RunSQL(...)`
     API instead of a newer `run_sql_query(...)` helper that is not present in
     this branch
+- Migrated the active "pair to new DB" HC/LC export flow onto the shared
+  async task model with `run_hclc_export_db(...)` and a main-thread result
+  adapter that preserves the existing `HCLC_finish_process(...)` behavior
 
 ## Notes
 

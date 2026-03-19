@@ -1,5 +1,6 @@
 import math
 import os
+import shutil
 import traceback
 
 import pandas as pd
@@ -395,4 +396,78 @@ def run_hclc_pairing(
         'checked_records': list(checked_records),
         'new_checks': new_checks,
         'error_file': error_file,
+    }
+
+
+def run_hclc_export_db(
+    db_filename,
+    output_path,
+    checked_records,
+    emit_progress=None,
+):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    emit_progress(2, 'Creating paired HC/LC database ...')
+    try:
+        shutil.copy(db_filename, output_path)
+    except Exception:
+        return {
+            'sign': 1,
+            'message': 'Can not save file in this path! You do not have write permission!',
+            'pathname': output_path,
+        }
+
+    if len(checked_records) == 0:
+        sql_statement = 'SELECT DISTINCT(Blank10) FROM vgenesDB WHERE GeneType = "Heavy"'
+        data_in = VGenesSQL.RunSQL(db_filename, sql_statement)
+    else:
+        list_str = '("' + '","'.join(checked_records) + '")'
+        sql_statement = 'SELECT DISTINCT(Blank10) FROM vgenesDB WHERE SeqName IN ' + list_str
+        data_in = VGenesSQL.RunSQL(db_filename, sql_statement)
+
+    if len(data_in) < 2:
+        return {
+            'sign': 1,
+            'message': 'Your VGene DB do not have any barcode information!',
+            'pathname': output_path,
+        }
+
+    good_list = []
+    total = len(data_in)
+    progress = 0
+    for record in data_in:
+        barcode = record[0]
+        if barcode not in ('Blank10', ''):
+            sql_statement1 = (
+                'SELECT SeqName FROM vgenesDB WHERE Blank10 = "' + str(barcode).replace('"', '""') +
+                '" AND GeneType IN ("Heavy","Beta","Delta")'
+            )
+            data_in1 = VGenesSQL.RunSQL(db_filename, sql_statement1)
+            sql_statement2 = (
+                'SELECT SeqName FROM vgenesDB WHERE Blank10 = "' + str(barcode).replace('"', '""') +
+                '" AND GeneType NOT IN ("Heavy","Beta","Delta")'
+            )
+            data_in2 = VGenesSQL.RunSQL(db_filename, sql_statement2)
+            if len(data_in1) == 1 and len(data_in2) == 1:
+                good_list.append(barcode)
+
+        progress += 1
+        emit_progress(int(progress / total * 100), 'Filtering complete HC/LC pairs ...')
+
+    seq_num = len(good_list)
+    if seq_num > 0:
+        list_str = '("' + '","'.join(good_list) + '")'
+        sql_statement = 'DELETE FROM vgenesDB WHERE Blank10 NOT IN ' + list_str
+        VGenesSQL.RunUpdateSQL(output_path, sql_statement)
+        return {
+            'sign': 0,
+            'message': 'Total ' + str(seq_num) + ' HC/LC pairs were found!',
+            'pathname': output_path,
+        }
+
+    return {
+        'sign': 1,
+        'message': 'Did not find any HC/LC pair in your current DB!',
+        'pathname': output_path,
     }

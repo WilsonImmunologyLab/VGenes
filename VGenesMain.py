@@ -67,6 +67,7 @@ from task_utils import (
     FunctionTask,
     fetch_seq_table_page,
     run_hclc_pairing,
+    run_hclc_export_db,
     run_changeo_clone_pipeline,
     run_changeo_igblast_export,
     run_conventional_clone_calling,
@@ -14329,6 +14330,37 @@ class VGenesForm(QtWidgets.QMainWindow):
         self._hclc_pair_task_mode = None
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
+    def launchHCLCExportTask(self, output_path, checked_records):
+        token = self.nextTaskToken()
+        self.openTaskProgress('hclc_export', token, 'Creating paired HC/LC database ...')
+
+        task = FunctionTask(
+            run_hclc_export_db,
+            DBFilename,
+            output_path,
+            list(checked_records),
+            task_name='Export paired HC/LC database',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('hclc_export', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handleHCLCExportResult)
+        task.signals.error.connect(self.handleHCLCExportError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('hclc_export', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleHCLCExportResult(self, payload):
+        self.HCLC_finish_process([
+            payload.get('sign', 1),
+            payload.get('message', 'HC/LC export finished.'),
+            payload.get('pathname', ''),
+        ])
+
+    def handleHCLCExportError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
     def handleSeqTableCheckChanged(self, item):
         global MoveNotChange
         if MoveNotChange:
@@ -15053,16 +15085,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 msg = 'You selected part of records, will only identify HC/LC pairs for your selected records!'
                 QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
 
-        self.HCLC_Thread = HCLC_thread(self)
-        self.HCLC_Thread.DBFilename = DBFilename
-        self.HCLC_Thread.Pathname = Pathname
-        self.HCLC_Thread.checkRecords = listItems
-        self.HCLC_Thread.HCLC_progress.connect(self.result_display)
-        self.HCLC_Thread.HCLC_finish.connect(self.HCLC_finish_process)
-        self.HCLC_Thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchHCLCExportTask(Pathname, listItems)
 
     @pyqtSlot()
     def on_pushButtonHeatmap_clicked(self):
