@@ -66,6 +66,7 @@ from sequence_table_view import SequenceTableView
 from task_utils import (
     FunctionTask,
     fetch_seq_table_page,
+    run_hclc_pairing,
     run_changeo_clone_pipeline,
     run_changeo_igblast_export,
     run_conventional_clone_calling,
@@ -13908,6 +13909,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         self._pending_seqtable_column = 1
         self._pending_seqtable_hscroll = None
         self._clone_task_active = False
+        self._hclc_pair_task_mode = None
 
         self.lastTab = 1
         self.ui.cboTreeOp1.id = 'TreeOp1'
@@ -14289,6 +14291,42 @@ class VGenesForm(QtWidgets.QMainWindow):
 
     def handleChangeOCloneTaskError(self, title, detail):
         self._clone_task_active = False
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
+    def launchHCLCPairingTask(self, checked_records, mode):
+        token = self.nextTaskToken()
+        self._hclc_pair_task_mode = mode
+        self.openTaskProgress('hclc_pairing', token, 'Matching HC/LC pairs ...')
+
+        task = FunctionTask(
+            run_hclc_pairing,
+            DBFilename,
+            list(checked_records),
+            temp_folder,
+            task_name='Match HC/LC pairs',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('hclc_pairing', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handleHCLCPairingResult)
+        task.signals.error.connect(self.handleHCLCPairingError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('hclc_pairing', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleHCLCPairingResult(self, payload):
+        checked_records = payload.get('checked_records', [])
+        new_checks = payload.get('new_checks', [])
+        error_file = payload.get('error_file', '')
+        if self._hclc_pair_task_mode == 'jump':
+            self.jump_to_HCLC(checked_records, new_checks, error_file)
+        else:
+            self.update_check_from_list(checked_records, new_checks, error_file)
+        self._hclc_pair_task_mode = None
+
+    def handleHCLCPairingError(self, title, detail):
+        self._hclc_pair_task_mode = None
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
     def handleSeqTableCheckChanged(self, item):
@@ -16200,15 +16238,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        self.HCLC_Thread = HCLC_pair_thread(self)
-        self.HCLC_Thread.DBFilename = DBFilename
-        self.HCLC_Thread.checkRecords = listItems
-        self.HCLC_Thread.HCLC_progress.connect(self.result_display)
-        self.HCLC_Thread.HCLC_finish.connect(self.jump_to_HCLC)
-        self.HCLC_Thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchHCLCPairingTask(listItems, 'jump')
 
     @pyqtSlot()
     def on_pushButtonPairClone_clicked(self):
@@ -16525,15 +16555,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.information(self, 'Information', msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        self.HCLC_Thread = HCLC_pair_thread(self)
-        self.HCLC_Thread.DBFilename = DBFilename
-        self.HCLC_Thread.checkRecords = listItems
-        self.HCLC_Thread.HCLC_progress.connect(self.result_display)
-        self.HCLC_Thread.HCLC_finish.connect(self.update_check_from_list)
-        self.HCLC_Thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchHCLCPairingTask(listItems, 'update_checks')
 
         '''
         checkedItems = self.CheckedRecords

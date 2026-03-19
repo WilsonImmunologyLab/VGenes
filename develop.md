@@ -332,6 +332,15 @@ Current guidance:
   - preserved the legacy `ChangeODialog` for the original manual/export flow
   - added a new `ChangeORunDialog` as the default entry point for integrated
     Change-O execution and parameter tuning
+- Migrated the active HC/LC barcode-pairing workflow onto the shared async
+  task model:
+  - added `run_hclc_pairing(...)` in `task_utils.py`
+  - replaced the active `HCLC_pair_thread` launch paths for
+    `match HC/LC` and `pair-and-jump` with `FunctionTask` + shared progress
+    dialog handling
+  - corrected the worker to use the current checkout's `VGenesSQL.RunSQL(...)`
+    API instead of a newer `run_sql_query(...)` helper that is not present in
+    this branch
 
 ## Notes
 

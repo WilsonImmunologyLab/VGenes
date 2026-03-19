@@ -327,3 +327,72 @@ def run_changeo_clone_pipeline(
         define_clones_model=define_clones_model,
         emit_progress=emit_progress,
     )
+
+
+def run_hclc_pairing(
+    db_filename,
+    checked_records,
+    temp_folder,
+    emit_progress=None,
+):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    if len(checked_records) == 0:
+        raise ValueError('Please check some sequences to start!')
+
+    progress = 0
+    new_checks = []
+    err_msg_type1 = ''
+    err_msg_type2 = ''
+    err_msg_type3 = ''
+    total = len(checked_records)
+
+    for item in checked_records:
+        safe_item = str(item).replace('"', '""')
+        rows = VGenesSQL.RunSQL(
+            db_filename,
+            'SELECT SeqName,Blank10 FROM vgenesDB WHERE SeqName = "' + safe_item + '"',
+        )
+        if len(rows) == 0:
+            progress += 1
+            emit_progress(int(progress / total * 100), 'Matching HC/LC pairs ...')
+            continue
+
+        barcode = rows[0][1]
+        if barcode == 'Blank10' or barcode == '':
+            err_msg_type1 += 'Sequence ' + item + ' does not have barcode information!\n'
+        else:
+            safe_barcode = str(barcode).replace('"', '""')
+            pair_rows = VGenesSQL.RunSQL(
+                db_filename,
+                'SELECT SeqName,Blank10 FROM vgenesDB WHERE Blank10 = "' + safe_barcode + '"',
+            )
+            pair_count = len(pair_rows) - 1
+            if pair_count == 0:
+                err_msg_type2 += 'For ' + item + ', did not find any Heavy/Light chain using same barcode!\n'
+            else:
+                err_msg_type3 += 'For ' + item + ', find ' + str(pair_count) + ' Heavy/Light chain using same barcode!\n'
+                for record in pair_rows:
+                    seq_name = record[0]
+                    if seq_name not in checked_records and seq_name not in new_checks:
+                        new_checks.append(seq_name)
+
+        progress += 1
+        emit_progress(int(progress / total * 100), 'Matching HC/LC pairs ...')
+
+    error_file = os.path.join(temp_folder, 'ErLog.txt')
+    with open(error_file, 'w') as current_file:
+        current_file.write('Running finished!\n')
+        current_file.write('\nThe following records have paired HC/LC:\n')
+        current_file.write(err_msg_type3)
+        current_file.write('\nThe following records do not have barcode information:\n')
+        current_file.write(err_msg_type1)
+        current_file.write('\nThe following records do not have any paired HC/LC:\n')
+        current_file.write(err_msg_type2)
+
+    return {
+        'checked_records': list(checked_records),
+        'new_checks': new_checks,
+        'error_file': error_file,
+    }
