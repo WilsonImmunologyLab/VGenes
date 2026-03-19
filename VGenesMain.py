@@ -13732,6 +13732,8 @@ class VGenesForm(QtWidgets.QMainWindow):
         self._table_load_token = 0
         self._task_token_counter = 0
         self._pending_seqtable_selection = None
+        self._pending_seqtable_column = 1
+        self._pending_seqtable_hscroll = None
         self._clone_task_active = False
 
         self.lastTab = 1
@@ -13999,15 +14001,37 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.applyLoadedSeqTablePayload(payload)
         pending_name = self._pending_seqtable_selection
         if pending_name:
-            if self.seqTableAdapter.set_current_name(pending_name):
+            if self.seqTableAdapter.set_current_name(pending_name, self._pending_seqtable_column):
+                if self._pending_seqtable_hscroll is not None:
+                    try:
+                        self.ui.SeqTable.horizontalScrollBar().setValue(self._pending_seqtable_hscroll)
+                    except:
+                        pass
                 self._pending_seqtable_selection = None
+                self._pending_seqtable_hscroll = None
 
     def handleLoadTableError(self, token, title, detail):
         if token != self._table_load_token:
             return
         self._pending_seqtable_selection = None
+        self._pending_seqtable_hscroll = None
         self.updateDbTableStatus('Failed to load table.', 'Unable to load records for the current table view.')
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
+    def locateSeqTablePageForName(self, name):
+        if not name or DBFilename in ['', 'none', None]:
+            return None
+
+        order_statement = self.seqTableOrderClause()
+        data_in = VGenesSQL.RunSQL(DBFilename, 'SELECT SeqName FROM vgenesDB ' + order_statement)
+        name_list = [row[0] for row in data_in]
+        try:
+            row_number = name_list.index(name) + 1
+        except:
+            return None
+
+        page_size = int(self.ui.spinBoxPageSize.text())
+        return max(1, math.ceil(row_number / page_size))
 
     def handleCloneTaskResult(self, payload):
         self._clone_task_active = False
@@ -17743,6 +17767,12 @@ class VGenesForm(QtWidgets.QMainWindow):
     def sortTable(self, index):
         if index == 0:
             return
+        current_name = self.seqTableAdapter.current_name()
+        current_column = self.seqTableAdapter.current_column(default=index)
+        try:
+            current_hscroll = self.ui.SeqTable.horizontalScrollBar().value()
+        except:
+            current_hscroll = None
         try:
             field_name = self.seqTableAdapter.db_field(index)
         except:
@@ -17760,6 +17790,13 @@ class VGenesForm(QtWidgets.QMainWindow):
             self.seqTableSortOrder = Qt.AscendingOrder
 
         self.ui.SeqTable.horizontalHeader().setSortIndicator(index, self.seqTableSortOrder)
+        if current_name:
+            page_number = self.locateSeqTablePageForName(current_name)
+            if page_number is not None:
+                self._pending_seqtable_selection = current_name
+                self._pending_seqtable_column = current_column
+                self._pending_seqtable_hscroll = current_hscroll
+                self.ui.labelCurPage.setText(str(page_number))
         self.load_table()
 
     def ChangeEditMode(self):

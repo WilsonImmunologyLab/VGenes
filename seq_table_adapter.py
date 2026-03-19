@@ -132,6 +132,27 @@ class SequenceTableAdapter:
     def selected_names(self):
         return [self.row_name(row) for row in self.selected_rows()]
 
+    def current_name(self):
+        try:
+            current_row = self.table.currentRow()
+            if current_row >= 0:
+                return self.row_name(current_row)
+        except:
+            pass
+        names = self.selected_names()
+        if len(names) > 0:
+            return names[-1]
+        return ''
+
+    def current_column(self, default=1):
+        try:
+            column = self.table.currentColumn()
+            if column >= 0:
+                return column
+        except:
+            pass
+        return default
+
     def set_current_name(self, name, column=1):
         row = self._row_index_by_name.get(name)
         if row is None:
