@@ -363,6 +363,11 @@ Current guidance:
   - added `run_tree_html_task(...)` in `VGenesMain.py`
   - replaced the active tree HTML launch paths for HC, LC, selected records,
     and clone-tree generation with `FunctionTask` + shared progress handling
+- Migrated the active sequence-logo workflow onto the shared async task
+  model:
+  - added `run_seq_logo_task(...)` in `VGenesMain.py`
+  - replaced the active main-logo and clone-logo launch paths with
+    `FunctionTask` + shared progress handling
 
 ## Notes
 
