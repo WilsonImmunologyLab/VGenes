@@ -1,3 +1,0 @@
-Sequence T2_clonetype267_H1 is incomplete and has been removed from current analysis!
-Sequence T2_clonetype301_H1 is incomplete and has been removed from current analysis!
-Sequence T2_clonetype576_H1 is incomplete and has been removed from current analysis!

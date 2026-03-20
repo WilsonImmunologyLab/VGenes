@@ -359,6 +359,10 @@ Current guidance:
 - Hardened `AlignSequencesHTMLBCR(...)` against non-numeric ruler coordinates
   such as `NA`, preventing clone-page alignment HTML generation from crashing
   on incomplete region metadata
+- Migrated the active tree-HTML workflow onto the shared async task model:
+  - added `run_tree_html_task(...)` in `VGenesMain.py`
+  - replaced the active tree HTML launch paths for HC, LC, selected records,
+    and clone-tree generation with `FunctionTask` + shared progress handling
 
 ## Notes
 

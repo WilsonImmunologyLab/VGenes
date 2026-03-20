@@ -645,6 +645,105 @@ class Tree_thread(QThread):
         # Step 5: send signal to VGenes
         self.HCLC_finish.emit(['OK', out_html_file])
 
+
+def run_tree_html_task(check_records, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    emit_progress(10, 'Loading sequences ...')
+    where_state = 'SeqName IN ("' + '","'.join(check_records) + '")'
+    field = 'SeqName,Sequence,GermlineSequence,Vbeg,Jend'
+    sql_statement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + where_state
+    data_in = VGenesSQL.RunSQL(DBFilename, sql_statement)
+
+    emit_progress(25, 'Preparing temp files ...')
+    time_stamp = str(int(time.time() * 100))
+    this_folder = os.path.join(temp_folder, time_stamp)
+    os.makedirs(this_folder, exist_ok=True)
+
+    emit_progress(40, 'Aligning sequences ...')
+    aafilename = os.path.join(this_folder, "input.fas")
+    outfilename = os.path.join(this_folder, "alignment.fas")
+    treefilename = 'tree'
+
+    germ_sequences = [item[2] for item in data_in]
+    germ_consensus_seq = CalConsensus(germ_sequences)
+    if germ_consensus_seq == 'bad':
+        con_rawfilename = os.path.join(this_folder, "con_raw_input.fas")
+        con_outfilename = os.path.join(this_folder, "con_alignment.fas")
+        with open(con_rawfilename, 'w') as handle:
+            for item in data_in:
+                handle.write('>' + item[0] + '\n')
+                handle.write(item[2] + '\n')
+
+        cmd = muscle_path + " -in " + con_rawfilename + " -out " + con_outfilename
+        os.system(cmd)
+        if os.path.exists(con_outfilename) is False:
+            return ['Fail to run muscle! Check your muscle path!', '']
+
+        con_ali = ReadFasta(con_outfilename)
+        germ_sequences = [item[1] for item in con_ali]
+        germ_consensus_seq = CalConsensus(germ_sequences)
+
+    with open(aafilename, 'w') as out_handle:
+        out_handle.write('>Germline_consensus\n')
+        out_handle.write(germ_consensus_seq + '\n')
+        for item in data_in:
+            seq_name = item[0]
+            sequence = item[1]
+            try:
+                vbeg = int(item[3]) - 1
+            except:
+                vbeg = 0
+            try:
+                jend = int(item[4])
+            except:
+                jend = len(sequence)
+
+            vdj_sequence = sequence[vbeg:jend]
+            seq_name = re.sub(r'[^\w\d\/\>]', '_', seq_name)
+            seq_name = re.sub(r'_+', '_', seq_name).strip('_')
+            out_handle.write('>' + seq_name + '\n')
+            out_handle.write(vdj_sequence + '\n')
+
+    cmd = muscle_path + " -in " + aafilename + " -out " + outfilename
+    os.system(cmd)
+    if os.path.exists(outfilename) is False:
+        return ['Fail to run muscle! Check your muscle path!', '']
+
+    emit_progress(70, 'Building phylogeny ...')
+    if system() == 'Windows':
+        cmd = 'cd ' + this_folder + ' & ' + raxml_path + ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+    elif system() in ('Darwin', 'Linux'):
+        cmd = 'cd ' + this_folder + ';' + raxml_path + ' -m GTRGAMMA -p 12345 -T 2 -s ' + outfilename + ' -n ' + treefilename
+    else:
+        cmd = ''
+    os.system(cmd)
+
+    emit_progress(90, 'Preparing tree HTML ...')
+    treefile = os.path.join(this_folder, 'RAxML_bestTree.tree')
+    if os.path.exists(treefile) is False:
+        return ['Fail to generate tree!', '']
+
+    with open(treefile, 'r') as handle:
+        tree_str = handle.readline()
+    tree_str = 'var test_string = "' + tree_str.rstrip("\n") + '";\n'
+
+    out_html_file = os.path.join(this_folder, 'tree.html')
+    header_file = os.path.join(working_prefix, 'Data', 'template_raxml_tree.html')
+    shutil.copyfile(header_file, out_html_file)
+
+    foot = 'var container_id = "#tree_container";\nvar svg = d3.select(container_id).append("svg")' \
+           '.attr("width", width).attr("height", height);\n$( document ).ready( function () {' \
+           'default_tree_settings();tree(test_string).svg (svg).layout();update_selection_names();' \
+           '});\n</script>\n</body>\n</html>'
+    with open(out_html_file, 'a') as out_file_handle:
+        out_file_handle.write(tree_str)
+        out_file_handle.write(foot)
+
+    emit_progress(100, 'Tree HTML finished.')
+    return ['OK', out_html_file]
+
 class SeqLogo_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -14448,6 +14547,31 @@ class VGenesForm(QtWidgets.QMainWindow):
     def handleAlignmentHtmlTaskError(self, title, detail):
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
+    def launchTreeHtmlTask(self, seq_names, clone_view=False):
+        token = self.nextTaskToken()
+        self.openTaskProgress('tree_html', token, 'Loading sequences ...')
+
+        task = FunctionTask(
+            run_tree_html_task,
+            list(seq_names),
+            task_name='Build phylogeny tree',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('tree_html', current_token, pct, label)
+        )
+        if clone_view:
+            task.signals.result.connect(self.handle_tree_html_clone)
+        else:
+            task.signals.result.connect(self.handle_tree_html)
+        task.signals.error.connect(self.handleTreeHtmlTaskError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('tree_html', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleTreeHtmlTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
     def handleSeqTableCheckChanged(self, item):
         global MoveNotChange
         if MoveNotChange:
@@ -17053,15 +17177,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         for row in range(self.ui.tableWidgetHC.rowCount()):
             seq_list.append(self.ui.tableWidgetHC.item(row, 0).text())
 
-        self.Tree_thread = Tree_thread(self)
-        self.Tree_thread.DBFilename = DBFilename
-        self.Tree_thread.checkRecords = seq_list
-        self.Tree_thread.HCLC_progress.connect(self.result_display)
-        self.Tree_thread.HCLC_finish.connect(self.handle_tree_html)
-        self.Tree_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchTreeHtmlTask(seq_list, clone_view=False)
 
     def on_pushButtonTreeLC_clicked(self):
         if self.ui.tableWidgetLC.rowCount() < 3:
@@ -17073,15 +17189,7 @@ class VGenesForm(QtWidgets.QMainWindow):
         for row in range(self.ui.tableWidgetLC.rowCount()):
             seq_list.append(self.ui.tableWidgetLC.item(row, 0).text())
 
-        self.Tree_thread = Tree_thread(self)
-        self.Tree_thread.DBFilename = DBFilename
-        self.Tree_thread.checkRecords = seq_list
-        self.Tree_thread.HCLC_progress.connect(self.result_display)
-        self.Tree_thread.HCLC_finish.connect(self.handle_tree_html)
-        self.Tree_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchTreeHtmlTask(seq_list, clone_view=False)
 
     def on_pushButtonSelectTree_clicked(self):
         seq_list = self.CheckedRecords
@@ -17091,15 +17199,7 @@ class VGenesForm(QtWidgets.QMainWindow):
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        self.Tree_thread = Tree_thread(self)
-        self.Tree_thread.DBFilename = DBFilename
-        self.Tree_thread.checkRecords = seq_list
-        self.Tree_thread.HCLC_progress.connect(self.result_display)
-        self.Tree_thread.HCLC_finish.connect(self.handle_tree_html_clone)
-        self.Tree_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchTreeHtmlTask(seq_list, clone_view=True)
 
     def buildCloneTree(self):
         clone_name = self.ui.comboBoxTree.currentText()
@@ -17117,15 +17217,7 @@ class VGenesForm(QtWidgets.QMainWindow):
 
         listItems = [ele[0] for ele in DataIn]
 
-        self.Tree_thread = Tree_thread(self)
-        self.Tree_thread.DBFilename = DBFilename
-        self.Tree_thread.checkRecords = listItems
-        self.Tree_thread.HCLC_progress.connect(self.result_display)
-        self.Tree_thread.HCLC_finish.connect(self.handle_tree_html_clone)
-        self.Tree_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchTreeHtmlTask(listItems, clone_view=True)
 
     def handle_tree_html_clone(self, res):
         global VGenesTextWindows
