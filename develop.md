@@ -403,6 +403,12 @@ Current guidance:
   - added `pyclustering` to `requirements-optional.txt`
   - installed `pyclustering` locally and added a clearer runtime error message
     if that optional dependency is missing
+- Migrated the active protein-similarity workflow onto the shared async task
+  model:
+  - added `run_protein_similarity_task(...)` in `VGenesMain.py`
+  - replaced the dialog's `protein_slimlar_thread` launch path with
+    `FunctionTask` + main-thread result/error handling
+  - kept `ShowProteinSimilarResults(...)` as the main-thread result renderer
 
 ## Notes
 

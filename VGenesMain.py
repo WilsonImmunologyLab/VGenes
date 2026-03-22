@@ -6408,6 +6408,229 @@ class protein_slimlar_thread(QThread):
         sign = 0
         self.trigger.emit([sign, ScoreRank, Error_list, self.targetName, self.options])
 
+
+def run_protein_similarity_task(
+    db_filename,
+    options,
+    sequence_type,
+    search_range,
+    target_name,
+    ignore_gap,
+    alignment_setting,
+    emit_progress=None,
+):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    pct = 1
+    label = "Fetching records to compare with your selected sequence ..."
+    emit_progress(pct, label)
+
+    if len(search_range) == 0:
+        if sequence_type == '':
+            where_statement = ' WHERE 1'
+        else:
+            where_statement = ' WHERE GeneType = "' + sequence_type + '"'
+    else:
+        if sequence_type == '':
+            where_statement = ' WHERE SeqName IN ("' + '","'.join(search_range) + '")'
+        else:
+            where_statement = ' WHERE GeneType = "' + sequence_type + '" AND SeqName IN ("' + '","'.join(search_range) + '")'
+
+    sql_statement = 'SELECT SeqName, Sequence, FR1From, Jend, Blank7 FROM vgenesDB' + where_statement
+    data_in = VGenesSQL.RunSQL(db_filename, sql_statement)
+
+    sql_statement = 'SELECT SeqName, Sequence, FR1From, Jend, Blank7 FROM vgenesDB WHERE SeqName = "' + target_name + '"'
+    target_data_in = VGenesSQL.RunSQL(db_filename, sql_statement)
+    target_nt_seq = target_data_in[0][1]
+    target_vdj_start = int(target_data_in[0][2])
+    target_vdj_end = int(target_data_in[0][3])
+    target_nt_seq = target_nt_seq[target_vdj_start - 1:target_vdj_end]
+    try:
+        orf = int(target_data_in[0][4])
+    except:
+        orf = 0
+    target_aa_seq, msg = Translator(target_nt_seq, orf)
+    target_aa_seq = re.sub(r'~', '', target_aa_seq)
+
+    if 'Hydrophobicity' in options:
+        window_size = options['Hydrophobicity']
+        target_color_map1 = [0, 0] + VGenesSeq.OtherParam(target_aa_seq, 'Hydrophobicity', window_size, True)
+    if 'Hydrophilicity' in options:
+        window_size = options['Hydrophilicity']
+        target_color_map2 = [0, 0] + VGenesSeq.OtherParam(target_aa_seq, 'Hydrophilicity', window_size, True)
+    if 'Flexibility' in options:
+        window_size = options['Flexibility']
+        target_color_map3 = [0, 0] + VGenesSeq.OtherParam(target_aa_seq, 'Flexibility', window_size, True)
+    if 'Surface' in options:
+        window_size = options['Surface']
+        target_color_map4 = [0, 0] + VGenesSeq.OtherParam(target_aa_seq, 'Surface', window_size, True)
+    if 'MapAApI' in options:
+        window_size = options['MapAApI']
+        target_color_map5 = [0, 0] + VGenesSeq.OtherParam(target_aa_seq, 'MapAApI', window_size, True)
+    if 'MapInstability' in options:
+        window_size = options['MapInstability']
+        target_color_map6 = [0, 0] + VGenesSeq.OtherParam(target_aa_seq, 'MapInstability', window_size, True)
+
+    score_rank = pd.DataFrame(0, index=options.keys(), columns=[el[0] for el in data_in])
+    count = 0
+    all_record_count = max(1, len(data_in))
+    error_list = []
+
+    for record in data_in:
+        pct = count / all_record_count * 100
+        label = "Comparing the target sequence against select sequences, " + str(count) + '/' + str(all_record_count) + '...'
+        emit_progress(pct, label)
+        count += 1
+
+        current_seq_name = record[0]
+        current_nt_seq = record[1]
+        current_vdj_start = int(record[2])
+        current_vdj_end = int(record[3])
+        current_nt_seq = current_nt_seq[current_vdj_start - 1:current_vdj_end]
+        try:
+            orf = int(record[4])
+        except:
+            orf = 0
+        current_aa_seq, msg = Translator(current_nt_seq, orf)
+        current_aa_seq = re.sub(r'~', '', current_aa_seq)
+
+        try:
+            if 'Hydrophobicity' in options:
+                window_size = options['Hydrophobicity']
+                current_color_map1 = [0, 0] + VGenesSeq.OtherParam(current_aa_seq, 'Hydrophobicity', window_size, True)
+            if 'Hydrophilicity' in options:
+                window_size = options['Hydrophilicity']
+                current_color_map2 = [0, 0] + VGenesSeq.OtherParam(current_aa_seq, 'Hydrophilicity', window_size, True)
+            if 'Flexibility' in options:
+                window_size = options['Flexibility']
+                current_color_map3 = [0, 0] + VGenesSeq.OtherParam(current_aa_seq, 'Flexibility', window_size, True)
+            if 'Surface' in options:
+                window_size = options['Surface']
+                current_color_map4 = [0, 0] + VGenesSeq.OtherParam(current_aa_seq, 'Surface', window_size, True)
+            if 'MapAApI' in options:
+                window_size = options['MapAApI']
+                current_color_map5 = [0, 0] + VGenesSeq.OtherParam(current_aa_seq, 'MapAApI', window_size, True)
+            if 'MapInstability' in options:
+                window_size = options['MapInstability']
+                current_color_map6 = [0, 0] + VGenesSeq.OtherParam(current_aa_seq, 'MapInstability', window_size, True)
+
+            if 'Hydrophobicity' in options:
+                this_loop_target_color_map1 = copy.deepcopy(target_color_map1)
+            if 'Hydrophilicity' in options:
+                this_loop_target_color_map2 = copy.deepcopy(target_color_map2)
+            if 'Flexibility' in options:
+                this_loop_target_color_map3 = copy.deepcopy(target_color_map3)
+            if 'Surface' in options:
+                this_loop_target_color_map4 = copy.deepcopy(target_color_map4)
+            if 'MapAApI' in options:
+                this_loop_target_color_map5 = copy.deepcopy(target_color_map5)
+            if 'MapInstability' in options:
+                this_loop_target_color_map6 = copy.deepcopy(target_color_map6)
+
+            gap_open = alignment_setting[1]
+            gap_extend = alignment_setting[2]
+            terget_align, current_align = global_alignment_strings(
+                target_aa_seq,
+                current_aa_seq,
+                alignment_setting[0],
+                gap_open,
+                gap_extend,
+            )
+
+            gap_index_target = []
+            index = 0
+            while index < len(terget_align):
+                pos = terget_align.find('-', index)
+                if pos != -1:
+                    index = pos + 1
+                    gap_index_target.append(pos)
+                    if 'Hydrophobicity' in options:
+                        this_loop_target_color_map1.insert(pos, -10)
+                    if 'Hydrophilicity' in options:
+                        this_loop_target_color_map2.insert(pos, -10)
+                    if 'Flexibility' in options:
+                        this_loop_target_color_map3.insert(pos, -10)
+                    if 'Surface' in options:
+                        this_loop_target_color_map4.insert(pos, -10)
+                    if 'MapAApI' in options:
+                        this_loop_target_color_map5.insert(pos, -10)
+                    if 'MapInstability' in options:
+                        this_loop_target_color_map6.insert(pos, -10)
+                else:
+                    break
+
+            gap_index_current = []
+            index = 0
+            while index < len(current_align):
+                pos = current_align.find('-', index)
+                if pos != -1:
+                    index = pos + 1
+                    gap_index_current.append(pos)
+                    if 'Hydrophobicity' in options:
+                        current_color_map1.insert(pos, -10)
+                    if 'Hydrophilicity' in options:
+                        current_color_map2.insert(pos, -10)
+                    if 'Flexibility' in options:
+                        current_color_map3.insert(pos, -10)
+                    if 'Surface' in options:
+                        current_color_map4.insert(pos, -10)
+                    if 'MapAApI' in options:
+                        current_color_map5.insert(pos, -10)
+                    if 'MapInstability' in options:
+                        current_color_map6.insert(pos, -10)
+                else:
+                    break
+
+            if ignore_gap is True:
+                gap_index = gap_index_target + gap_index_current
+                if 'Hydrophobicity' in options:
+                    this_loop_target_color_map1 = numpy.delete(this_loop_target_color_map1, gap_index).tolist()
+                    current_color_map1 = numpy.delete(current_color_map1, gap_index).tolist()
+                if 'Hydrophilicity' in options:
+                    this_loop_target_color_map2 = numpy.delete(this_loop_target_color_map2, gap_index).tolist()
+                    current_color_map2 = numpy.delete(current_color_map2, gap_index).tolist()
+                if 'Flexibility' in options:
+                    this_loop_target_color_map3 = numpy.delete(this_loop_target_color_map3, gap_index).tolist()
+                    current_color_map3 = numpy.delete(current_color_map3, gap_index).tolist()
+                if 'Surface' in options:
+                    this_loop_target_color_map4 = numpy.delete(this_loop_target_color_map4, gap_index).tolist()
+                    current_color_map4 = numpy.delete(current_color_map4, gap_index).tolist()
+                if 'MapAApI' in options:
+                    this_loop_target_color_map5 = numpy.delete(this_loop_target_color_map5, gap_index).tolist()
+                    current_color_map5 = numpy.delete(current_color_map5, gap_index).tolist()
+                if 'MapInstability' in options:
+                    this_loop_target_color_map6 = numpy.delete(this_loop_target_color_map6, gap_index).tolist()
+                    current_color_map6 = numpy.delete(current_color_map6, gap_index).tolist()
+
+            if 'Hydrophobicity' in options:
+                score = CalculateProteinScoreDiff(this_loop_target_color_map1, current_color_map1, -10)
+                score_rank[current_seq_name].loc['Hydrophobicity'] = score
+            if 'Hydrophilicity' in options:
+                score = CalculateProteinScoreDiff(this_loop_target_color_map2, current_color_map2, -10)
+                score_rank[current_seq_name].loc['Hydrophilicity'] = score
+            if 'Flexibility' in options:
+                score = CalculateProteinScoreDiff(this_loop_target_color_map3, current_color_map3, -10)
+                score_rank[current_seq_name].loc['Flexibility'] = score
+            if 'Surface' in options:
+                score = CalculateProteinScoreDiff(this_loop_target_color_map4, current_color_map4, -10)
+                score_rank[current_seq_name].loc['Surface'] = score
+            if 'MapAApI' in options:
+                score = CalculateProteinScoreDiff(this_loop_target_color_map5, current_color_map5, -10)
+                score_rank[current_seq_name].loc['MapAApI'] = score
+            if 'MapInstability' in options:
+                score = CalculateProteinScoreDiff(this_loop_target_color_map6, current_color_map6, -10)
+                score_rank[current_seq_name].loc['MapInstability'] = score
+        except:
+            error_list.append([current_seq_name, current_aa_seq])
+
+    if len(error_list) > 0:
+        drop_list = [ele[0] for ele in error_list]
+        score_rank = score_rank.drop(drop_list, axis=1)
+
+    emit_progress(100, '')
+    return [0, score_rank, error_list, target_name, options]
+
 class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
     def __init__(self, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
@@ -6417,6 +6640,7 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
 
         self.DBFilename = ""
         self.vgene = ''
+        self.threadpool = QThreadPool()
 
         self.ui.pushButtonConfirm.clicked.connect(self.accept)
         self.ui.pushButtonCancel.clicked.connect(self.reject)
@@ -6452,6 +6676,37 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
         except:
             pass
 
+    def launchProteinSimilarityTask(self, options, sequence_type, search_range, target_name, ignore_gap, alignment_setting):
+        self.proteinSimilarityDialogClosing = False
+        task = FunctionTask(
+            run_protein_similarity_task,
+            self.DBFilename,
+            options,
+            sequence_type,
+            list(search_range),
+            target_name,
+            ignore_gap,
+            list(alignment_setting),
+            task_name='Protein similarity analysis',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleProteinSimilarityResult)
+        task.signals.error.connect(self.handleProteinSimilarityError)
+        task.signals.finished.connect(self.finishProteinSimilarityTask)
+        self.threadpool.start(task)
+
+    def handleProteinSimilarityResult(self, result):
+        self.vgene.ShowProteinSimilarResults(result)
+
+    def handleProteinSimilarityError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
+    def finishProteinSimilarityTask(self):
+        try:
+            self.progress.hide()
+        except:
+            pass
+
     def checkAll(self):
         if self.ui.chkSelectAllProt.isChecked():
             self.ui.chkHydrophobicity.setChecked(True)
@@ -6470,61 +6725,54 @@ class ProteinSimilarDialog(QtWidgets.QDialog, Ui_ProteinSimilarDialog):
 
     def accept(self):
         if self.ui.chkHydrophobicity.isChecked() or self.ui.chkFlexibility.isChecked() or self.ui.chkHydrophilicity.isChecked() or self.ui.chkInstability.isChecked() or self.ui.chkpI.isChecked() or self.ui.chkSurface.isChecked():
-            # multi-thread
-            self.protein_slimlar_workThread = protein_slimlar_thread(self)
-
-            self.protein_slimlar_workThread.DBFilename = DBFilename
-            self.protein_slimlar_workThread.options = {}
+            options = {}
             if self.ui.chkHydrophobicity.isChecked():
-                self.protein_slimlar_workThread.options['Hydrophobicity'] = self.ui.spnHydrophobicity.value()
+                options['Hydrophobicity'] = self.ui.spnHydrophobicity.value()
             if self.ui.chkHydrophilicity.isChecked():
-                self.protein_slimlar_workThread.options['Hydrophilicity'] = self.ui.spnHydrophilicity.value()
+                options['Hydrophilicity'] = self.ui.spnHydrophilicity.value()
             if self.ui.chkFlexibility.isChecked():
-                self.protein_slimlar_workThread.options['Flexibility'] = self.ui.spnFlexibility.value()
+                options['Flexibility'] = self.ui.spnFlexibility.value()
             if self.ui.chkSurface.isChecked():
-                self.protein_slimlar_workThread.options['Surface'] = self.ui.spnSurface.value()
+                options['Surface'] = self.ui.spnSurface.value()
             if self.ui.chkpI.isChecked():
-                self.protein_slimlar_workThread.options['MapAApI'] = self.ui.spnpI.value()
+                options['MapAApI'] = self.ui.spnpI.value()
             if self.ui.chkInstability.isChecked():
-                self.protein_slimlar_workThread.options['MapInstability'] = self.ui.spnInstability.value()
-            self.protein_slimlar_workThread.sequenceType = self.ui.lineEditGeneType.text()
+                options['MapInstability'] = self.ui.spnInstability.value()
+            sequence_type = self.ui.lineEditGeneType.text()
             if self.ui.checkBoxCheckRecords.isChecked():
-                self.protein_slimlar_workThread.searchRange = self.vgene.CheckedRecords
-                if len(self.protein_slimlar_workThread.searchRange) == 0:
+                search_range = self.vgene.CheckedRecords
+                if len(search_range) == 0:
                     Msg = 'You did not select any records, will search the entire database!'
                     QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             else:
-                self.protein_slimlar_workThread.searchRange = []
-            self.protein_slimlar_workThread.targetName = self.ui.lineEditName.text()
+                search_range = []
+            target_name = self.ui.lineEditName.text()
             if self.ui.radioButtonIgnoreGap.isChecked():
-                self.protein_slimlar_workThread.ignoreGap = True
+                ignore_gap = True
             else:
-                self.protein_slimlar_workThread.ignoreGap = False
+                ignore_gap = False
 
             if self.ui.radioButtonblosum62.isChecked():
-                self.protein_slimlar_workThread.alignment_setting = ['blosum62']
+                alignment_setting = ['blosum62']
             elif self.ui.radioButtonpam60.isChecked():
-                self.protein_slimlar_workThread.alignment_setting = ['pam60']
+                alignment_setting = ['pam60']
             elif self.ui.radioButtonbenner22.isChecked():
-                self.protein_slimlar_workThread.alignment_setting = ['benner22']
+                alignment_setting = ['benner22']
             else:
-                self.protein_slimlar_workThread.alignment_setting = ['blosum62']
+                alignment_setting = ['blosum62']
 
             try:
-                self.protein_slimlar_workThread.alignment_setting.append(float(self.ui.lineEditGapopen.text()))
-                self.protein_slimlar_workThread.alignment_setting.append(float(self.ui.lineEditGapExtend.text()))
+                alignment_setting.append(float(self.ui.lineEditGapopen.text()))
+                alignment_setting.append(float(self.ui.lineEditGapExtend.text()))
             except:
                 Msg = 'Only numbers allowed for Gap open and Gap extend!'
                 QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
                 return
 
-            self.protein_slimlar_workThread.start()
-            self.protein_slimlar_workThread.trigger.connect(self.vgene.ShowProteinSimilarResults)
-            self.protein_slimlar_workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Fetching records ...')
             self.progress.show()
+            self.launchProteinSimilarityTask(options, sequence_type, search_range, target_name, ignore_gap, alignment_setting)
 
             self.close()
         else:
