@@ -1165,6 +1165,168 @@ class SeqSimilarity_thread(QThread):
         # Step 5: send signal to VGenes
         self.HCLC_finish.emit(['OK', html_path])
 
+
+def run_seq_similarity_task(check_records, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    emit_progress(25, 'Loading sequences ...')
+    where_state = 'SeqName IN ("' + '","'.join(check_records) + '")'
+    field = 'SeqName,Sequence,FR1From,Jend,Blank7'
+    sql_statement = 'SELECT ' + field + ' FROM vgenesDB WHERE ' + where_state
+    data_in = VGenesSQL.RunSQL(DBFilename, sql_statement)
+
+    aa_seq_array = []
+    nt_seq_array = []
+    for item in data_in:
+        seq_name = item[0]
+        sequence = item[1]
+        seq_from = int(item[2])
+        seq_to = int(item[3])
+        sequence = sequence[seq_from - 1:seq_to]
+        sequence = sequence.upper()
+        try:
+            orf = int(item[4])
+        except:
+            orf = 0
+
+        aa_sequence, msg = Translator(sequence, orf)
+        nt_seq_array.append((seq_name, sequence))
+        aa_seq_array.append((seq_name, aa_sequence))
+
+    emit_progress(50, 'Aligning sequences ...')
+    nt_seq_array_align = AlignSeqMuscle(nt_seq_array, muscle_path, temp_folder)
+    aa_seq_array_align = AlignSeqMuscle(aa_seq_array, muscle_path, temp_folder)
+
+    emit_progress(75, 'Calculating similarity matrix ...')
+    min_value = 80
+    ntdata = []
+    seq_names = []
+    for i in range(len(nt_seq_array_align)):
+        seq_names.append(nt_seq_array_align[i][0])
+        ntdata.append([i, i, 100.00])
+        for j in range(i + 1, len(nt_seq_array_align)):
+            ident_pct = SequenceIdentity(nt_seq_array_align[i][1], nt_seq_array_align[j][1])
+            if ident_pct < min_value:
+                min_value = ident_pct
+            ntdata.append([i, j, round(ident_pct, 2)])
+            ntdata.append([j, i, round(ident_pct, 2)])
+
+    aadata = []
+    for i in range(len(aa_seq_array_align)):
+        aadata.append([i, i, 100.00])
+        for j in range(i + 1, len(aa_seq_array_align)):
+            ident_pct = SequenceIdentity(aa_seq_array_align[i][1], aa_seq_array_align[j][1])
+            if ident_pct < min_value:
+                min_value = ident_pct
+            aadata.append([i, j, round(ident_pct, 2)])
+            aadata.append([j, i, round(ident_pct, 2)])
+
+    xaxis_data = seq_names
+    yaxis_data = seq_names
+
+    emit_progress(90, 'Rendering similarity heatmap ...')
+    my_pyecharts = HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+    my_pyecharts.add_xaxis(xaxis_data)
+    my_pyecharts.add_yaxis(
+        "Sequence identity(%)",
+        yaxis_data,
+        ntdata,
+        label_opts=opts.LabelOpts(
+            is_show=True,
+            position="inside",
+            color='black',
+            font_weight=2,
+            formatter=JsCode("""
+                        function(params) {
+                            mydata = params.data;
+                            return mydata[2] + '%';
+                        }
+                    """)
+        )
+    )
+    my_pyecharts.set_series_opts()
+    my_pyecharts.set_global_opts(
+        title_opts=opts.TitleOpts(title="Sequence similarity HeatMap\nLeft: NT, Right: AA"),
+        visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=100, range_color=['#ffffcc', '#006699']),
+        tooltip_opts=opts.TooltipOpts(
+            formatter=JsCode("""
+                        function(params) {
+                            mydata = params.data;
+                            return 'Seq1: ' + Seqdata[mydata[0]] + '<br>' + 'Seq2: ' + Seqdata[mydata[1]] + '<br>' + 'Similarity: ' + mydata[2] + '%';
+                        }
+                    """)
+        ),
+        xaxis_opts=opts.AxisOpts(
+            type_="category",
+            axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
+            splitarea_opts=opts.SplitAreaOpts(is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1))
+        )
+    )
+
+    my_pyechartsAA = HeatMap(init_opts=opts.InitOpts(width="380px", height="380px", renderer='svg'))
+    my_pyechartsAA.add_xaxis(xaxis_data)
+    my_pyechartsAA.add_yaxis(
+        "Sequence identity(%)",
+        yaxis_data,
+        aadata,
+        label_opts=opts.LabelOpts(
+            is_show=True,
+            position="inside",
+            color='black',
+            font_weight=2,
+            formatter=JsCode("""
+                        function(params) {
+                            mydata = params.data;
+                            return mydata[2] + '%';
+                        }
+                    """)
+        )
+    )
+    my_pyechartsAA.set_series_opts()
+    my_pyechartsAA.set_global_opts(
+        visualmap_opts=opts.VisualMapOpts(min_=min_value, max_=100, range_color=['#ffffcc', '#006699']),
+        tooltip_opts=opts.TooltipOpts(
+            formatter=JsCode("""
+                                    function(params) {
+                                        mydata = params.data;
+                                        return 'Seq1: ' + Seqdata[mydata[0]] + '<br>' + 'Seq2: ' + Seqdata[mydata[1]] + '<br>' + 'Similarity: ' + mydata[2] + '%';
+                                    }
+                                """)
+        ),
+        xaxis_opts=opts.AxisOpts(
+            type_="category",
+            axislabel_opts=opts.LabelOpts(rotate=-45, interval=0),
+            splitarea_opts=opts.SplitAreaOpts(is_show=True, areastyle_opts=opts.AreaStyleOpts(opacity=1))
+        )
+    )
+
+    grid = Grid()
+    grid.add(my_pyecharts, grid_opts=opts.GridOpts(pos_bottom="20%", pos_left="20%", pos_right="50%"))
+    grid.add(my_pyechartsAA, grid_opts=opts.GridOpts(pos_bottom="20%", pos_left="65%", pos_right="5%"))
+    time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
+    html_path = os.path.join(temp_folder, time_stamp + '.html')
+    grid.render(path=html_path)
+
+    with open(html_path, 'r') as file_handle:
+        lines = file_handle.readlines()
+    js_line = '<script type="text/javascript" src="' + \
+              os.path.join(working_prefix, 'Js', 'echarts.js') + '"></script>' + \
+              '<script src="' + os.path.join(working_prefix, 'Js', 'jquery.js') + '"></script>'
+    seqdata_line = '<script>Seqdata=["' + '","'.join(seq_names) + '"]</script>'
+    lines[5] = js_line + "\n" + seqdata_line
+    style_line = lines[9]
+    style_pos = style_line.find('style')
+    style_line = style_line[0:style_pos] + \
+                 'style="position: fixed; top: 0px; left: 5%;width:95%; height:600px;"></div>'
+    lines[9] = style_line
+    content = '\n'.join(lines)
+    with open(html_path, 'w') as file_handle:
+        file_handle.write(content)
+
+    emit_progress(100, 'Similarity heatmap finished.')
+    return ['OK', html_path]
+
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -14701,6 +14863,31 @@ class VGenesForm(QtWidgets.QMainWindow):
     def handleSeqLogoTaskError(self, title, detail):
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
+    def launchSeqSimilarityTask(self, seq_names, clone_view=False):
+        token = self.nextTaskToken()
+        self.openTaskProgress('seq_similarity', token, 'Loading sequences ...')
+
+        task = FunctionTask(
+            run_seq_similarity_task,
+            list(seq_names),
+            task_name='Build similarity heatmap',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('seq_similarity', current_token, pct, label)
+        )
+        if clone_view:
+            task.signals.result.connect(self.handle_alignment_html_clone)
+        else:
+            task.signals.result.connect(self.handle_alignment_html)
+        task.signals.error.connect(self.handleSeqSimilarityTaskError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('seq_similarity', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleSeqSimilarityTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
     def showLogoPopup(self, local_path):
         global VGenesTextWindows
 
@@ -17124,15 +17311,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                                 QMessageBox.Ok)
             return
 
-        self.SeqSimilarity_thread = SeqSimilarity_thread(self)
-        self.SeqSimilarity_thread.DBFilename = DBFilename
-        self.SeqSimilarity_thread.checkRecords = listItems
-        self.SeqSimilarity_thread.HCLC_progress.connect(self.result_display)
-        self.SeqSimilarity_thread.HCLC_finish.connect(self.handle_alignment_html)
-        self.SeqSimilarity_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchSeqSimilarityTask(listItems, clone_view=False)
 
     @pyqtSlot()
     def on_actionStructure_triggered(self):
@@ -17171,15 +17350,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                                 QMessageBox.Ok)
             return
 
-        self.SeqSimilarity_thread = SeqSimilarity_thread(self)
-        self.SeqSimilarity_thread.DBFilename = DBFilename
-        self.SeqSimilarity_thread.checkRecords = member_names
-        self.SeqSimilarity_thread.HCLC_progress.connect(self.result_display)
-        self.SeqSimilarity_thread.HCLC_finish.connect(self.handle_alignment_html_clone)
-        self.SeqSimilarity_thread.start()
-
-        self.progress = ProgressBar(self)
-        self.progress.show()
+        self.launchSeqSimilarityTask(member_names, clone_view=True)
 
     @pyqtSlot()
     def on_actionAlignmentHTML_triggered(self):

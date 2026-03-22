@@ -368,6 +368,11 @@ Current guidance:
   - added `run_seq_logo_task(...)` in `VGenesMain.py`
   - replaced the active main-logo and clone-logo launch paths with
     `FunctionTask` + shared progress handling
+- Migrated the active sequence-similarity heatmap workflow onto the shared
+  async task model:
+  - added `run_seq_similarity_task(...)` in `VGenesMain.py`
+  - replaced the active checked-record and clone similarity launch paths with
+    `FunctionTask` + shared progress handling
 
 ## Notes
 
