@@ -1,0 +1,40 @@
+Running finished!
+
+The following records have paired HC/LC:
+For QQQQQQQQ, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1002_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1003_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1004_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1005_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1006_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1007_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1008_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1009_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype100_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1010_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1011_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1012_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1013_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1014_H1, find 3 Heavy/Light chain using same barcode!
+For T2_clonetype1014_H2, find 3 Heavy/Light chain using same barcode!
+For T2_clonetype1015_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1016_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1017_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1018_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1019_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype101_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1020_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1021_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1022_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1023_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1024_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1025_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1026_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1027_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1028_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype1029_H1, find 1 Heavy/Light chain using same barcode!
+For T2_clonetype102_H1, find 1 Heavy/Light chain using same barcode!
+
+The following records do not have barcode information:
+
+The following records do not have any paired HC/LC:

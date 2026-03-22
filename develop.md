@@ -384,6 +384,25 @@ Current guidance:
     junction annotations in the database
   - this preserves the async/progress flow while avoiding a full IgBlast run
     for each search
+- Migrated the active Cookie/representative sampling workflow onto the shared
+  async task model:
+  - added `run_cookie_sampling_task(...)` in `VGenesMain.py`
+  - added a shared `launchCookieSamplingTask(...)` path
+  - replaced the four active `CookieThread` launch sites with
+    `FunctionTask` + shared progress handling
+  - kept the existing `cookieRes(...)` table rendering path on the main thread
+- Fixed two sampling regressions:
+  - moved the new Cookie async launcher onto `SamplingDialog`, which is where
+    the representative sampling workflow actually runs
+  - replaced proportional stratified size rounding with an exact allocation
+    helper so requested totals are preserved much more closely instead of
+    collapsing to per-level minimums
+- Fixed Cookie sampling environment/messaging issues:
+  - corrected the large-sample warning text so PF mode no longer claims it is
+    running "without prime factor"
+  - added `pyclustering` to `requirements-optional.txt`
+  - installed `pyclustering` locally and added a clearer runtime error message
+    if that optional dependency is missing
 
 ## Notes
 

@@ -1421,6 +1421,27 @@ def run_pattern_search_task(records, pattern_text, region_list, emit_progress=No
         'selected_result': selected_result,
     }
 
+
+def run_cookie_sampling_task(mode, pf, size, data, rows, cols, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    run_flag, cookie_results = CookieSampling(mode, pf, size, data, rows, cols, emit_progress)
+    if run_flag is not True:
+        raise RuntimeError(cookie_results)
+
+    if pf == '':
+        pf_value = ''
+    else:
+        pf_value = pf[0]
+
+    return {
+        'mode': mode,
+        'results': cookie_results,
+        'cols': cols,
+        'pf': pf_value,
+    }
+
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -3437,6 +3458,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
 
         self.DBFilename = ''
         self.NewSampRes = False
+        self.threadpool = QThreadPool()
 
         if system() == 'Windows':
             # set style for windows
@@ -3456,6 +3478,45 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                                "QAction{font-size:18px;}"
                                "QMainWindow{font-size:18px;}")
         else:
+            pass
+
+    def launchCookieSamplingTask(self, mode, pf, size, data, rows, cols):
+        self.progress = ProgressBar(self)
+        self.progress.setLabel('Cookie sampling running ...')
+        self.progress.show()
+
+        task = FunctionTask(
+            run_cookie_sampling_task,
+            mode,
+            pf,
+            size,
+            data,
+            rows,
+            cols,
+            task_name='Representative sampling',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleCookieSamplingResult)
+        task.signals.error.connect(self.handleCookieSamplingError)
+        task.signals.finished.connect(self.closeCookieSamplingProgress)
+        self.threadpool.start(task)
+
+    def handleCookieSamplingResult(self, payload):
+        self.cookieRes(
+            payload.get('mode', ''),
+            payload.get('results', []),
+            payload.get('cols', []),
+            payload.get('pf', ''),
+        )
+
+    def handleCookieSamplingError(self, title, detail):
+        self.errorMsgFun(title + '\n\n' + detail)
+
+    def closeCookieSamplingProgress(self):
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
             pass
     def groupChange(self):
         field_name = self.ui.comboBoxGroupField.currentText()
@@ -3589,25 +3650,19 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '") GROUP BY ' + field_name
                     SQLStatement = 'SELECT DISTINCT(' + field_name + '),COUNT(*) FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
-                    # CALCULATE Proportionable size
-                    Levels = []
-                    for record in DataIn:
-                        new_size = int(round(record[1]*SamplingRatio))
-                        if new_size == 0:
-                            new_size = 1
-                        Levels.append([record[0],new_size])
+                    level_sizes = proportional_sample_sizes(DataIn, size, ensure_min_one=True)
                     # sampling in each level
-                    for level in Levels:
+                    for level_name, level_size in level_sizes.items():
                         # get all records in this level
                         WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(self.inputData) + '")' \
-                                         + ' AND ' + field_name + ' = "' + level[0] + '"'
+                                         + ' AND ' + field_name + ' = "' + level_name + '"'
                         SQLStatement = 'SELECT SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
                         SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                         SubName = [i[0] for i in SubDataIn]
-                        if level[1] >= len(SubName):
+                        if level_size >= len(SubName):
                             Res = Res + SubName
                         else:
-                            Res = Res + random.sample(SubName, level[1])
+                            Res = Res + random.sample(SubName, level_size)
 
                     # result
                     WHEREStatement = ' WHERE SeqName IN ("' + '","'.join(Res) + '") ORDER BY ' + field_name
@@ -3639,25 +3694,19 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                         self.inputData) + '") AND `GeneType` == "Heavy" GROUP BY ' + field_name
                     SQLStatement = 'SELECT DISTINCT(' + field_name + '),COUNT(*) FROM vgenesDB' + WHEREStatement
                     DataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
-                    # CALCULATE Proportionable size
-                    Levels = []
-                    for record in DataIn:
-                        new_size = int(round(record[1] * SamplingRatio))
-                        if new_size == 0:
-                            new_size = 1
-                        Levels.append([record[0], new_size])
+                    level_sizes = proportional_sample_sizes(DataIn, size, ensure_min_one=True)
                     # sampling in each level
-                    for level in Levels:
+                    for level_name, level_size in level_sizes.items():
                         # get all records in this level
                         WHEREStatement = ' WHERE `SeqName` IN ("' + '","'.join(self.inputData) + '")' \
-                                         + ' AND `' + field_name + '` = "' + level[0] + '" AND `GeneType` == "Heavy"'
+                                         + ' AND `' + field_name + '` = "' + level_name + '" AND `GeneType` == "Heavy"'
                         SQLStatement = 'SELECT Blank10,SeqName,' + field_name + ' FROM vgenesDB' + WHEREStatement
                         SubDataIn = VGenesSQL.RunSQL(self.DBFilename, SQLStatement)
                         SubName = [i[0] for i in SubDataIn]
-                        if level[1] >= len(SubName):
+                        if level_size >= len(SubName):
                             Res_barcode = Res_barcode + SubName
                         else:
-                            Res_barcode = Res_barcode + random.sample(SubName,  level[1])
+                            Res_barcode = Res_barcode + random.sample(SubName, level_size)
 
                     # make res
                     WHEREStatement = ' WHERE Blank10 IN ("' + '","'.join(
@@ -3809,7 +3858,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                         return
 
                     if len(self.inputData) > 1000:
-                        question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+                        question = 'Your sample size > 1000, Cookie sampling may be slow even with a prime factor, still want to continue?'
                         buttons = 'YN'
                         answer = questionMessage(self, question, buttons)
                         if answer == 'No':
@@ -3858,22 +3907,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     mode = 'single'
                     pf = [PF_field_name, LevelIndex]
 
-                    self.CookieworkThread = CookieThread(self)
-                    self.CookieworkThread.mode = mode
-                    self.CookieworkThread.pf = pf
-                    self.CookieworkThread.size = size
-                    self.CookieworkThread.data = Data
-                    self.CookieworkThread.cols = data_cols
-                    self.CookieworkThread.rows = data_rows
-                    self.CookieworkThread.start()
-
-                    self.CookieworkThread.trigger.connect(self.cookieRes)
-                    self.CookieworkThread.loadProgress.connect(self.progressLabel)
-                    self.CookieworkThread.badNews.connect(self.errorMsgFun)
-
-                    self.progress = ProgressBar(self)
-                    self.progress.setLabel('Cookie sampling running ...')
-                    self.progress.show()
+                    self.launchCookieSamplingTask(mode, pf, size, Data, data_rows, data_cols)
                 # pair mode
                 else:
                     if size >= len(self.inputData) / 2:
@@ -3882,7 +3916,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                         return
 
                     if len(self.inputData) > 2000:
-                        question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+                        question = 'Your sample size > 1000, Cookie sampling may be slow even with a prime factor, still want to continue?'
                         buttons = 'YN'
                         answer = questionMessage(self, question, buttons)
                         if answer == 'No':
@@ -3932,22 +3966,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     mode = 'pair'
                     pf = [PF_field_name, LevelIndex]
                     # self.cookieSignal.emit(mode, pf, data_cols, DataIn)
-                    self.CookieworkThread = CookieThread(self)
-                    self.CookieworkThread.mode = mode
-                    self.CookieworkThread.pf = pf
-                    self.CookieworkThread.size = size
-                    self.CookieworkThread.data = Data
-                    self.CookieworkThread.cols = data_cols
-                    self.CookieworkThread.rows = data_rows
-                    self.CookieworkThread.start()
-
-                    self.CookieworkThread.trigger.connect(self.cookieRes)
-                    self.CookieworkThread.loadProgress.connect(self.progressLabel)
-                    self.CookieworkThread.badNews.connect(self.errorMsgFun)
-
-                    self.progress = ProgressBar(self)
-                    self.progress.setLabel('Cookie sampling running ...')
-                    self.progress.show()
+                    self.launchCookieSamplingTask(mode, pf, size, Data, data_rows, data_cols)
             # none-PF mode
             else:
                 # single mode
@@ -3958,7 +3977,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                         return
 
                     if len(self.inputData) > 1000:
-                        question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+                        question = 'Your sample size > 1000, sampling without a prime factor will be slow, still want to continue?'
                         buttons = 'YN'
                         answer = questionMessage(self, question, buttons)
                         if answer == 'No':
@@ -3990,22 +4009,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     mode = 'single'
                     pf = ''
                     #self.cookieSignal.emit(mode, pf, data_cols, DataIn)
-                    self.CookieworkThread = CookieThread(self)
-                    self.CookieworkThread.mode = mode
-                    self.CookieworkThread.pf = pf
-                    self.CookieworkThread.size = size
-                    self.CookieworkThread.data = [i[1:] for i in DataIn]
-                    self.CookieworkThread.cols = data_cols
-                    self.CookieworkThread.rows = [i[0] for i in DataIn]
-                    self.CookieworkThread.start()
-
-                    self.CookieworkThread.trigger.connect(self.cookieRes)
-                    self.CookieworkThread.loadProgress.connect(self.progressLabel)
-                    self.CookieworkThread.badNews.connect(self.errorMsgFun)
-
-                    self.progress = ProgressBar(self)
-                    self.progress.setLabel('Cookie sampling running ...')
-                    self.progress.show()
+                    self.launchCookieSamplingTask(mode, pf, size, [i[1:] for i in DataIn], [i[0] for i in DataIn], data_cols)
                 # pair mode
                 else:
                     if size >= len(self.inputData)/2:
@@ -4014,7 +4018,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                         return
 
                     if len(self.inputData) > 2000:
-                        question = 'Your sample size > 1000, sampling without prime factor will be slow, still want to continue?'
+                        question = 'Your sample size > 1000, sampling without a prime factor will be slow, still want to continue?'
                         buttons = 'YN'
                         answer = questionMessage(self, question, buttons)
                         if answer == 'No':
@@ -4046,22 +4050,7 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
                     mode = 'pair'
                     pf = ''
                     # self.cookieSignal.emit(mode, pf, data_cols, DataIn)
-                    self.CookieworkThread = CookieThread(self)
-                    self.CookieworkThread.mode = mode
-                    self.CookieworkThread.pf = pf
-                    self.CookieworkThread.size = size
-                    self.CookieworkThread.data = [i[1:] for i in DataIn]
-                    self.CookieworkThread.cols = data_cols
-                    self.CookieworkThread.rows = [i[0] for i in DataIn]
-                    self.CookieworkThread.start()
-
-                    self.CookieworkThread.trigger.connect(self.cookieRes)
-                    self.CookieworkThread.loadProgress.connect(self.progressLabel)
-                    self.CookieworkThread.badNews.connect(self.errorMsgFun)
-
-                    self.progress = ProgressBar(self)
-                    self.progress.setLabel('Cookie sampling running ...')
-                    self.progress.show()
+                    self.launchCookieSamplingTask(mode, pf, size, [i[1:] for i in DataIn], [i[0] for i in DataIn], data_cols)
         else:
             pass
 
@@ -4113,9 +4102,12 @@ class SamplingDialog(QtWidgets.QDialog, Ui_SamplingDialog):
         self.ui.tableWidgetResult.sortByColumn(index, self.ui.tableWidgetResult.horizontalHeader().sortIndicatorOrder())
 
     def cookieRes(self, mode, res, cols, pf):
-        # close progress bar
-        self.progress.FeatProgressBar.setValue(100)
-        self.progress.close()
+        # legacy progress bar path may or may not be present
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
         # make res
         col_names = [i[0] for i in cols]
         field_names_str = ','.join(col_names)
@@ -15007,6 +14999,41 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.patternResult(payload.get('pattern', ''), payload.get('selected_result', {}))
 
     def handlePatternSearchTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
+    def launchCookieSamplingTask(self, mode, pf, size, data, rows, cols):
+        token = self.nextTaskToken()
+        self.openTaskProgress('cookie_sampling', token, 'Cookie sampling running ...')
+
+        task = FunctionTask(
+            run_cookie_sampling_task,
+            mode,
+            pf,
+            size,
+            data,
+            rows,
+            cols,
+            task_name='Representative sampling',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('cookie_sampling', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handleCookieSamplingResult)
+        task.signals.error.connect(self.handleCookieSamplingError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('cookie_sampling', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handleCookieSamplingResult(self, payload):
+        self.cookieRes(
+            payload.get('mode', ''),
+            payload.get('results', []),
+            payload.get('cols', []),
+            payload.get('pf', ''),
+        )
+
+    def handleCookieSamplingError(self, title, detail):
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
     def showLogoPopup(self, local_path):
@@ -37685,8 +37712,15 @@ def MutMap(Sequence):
 
 # function for cookie sampling
 def CookieSampling(mode, pf, size, data, rows, cols, signal):
-    from pyclustering.cluster.kmedoids import kmedoids
-    from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
+    emit_progress = signal.emit if hasattr(signal, 'emit') else signal
+    try:
+        from pyclustering.cluster.kmedoids import kmedoids
+        from pyclustering.cluster.center_initializer import kmeans_plusplus_initializer
+    except ModuleNotFoundError as exc:
+        raise RuntimeError(
+            "Cookie sampling requires the optional dependency 'pyclustering'. "
+            "Install it with: python3 -m pip install pyclustering"
+        ) from exc
     # test progress bar and downstream functions
     '''
     time.sleep(1)
@@ -37708,7 +37742,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
     '''
     # pre-process, validate data type
     current_progress = 1
-    signal.emit(current_progress, 'Validating your input data and types...')
+    emit_progress(current_progress, 'Validating your input data and types...')
     process_step = int(20/len(cols))
 
     # convert data into pandas data frame
@@ -37716,7 +37750,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 
     for field in cols:
         current_progress = current_progress + process_step
-        signal.emit(current_progress, 'Validating your input data and types for ' + field[0] + ' ...')
+        emit_progress(current_progress, 'Validating your input data and types for ' + field[0] + ' ...')
         if field[1] == 'Num':
             try:
                 DataMatrix[field[0]] = DataMatrix[field[0]].astype(float)
@@ -37735,7 +37769,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
     # step 1, data normalization
     for field in cols:
         current_progress = current_progress + process_step
-        signal.emit(current_progress, 'Normalizing your input data for ' + field[0] + ' ...')
+        emit_progress(current_progress, 'Normalizing your input data for ' + field[0] + ' ...')
         if field[1] == 'Num':
             max = DataMatrix[field[0]].max()
             min = DataMatrix[field[0]].min()
@@ -37764,13 +37798,13 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
     clusters = kmedoids_instance.get_clusters()
     medoids = kmedoids_instance.get_medoids()
     '''
-    signal.emit(current_progress + process_step, 'Calculating distance ...')
+    emit_progress(current_progress + process_step, 'Calculating distance ...')
     DistMatrix = CookieDistance(DataMatrix, [i[1] for i in cols])
 
     # step 3, sampling
     medoids_index = []
     current_progress = 60
-    signal.emit(current_progress, 'Sampling ...')
+    emit_progress(current_progress, 'Sampling ...')
     # none-PF mode
     if pf == "":
         ## Initialize initial medoids using K-Means++ algorithm
@@ -37801,7 +37835,7 @@ def CookieSampling(mode, pf, size, data, rows, cols, signal):
 
     # step 4, handle important factor
     current_progress = 80
-    signal.emit(current_progress, 'Handling important factors ...')
+    emit_progress(current_progress, 'Handling important factors ...')
     
     col_idx = 0
     for col in cols:
@@ -37894,6 +37928,63 @@ def CalculateProteinScoreDiff(A, B, GapCode):
 def find_value_location(lst,value):
     result = [i for i in range(len(lst)) if value==lst[i]]
     return result
+
+
+def proportional_sample_sizes(level_counts, total_size, ensure_min_one=False):
+    clean_levels = [(level, max(0, int(count))) for level, count in level_counts if level not in (None, '')]
+    if total_size <= 0 or len(clean_levels) == 0:
+        return {level: 0 for level, _count in clean_levels}
+
+    total_population = sum(count for _level, count in clean_levels)
+    if total_population <= 0:
+        return {level: 0 for level, _count in clean_levels}
+
+    allocation = {level: 0 for level, _count in clean_levels}
+    remaining_total = min(int(total_size), total_population)
+
+    if ensure_min_one and remaining_total >= len(clean_levels):
+        for level, count in clean_levels:
+            if count > 0:
+                allocation[level] = 1
+                remaining_total -= 1
+        weighted_levels = [(level, max(0, count - 1)) for level, count in clean_levels]
+    else:
+        weighted_levels = clean_levels
+
+    weighted_total = sum(count for _level, count in weighted_levels)
+    if remaining_total <= 0 or weighted_total <= 0:
+        return allocation
+
+    quotas = {}
+    base_used = 0
+    for level, count in weighted_levels:
+        quota = (count / float(weighted_total)) * remaining_total
+        base = min(count, int(math.floor(quota)))
+        allocation[level] += base
+        quotas[level] = quota - base
+        base_used += base
+
+    remaining_slots = remaining_total - base_used
+    ranked_levels = sorted(
+        weighted_levels,
+        key=lambda item: (quotas.get(item[0], 0), item[1]),
+        reverse=True,
+    )
+    while remaining_slots > 0:
+        moved = False
+        for level, count in ranked_levels:
+            max_allowed = count
+            current_extra = allocation[level] - (1 if ensure_min_one and total_size >= len(clean_levels) else 0)
+            if current_extra < max_allowed:
+                allocation[level] += 1
+                remaining_slots -= 1
+                moved = True
+                if remaining_slots == 0:
+                    break
+        if not moved:
+            break
+
+    return allocation
 
 def dataReshape(data):
     df = pd.DataFrame(data, columns=['HC', 'LC'])
