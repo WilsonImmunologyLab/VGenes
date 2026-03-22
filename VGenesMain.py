@@ -1442,6 +1442,160 @@ def run_cookie_sampling_task(mode, pf, size, data, rows, cols, emit_progress=Non
         'pf': pf_value,
     }
 
+
+def run_vdb_import_task(db_filename, files, df_map, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    for new_field in df_map.columns:
+        if new_field not in RealNameList:
+            sql_statement = "ALTER TABLE vgenesDB ADD " + new_field + " text"
+            try:
+                VGenesSQL.RunUpdateSQL(db_filename, sql_statement)
+            except:
+                raise RuntimeError("DB operation Error! Current SQL statement is: \n" + sql_statement)
+
+            try:
+                VGenesSQL.InsertFieldTableRecord(
+                    db_filename,
+                    new_field,
+                    new_field,
+                    field_type='Customized',
+                    comment=new_field,
+                    display='yes',
+                    display_priority=9,
+                )
+            except:
+                raise RuntimeError("DB operation Error when creating field metadata for:\n" + new_field)
+
+            RealNameList.append(new_field)
+            FieldCommentList.append(new_field)
+            FieldTypeList.append('Customized')
+            FieldList.append(new_field)
+
+    conn = db.connect(db_filename)
+    cursor = conn.cursor()
+    try:
+        process = 1
+        for vdb_file in files:
+            df_slices_current_vdb = df_map.loc[vdb_file]
+            projection_dict = {}
+            for sub_index in df_slices_current_vdb.index:
+                if df_slices_current_vdb[sub_index] != '':
+                    projection_dict[df_slices_current_vdb[sub_index]] = sub_index
+
+            sql_statement = 'SELECT Field FROM fieldsname'
+            data_in = VGenesSQL.RunSQL(vdb_file, sql_statement)
+            fields = []
+            translated_fields = []
+            index = 0
+            for item in data_in:
+                fields.append(item[0])
+                if index < 119:
+                    translated_fields.append(item[0])
+                else:
+                    if item[0] in projection_dict.keys():
+                        translated_fields.append(projection_dict[item[0]])
+                    else:
+                        translated_fields.append(item[0])
+                index += 1
+            questions = ['?'] * len(fields)
+
+            field_str = ','.join(fields)
+            question_str = ','.join(questions)
+            translated_field_str = ','.join(translated_fields)
+
+            sql_statement = 'SELECT ' + field_str + ' FROM vgenesDB'
+            data_in = VGenesSQL.RunSQL(vdb_file, sql_statement)
+
+            sql_statement = 'SELECT ID FROM vgenesDB'
+            res = VGenesSQL.RunSQL(db_filename, sql_statement)
+            if len(res) > 0:
+                count = [int(ele[0]) for ele in res]
+                max_count = max(count)
+            else:
+                max_count = 0
+
+            input_data = []
+            for records in data_in:
+                cur_line = list(records)
+                cur_line[119] = int(records[119]) + max_count
+                input_data.append(cur_line)
+
+            sql_statement = "INSERT INTO vgenesDB(" + translated_field_str + ") VALUES(" + question_str + ")"
+            try:
+                cursor.executemany(sql_statement, input_data)
+            except Exception:
+                raise RuntimeError(
+                    "UNIQUE constraint failed: SeqName\n Please make sure all the sequence names are unique! (add sampleID to each sequence name)"
+                )
+            conn.commit()
+
+            pct = int(process / len(files) * 100)
+            label = "Processing VDB file: " + vdb_file
+            emit_progress(pct, label)
+            process += 1
+    finally:
+        conn.close()
+
+    return [0, 'Data import finished!']
+
+
+def run_csv_import_task(db_filename, files, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    conn = db.connect(db_filename)
+    cursor = conn.cursor()
+    try:
+        process = 1
+        for csv_file in files:
+            with open(csv_file, "r") as csv_file_handle:
+                reader = csv.reader(csv_file_handle)
+                line = 0
+                data_in = []
+                for item in reader:
+                    if line == 0:
+                        cur_field = item
+                    elif line == 1:
+                        cur_field_name = item
+                    else:
+                        data_in.append(item)
+                    line += 1
+
+            question_list = ['?' for n in range(len(cur_field))]
+            field_str = ','.join(cur_field)
+            question_str = ','.join(question_list)
+
+            sql_statement = 'SELECT COUNT(ID) FROM vgenesDB'
+            count = VGenesSQL.RunSQL(db_filename, sql_statement)
+            count = count[0][0]
+
+            input_data = []
+            for records in data_in:
+                cur_line = list(records)
+                cur_line[119] = str(int(records[119]) + count)
+                cur_line[58] = re.sub('#', '\n', records[58])
+                cur_line[97] = re.sub('|', ',', records[97])
+                cur_line[119] = int(cur_line[119])
+                input_data.append(cur_line)
+
+            sql_statement = "INSERT INTO vgenesDB(" + field_str + ") VALUES(" + question_str + ")"
+            try:
+                cursor.executemany(sql_statement, input_data)
+                conn.commit()
+            except Exception:
+                raise RuntimeError('Error detected! \nError Message:' + traceback.format_exc())
+
+            pct = int(process / len(files) * 100)
+            label = "Processing CSV file: " + csv_file
+            emit_progress(pct, label)
+            process += 1
+    finally:
+        conn.close()
+
+    return [0, 'Data import finished!']
+
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -11010,6 +11164,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         #super(ImportDataDialogue, self).__init__()
         self.ui = Ui_ImportDataDialog()
         self.ui.setupUi(self)
+        self.threadpool = QThreadPool()
 
         self.TextEdit = VGenesTextMain()
 
@@ -11750,6 +11905,47 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             t = thd.Timer(1, self.checkProgress)
             t.start()
 
+    def launchCsvImportTask(self, files):
+        task = FunctionTask(
+            run_csv_import_task,
+            DBFilename,
+            list(files),
+            task_name='Merge CSV files',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleDataImportTaskResult)
+        task.signals.error.connect(self.handleDataImportTaskError)
+        task.signals.finished.connect(self.finishDataImportTask)
+        self.threadpool.start(task)
+
+    def launchVdbImportTask(self, files, df_map):
+        task = FunctionTask(
+            run_vdb_import_task,
+            DBFilename,
+            list(files),
+            df_map,
+            task_name='Merge VDB files',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleDataImportTaskResult)
+        task.signals.error.connect(self.handleDataImportTaskError)
+        task.signals.finished.connect(self.finishDataImportTask)
+        self.threadpool.start(task)
+
+    def handleDataImportTaskResult(self, result):
+        self.multi_callback(result[0], result[1])
+
+    def handleDataImportTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+        self.finishDataImportTask()
+
+    def finishDataImportTask(self):
+        try:
+            self.progress.FeatProgressBar.setValue(100)
+            self.progress.close()
+        except:
+            pass
+
     def readBarcode(self, anno_path_name, type10x):
         # read annotation content
         name_index = 17
@@ -12313,17 +12509,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             Vgenes.LoadDB(DBFilename)
             self.hide()
             '''
-            # try multi-thread
-            workThread = CSV_thread(self)
-            workThread.DBFilename = DBFilename
-            workThread.files = files
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Merging CSV...')
             self.progress.show()
+            self.launchCsvImportTask(files)
             
     def InitiateImportFromVDBOld(self, Filenamed, MaxNu):
         global FieldList
@@ -12445,17 +12634,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.hide()
             '''
 
-            # try multi-thread
-            workThread = VDB_thread(self)
-            workThread.DBFilename = DBFilename
-            workThread.files = files
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Merging VDB...')
             self.progress.show()
+            self.launchVdbImportTask(files, pd.DataFrame('', index=files, columns=[]))
         else:
             return
 
@@ -12533,18 +12715,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         self.myVDBdialog.show()
 
     def handleVDB(self, DBFilename, files, DF):
-        # try multi-thread
-        workThread = VDB_thread(self)
-        workThread.DBFilename = DBFilename
-        workThread.files = files
-        workThread.df = DF
-        workThread.start()
-        workThread.trigger.connect(self.multi_callback)
-        workThread.loadProgress.connect(self.progressLabel)
-
         self.progress = ProgressBar(self)
         self.progress.setLabel('Merging VDB...')
         self.progress.show()
+        self.launchVdbImportTask(files, DF)
 
     def InitiateImportFromIgBlast(self, Filenamed, MaxNum):
         if os.path.isfile(self.ui.lineEditIgOut.text()) and os.path.isfile(self.ui.lineEditIgFasta.text()):

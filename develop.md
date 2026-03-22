@@ -409,6 +409,13 @@ Current guidance:
   - replaced the dialog's `protein_slimlar_thread` launch path with
     `FunctionTask` + main-thread result/error handling
   - kept `ShowProteinSimilarResults(...)` as the main-thread result renderer
+- Migrated the active CSV/VDB merge-import workflows onto the shared async
+  task model:
+  - added `run_csv_import_task(...)` and `run_vdb_import_task(...)` in
+    `VGenesMain.py`
+  - replaced the active `CSV_thread` / `VDB_thread` launch paths in
+    `ImportDataDialogue` with `FunctionTask` + main-thread result/error
+    handling
 
 ## Notes
 
