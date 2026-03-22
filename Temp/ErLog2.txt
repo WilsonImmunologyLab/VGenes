@@ -1,0 +1,12 @@
+Began input at Sun Mar 22 11:13:22 2026
+VGenes input ended at: Sun Mar 22 11:13:29 2026
+
+555 sequences were input by IgBLAST for file: 
+/Users/leili/Documents/GitHub/VGenes/Temp/S24cloning.fasta
+/Users/leili/Documents/GitHub/VGenes/Temp/S266Cloning.fasta
+/Users/leili/Documents/GitHub/VGenes/Temp/S319Cloning.fasta
+S24cloning_S24-902-L1-1 missed V or J
+S24cloning_S24-278-K2-1 missed V or J
+S24cloning_S24-921-K1-2 missed V or J
+S266Cloning_S266-4263-K1-1 missed V or J
+S319Cloning_S319-77-H2-2 missed V or J

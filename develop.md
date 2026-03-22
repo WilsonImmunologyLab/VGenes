@@ -416,6 +416,16 @@ Current guidance:
   - replaced the active `CSV_thread` / `VDB_thread` launch paths in
     `ImportDataDialogue` with `FunctionTask` + main-thread result/error
     handling
+- Migrated the active IgBlast/IMGT parser launch paths in `ImportDataDialogue`
+  onto the shared async task model:
+  - added `run_igblast_parser_task(...)`, `run_igblast_results_task(...)`,
+    and `run_imgt_parser_task(...)` in `VGenesMain.py`
+  - replaced the active `WorkThread`, `WorkThread1`, and
+    `WorkThreadIMGTparser` launch paths used by the 10X/FASTA/SEQ import,
+    IgBlast-results import, and IMGT import flows
+  - kept the existing `multi_callback(...)` / `multiIMGT_callback(...)`
+    database-insert logic intact by routing parsed results back through the
+    same callbacks on the main thread
 
 ## Notes
 

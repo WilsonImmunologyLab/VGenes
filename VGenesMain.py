@@ -1389,6 +1389,14 @@ def _extract_pattern_regions(record):
     }
 
 
+class _SignalAdapter:
+    def __init__(self, callback):
+        self._callback = callback
+
+    def emit(self, pct, label):
+        self._callback(pct, label)
+
+
 def run_pattern_search_task(records, pattern_text, region_list, emit_progress=None):
     if emit_progress is None:
         emit_progress = lambda pct, label: None
@@ -1595,6 +1603,54 @@ def run_csv_import_task(db_filename, files, emit_progress=None):
         conn.close()
 
     return [0, 'Data import finished!']
+
+
+def run_igblast_parser_task(item, datalist, method='fast', datatype='BCR', emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+    signal = _SignalAdapter(emit_progress)
+
+    if method == 'fast':
+        if datatype == 'BCR':
+            analysis = IgBlastParserFast(item, datalist, signal)
+        elif datatype == 'TCR':
+            analysis = IgBlastParserFastTCR(item, datalist, signal)
+        else:
+            raise RuntimeError('Unsupported datatype: ' + str(datatype))
+    else:
+        if datatype == 'BCR':
+            analysis = IgBLASTer.IgBLASTit(item, datalist, signal)
+        else:
+            raise RuntimeError('Unsupported datatype: ' + str(datatype))
+
+    return {
+        'item': item,
+        'analysis': analysis,
+    }
+
+
+def run_igblast_results_task(item, ig_out, datalist, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+    signal = _SignalAdapter(emit_progress)
+
+    analysis = IgBLASTer.IgBLASTitResults(item, ig_out, datalist, signal)
+    return {
+        'item': item,
+        'analysis': analysis,
+    }
+
+
+def run_imgt_parser_task(item, datalist, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+    signal = _SignalAdapter(emit_progress)
+
+    analysis = IMGTparser(item, datalist, signal)
+    return {
+        'item': item,
+        'analysis': analysis,
+    }
 
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
@@ -11946,6 +12002,62 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         except:
             pass
 
+    def launchIgBlastParserTask(self, item, datalist, method='fast', datatype='BCR'):
+        task = FunctionTask(
+            run_igblast_parser_task,
+            item,
+            list(datalist),
+            method,
+            datatype,
+            task_name='Run IgBlast parser',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleIgBlastParserTaskResult)
+        task.signals.error.connect(self.handleIgBlastParserTaskError)
+        self.threadpool.start(task)
+
+    def handleIgBlastParserTaskResult(self, payload):
+        global IgBLASTAnalysis
+        IgBLASTAnalysis = payload.get('analysis', [])
+        self.multi_callback(0, payload.get('item', ''))
+
+    def handleIgBlastParserTaskError(self, title, detail):
+        self.multi_callback(1, title + '\n\n' + detail)
+
+    def launchIgBlastResultsTask(self, item, ig_out, datalist):
+        task = FunctionTask(
+            run_igblast_results_task,
+            item,
+            ig_out,
+            list(datalist),
+            task_name='Import IgBlast results',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleIgBlastParserTaskResult)
+        task.signals.error.connect(self.handleIgBlastParserTaskError)
+        self.threadpool.start(task)
+
+    def launchIMGTParserTask(self, item, datalist):
+        task = FunctionTask(
+            run_imgt_parser_task,
+            item,
+            list(datalist),
+            task_name='Parse IMGT results',
+        )
+        task.signals.progress.connect(self.progressLabel)
+        task.signals.result.connect(self.handleIMGTParserTaskResult)
+        task.signals.error.connect(self.handleIMGTParserTaskError)
+        self.threadpool.start(task)
+
+    def handleIMGTParserTaskResult(self, payload):
+        global IMGTAnalysis
+        IMGTAnalysis = payload.get('analysis', [])
+        self.multiIMGT_callback()
+
+    def handleIMGTParserTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+        self.finishDataImportTask()
+
     def readBarcode(self, anno_path_name, type10x):
         # read annotation content
         name_index = 17
@@ -12063,24 +12175,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast1.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast, may take a few minutes ...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12111,24 +12209,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast1.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast, may take a few minutes ...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12251,24 +12335,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast2.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12308,24 +12378,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast2.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12357,24 +12413,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast2.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12794,17 +12836,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread1(self)
-            workThread.igOut = igOut
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastResultsTask(seq_pathname, igOut, datalist)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12835,17 +12870,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread1(self)
-            workThread.igOut = igOut
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastResultsTask(seq_pathname, igOut, datalist)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -12897,16 +12925,15 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThreadIMGTparser(self)
-            workThread.item = IMGT_out
-            workThread.datalist = datalist
-            workThread.start()
-            workThread.trigger.connect(self.multiIMGT_callback)
-
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
             f.write(IMGT_out)
             f.close()
+
+            self.progress = ProgressBar(self)
+            self.progress.setLabel('Parsing IMGT...')
+            self.progress.show()
+            self.launchIMGTParserTask(IMGT_out, datalist)
 
             self.disableWidgets()
             return
@@ -12928,16 +12955,15 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThreadIMGTparser(self)
-            workThread.item = IMGT_out
-            workThread.datalist = datalist
-            workThread.start()
-            workThread.trigger.connect(self.multiIMGT_callback)
-
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
             f.write(IMGT_out)
             f.close()
+
+            self.progress = ProgressBar(self)
+            self.progress.setLabel('Parsing IMGT...')
+            self.progress.show()
+            self.launchIMGTParserTask(IMGT_out, datalist)
 
             # self.disableWidgets()
             return
@@ -13052,24 +13078,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast2.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -13109,24 +13121,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast2.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
@@ -13158,24 +13156,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             #file_handle = open(progressBarFile, 'w')
             #file_handle.write('0')
             #file_handle.close()
-            workThread = WorkThread(self)
-            workThread.item = seq_pathname
-            workThread.datalist = datalist
-            '''
-            if self.ui.radioButtonFast2.isChecked():
-                workThread.method = 'fast'
-            else:
-                workThread.method = 'slow'
-            '''
-            workThread.method = 'fast'
-            workThread.datatype = dataType
-            workThread.start()
-            workThread.trigger.connect(self.multi_callback)
-            workThread.loadProgress.connect(self.progressLabel)
-
             self.progress = ProgressBar(self)
             self.progress.setLabel('Running IgBlast...')
             self.progress.show()
+            self.launchIgBlastParserTask(seq_pathname, datalist, method='fast', datatype=dataType)
 
             import_file = os.path.join(temp_folder, "import_file_name.txt")
             f = open(import_file, 'w')
