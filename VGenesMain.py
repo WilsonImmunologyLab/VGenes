@@ -1327,6 +1327,100 @@ def run_seq_similarity_task(check_records, emit_progress=None):
     emit_progress(100, 'Similarity heatmap finished.')
     return ['OK', html_path]
 
+
+def _safe_int(value):
+    try:
+        return int(value)
+    except:
+        return None
+
+
+def _translate_nt_region(sequence, start_value, end_value):
+    if not sequence:
+        return ''
+    start = _safe_int(start_value)
+    end = _safe_int(end_value)
+    if start is None or end is None or start < 1 or end < start:
+        return ''
+    nt_region = sequence[start - 1:end].upper()
+    aa_region, _msg = VGenesSeq.Translator(nt_region, 0)
+    return aa_region
+
+
+def _extract_pattern_regions(record):
+    sequence = (record.get('Sequence') or '').upper()
+    blank20 = record.get('Blank20') or ''
+    if SequenceCheck(blank20, 'nt') == 'none':
+        full_aa = blank20.upper()
+    else:
+        full_aa = _translate_nt_region(
+            sequence,
+            record.get('Vbeg') or record.get('FR1From') or 1,
+            record.get('Jend') or len(sequence),
+        )
+
+    cdr3_aa = (record.get('CDR3AA') or '').upper()
+    if cdr3_aa in ('', 'CDR3AA', 'NA'):
+        cdr3_aa = _translate_nt_region(sequence, record.get('CDR3beg'), record.get('CDR3end'))
+
+    junction_aa = _translate_nt_region(
+        (record.get('VDJunction') or '').upper(),
+        1,
+        len((record.get('VDJunction') or '').upper()),
+    )
+
+    return {
+        'Vgene': _translate_nt_region(sequence, record.get('Vbeg'), record.get('Vend')),
+        'Dgene': _translate_nt_region(sequence, record.get('D1beg'), record.get('D1end')),
+        'Jgene': _translate_nt_region(sequence, record.get('Jbeg'), record.get('Jend')),
+        'FWR1': _translate_nt_region(sequence, record.get('FR1From'), record.get('FR1To')),
+        'FWR2': _translate_nt_region(sequence, record.get('FR2From'), record.get('FR2To')),
+        'FWR3': _translate_nt_region(sequence, record.get('FR3From'), record.get('FR3To')),
+        'FWR4': _translate_nt_region(
+            sequence,
+            (_safe_int(record.get('CDR3end')) or 0) + 1,
+            record.get('Jend'),
+        ),
+        'CDR1': _translate_nt_region(sequence, record.get('CDR1From'), record.get('CDR1to')),
+        'CDR2': _translate_nt_region(sequence, record.get('CDR2From'), record.get('CDR2to')),
+        'CDR3': cdr3_aa,
+        'Full': full_aa,
+        'Junction': junction_aa,
+    }
+
+
+def run_pattern_search_task(records, pattern_text, region_list, emit_progress=None):
+    if emit_progress is None:
+        emit_progress = lambda pct, label: None
+
+    pattern = pattern_text.upper()
+    pattern = re.sub('X', '.', pattern)
+    pattern = re.compile(pattern)
+
+    selected_result = {}
+    total_records = max(1, len(records))
+    emit_progress(1, 'Scanning annotated regions ...')
+
+    for line_num, record in enumerate(records, start=1):
+        seq_name = record['SeqName']
+        aa_regions = _extract_pattern_regions(record)
+        for each_region in region_list:
+            current_region = aa_regions.get(each_region, '')
+            if current_region and pattern.search(current_region) is not None:
+                if each_region in selected_result.keys():
+                    selected_result[each_region].append(seq_name)
+                else:
+                    selected_result[each_region] = [seq_name]
+
+        progress_int = min(100, int(line_num / total_records * 100))
+        progress_str = "Working progress: " + str(line_num) + '/' + str(total_records)
+        emit_progress(progress_int, progress_str)
+
+    return {
+        'pattern': pattern_text,
+        'selected_result': selected_result,
+    }
+
 class HCLC_thread(QThread):
     HCLC_progress = pyqtSignal(int, int, int)
     HCLC_finish = pyqtSignal(list)
@@ -14888,6 +14982,33 @@ class VGenesForm(QtWidgets.QMainWindow):
     def handleSeqSimilarityTaskError(self, title, detail):
         QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
 
+    def launchPatternSearchTask(self, records, pattern_text, region_list):
+        token = self.nextTaskToken()
+        self.openTaskProgress('pattern_search', token, 'Scanning annotated regions ...')
+
+        task = FunctionTask(
+            run_pattern_search_task,
+            list(records),
+            pattern_text,
+            list(region_list),
+            task_name='Search sequence pattern',
+        )
+        task.signals.progress.connect(
+            lambda pct, label, current_token=token: self.updateTaskProgress('pattern_search', current_token, pct, label)
+        )
+        task.signals.result.connect(self.handlePatternSearchTaskResult)
+        task.signals.error.connect(self.handlePatternSearchTaskError)
+        task.signals.finished.connect(
+            lambda current_token=token: self.closeTaskProgress('pattern_search', current_token)
+        )
+        self.threadpool.start(task)
+
+    def handlePatternSearchTaskResult(self, payload):
+        self.patternResult(payload.get('pattern', ''), payload.get('selected_result', {}))
+
+    def handlePatternSearchTaskError(self, title, detail):
+        QMessageBox.warning(self, 'Warning', title + '\n\n' + detail, QMessageBox.Ok, QMessageBox.Ok)
+
     def showLogoPopup(self, local_path):
         global VGenesTextWindows
 
@@ -15315,42 +15436,21 @@ class VGenesForm(QtWidgets.QMainWindow):
                     WHEREStatement += 'Jlocus IN ("' + '","'.join(jlist) + '")'
         
         # fetch sequence
-        SQLStatement = "SELECT SeqName,Sequence,Blank20,Species FROM vgenesDB" + WHEREStatement
+        field_names = [
+            'SeqName', 'Sequence', 'Blank20', 'VDJunction', 'CDR3AA',
+            'FR1From', 'FR1To', 'CDR1From', 'CDR1to', 'FR2From', 'FR2To',
+            'CDR2From', 'CDR2to', 'FR3From', 'FR3To', 'CDR3beg', 'CDR3end',
+            'Vbeg', 'Vend', 'D1beg', 'D1end', 'Jbeg', 'Jend'
+        ]
+        SQLStatement = "SELECT " + ','.join(field_names) + " FROM vgenesDB" + WHEREStatement
         DataIn = VGenesSQL.RunSQL(DBFilename, SQLStatement)
         if len(DataIn) == 0:
             Msg = 'No records were found under your searching criteria!'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
             return
 
-        # write to fasta
-        time_stamp = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime())
-        fasta_path = os.path.join(temp_folder, time_stamp + '.fasta')
-        if SequenceCheck(DataIn[0][2], 'nt') == 'none':
-            index = 2
-        else:
-            index = 1
-        with open(fasta_path, 'w') as writeFasta:
-            for record in DataIn:
-                writeFasta.write('>' + record[0] + '\n')
-                writeFasta.write(record[index] + '\n')
-        species = DataIn[0][3]
-        
-        # open an thread to identify pattern
-        self.PatternworkThread = PatternThread(self)
-        self.PatternworkThread.species = species
-        self.PatternworkThread.fasta = fasta_path
-        self.PatternworkThread.pattern = pattern
-        self.PatternworkThread.region = region
-        self.PatternworkThread.num = len(DataIn)
-        self.PatternworkThread.start()
-
-        self.PatternworkThread.trigger.connect(self.patternResult)
-        self.PatternworkThread.loadProgress.connect(self.progressLabel)
-        self.PatternworkThread.badNews.connect(self.errorMsgFun)
-
-        self.progress = ProgressBar(self)
-        self.progress.setLabel('Pattern searching ...')
-        self.progress.show()
+        records = [dict(zip(field_names, row)) for row in DataIn]
+        self.launchPatternSearchTask(records, pattern, region)
 
     def patternResult(self, pattern, selected_result):
         # close progress bar

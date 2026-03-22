@@ -373,6 +373,17 @@ Current guidance:
   - added `run_seq_similarity_task(...)` in `VGenesMain.py`
   - replaced the active checked-record and clone similarity launch paths with
     `FunctionTask` + shared progress handling
+- Migrated the active Pattern Search workflow onto the shared async task
+  model:
+  - added `run_pattern_search_task(...)` in `VGenesMain.py`
+  - replaced the active `PatternThread` launch path in `SearchPattern(...)`
+    with `FunctionTask` + shared progress handling
+  - kept the existing pattern-result dialog rendering on the main thread
+- Removed the Pattern Search IgBlast dependency from the active workflow:
+  - the search now derives AA regions directly from stored V/D/J, FR/CDR, and
+    junction annotations in the database
+  - this preserves the async/progress flow while avoiding a full IgBlast run
+    for each search
 
 ## Notes
 
