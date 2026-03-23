@@ -75,6 +75,21 @@ from task_utils import (
 )
 from vg_theme import db_tab_stylesheet
 from vgenes_version import APP_NAME, SCHEMA_VERSION, __version__, format_app_title
+from igblast_presets import (
+    build_igblast_command,
+    build_custom_preset_assets,
+    detect_reference_files,
+    get_default_preset_id,
+    get_preset,
+    legacy_preset_id,
+    list_presets,
+    load_config as load_igblast_preset_config,
+    resolve_preset,
+    set_default_preset,
+    upsert_preset,
+    validate_preset,
+    delete_preset,
+)
 from htmldialog import Ui_htmlDialog
 from PyQt5.QtWidgets import QMainWindow
 
@@ -232,6 +247,43 @@ JustMoved = False
 
 global RefreshSQL
 RefreshSQL = 'select * from vgenesDB ORDER BY Project, Grouping, SubGroup, SeqName'
+
+
+def emit_progress_update(signal_or_callback, pct, label):
+    emit = getattr(signal_or_callback, 'emit', None)
+    if callable(emit):
+        emit(pct, label)
+    elif callable(signal_or_callback):
+        signal_or_callback(pct, label)
+
+
+def resolve_igblast_preset_from_datalist(datalist, sequence_type='IG'):
+    species = ''
+    preset_id = None
+    if len(datalist) > 3:
+        species = datalist[3]
+    if len(datalist) > 7:
+        preset_id = datalist[-1]
+    elif len(datalist) > 6 and get_preset(datalist[6]):
+        preset_id = datalist[6]
+    return resolve_preset(preset_id, species, sequence_type)
+
+
+def run_igblast_output_lines(preset, query_path, outfmt, show_translation=True, extra_args=None):
+    workingdir = os.path.join(working_prefix, 'IgBlast')
+    command = build_igblast_command(
+        igblast_path,
+        preset,
+        query_path,
+        outfmt,
+        show_translation=show_translation,
+        extra_args=extra_args,
+    )
+    process = Popen(command, cwd=workingdir, stdout=PIPE, stderr=PIPE, universal_newlines=True)
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        raise RuntimeError(stderr or ('IgBlast failed with exit code ' + str(process.returncode)))
+    return stdout.splitlines(True)
 # global data
 global FieldList
 FieldList = ['SeqName', 'SeqLen', 'GeneType', 'V1', 'V2', 'V3', 'D1', 'D2', 'D3', 'J1', 'J2', 'J3', 'StopCodon',
@@ -1623,6 +1675,14 @@ def run_igblast_parser_task(item, datalist, method='fast', datatype='BCR', emit_
         else:
             raise RuntimeError('Unsupported datatype: ' + str(datatype))
 
+    if analysis is None:
+        raise RuntimeError(
+            'IgBlast parsing returned no data. Check the current reference preset, IgBlast output, and '
+            + os.path.join(temp_folder, 'ErLog.txt')
+        )
+    if isinstance(analysis, str):
+        raise RuntimeError(analysis)
+
     return {
         'item': item,
         'analysis': analysis,
@@ -1635,6 +1695,13 @@ def run_igblast_results_task(item, ig_out, datalist, emit_progress=None):
     signal = _SignalAdapter(emit_progress)
 
     analysis = IgBLASTer.IgBLASTitResults(item, ig_out, datalist, signal)
+    if analysis is None:
+        raise RuntimeError(
+            'IgBlast result parsing returned no data. Check the selected files and '
+            + os.path.join(temp_folder, 'ErLog.txt')
+        )
+    if isinstance(analysis, str):
+        raise RuntimeError(analysis)
     return {
         'item': item,
         'analysis': analysis,
@@ -3293,6 +3360,13 @@ class ChangeORunDialog(QtWidgets.QDialog):
         self.comboModel.addItems(['ham', 'aa', 'hh_s1f', 'hh_s5f', 'mk_rs1nf', 'mk_rs5nf'])
         settings_layout.addRow('Distance model', self.comboModel)
 
+        self.comboPreset = QtWidgets.QComboBox()
+        self.buttonManagePresets = QtWidgets.QPushButton('Manage Presets')
+        preset_layout = QtWidgets.QHBoxLayout()
+        preset_layout.addWidget(self.comboPreset, 1)
+        preset_layout.addWidget(self.buttonManagePresets)
+        settings_layout.addRow('IgBlast preset', preset_layout)
+
         top_layout.addWidget(actions_box, 1)
         top_layout.addWidget(settings_box, 1)
 
@@ -3321,7 +3395,9 @@ class ChangeORunDialog(QtWidgets.QDialog):
         self.buttonExport.clicked.connect(self.changeOsetp1)
         self.buttonImport.clicked.connect(self.changeOsetp3)
         self.buttonLegacy.clicked.connect(self.openLegacyDialog)
+        self.buttonManagePresets.clicked.connect(self.openPresetManager)
         self.buttonClose.clicked.connect(self.reject)
+        self.refreshPresetOptions()
 
         if system() == 'Windows':
             self.setStyleSheet("QLabel{font-size:18px;}"
@@ -3345,7 +3421,9 @@ class ChangeORunDialog(QtWidgets.QDialog):
                                "QGroupBox{font-size:18px;}")
 
     def changeOsetp1(self):
-        self.changeOSignal.emit({'action': 'export'})
+        if self.validateSelectedPreset() is None:
+            return
+        self.changeOSignal.emit({'action': 'export', 'preset_id': self.comboPreset.currentData()})
 
     def changeOsetp3(self):
         res_file = openFile(self, 'Tsv')
@@ -3373,18 +3451,388 @@ class ChangeORunDialog(QtWidgets.QDialog):
             self.close()
 
     def changeOrun(self):
+        if self.validateSelectedPreset() is None:
+            return
         self.changeOSignal.emit({
             'action': 'run',
             'distance': self.doubleSpinDistance.value(),
             'mode': self.comboMode.currentText(),
             'link': self.comboLink.currentText(),
             'model': self.comboModel.currentText(),
+            'preset_id': self.comboPreset.currentData(),
         })
+
+    def refreshPresetOptions(self):
+        self.comboPreset.clear()
+        for preset in list_presets(sequence_type='IG', enabled_only=True):
+            self.comboPreset.addItem(preset.get('name', preset.get('id', 'Preset')), preset.get('id'))
+        default_id = get_default_preset_id('IG')
+        index = self.comboPreset.findData(default_id)
+        if index < 0 and self.comboPreset.count() > 0:
+            index = 0
+        if index >= 0:
+            self.comboPreset.setCurrentIndex(index)
+
+    def validateSelectedPreset(self):
+        preset = resolve_preset(self.comboPreset.currentData(), 'Human', 'IG')
+        errors = validate_preset(preset, igblast_path)
+        if errors:
+            QMessageBox.warning(self, 'Warning', '\n'.join(errors), QMessageBox.Ok, QMessageBox.Ok)
+            return None
+        return preset
+
+    def openPresetManager(self):
+        dialog = IgBlastPresetManagerDialog(self)
+        dialog.presetsChanged.connect(self.refreshPresetOptions)
+        dialog.exec_()
 
     def openLegacyDialog(self):
         self.legacyDialog = ChangeODialog()
-        self.legacyDialog.changeOSignal.connect(lambda signal: self.changeOSignal.emit({'action': 'export'} if signal == 1 else {'action': 'run'}))
+        self.legacyDialog.changeOSignal.connect(
+            lambda signal: self.changeOSignal.emit({'action': 'export', 'preset_id': self.comboPreset.currentData()} if signal == 1 else {
+                'action': 'run',
+                'distance': self.doubleSpinDistance.value(),
+                'mode': self.comboMode.currentText(),
+                'link': self.comboLink.currentText(),
+                'model': self.comboModel.currentText(),
+                'preset_id': self.comboPreset.currentData(),
+            })
+        )
         self.legacyDialog.show()
+
+
+class IgBlastPresetManagerDialog(QtWidgets.QDialog):
+    presetsChanged = pyqtSignal()
+
+    def __init__(self, parent=None):
+        super(IgBlastPresetManagerDialog, self).__init__(parent)
+        self.setWindowTitle('IgBlast Reference Presets')
+        self.resize(980, 620)
+        self._current_preset_id = None
+
+        root = QtWidgets.QVBoxLayout(self)
+        split = QtWidgets.QHBoxLayout()
+        root.addLayout(split)
+
+        left_box = QtWidgets.QGroupBox('Presets')
+        left_layout = QtWidgets.QVBoxLayout(left_box)
+        self.listPresets = QtWidgets.QListWidget()
+        left_layout.addWidget(self.listPresets)
+        left_buttons = QtWidgets.QHBoxLayout()
+        self.buttonNewPreset = QtWidgets.QPushButton('Add')
+        self.buttonDeletePreset = QtWidgets.QPushButton('Delete')
+        self.buttonDefaultPreset = QtWidgets.QPushButton('Set Default')
+        left_buttons.addWidget(self.buttonNewPreset)
+        left_buttons.addWidget(self.buttonDeletePreset)
+        left_buttons.addWidget(self.buttonDefaultPreset)
+        left_layout.addLayout(left_buttons)
+        split.addWidget(left_box, 1)
+
+        form_box = QtWidgets.QGroupBox('Preset Details')
+        form_layout = QtWidgets.QFormLayout(form_box)
+        form_layout.setFieldGrowthPolicy(QtWidgets.QFormLayout.AllNonFixedFieldsGrow)
+        self.editPresetName = QtWidgets.QLineEdit()
+        self.editOrganism = QtWidgets.QLineEdit()
+        self.comboSequenceType = QtWidgets.QComboBox()
+        self.comboSequenceType.addItems(['IG', 'TR'])
+        self.editSpeciesLabel = QtWidgets.QLineEdit()
+        self.comboDomainSystem = QtWidgets.QComboBox()
+        self.comboDomainSystem.addItems(['kabat', 'imgt'])
+        self.comboIgSeqtype = QtWidgets.QComboBox()
+        self.comboIgSeqtype.addItems(['', 'Ig', 'TCR'])
+        self.editRootFolder = QtWidgets.QLineEdit()
+        self.editDbV = QtWidgets.QLineEdit()
+        self.editDbD = QtWidgets.QLineEdit()
+        self.editDbJ = QtWidgets.QLineEdit()
+        self.editRepoV = QtWidgets.QLineEdit()
+        self.editRepoD = QtWidgets.QLineEdit()
+        self.editRepoJ = QtWidgets.QLineEdit()
+        self.editAux = QtWidgets.QLineEdit()
+        for widget in (
+            self.editPresetName,
+            self.editOrganism,
+            self.editSpeciesLabel,
+            self.editRootFolder,
+            self.editDbV,
+            self.editDbD,
+            self.editDbJ,
+            self.editRepoV,
+            self.editRepoD,
+            self.editRepoJ,
+            self.editAux,
+        ):
+            widget.setMinimumWidth(520)
+        self.checkEnabled = QtWidgets.QCheckBox('Enabled')
+        self.labelBuiltin = QtWidgets.QLabel('')
+        self.labelValidation = QtWidgets.QLabel('')
+        self.labelValidation.setWordWrap(True)
+        self.editRootFolder.setReadOnly(True)
+        self.editDbV.setReadOnly(True)
+        self.editDbD.setReadOnly(True)
+        self.editDbJ.setReadOnly(True)
+
+        self.buttonBrowseRepoV = QtWidgets.QPushButton('Browse')
+        self.buttonBrowseRepoD = QtWidgets.QPushButton('Browse')
+        self.buttonBrowseRepoJ = QtWidgets.QPushButton('Browse')
+        self.buttonBrowseAux = QtWidgets.QPushButton('Browse')
+
+        def _file_row(line_edit, button):
+            row = QtWidgets.QHBoxLayout()
+            row.addWidget(line_edit, 1)
+            row.addWidget(button)
+            return row
+
+        form_layout.addRow('Name', self.editPresetName)
+        form_layout.addRow('Organism', self.editOrganism)
+        form_layout.addRow('Sequence type', self.comboSequenceType)
+        form_layout.addRow('Species label', self.editSpeciesLabel)
+        form_layout.addRow('Domain system', self.comboDomainSystem)
+        form_layout.addRow('ig_seqtype', self.comboIgSeqtype)
+        form_layout.addRow('Managed root', self.editRootFolder)
+        form_layout.addRow('V DB', self.editDbV)
+        form_layout.addRow('D DB', self.editDbD)
+        form_layout.addRow('J DB', self.editDbJ)
+        form_layout.addRow('V FASTA', _file_row(self.editRepoV, self.buttonBrowseRepoV))
+        form_layout.addRow('D FASTA', _file_row(self.editRepoD, self.buttonBrowseRepoD))
+        form_layout.addRow('J FASTA', _file_row(self.editRepoJ, self.buttonBrowseRepoJ))
+        form_layout.addRow('Aux file', _file_row(self.editAux, self.buttonBrowseAux))
+        form_layout.addRow('', self.checkEnabled)
+        form_layout.addRow('Built-in', self.labelBuiltin)
+        form_layout.addRow('Validation', self.labelValidation)
+
+        action_row = QtWidgets.QHBoxLayout()
+        self.buttonAutoDetect = QtWidgets.QPushButton('Autodetect from Folder')
+        self.buttonValidate = QtWidgets.QPushButton('Validate')
+        self.buttonSave = QtWidgets.QPushButton('Save')
+        action_row.addWidget(self.buttonAutoDetect)
+        action_row.addWidget(self.buttonValidate)
+        action_row.addStretch(1)
+        action_row.addWidget(self.buttonSave)
+        form_layout.addRow(action_row)
+        split.addWidget(form_box, 2)
+
+        close_row = QtWidgets.QHBoxLayout()
+        close_row.addStretch(1)
+        self.buttonClose = QtWidgets.QPushButton('Close')
+        close_row.addWidget(self.buttonClose)
+        root.addLayout(close_row)
+
+        self.listPresets.currentItemChanged.connect(self.loadSelectedPreset)
+        self.buttonNewPreset.clicked.connect(self.newPreset)
+        self.buttonDeletePreset.clicked.connect(self.deleteCurrentPreset)
+        self.buttonDefaultPreset.clicked.connect(self.makeCurrentDefault)
+        self.buttonAutoDetect.clicked.connect(self.autodetectCurrentPreset)
+        self.buttonValidate.clicked.connect(self.validateCurrentPreset)
+        self.buttonSave.clicked.connect(self.saveCurrentPreset)
+        self.buttonClose.clicked.connect(self.accept)
+        self.buttonBrowseRepoV.clicked.connect(lambda: self.pickFileFor(self.editRepoV, 'fasta'))
+        self.buttonBrowseRepoD.clicked.connect(lambda: self.pickFileFor(self.editRepoD, 'fasta'))
+        self.buttonBrowseRepoJ.clicked.connect(lambda: self.pickFileFor(self.editRepoJ, 'fasta'))
+        self.buttonBrowseAux.clicked.connect(lambda: self.pickFileFor(self.editAux, 'all'))
+
+        self.refreshPresetList()
+
+    def refreshPresetList(self):
+        config = load_igblast_preset_config()
+        self.listPresets.clear()
+        for preset in config.get('presets', []):
+            label = preset.get('name', preset.get('id', 'Preset'))
+            if preset.get('default'):
+                label += ' (Default)'
+            item = QtWidgets.QListWidgetItem(label)
+            item.setData(Qt.UserRole, preset.get('id'))
+            self.listPresets.addItem(item)
+        if self.listPresets.count() > 0:
+            self.listPresets.setCurrentRow(0)
+
+    def currentFormPreset(self):
+        return {
+            'id': self._current_preset_id,
+            'name': self.editPresetName.text().strip(),
+            'organism_label': self.editOrganism.text().strip(),
+            'sequence_type': self.comboSequenceType.currentText(),
+            'species_label': self.editSpeciesLabel.text().strip(),
+            'domain_system': self.comboDomainSystem.currentText(),
+            'ig_seqtype': self.comboIgSeqtype.currentText().strip(),
+            'root_folder': self.editRootFolder.text().strip(),
+            'db_v': self.editDbV.text().strip(),
+            'db_d': self.editDbD.text().strip(),
+            'db_j': self.editDbJ.text().strip(),
+            'repo_v': self.editRepoV.text().strip(),
+            'repo_d': self.editRepoD.text().strip(),
+            'repo_j': self.editRepoJ.text().strip(),
+            'auxiliary_data': self.editAux.text().strip(),
+            'enabled': self.checkEnabled.isChecked(),
+            'builtin': self.labelBuiltin.text() == 'Yes',
+            'default': False,
+        }
+
+    def setFormPreset(self, preset):
+        self._current_preset_id = preset.get('id')
+        self.editPresetName.setText(preset.get('name', ''))
+        self.editOrganism.setText(preset.get('organism_label', ''))
+        self.comboSequenceType.setCurrentText(preset.get('sequence_type', 'IG'))
+        self.editSpeciesLabel.setText(preset.get('species_label', ''))
+        self.comboDomainSystem.setCurrentText(preset.get('domain_system', 'kabat'))
+        self.comboIgSeqtype.setCurrentText(preset.get('ig_seqtype', ''))
+        self.editRootFolder.setText(preset.get('root_folder', ''))
+        self.editDbV.setText(preset.get('db_v', ''))
+        self.editDbD.setText(preset.get('db_d', ''))
+        self.editDbJ.setText(preset.get('db_j', ''))
+        self.editRepoV.setText(preset.get('repo_v', ''))
+        self.editRepoD.setText(preset.get('repo_d', ''))
+        self.editRepoJ.setText(preset.get('repo_j', ''))
+        self.editAux.setText(preset.get('auxiliary_data', ''))
+        self.checkEnabled.setChecked(preset.get('enabled', True))
+        self.labelBuiltin.setText('Yes' if preset.get('builtin') else 'No')
+        self.labelValidation.setText('')
+        self.applyPresetEditState(preset)
+
+    def applyPresetEditState(self, preset):
+        builtin = bool(preset.get('builtin'))
+        editable_widgets = [
+            self.editPresetName,
+            self.editOrganism,
+            self.comboSequenceType,
+            self.editSpeciesLabel,
+            self.comboDomainSystem,
+            self.comboIgSeqtype,
+            self.editRepoV,
+            self.editRepoD,
+            self.editRepoJ,
+            self.editAux,
+            self.checkEnabled,
+            self.buttonBrowseRepoV,
+            self.buttonBrowseRepoD,
+            self.buttonBrowseRepoJ,
+            self.buttonBrowseAux,
+            self.buttonAutoDetect,
+            self.buttonSave,
+        ]
+        for widget in editable_widgets:
+            widget.setEnabled(not builtin)
+        self.buttonDeletePreset.setEnabled(not builtin)
+        self.buttonDefaultPreset.setEnabled(True)
+
+    def pickFileFor(self, line_edit, filetype):
+        if filetype == 'fasta':
+            file_path, _filetype = QtWidgets.QFileDialog.getOpenFileName(
+                self,
+                "Choose file",
+                "~/Documents",
+                "Fasta Files (*.fasta *.fas *.fa);;All Files (*)",
+            )
+        else:
+            file_path, _filetype = QtWidgets.QFileDialog.getOpenFileName(
+                self,
+                "Choose file",
+                "~/Documents",
+                "All Files (*)",
+            )
+        if file_path:
+            line_edit.setText(file_path)
+
+    def loadSelectedPreset(self, current, previous):
+        if current is None:
+            return
+        preset_id = current.data(Qt.UserRole)
+        preset = get_preset(preset_id)
+        if preset:
+            self.setFormPreset(preset)
+
+    def newPreset(self):
+        self.setFormPreset({
+            'id': None,
+            'name': '',
+            'organism_label': '',
+            'sequence_type': 'IG',
+            'species_label': '',
+            'domain_system': 'kabat',
+            'ig_seqtype': 'Ig',
+            'root_folder': '',
+            'db_v': '',
+            'db_d': '',
+            'db_j': '',
+            'repo_v': '',
+            'repo_d': '',
+            'repo_j': '',
+            'auxiliary_data': '',
+            'enabled': True,
+            'builtin': False,
+        })
+
+    def autodetectCurrentPreset(self):
+        preset = self.currentFormPreset()
+        detected = detect_reference_files(preset.get('root_folder'))
+        if not detected:
+            self.labelValidation.setText('No V/D/J files were autodetected from the selected folder.')
+            return
+        self.editDbV.setText(detected.get('db_v', self.editDbV.text()))
+        self.editDbD.setText(detected.get('db_d', self.editDbD.text()))
+        self.editDbJ.setText(detected.get('db_j', self.editDbJ.text()))
+        self.editRepoV.setText(detected.get('repo_v', self.editRepoV.text()))
+        self.editRepoD.setText(detected.get('repo_d', self.editRepoD.text()))
+        self.editRepoJ.setText(detected.get('repo_j', self.editRepoJ.text()))
+        self.labelValidation.setText('Autodetection updated the reference file paths.')
+
+    def validateCurrentPreset(self):
+        preset = self.currentFormPreset()
+        if not preset.get('builtin'):
+            try:
+                preset = build_custom_preset_assets(preset)
+            except Exception as exc:
+                self.labelValidation.setText(str(exc))
+                return
+        errors = validate_preset(preset, igblast_path)
+        if errors:
+            self.labelValidation.setText('\n'.join(errors))
+        else:
+            self.labelValidation.setText('Preset validation passed.')
+
+    def saveCurrentPreset(self):
+        preset = self.currentFormPreset()
+        if preset.get('builtin'):
+            QMessageBox.information(self, 'Information', 'Built-in presets are read-only.', QMessageBox.Ok, QMessageBox.Ok)
+            return
+        try:
+            preset = build_custom_preset_assets(preset)
+        except Exception as exc:
+            QMessageBox.warning(self, 'Warning', str(exc), QMessageBox.Ok, QMessageBox.Ok)
+            self.labelValidation.setText(str(exc))
+            return
+        errors = validate_preset(preset, igblast_path)
+        if errors:
+            QMessageBox.warning(self, 'Warning', '\n'.join(errors), QMessageBox.Ok, QMessageBox.Ok)
+            self.labelValidation.setText('\n'.join(errors))
+            return
+        preset_id = upsert_preset(preset)
+        self._current_preset_id = preset_id
+        self.presetsChanged.emit()
+        self.refreshPresetList()
+        for row in range(self.listPresets.count()):
+            item = self.listPresets.item(row)
+            if item.data(Qt.UserRole) == preset_id:
+                self.listPresets.setCurrentRow(row)
+                break
+        self.labelValidation.setText('Preset saved.')
+
+    def deleteCurrentPreset(self):
+        if not self._current_preset_id:
+            return
+        preset = get_preset(self._current_preset_id)
+        if preset and preset.get('builtin'):
+            QMessageBox.information(self, 'Information', 'Built-in presets cannot be deleted.', QMessageBox.Ok, QMessageBox.Ok)
+            return
+        delete_preset(self._current_preset_id)
+        self.presetsChanged.emit()
+        self.refreshPresetList()
+
+    def makeCurrentDefault(self):
+        if not self._current_preset_id:
+            return
+        set_default_preset(self._current_preset_id)
+        self.presetsChanged.emit()
+        self.refreshPresetList()
 
 class CloneOptionDialog(QtWidgets.QDialog):
     optionSignal = pyqtSignal(int)
@@ -4490,20 +4938,13 @@ class PatentDialog(QtWidgets.QDialog, Ui_PatentDialog):
                 currentFile.write('>' + record[0] + '\n')
                 currentFile.write(record[1] + '\n')
 
-        species = 'Human'
-        # run IgBlast
-        workingdir = os.path.join(working_prefix, 'IgBlast')
-        os.chdir(workingdir)
-        if species == 'Human':
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
-            IgBlastOut_HC = os.popen(BLASTCommandLine)
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query " + lc_fasta_file + " -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
-            IgBlastOut_LC = os.popen(BLASTCommandLine)
-        elif species == 'Mouse':
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
-            IgBlastOut_HC = os.popen(BLASTCommandLine)
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query " + hc_fasta_file + " -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
-            IgBlastOut_LC = os.popen(BLASTCommandLine)
+        try:
+            preset = resolve_preset(get_default_preset_id('IG'), 'Human', 'IG')
+            IgBlastOut_HC = run_igblast_output_lines(preset, hc_fasta_file, 19, show_translation=True)
+            IgBlastOut_LC = run_igblast_output_lines(preset, lc_fasta_file, 19, show_translation=True)
+        except Exception as exc:
+            QMessageBox.warning(self, 'Warning', str(exc), QMessageBox.Ok, QMessageBox.Ok)
+            return
         
         Final_data = []
         index = -1
@@ -11248,10 +11689,14 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         self.ui.listWidgetSEQ.itemDoubleClicked.connect(self.removeSel)
         self.ui.radioButtonCon.clicked.connect(self.change10xType)
         self.ui.radioButtonTig.clicked.connect(self.change10xType)
+        self.ui.radioButtonHuman.clicked.connect(self.syncPresetFromLegacySpecies)
+        self.ui.radioButtonMouse.clicked.connect(self.syncPresetFromLegacySpecies)
 
         # unknown bug for this function, the icon doesn't update well
         self.ui.pushButtonBCR.clicked.connect(self.setIcon)
         self.ui.pushButtonTCR.clicked.connect(self.setIcon)
+        self.ui.pushButtonBCR.clicked.connect(self.refreshIgBlastPresetChoices)
+        self.ui.pushButtonTCR.clicked.connect(self.refreshIgBlastPresetChoices)
 
         self.iconBCR = QIcon(QPixmap(":/PNG-Icons/BCR.png"))
         self.iconBCRgray = QIcon(QPixmap(":/PNG-Icons/BCRgray.png"))
@@ -11291,6 +11736,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             pass
         
         self.setIcon()
+        self.setupIgBlastPresetControls()
+        self.refreshIgBlastPresetChoices()
     
     def change10xType(self):
         if self.ui.radioButtonCon.isChecked():  # consensus sequence
@@ -11327,6 +11774,92 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         offset_pool = [-1, 1]
         offset = offset_pool[random.randint(0, 1)]
         self.resize(size_w + offset, size_h + offset)
+
+    def setupIgBlastPresetControls(self):
+        self.labelPreset = QtWidgets.QLabel('IgBlast preset:')
+        self.comboPreset = QtWidgets.QComboBox()
+        self.buttonPresetManager = QtWidgets.QPushButton('Manage Presets')
+        self.buttonPresetManager.setMaximumWidth(170)
+        self.ui.groupBox.setTitle('IgBlast Reference')
+        self.ui.radioButtonHuman.hide()
+        self.ui.radioButtonMouse.hide()
+        self.ui.gridLayout_4.addWidget(self.labelPreset, 0, 1, 1, 1)
+        self.ui.gridLayout_4.addWidget(self.comboPreset, 0, 2, 1, 1)
+        self.ui.gridLayout_4.addWidget(self.buttonPresetManager, 1, 1, 1, 2)
+        self.comboPreset.currentIndexChanged.connect(self.syncLegacySpeciesFromPreset)
+        self.buttonPresetManager.clicked.connect(self.openPresetManager)
+
+    def currentImportSequenceType(self):
+        if self.ui.pushButtonTCR.isChecked():
+            return 'TR'
+        return 'IG'
+
+    def refreshIgBlastPresetChoices(self):
+        if not hasattr(self, 'comboPreset'):
+            return
+        sequence_type = self.currentImportSequenceType()
+        current_id = self.comboPreset.currentData()
+        self.comboPreset.blockSignals(True)
+        self.comboPreset.clear()
+        for preset in list_presets(sequence_type=sequence_type, enabled_only=True):
+            self.comboPreset.addItem(preset.get('name', preset.get('id', 'Preset')), preset.get('id'))
+        target_id = current_id
+        if target_id is None:
+            target_id = legacy_preset_id(self.currentLegacySpecies(), sequence_type)
+        index = self.comboPreset.findData(target_id)
+        if index < 0:
+            index = self.comboPreset.findData(get_default_preset_id(sequence_type))
+        if index < 0 and self.comboPreset.count() > 0:
+            index = 0
+        if index >= 0:
+            self.comboPreset.setCurrentIndex(index)
+        self.comboPreset.blockSignals(False)
+        self.syncLegacySpeciesFromPreset()
+
+    def currentLegacySpecies(self):
+        preset = get_preset(self.currentIgBlastPresetId())
+        if preset:
+            return preset.get('species_label', 'Human')
+        return 'Human'
+
+    def currentIgBlastPresetId(self):
+        preset_id = self.comboPreset.currentData() if hasattr(self, 'comboPreset') else None
+        return preset_id or get_default_preset_id(self.currentImportSequenceType())
+
+    def ensureCurrentPresetValid(self, sequence_type=None):
+        if sequence_type is None:
+            sequence_type = self.currentImportSequenceType()
+        preset = resolve_preset(self.currentIgBlastPresetId(), self.currentLegacySpecies(), sequence_type)
+        errors = validate_preset(preset, igblast_path)
+        if errors:
+            QMessageBox.warning(self, 'Warning', '\n'.join(errors), QMessageBox.Ok, QMessageBox.Ok)
+            return None
+        return preset
+
+    def syncPresetFromLegacySpecies(self):
+        if not hasattr(self, 'comboPreset'):
+            return
+        target_id = legacy_preset_id(self.currentLegacySpecies(), self.currentImportSequenceType())
+        index = self.comboPreset.findData(target_id)
+        if index >= 0:
+            self.comboPreset.setCurrentIndex(index)
+
+    def syncLegacySpeciesFromPreset(self):
+        if not hasattr(self, 'comboPreset'):
+            return
+        preset = get_preset(self.comboPreset.currentData())
+        if not preset:
+            return
+        species = preset.get('species_label', 'Human')
+        if species == 'Mouse':
+            self.ui.radioButtonMouse.setChecked(True)
+        else:
+            self.ui.radioButtonHuman.setChecked(True)
+
+    def openPresetManager(self):
+        dialog = IgBlastPresetManagerDialog(self)
+        dialog.presetsChanged.connect(self.refreshIgBlastPresetChoices)
+        dialog.exec_()
 
     def progressLabel(self, pct, label):
         try:
@@ -11774,6 +12307,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         if num == 0:
             self.ui.radioButtonHuman.setEnabled(True)
             self.ui.radioButtonMouse.setEnabled(True)
+            self.comboPreset.setEnabled(True)
+            self.buttonPresetManager.setEnabled(True)
             self.ui.rdoProductive.setEnabled(True)
             self.ui.rdoVandJ.setEnabled(True)
             self.ui.rdoFunction.setEnabled(True)
@@ -11788,6 +12323,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         elif num == 1:
             self.ui.radioButtonHuman.setEnabled(True)
             self.ui.radioButtonMouse.setEnabled(True)
+            self.comboPreset.setEnabled(True)
+            self.buttonPresetManager.setEnabled(True)
             self.ui.rdoProductive.setEnabled(True)
             self.ui.rdoVandJ.setEnabled(True)
             self.ui.rdoFunction.setEnabled(True)
@@ -11802,6 +12339,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         elif num == 3:
             self.ui.radioButtonHuman.setEnabled(False)
             self.ui.radioButtonMouse.setEnabled(False)
+            self.comboPreset.setEnabled(False)
+            self.buttonPresetManager.setEnabled(False)
             self.ui.rdoProductive.setEnabled(False)
             self.ui.rdoVandJ.setEnabled(False)
             self.ui.rdoFunction.setEnabled(False)
@@ -11816,6 +12355,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         elif num == 4:
             self.ui.radioButtonHuman.setEnabled(False)
             self.ui.radioButtonMouse.setEnabled(False)
+            self.comboPreset.setEnabled(False)
+            self.buttonPresetManager.setEnabled(False)
             self.ui.rdoProductive.setEnabled(False)
             self.ui.rdoVandJ.setEnabled(False)
             self.ui.rdoFunction.setEnabled(False)
@@ -11830,6 +12371,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         elif num == 5:
             self.ui.radioButtonHuman.setEnabled(True)
             self.ui.radioButtonMouse.setEnabled(True)
+            self.comboPreset.setEnabled(True)
+            self.buttonPresetManager.setEnabled(True)
             self.ui.rdoProductive.setEnabled(True)
             self.ui.rdoVandJ.setEnabled(True)
             self.ui.rdoFunction.setEnabled(True)
@@ -11844,6 +12387,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         elif num == 6:
             self.ui.radioButtonHuman.setEnabled(False)
             self.ui.radioButtonMouse.setEnabled(False)
+            self.comboPreset.setEnabled(False)
+            self.buttonPresetManager.setEnabled(False)
             self.ui.rdoVandJ.setEnabled(False)
             self.ui.rdoFunction.setEnabled(True)
             self.ui.rdoAll.setEnabled(False)
@@ -11857,6 +12402,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         elif num == 2:
             self.ui.radioButtonHuman.setEnabled(True)
             self.ui.radioButtonMouse.setEnabled(True)
+            self.comboPreset.setEnabled(True)
+            self.buttonPresetManager.setEnabled(True)
             self.ui.rdoProductive.setEnabled(True)
             self.ui.rdoVandJ.setEnabled(True)
             self.ui.rdoFunction.setEnabled(True)
@@ -11878,6 +12425,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         else:
             self.ui.pushButtonBCR.setEnabled(False)
             self.ui.pushButtonTCR.setEnabled(False)
+        self.refreshIgBlastPresetChoices()
 
     def accept(self):
         num = self.ui.tabWidget.currentIndex()
@@ -11891,6 +12439,10 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             dataType = 'BCR'
         else:
             dataType = 'TCR'
+
+        if num in [0, 1, 2, 5]:
+            if self.ensureCurrentPresetValid('TR' if dataType == 'TCR' else 'IG') is None:
+                return
 
         if num == 0:
             self.InitiateImportFrom10X('none', 0, dataType)
@@ -11922,6 +12474,8 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
 
         self.ui.radioButtonHuman.setDisabled(True)
         self.ui.radioButtonMouse.setDisabled(True)
+        self.comboPreset.setDisabled(True)
+        self.buttonPresetManager.setDisabled(True)
 
         self.ui.rdoAll.setDisabled(True)
         self.ui.rdoProductive.setDisabled(True)
@@ -12102,15 +12656,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         # need to transfer species grouping to IgBlaster
         answer = ''
         thetype = 'FASTA'
-        species = ''
+        preset_id = self.currentIgBlastPresetId()
+        species = resolve_preset(preset_id, None, 'TR' if dataType == 'TCR' else 'IG').get('species_label', 'Human')
         datalist = []
         global answer3
         # answerTo = answer3
-
-        if self.ui.radioButtonHuman.isChecked():
-            species = 'Human'
-        elif self.ui.radioButtonMouse.isChecked():
-            species = 'Mouse'
 
         seq_pathname = self.ui.Seqpath.text()
         anno_path_name = self.ui.Annopath.text()
@@ -12169,6 +12719,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(species)
             datalist.append(GetProductive)
             datalist.append(MaxNum)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12203,6 +12754,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(GetProductive)
             datalist.append(MaxNum)
             datalist.append(multiProject)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12234,15 +12786,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                 fasta_files.append(self.ui.listWidgetFasta.item(index).text())
         answer = ''
         thetype = 'FASTA'
-        species = ''
+        preset_id = self.currentIgBlastPresetId()
+        species = resolve_preset(preset_id, None, 'TR' if dataType == 'TCR' else 'IG').get('species_label', 'Human')
         datalist = []
         global answer3
         # answerTo = answer3
-
-        if self.ui.radioButtonHuman.isChecked():
-            species = 'Human'
-        elif self.ui.radioButtonMouse.isChecked():
-            species = 'Mouse'
 
         # process sequence
         time_stamp = str(int(time.time() * 100)) + '.fasta'
@@ -12329,6 +12877,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(species)
             datalist.append(GetProductive)
             datalist.append(MaxNum)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12372,6 +12921,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(species)
             datalist.append(GetProductive)
             datalist.append(MaxNum)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12407,6 +12957,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(GetProductive)
             datalist.append(MaxNum)
             datalist.append(multiProject)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12775,15 +13326,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         # need to transfer species grouping to IgBlaster
         answer = ''
         thetype = 'FASTA'
-        species = ''
+        preset_id = self.currentIgBlastPresetId()
+        species = resolve_preset(preset_id, None, self.currentImportSequenceType()).get('species_label', 'Human')
         datalist = []
         global answer3
         # answerTo = answer3
-
-        if self.ui.radioButtonHuman.isChecked():
-            species = 'Human'
-        elif self.ui.radioButtonMouse.isChecked():
-            species = 'Mouse'
 
         igOut = self.ui.lineEditIgOut.text()
         seq_pathname = self.ui.lineEditIgFasta.text()
@@ -12830,6 +13377,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(species)
             datalist.append(GetProductive)
             datalist.append(MaxNum)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12864,6 +13412,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(GetProductive)
             datalist.append(MaxNum)
             datalist.append(multiProject)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -12996,15 +13545,11 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
                 out_handle.close()
         answer = ''
         thetype = 'FASTA'
-        species = ''
+        preset_id = self.currentIgBlastPresetId()
+        species = resolve_preset(preset_id, None, 'TR' if dataType == 'TCR' else 'IG').get('species_label', 'Human')
         datalist = []
         global answer3
         # answerTo = answer3
-
-        if self.ui.radioButtonHuman.isChecked():
-            species = 'Human'
-        elif self.ui.radioButtonMouse.isChecked():
-            species = 'Mouse'
 
         # process sequence
         time_stamp = str(int(time.time() * 100)) + '.fasta'
@@ -13072,6 +13617,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(species)
             datalist.append(GetProductive)
             datalist.append(MaxNum)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -13115,6 +13661,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(species)
             datalist.append(GetProductive)
             datalist.append(MaxNum)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -13150,6 +13697,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             datalist.append(GetProductive)
             datalist.append(MaxNum)
             datalist.append(multiProject)
+            datalist.append(preset_id)
 
             # try multi-thread
             #progressBarFile = os.path.join(temp_folder, 'progressBarFile.txt')
@@ -14692,10 +15240,15 @@ class VGenesForm(QtWidgets.QMainWindow):
         self.ui = Ui_MainWindow()
 
         self.ui.setupUi(self)
+        load_igblast_preset_config()
         self.setWindowTitle(format_app_title())
         self.replaceSeqTable()
         self.setupDbTableStatus()
         self.applyDbTabTheme()
+        self.actionIgBlastPresets = QtWidgets.QAction('IgBlast Reference Presets', self)
+        self.actionIgBlastPresets.triggered.connect(self.openIgBlastPresetManager)
+        self.ui.menuTools.addSeparator()
+        self.ui.menuTools.addAction(self.actionIgBlastPresets)
 
         self.ui.comboBoxSpecies.currentTextChanged.connect(self.on_comboBoxSpecies_editTextChanged)
         self.ui.cboTreeOp1.currentTextChanged.connect(self.TreeviewOptions)
@@ -23167,12 +23720,14 @@ class VGenesForm(QtWidgets.QMainWindow):
             changeo_mode = signal_data.get('mode', 'gene')
             changeo_link = signal_data.get('link', 'single')
             changeo_model = signal_data.get('model', 'ham')
+            preset_id = signal_data.get('preset_id')
         else:
             action = 'export' if signal_data == 1 else 'run'
             changeo_distance = 0.15
             changeo_mode = 'gene'
             changeo_link = 'single'
             changeo_model = 'ham'
+            preset_id = None
 
         WhereStatement = '1'
         if len(self.CheckedRecords) == 0:
@@ -23204,6 +23759,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 working_prefix,
                 temp_folder,
                 igblast_path,
+                preset_id,
                 task_name='Change-O IgBlast export',
             )
         else:
@@ -23216,6 +23772,7 @@ class VGenesForm(QtWidgets.QMainWindow):
                 temp_folder,
                 igblast_path,
                 self.ui.txtName.toPlainText(),
+                preset_id,
                 changeo_distance,
                 changeo_mode,
                 changeo_link,
@@ -25100,6 +25657,12 @@ class VGenesForm(QtWidgets.QMainWindow):
         #self.ImportOptions = ImportDialogue()
         self.ImportOptions = ImportDataDialogue()
         self.ImportOptions.show()
+
+    def openIgBlastPresetManager(self):
+        dialog = IgBlastPresetManagerDialog(self)
+        if hasattr(self, 'ImportOptions') and self.ImportOptions is not None:
+            dialog.presetsChanged.connect(self.ImportOptions.refreshIgBlastPresetChoices)
+        dialog.exec_()
 
     @pyqtSlot()
     def on_actionGenerate_from_file_triggered(self):  # how to activate menu and toolbar actions!!!
@@ -33361,6 +33924,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
     grouping = datalist[1]
     subgroup = datalist[2]
     species = datalist[3]
+    preset = resolve_igblast_preset_from_datalist(datalist, 'IG')
     GetProductive = datalist[4]
     MaxNum = int(datalist[5])
 
@@ -33394,30 +33958,12 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
     igblast_out_fmt19 = os.path.join(temp_folder, time_stamp + '_igblast_out_fmt19.csv')
     try:
         start = time.time()
-        if species == 'Human':
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
-            IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
-            #BLASTCommandLine = workingdir + " -germline_db_V Human/HumanVGenes.nt -germline_db_J Human/HumanJGenes.nt -germline_db_D Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
-            #IgBlastOut_fmt19 = os.system(BLASTCommandLine)
-            #print(BLASTCommandLine)
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 19"
-            IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
-        elif species == 'Mouse':
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
-            IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
-            #BLASTCommandLine = workingdir + " -germline_db_V Mouse/MouseVGenes.nt -germline_db_J Mouse/MouseJGenes.nt -germline_db_D Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19 > " + igblast_out_fmt19
-            #IgBlastOut_fmt19 = os.system(BLASTCommandLine)
-            #print(BLASTCommandLine)
-            BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 19"
-            IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
+        IgBlastOut_fmt3 = run_igblast_output_lines(preset, 'WorkingFile.nt', 3, show_translation=True)
+        IgBlastOut_fmt19 = run_igblast_output_lines(preset, 'WorkingFile.nt', 19, show_translation=True)
         end = time.time()
         print('Run time for IgBlast: ' + str(end - start))
     except:
-        ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+        ErLog = 'VGenes running Error!\nPreset: ' + str(preset.get('name', preset.get('id', ''))) + '\n'
         with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
             currentFile.write(ErLog)
         return
@@ -33550,9 +34096,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                                 elif species == 'Mouse':
                                     Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
                                 else:
-                                    Msg = 'Your current species is: ' + species + \
-                                          '\nWe do not support this species!'
-                                    return Msg
+                                    Isotype = 'Unknown'
                             else:
                                 if len(IsoSeq) > 2:
                                     if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
@@ -33683,9 +34227,7 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                                 elif species == 'Mouse':
                                     Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
                                 else:
-                                    Msg = 'Your current species is: ' + species + \
-                                          '\nWe do not support this species!'
-                                    return Msg
+                                    Isotype = 'Unknown'
                             else:
                                 if len(IsoSeq) > 2:
                                     if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
@@ -33761,7 +34303,6 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
                 # import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
                 ig_match = re.findall('\nIG[^\n]+', cur_block)
-                ## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
                 v_cur_index = 3
                 d_cur_index = 6
                 j_cur_index = 9
@@ -33991,7 +34532,6 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
 
             # import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
             ig_match = re.findall('\nIG[^\n]+', cur_block)
-            ## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
             v_cur_index = 3
             d_cur_index = 6
             j_cur_index = 9
@@ -34237,6 +34777,7 @@ def IgBlastParserFastTCR(FASTAFile, datalist, signal):
     grouping = datalist[1]
     subgroup = datalist[2]
     species = datalist[3]
+    preset = resolve_igblast_preset_from_datalist(datalist, 'TR')
     GetProductive = datalist[4]
     MaxNum = int(datalist[5])
 
@@ -34270,24 +34811,12 @@ def IgBlastParserFastTCR(FASTAFile, datalist, signal):
     igblast_out_fmt19 = os.path.join(temp_folder, time_stamp + '_igblast_out_fmt19.csv')
     try:
         start = time.time()
-        if species == 'Human':
-            BLASTCommandLine = igblast_path + " -germline_db_V TR/Human/HumanVGenes.nt -germline_db_J TR/Human/HumanJGenes.nt -germline_db_D TR/Human/HumanDGenes.nt -organism human -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -ig_seqtype TCR -outfmt 3"
-            IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
-            BLASTCommandLine = igblast_path + " -germline_db_V TR/Human/HumanVGenes.nt -germline_db_J TR/Human/HumanJGenes.nt -germline_db_D TR/Human/HumanDGenes.nt -organism human -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -ig_seqtype TCR -outfmt 19"
-            IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
-        elif species == 'Mouse':
-            BLASTCommandLine = igblast_path + " -germline_db_V TR/Mouse/MouseVGenes.nt -germline_db_J TR/Mouse/MouseJGenes.nt -germline_db_D TR/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -ig_seqtype TCR -outfmt 3"
-            IgBlastOut_fmt3 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
-            BLASTCommandLine = igblast_path + " -germline_db_V TR/Mouse/MouseVGenes.nt -germline_db_J TR/Mouse/MouseJGenes.nt -germline_db_D TR/Mouse/MouseDGenes.nt -organism mouse -domain_system imgt -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -ig_seqtype TCR -outfmt 19"
-            IgBlastOut_fmt19 = os.popen(BLASTCommandLine)
-            print(BLASTCommandLine)
+        IgBlastOut_fmt3 = run_igblast_output_lines(preset, 'WorkingFile.nt', 3, show_translation=True)
+        IgBlastOut_fmt19 = run_igblast_output_lines(preset, 'WorkingFile.nt', 19, show_translation=True)
         end = time.time()
         print('Run time for IgBlast: ' + str(end - start))
     except:
-        ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+        ErLog = 'VGenes running Error!\nPreset: ' + str(preset.get('name', preset.get('id', ''))) + '\n'
         with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
             currentFile.write(ErLog)
         return
@@ -34565,7 +35094,6 @@ def IgBlastParserFastTCR(FASTAFile, datalist, signal):
 
                 # import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
                 ig_match = re.findall('\nTR[^\n]+', cur_block)
-                ## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
                 v_cur_index = 3
                 d_cur_index = 6
                 j_cur_index = 9
@@ -34792,7 +35320,6 @@ def IgBlastParserFastTCR(FASTAFile, datalist, signal):
 
             # import V1,V2,V3,D1,D2,DD3,J1,J2,J3 and V,D,J locus
             ig_match = re.findall('\nIG[^\n]+', cur_block)
-            ## import V1,V2,V3,D1,D2,DD3,J1,J2,J3
             v_cur_index = 3
             d_cur_index = 6
             j_cur_index = 9
@@ -35205,9 +35732,7 @@ def IgBlastParserFastOld(FASTAFile, datalist, signal):
                         elif species == 'Mouse':
                             Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
                         else:
-                            Msg = 'Your current species is: ' + species + \
-                                  '\nWe do not support this species!'
-                            return Msg
+                            Isotype = 'Unknown'
                     else:
                         if len(IsoSeq) > 2:
                             if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':
@@ -36084,9 +36609,7 @@ def IMGTparser(IMGT_out, data_list, signal):
                             elif spe == 'Mouse':
                                 Isotype = VGenesSeq.CallIsotypeMouse(IsoSeq)
                             else:
-                                Msg = 'Your current species is: ' + spe + \
-                                      '\nWe do not support this species!'
-                                return Msg
+                                Isotype = 'Unknown'
                         else:
                             if len(IsoSeq) > 2:
                                 if IsoSeq[:3] == 'CCT' or IsoSeq == 'CTT':

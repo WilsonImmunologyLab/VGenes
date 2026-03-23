@@ -430,3 +430,57 @@ Current guidance:
 ## Notes
 
 The working tree already contains unrelated local modifications. Future code changes should be scoped carefully and recorded here as they are completed.
+
+## 2026-03-23
+
+- Implemented a user-managed IgBlast reference preset system:
+  - added `igblast_presets.py` as the central preset/config/validation layer
+  - presets are now stored in `Conf/igblast_reference_presets.json`
+  - built-in Human/Mouse IG/TR presets are seeded automatically from the
+    bundled `IgBlast/` layout
+- Added a preset manager UI in `VGenesMain.py`:
+  - list/add/edit/delete custom presets
+  - validate presets
+  - set a default preset
+  - autodetect V/D/J files from a reference folder
+- Integrated preset selection into the active import and Change-O workflows:
+  - `ImportDataDialogue` now has an `IgBlast preset` selector plus a
+    `Manage Presets` button
+  - `ChangeORunDialog` now has an `IgBlast preset` selector plus the same
+    manager entry point
+  - runtime validation blocks import/Change-O if a saved preset is invalid
+- Replaced active hardcoded IgBlast command construction with shared preset
+  resolution and command building in:
+  - `VGenesMain.py` fast BCR/TCR parser paths
+  - `changeo_runner.py`
+  - `task_utils.py`
+  - `IgBLASTer.py`
+- Added a main-menu entry under `Tools` for `IgBlast Reference Presets`.
+- Refined the import UI around presets:
+  - hid the old Human/Mouse radio buttons so preset selection is the only
+    visible IgBlast reference control in `ImportDataDialogue`
+  - kept internal compatibility mapping only as fallback state, not as the
+    primary UI
+- Relaxed Human/Mouse-only import assumptions for custom presets:
+  - custom presets no longer fail IgBlast import just because species-specific
+    isotype helpers are unavailable
+  - unsupported species now fall back to `Unknown` isotype instead of aborting
+- Extended custom preset setup for user-provided FASTA + AUX only:
+  - custom presets now build their own IgBlast databases with `makeblastdb`
+    and store the generated assets under `IgBlast/Custom/<IG|TR>/<preset_id>/`
+  - the preset manager now has browse buttons for V/D/J FASTA and AUX files
+  - generated DB/root paths are shown as read-only managed outputs
+  - the four built-in presets are now read-only in the preset manager
+- Hardened custom-reference import failure handling:
+  - parser task wrappers now raise explicit errors if IgBlast parsing returns
+    `None` or an error string, instead of letting the UI crash later when it
+    tries to iterate `IgBLASTAnalysis`
+- Added a safer custom-preset IgBlast fallback:
+  - fast IG/TCR parser paths now accept partial `outfmt 19` stdout when
+    `igblastn` exits non-zero after already producing usable rows
+  - the warning and stderr are written to `Temp/ErLog.txt` instead of
+    discarding the whole import as empty
+- Hardened fast IgBlast parsing for IMGT/custom references:
+  - capped imported ranked V/D/J hits to the three table columns the schema
+    actually supports, preventing `IndexError` when IgBlast returns more hits
+    than the older parser expected

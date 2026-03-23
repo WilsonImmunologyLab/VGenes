@@ -6,6 +6,7 @@ import time
 from collections import Counter
 
 import VGenesSQL
+from igblast_presets import build_igblast_command, build_make_db_repo_args, resolve_preset
 
 
 DEFAULT_DEFINE_CLONES_DISTANCE = "0.15"
@@ -19,32 +20,6 @@ def looks_like_nucleotide(sequence):
     if not seq:
         return False
     return all(base in {"A", "T", "C", "G", "N"} for base in seq)
-
-
-def species_paths(species):
-    if species == 'Human':
-        return {
-            'db_v': 'IG/Human/HumanVGenes.nt',
-            'db_j': 'IG/Human/HumanJGenes.nt',
-            'db_d': 'IG/Human/HumanDGenes.nt',
-            'repo_v': '../IgBlast/IG/Human/HumanVGenes.fasta',
-            'repo_d': '../IgBlast/IG/Human/HumanDGenes.fasta',
-            'repo_j': '../IgBlast/IG/Human/HumanJGenes.fasta',
-            'organism': 'human',
-            'aux': 'optional_file/human_gl.aux',
-        }
-    if species == 'Mouse':
-        return {
-            'db_v': 'IG/Mouse/MouseVGenes.nt',
-            'db_j': 'IG/Mouse/MouseJGenes.nt',
-            'db_d': 'IG/Mouse/MouseDGenes.nt',
-            'repo_v': '../IgBlast/IG/Mouse/MouseVGenes.fasta',
-            'repo_d': '../IgBlast/IG/Mouse/MouseDGenes.fasta',
-            'repo_j': '../IgBlast/IG/Mouse/MouseJGenes.fasta',
-            'organism': 'mouse',
-            'aux': 'optional_file/mouse_gl.aux',
-        }
-    raise ValueError('Unsupported species for Change-O cloning: ' + str(species))
 
 
 def write_fasta(data_rows, temp_folder):
@@ -70,29 +45,23 @@ def resolve_tool_paths(working_prefix):
     return make_db_script, define_clones_script
 
 
-def run_igblast_fmt7(seq_pathname, output_path, species, working_prefix, igblast_path):
-    species_info = species_paths(species)
+def run_igblast_fmt7(seq_pathname, output_path, preset, working_prefix, igblast_path):
     workingdir = os.path.join(working_prefix, 'IgBlast')
-    cmd = [
+    cmd = build_igblast_command(
         igblast_path,
-        '-germline_db_V', species_info['db_v'],
-        '-germline_db_J', species_info['db_j'],
-        '-germline_db_D', species_info['db_d'],
-        '-organism', species_info['organism'],
-        '-domain_system', 'imgt',
-        '-ig_seqtype', 'Ig',
-        '-query', seq_pathname,
-        '-auxiliary_data', species_info['aux'],
-        '-outfmt', '7 std qseq sseq btop',
-        '-out', output_path,
-    ]
+        preset,
+        seq_pathname,
+        '7 std qseq sseq btop',
+        output_path=output_path,
+        show_translation=False,
+    )
     subprocess.run(cmd, cwd=workingdir, check=True)
 
 
-def run_make_db(working_prefix, temp_folder, fmt7_path, fasta_path, species):
+def run_make_db(working_prefix, temp_folder, fmt7_path, fasta_path, preset):
     make_db_script, _ = resolve_tool_paths(working_prefix)
-    species_info = species_paths(species)
     output_path = os.path.join(temp_folder, os.path.splitext(os.path.basename(fmt7_path))[0] + '_db-pass.tsv')
+    repo_paths = build_make_db_repo_args(preset)
     cmd = [
         sys.executable,
         make_db_script,
@@ -100,9 +69,7 @@ def run_make_db(working_prefix, temp_folder, fmt7_path, fasta_path, species):
         '-i', fmt7_path,
         '-s', fasta_path,
         '-r',
-        species_info['repo_v'],
-        species_info['repo_d'],
-        species_info['repo_j'],
+    ] + repo_paths + [
         '--extended',
         '--format', 'airr',
         '-o', output_path,
@@ -211,6 +178,7 @@ def run_integrated_changeo(
     temp_folder,
     igblast_path,
     current_record='',
+    preset_id=None,
     define_clones_distance=DEFAULT_DEFINE_CLONES_DISTANCE,
     define_clones_mode=DEFAULT_DEFINE_CLONES_MODE,
     define_clones_link=DEFAULT_DEFINE_CLONES_LINK,
@@ -223,6 +191,7 @@ def run_integrated_changeo(
         raise ValueError('No records selected for Change-O clone analysis.')
 
     species = data_rows[0][3]
+    preset = resolve_preset(preset_id, species, "IG")
     seq_names = [row[0] for row in data_rows]
 
     emit_progress(5, 'Fetching data ...')
@@ -230,10 +199,10 @@ def run_integrated_changeo(
 
     emit_progress(20, 'Running IgBlast ...')
     fmt7_path = os.path.join(temp_folder, os.path.splitext(os.path.basename(fasta_path))[0] + '.fmt7')
-    run_igblast_fmt7(fasta_path, fmt7_path, species, working_prefix, igblast_path)
+    run_igblast_fmt7(fasta_path, fmt7_path, preset, working_prefix, igblast_path)
 
     emit_progress(40, 'Parsing IgBlast results ...')
-    airr_db_path = run_make_db(working_prefix, temp_folder, fmt7_path, fasta_path, species)
+    airr_db_path = run_make_db(working_prefix, temp_folder, fmt7_path, fasta_path, preset)
 
     emit_progress(65, 'Running DefineClones ...')
     clone_output_path = run_define_clones(

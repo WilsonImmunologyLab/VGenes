@@ -281,6 +281,7 @@ def run_changeo_igblast_export(
     working_prefix,
     temp_folder,
     igblast_path,
+    preset_id=None,
     emit_progress=None,
 ):
     if emit_progress is None:
@@ -288,12 +289,15 @@ def run_changeo_igblast_export(
     if not data_rows:
         raise ValueError('No records selected for Change-O IgBlast export.')
 
-    species = data_rows[0][3]
     emit_progress(15, 'Fetching data ...')
     _, seq_pathname = write_fasta(data_rows, temp_folder)
 
     emit_progress(45, 'Running IgBlast ...')
-    run_igblast_fmt7(seq_pathname, output_path, species, working_prefix, igblast_path)
+    from igblast_presets import resolve_preset
+
+    species = data_rows[0][3]
+    preset = resolve_preset(preset_id, species, "IG")
+    run_igblast_fmt7(seq_pathname, output_path, preset, working_prefix, igblast_path)
 
     emit_progress(100, 'IgBlast export finished.')
     return {
@@ -309,6 +313,7 @@ def run_changeo_clone_pipeline(
     temp_folder,
     igblast_path,
     current_record='',
+    preset_id=None,
     define_clones_distance='0.15',
     define_clones_mode='gene',
     define_clones_link='single',
@@ -322,6 +327,7 @@ def run_changeo_clone_pipeline(
         temp_folder,
         igblast_path,
         current_record=current_record,
+        preset_id=preset_id,
         define_clones_distance=define_clones_distance,
         define_clones_mode=define_clones_mode,
         define_clones_link=define_clones_link,

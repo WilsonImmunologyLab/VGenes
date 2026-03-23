@@ -6,13 +6,14 @@ __author__ = 'wilsonp'
 
 # must first switch to a directory containing both the database and the FASTA file
 # then use the subprocess command to run program and grab the output as a string
-import os, time, sys, re
+import os, time, sys, re, subprocess
 import sqlite3 as db
 from PyQt5 import QtWidgets
 from multiprocessing.dummy import Pool as ThreadPool
 import VGenesDialogues #import openFile, openFiles, newFile, saveFile, questionMessage, informationMessage, setItem, setText
 import VGenesSeq
 from platform import system
+from igblast_presets import build_igblast_command, get_preset, resolve_preset
 
 # IgBlastThreadTest = ''
 
@@ -27,6 +28,32 @@ if system() == 'Windows':
 	igblast_path = os.path.join(working_prefix, 'IgBlast', 'igblastn.exe')
 else:
 	igblast_path = os.path.join(working_prefix, 'IgBlast', 'igblastn')
+
+
+def _resolve_preset_from_datalist(datalist, sequence_type='IG'):
+	preset_id = None
+	if len(datalist) > 7:
+		preset_id = datalist[-1]
+	elif len(datalist) > 6 and get_preset(datalist[6]):
+		preset_id = datalist[6]
+	species = datalist[3] if len(datalist) > 3 else 'Human'
+	return resolve_preset(preset_id, species, sequence_type)
+
+
+def _run_igblast_lines(preset, query_name, outfmt, show_translation=True):
+	workingdir = os.path.join(working_prefix, 'IgBlast')
+	cmd = build_igblast_command(
+		igblast_path,
+		preset,
+		query_name,
+		outfmt,
+		show_translation=show_translation,
+	)
+	process = subprocess.Popen(cmd, cwd=workingdir, stdout=subprocess.PIPE, stderr=subprocess.PIPE, universal_newlines=True)
+	stdout, stderr = process.communicate()
+	if process.returncode != 0:
+		raise RuntimeError(stderr or ('IgBlast failed with exit code ' + str(process.returncode)))
+	return stdout.splitlines(True)
 
 def ProcessFASTAold(FASTAfile, MaxNum):
 	ErLog = ''
@@ -220,6 +247,7 @@ def IgBLASTit(FASTAFile, datalist, signal):
 	species = datalist[3]
 	GetProductive = datalist[4]
 	MaxNum = int(datalist[5])
+	preset = _resolve_preset_from_datalist(datalist, 'IG')
 
 	try:
 		multiProject = datalist[6]
@@ -268,16 +296,11 @@ def IgBLASTit(FASTAFile, datalist, signal):
 
 	try:
 		start = time.time()
-		if species == 'Human':
-			BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
-			IgBlastOut = os.popen(BLASTCommandLine)
-		elif species == 'Mouse':
-			BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
-			IgBlastOut = os.popen(BLASTCommandLine)
+		IgBlastOut = _run_igblast_lines(preset, 'WorkingFile.nt', 3, show_translation=True)
 		end = time.time()
 		print('Run time for IgBlast: ' + str(end - start))
 	except:
-		ErLog = 'VGenes running Error!\nCurrent CMD: ' + BLASTCommandLine + '\n'
+		ErLog = 'VGenes running Error!\nPreset: ' + str(preset.get('name', preset.get('id', ''))) + '\n'
 		with open(ErlogFile, 'a') as currentFile:  # using with for this automatically closes the file even if you crash
 			currentFile.write(ErLog)
 
@@ -3156,12 +3179,8 @@ def GetGLCDRs(Sequence, species):
 		currentfile.write(Sequence)
 
 
-	if species == 'Human':
-		BLASTCommandLine = igblast_path + " -germline_db_V IG/Human/HumanVGenes.nt -germline_db_J IG/Human/HumanJGenes.nt -germline_db_D IG/Human/HumanDGenes.nt -organism human -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/human_gl.aux -show_translation -outfmt 3"
-		IgBlastOut = os.popen(BLASTCommandLine)
-	elif species == 'Mouse':
-		BLASTCommandLine = igblast_path + " -germline_db_V IG/Mouse/MouseVGenes.nt -germline_db_J IG/Mouse/MouseJGenes.nt -germline_db_D IG/Mouse/MouseDGenes.nt -organism mouse -domain_system kabat -query WorkingFile.nt -auxiliary_data optional_file/mouse_gl.aux -show_translation -outfmt 3"
-		IgBlastOut = os.popen(BLASTCommandLine)
+	preset = _resolve_preset_from_datalist(datalist, 'IG')
+	IgBlastOut = _run_igblast_lines(preset, 'WorkingFile.nt', 3, show_translation=True)
 
 
 	for IgLine in IgBlastOut:
