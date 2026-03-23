@@ -11736,8 +11736,33 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             pass
         
         self.setIcon()
+        self.setup10xTypeControls()
         self.setupIgBlastPresetControls()
         self.refreshIgBlastPresetChoices()
+
+    def setup10xTypeControls(self):
+        self.radioButtonAllContig = QtWidgets.QRadioButton('All contig', self.ui.radioButtonCon.parentWidget())
+        self.radioButtonAllContig.setObjectName('radioButtonAllContig')
+        self.radioButtonAllContig.clicked.connect(self.change10xType)
+        grid = self.ui.gridLayout
+        for widget in [
+            self.ui.radioButtonCon,
+            self.ui.radioButtonTig,
+            self.radioButtonAllContig,
+            self.ui.label_6,
+            self.ui.Seqpath,
+            self.ui.label_7,
+            self.ui.Annopath,
+        ]:
+            grid.removeWidget(widget)
+
+        grid.addWidget(self.ui.radioButtonCon, 1, 3, 1, 1)
+        grid.addWidget(self.ui.radioButtonTig, 1, 4, 1, 1)
+        grid.addWidget(self.radioButtonAllContig, 1, 5, 1, 1)
+        grid.addWidget(self.ui.label_6, 2, 0, 1, 1)
+        grid.addWidget(self.ui.Seqpath, 2, 1, 1, 6)
+        grid.addWidget(self.ui.label_7, 3, 0, 1, 1)
+        grid.addWidget(self.ui.Annopath, 3, 1, 1, 6)
     
     def change10xType(self):
         if self.ui.radioButtonCon.isChecked():  # consensus sequence
@@ -11746,17 +11771,25 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             self.ui.label_17.setText('2) Replace "consensus_" by')
             self.ui.label_15.setText('10X seq name: clonotype2_consensus_1')
             self.ui.lineEditRep2.setText('consensus_')
-        else:   # filtered contigs sequence
+        elif self.radioButtonAllContig.isChecked():
             self.ui.lineEditRep1.setEnabled(False)
             self.ui.label_16.setText('1) ')
             self.ui.label_17.setText('2) Replace "contig_" by')
-            self.ui.label_15.setText('10X seq name: AAACCTGAGACAAGCC-1_contig_1')
+            self.ui.label_15.setText('10X seq name: AAACCTGAGACAAGCC-1_contig_1 (all contig)')
+            self.ui.lineEditRep2.setText('contig_')
+        else:   # contig sequence
+            self.ui.lineEditRep1.setEnabled(False)
+            self.ui.label_16.setText('1) ')
+            self.ui.label_17.setText('2) Replace "contig_" by')
+            self.ui.label_15.setText('10X seq name: AAACCTGAGACAAGCC-1_contig_1 (filtered contig)')
             self.ui.lineEditRep2.setText('contig_')
         self.updateName()
 
         if self.ui.Annopath.text() != "":
             path_10x = self.ui.Annopath.text()
             path_10x = re.sub('filtered_contig_annotations.csv', '', path_10x)
+            path_10x = re.sub('all_contig_annotations.csv', '', path_10x)
+            path_10x = re.sub('consensus_annotations.csv', '', path_10x)
             self.update10x(path_10x)
 
     def setIcon(self):
@@ -11883,39 +11916,55 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
             else:
                 pass
 
-        choosed_seq = ''
-        choose_annotate = ''
-        if self.ui.radioButtonTig.isChecked():
-            choosed_seq = 'filtered_contig.fasta'
-            choose_annotate = 'filtered_contig_annotations.csv'
+        candidate_pairs = []
+        if self.radioButtonAllContig.isChecked():
+            candidate_pairs = [
+                ('all_contig.fasta', 'all_contig_annotations.csv'),
+            ]
+        elif self.ui.radioButtonTig.isChecked():
+            candidate_pairs = [
+                ('filtered_contig.fasta', 'filtered_contig_annotations.csv'),
+                ('all_contig.fasta', 'all_contig_annotations.csv'),
+            ]
         elif self.ui.radioButtonCon.isChecked():
-            choosed_seq = 'consensus.fasta'
-            choose_annotate = 'filtered_contig_annotations.csv'
+            candidate_pairs = [
+                ('consensus.fasta', 'filtered_contig_annotations.csv'),
+                ('consensus.fasta', 'all_contig_annotations.csv'),
+                ('consensus.fasta', 'consensus_annotations.csv'),
+            ]
 
-        if choosed_seq == '':
+        if len(candidate_pairs) == 0:
             return
 
         if isinstance(directory, str):
             self.path10x = directory
 
-        seq_file = os.path.join(self.path10x, choosed_seq)
-        anno_file = os.path.join(self.path10x, choose_annotate)
-        if os.path.exists(seq_file):
-            pass
-        else:
-            seq_file = os.path.join(self.path10x, 'outs', choosed_seq)
-            anno_file = os.path.join(self.path10x, 'outs', choose_annotate)
+        search_roots = [self.path10x, os.path.join(self.path10x, 'outs')]
+        found_seq = ''
+        found_anno = ''
+        for root in search_roots:
+            for seq_name, anno_name in candidate_pairs:
+                seq_file = os.path.join(root, seq_name)
+                anno_file = os.path.join(root, anno_name)
+                if os.path.exists(seq_file) and os.path.exists(anno_file):
+                    found_seq = seq_file
+                    found_anno = anno_file
+                    break
+            if found_seq != '':
+                break
 
-        if os.path.exists(anno_file):
-            self.ui.Annopath.setText(anno_file)
+        if found_anno != '':
+            self.ui.Annopath.setText(found_anno)
         else:
-            Msg = 'Can not find ' + anno_file + ' under your folder! Please check your input!'
+            Msg = 'Can not find a matching 10X annotation csv under your folder! Supported names include:\n' \
+                  'filtered_contig_annotations.csv\nall_contig_annotations.csv\nconsensus_annotations.csv'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
-        if os.path.exists(seq_file):
-            self.ui.Seqpath.setText(seq_file)
+        if found_seq != '':
+            self.ui.Seqpath.setText(found_seq)
         else:
-            Msg = 'Can not find ' + seq_file + ' under your folder! Please check your input!'
+            Msg = 'Can not find a matching 10X sequence file under your folder! Supported names include:\n' \
+                  'consensus.fasta\nfiltered_contig.fasta\nall_contig.fasta'
             QMessageBox.warning(self, 'Warning', Msg, QMessageBox.Ok, QMessageBox.Ok)
 
     def updateGroupSetting(self):
@@ -12669,6 +12718,9 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         if self.ui.radioButtonCon.isChecked():
             self.rep1 = self.ui.lineEditRep1.text()
             self.type10x = 'consensus'
+        elif self.radioButtonAllContig.isChecked():
+            self.rep1 = 'contig'
+            self.type10x = 'all_contig'
         else:
             self.rep1 = 'contig'
             self.type10x = 'contig'

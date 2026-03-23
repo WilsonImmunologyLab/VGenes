@@ -80,26 +80,6 @@
       "root_folder": "/Users/leili/Documents/GitHub/VGenes/IgBlast/TR/Mouse",
       "sequence_type": "TR",
       "species_label": "Mouse"
-    },
-    {
-      "auxiliary_data": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/111.aux",
-      "builtin": false,
-      "db_d": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/DGenes.nt",
-      "db_j": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/JGenes.nt",
-      "db_v": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/VGenes.nt",
-      "default": false,
-      "domain_system": "kabat",
-      "enabled": true,
-      "id": "111",
-      "ig_seqtype": "Ig",
-      "name": "111",
-      "organism_label": "Human",
-      "repo_d": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/DGenes.fasta",
-      "repo_j": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/JGenes.fasta",
-      "repo_v": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111/VGenes.fasta",
-      "root_folder": "/Users/leili/Documents/GitHub/VGenes/IgBlast/Custom/IG/111",
-      "sequence_type": "IG",
-      "species_label": "Human"
     }
   ],
   "version": 1
