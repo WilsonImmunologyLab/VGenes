@@ -1,5 +1,5 @@
 APP_NAME = "VGenes"
-VERSION = (1, 1, 0)
+VERSION = (1, 2, 0)
 SCHEMA_VERSION = 1
 
 __version__ = ".".join(str(part) for part in VERSION)

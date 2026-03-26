@@ -34362,14 +34362,17 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                     m = re.search('IG\S+', line)
                     cur_gene = m.group(0)
                     if cur_gene[3] == 'V':
-                        DATA[block_id][v_cur_index] = cur_gene
-                        v_cur_index += 1
+                        if v_cur_index <= 5:
+                            DATA[block_id][v_cur_index] = cur_gene
+                            v_cur_index += 1
                     elif cur_gene[3] == 'D':
-                        DATA[block_id][d_cur_index] = cur_gene
-                        d_cur_index += 1
+                        if d_cur_index <= 8:
+                            DATA[block_id][d_cur_index] = cur_gene
+                            d_cur_index += 1
                     else:
-                        DATA[block_id][j_cur_index] = cur_gene
-                        j_cur_index += 1
+                        if j_cur_index <= 11:
+                            DATA[block_id][j_cur_index] = cur_gene
+                            j_cur_index += 1
                 # V,D,J locus
                 m = re.search('IG\S+', DATA[block_id][3])
                 try:
@@ -34591,14 +34594,17 @@ def IgBlastParserFast(FASTAFile, datalist, signal):
                 m = re.search('IG\S+', line)
                 cur_gene = m.group(0)
                 if cur_gene[3] == 'V':
-                    DATA[block_id][v_cur_index] = cur_gene
-                    v_cur_index += 1
+                    if v_cur_index <= 5:
+                        DATA[block_id][v_cur_index] = cur_gene
+                        v_cur_index += 1
                 elif cur_gene[3] == 'D':
-                    DATA[block_id][d_cur_index] = cur_gene
-                    d_cur_index += 1
+                    if d_cur_index <= 8:
+                        DATA[block_id][d_cur_index] = cur_gene
+                        d_cur_index += 1
                 else:
-                    DATA[block_id][j_cur_index] = cur_gene
-                    j_cur_index += 1
+                    if j_cur_index <= 11:
+                        DATA[block_id][j_cur_index] = cur_gene
+                        j_cur_index += 1
             # V,D,J locus
             m = re.search('IG\S+', DATA[block_id][3])
             try:
@@ -35153,14 +35159,17 @@ def IgBlastParserFastTCR(FASTAFile, datalist, signal):
                     m = re.search('TR\S+', line)
                     cur_gene = m.group(0)
                     if cur_gene[3] == 'V':
-                        DATA[block_id][v_cur_index] = cur_gene
-                        v_cur_index += 1
+                        if v_cur_index <= 5:
+                            DATA[block_id][v_cur_index] = cur_gene
+                            v_cur_index += 1
                     elif cur_gene[3] == 'D':
-                        DATA[block_id][d_cur_index] = cur_gene
-                        d_cur_index += 1
+                        if d_cur_index <= 8:
+                            DATA[block_id][d_cur_index] = cur_gene
+                            d_cur_index += 1
                     else:
-                        DATA[block_id][j_cur_index] = cur_gene
-                        j_cur_index += 1
+                        if j_cur_index <= 11:
+                            DATA[block_id][j_cur_index] = cur_gene
+                            j_cur_index += 1
                 # V,D,J locus
                 m = re.search('TR\S+', DATA[block_id][3])
                 try:
@@ -35379,14 +35388,17 @@ def IgBlastParserFastTCR(FASTAFile, datalist, signal):
                 m = re.search('TR\S+', line)
                 cur_gene = m.group(0)
                 if cur_gene[3] == 'V':
-                    DATA[block_id][v_cur_index] = cur_gene
-                    v_cur_index += 1
+                    if v_cur_index <= 5:
+                        DATA[block_id][v_cur_index] = cur_gene
+                        v_cur_index += 1
                 elif cur_gene[3] == 'D':
-                    DATA[block_id][d_cur_index] = cur_gene
-                    d_cur_index += 1
+                    if d_cur_index <= 8:
+                        DATA[block_id][d_cur_index] = cur_gene
+                        d_cur_index += 1
                 else:
-                    DATA[block_id][j_cur_index] = cur_gene
-                    j_cur_index += 1
+                    if j_cur_index <= 11:
+                        DATA[block_id][j_cur_index] = cur_gene
+                        j_cur_index += 1
             # V,D,J locus
             m = re.search('TR\S+', DATA[block_id][3])
             try:
