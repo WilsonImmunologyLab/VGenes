@@ -11745,24 +11745,7 @@ class ImportDataDialogue(QtWidgets.QDialog, Ui_DialogImport):
         self.radioButtonAllContig.setObjectName('radioButtonAllContig')
         self.radioButtonAllContig.clicked.connect(self.change10xType)
         grid = self.ui.gridLayout
-        for widget in [
-            self.ui.radioButtonCon,
-            self.ui.radioButtonTig,
-            self.radioButtonAllContig,
-            self.ui.label_6,
-            self.ui.Seqpath,
-            self.ui.label_7,
-            self.ui.Annopath,
-        ]:
-            grid.removeWidget(widget)
-
-        grid.addWidget(self.ui.radioButtonCon, 1, 3, 1, 1)
-        grid.addWidget(self.ui.radioButtonTig, 1, 4, 1, 1)
         grid.addWidget(self.radioButtonAllContig, 1, 5, 1, 1)
-        grid.addWidget(self.ui.label_6, 2, 0, 1, 1)
-        grid.addWidget(self.ui.Seqpath, 2, 1, 1, 6)
-        grid.addWidget(self.ui.label_7, 3, 0, 1, 1)
-        grid.addWidget(self.ui.Annopath, 3, 1, 1, 6)
     
     def change10xType(self):
         if self.ui.radioButtonCon.isChecked():  # consensus sequence

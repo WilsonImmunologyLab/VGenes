@@ -4,6 +4,12 @@ sys.setrecursionlimit(5000)
 
 block_cipher = None
 
+
+def _is_qml_payload(entry):
+    text = " ".join(str(part) for part in entry) if isinstance(entry, (tuple, list)) else str(entry)
+    normalized = text.replace("\\", "/")
+    return "/Qt5/qml/" in normalized or normalized.endswith("/Qt5/qml") or "QtQml/WorkerScript.2" in normalized
+
 added_files = [
              ('./Js/*','Js'),
              ('./Conf/path_setting.txt','Conf'),
@@ -25,11 +31,17 @@ a = Analysis(['VGenesMain.py'],
              hiddenimports=['scipy.special.cython_special','cmath'],
              hookspath=['hooks'],
              runtime_hooks=[],
-             excludes=[],
+             excludes=[
+                 'PyQt5.QtQml',
+                 'PyQt5.QtQuick',
+                 'PyQt5.QtQuickWidgets',
+             ],
              win_no_prefer_redirects=False,
              win_private_assemblies=False,
              cipher=block_cipher,
              noarchive=False)
+a.datas = [entry for entry in a.datas if not _is_qml_payload(entry)]
+a.binaries = [entry for entry in a.binaries if not _is_qml_payload(entry)]
 pyz = PYZ(a.pure, a.zipped_data,
              cipher=block_cipher)
 exe = EXE(pyz,
